@@ -37,6 +37,7 @@ Story and sandbox games are saved separately, so starting one never overwrites t
 ## Features
 
 - A new map is generated for each game, with castles, villages, rivers, mountain passes, ruins, bandit camps and hidden locations to discover.
+- Each kingdom has its own landscape: Albion's green countryside, Valoria's plains broken by desert (with cacti, scorpions, jackals and camels), Draven's mountain-walled forests and Eldoria's swamps.
 - Kingdom relations change on their own over time, and your actions affect them. The Diplomacy screen shows a live relationship graph and offers actions such as gifts, alliances, peace talks and swearing allegiance.
 - Real-time combat with blocking, stamina and dodging, plus gear, horses and loot that change both your stats and how your knight looks.
 - Quests, random world events and a day/night cycle.
