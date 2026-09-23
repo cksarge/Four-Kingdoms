@@ -23,7 +23,7 @@ Story and sandbox games are saved separately, so starting one never overwrites t
 | Mouse | Aim |
 | Left click | Attack (hold to chain) |
 | Right click | Block |
-| Space | Dodge roll |
+| Space | Dodge (time it just as a blow lands to take no damage) |
 | E | Interact |
 | F | Mount / dismount / call horse |
 | I | Inventory |
@@ -31,7 +31,8 @@ Story and sandbox games are saved separately, so starting one never overwrites t
 | K | Diplomacy |
 | J | Quest journal |
 | 1 / 2 / 3 | Eat food / drink potion / use bandage |
-| Shift + left click | Attack non-hostile characters |
+| Q (hold) | Sprint, draining stamina |
+| Shift + left click | Hit characters who aren't hostile, such as villagers, guards or peaceful animals. Normally your attacks pass through them. Attacking people costs reputation and turns guards against you |
 | Esc | Pause |
 
 ## Features
