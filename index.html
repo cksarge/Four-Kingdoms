@@ -760,6 +760,11 @@ const SND = {
       case 'howl': this.tone(420, 1.6, 'sine', .05, 'fx', 0, 1.35, .3); break;
       case 'fire': this.noise(.05, .06, 'fx', 2400, 3); break;
       case 'arrow': this.noise(.15, .15, 'sfx', 2500, 3, .4); break;
+      // desert
+      case 'wind': this.noise(2.4, .07, 'fx', 380, .6, 2.6); this.noise(1.8, .035, 'fx', 1400, 1.2, 1.6, 'bandpass', .5); break;
+      case 'yip': [0, .13, .27, .36].forEach((w, i) => this.tone(rand(880, 1250), .11 + (i === 3 ? .25 : 0), 'sine', .045, 'fx', w, i === 3 ? .7 : 1.35)); break;
+      case 'sting': this.noise(.08, .25, 'sfx', 3500, 3, .5); this.tone(900, .08, 'square', .045, 'sfx', 0, .4); break;
+      case 'grunt': this.tone(105, .45, 'sawtooth', .08, 'fx', 0, .7, .03); this.noise(.4, .1, 'fx', 300, .8, .6, 'lowpass'); break;
       // story mode
       case 'mainquest': [392, 523, 659, 784].forEach((f, i) => this.tone(f, .7, 'triangle', .13, 'sfx', i * .11)); this.tone(196, 1.3, 'sine', .1, 'sfx'); break;
       case 'story': this.tone(784, .3, 'sine', .1); this.tone(1175, .45, 'sine', .08, 'sfx', .08); break;
@@ -820,6 +825,7 @@ const SND = {
       case 'ruin': return STORY && STORY.path && best.id === STORY.refs.barrow ? 'barrow' : 'ruins';
       case 'hidden': return ['grove', 'shrine', 'chapel'].includes(HIDDEN_DEFS[best.def].kind) ? 'sacred' : 'ruins';
     }
+    if (inDesert()) return 'desert';
     return this.overworld(dt);
   },
   overworld(dt) {
@@ -866,6 +872,7 @@ const SND = {
     if (d.pad && si === 0) this.pad(d.pad.i || 'strings', ch.slice(0, 3).map(x => F(x + (d.pad.o || 0))), T, bar * base * 1.02, d.pad.v ?? .04, dst);
     if (d.arp) { const c = patAt(d.arp.p, si); if (c != null) this.voice(d.arp.i || 'pluck', F(ctone(ch, c) + (d.arp.o || 0)), T, (d.arp.d || 2) * base, d.arp.v ?? .07, dst); }
     if (d.bass && sec !== 'break' && (sec !== 'intro' || d.bass.intro !== false)) { const c = patAt(d.bass.p, si); if (c != null) this.voice(d.bass.i || 'bass', F(ctone(ch, c) + (d.bass.o ?? -12)), T, (d.bass.d || 2) * base, d.bass.v ?? .13, dst); }
+    if (d.stab && sec !== 'break') { const pp = d.stab.p; if (pp[si % pp.length] === 'x') [0, 7, 12].forEach(iv => this.voice(d.stab.i || 'brass', F(ch[0] + iv + (d.stab.o ?? -12)), T, (d.stab.d || 2) * base, (d.stab.v ?? .08) * (iv === 12 ? .6 : 1), dst)); }
     if (d.drums && sec !== 'break' && (sec !== 'intro' || d.drums.intro)) for (const k of 'kshtbm') { const p = d.drums[k]; if (p && p[si % p.length] === 'x') this.drum(k, T, d.drums.v || 1, dst); }
     if (s.mel && sec !== 'intro') {
       const alt = (sec === 'high' || sec === 'break') ? d.lead.alt : null, n = s.mel[bi][si];
@@ -943,9 +950,9 @@ const SND = {
         fl.connect(this.envG(t, .05, v * .55, hold, .18, dst)); this.osc('sawtooth', f, t, end, fl); this.osc('sawtooth', f, t, end, fl, 6);
         break;
       }
-      case 'choir': {
-        const hold = Math.max(.1, dur - .15), end = t + hold + .8, g = this.envG(t, .22, v * .8, hold, .45, dst), src = c.createGain();
-        [[800, 5, 1], [1150, 6, .6], [2900, 8, .25]].forEach(([ff, q, a]) => { const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = ff; bp.Q.value = q; const bg = c.createGain(); bg.gain.value = a; src.connect(bp); bp.connect(bg); bg.connect(g); });
+      case 'choir': case 'hum': {
+        const hold = Math.max(.1, dur - .15), end = t + hold + .8, g = this.envG(t, .22, v * (inst === 'hum' ? 1.1 : .8), hold, .45, dst), src = c.createGain();
+        (inst === 'hum' ? [[380, 5, 1], [720, 6, .45], [2300, 8, .06]] : [[800, 5, 1], [1150, 6, .6], [2900, 8, .25]]).forEach(([ff, q, a]) => { const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = ff; bp.Q.value = q; const bg = c.createGain(); bg.gain.value = a; src.connect(bp); bp.connect(bg); bg.connect(g); });
         [-9, 9].forEach(dt => this.vib(this.osc('sawtooth', f, t, end, src, dt), t, f, .007, end, 4.6));
         break;
       }
@@ -958,7 +965,7 @@ const SND = {
   },
   pad(inst, fs, t, dur, v, dst) {
     fs.forEach(f => {
-      if (inst === 'organ' || inst === 'choir') { this.voice(inst, f, t, dur, v * (inst === 'choir' ? 1.3 : 1), dst); return; }
+      if (inst === 'organ' || inst === 'choir' || inst === 'hum') { this.voice(inst, f, t, dur, v * (inst === 'organ' ? 1 : 1.3), dst); return; }
       const fl = this.ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = Math.min(2400, f * 4);
       fl.connect(this.envG(t, .5, v, Math.max(.1, dur - .5), .9, dst)); [-8, 8].forEach(dt => this.osc('sawtooth', f, t, t + dur + 1, fl, dt));
     });
@@ -980,7 +987,7 @@ const SND = {
    Melodies are generated from each song's seed, so a song always plays the same tune.
    Arrangement cycles through intro / full / high (counter-melody, alternate lead) / break sections. */
 const HZ = m => 440 * Math.pow(2, (m - 69) / 12);
-const MODES = { ion: [0, 2, 4, 5, 7, 9, 11], dor: [0, 2, 3, 5, 7, 9, 10], phr: [0, 1, 3, 5, 7, 8, 10], lyd: [0, 2, 4, 6, 7, 9, 11], mix: [0, 2, 4, 5, 7, 9, 10], aeo: [0, 2, 3, 5, 7, 8, 10], hmin: [0, 2, 3, 5, 7, 8, 11], pent: [0, 2, 4, 7, 9], mpent: [0, 3, 5, 7, 10] };
+const MODES = { phrd: [0, 1, 4, 5, 7, 8, 10], ion: [0, 2, 4, 5, 7, 9, 11], dor: [0, 2, 3, 5, 7, 9, 10], phr: [0, 1, 3, 5, 7, 8, 10], lyd: [0, 2, 4, 6, 7, 9, 11], mix: [0, 2, 4, 5, 7, 9, 10], aeo: [0, 2, 3, 5, 7, 8, 10], hmin: [0, 2, 3, 5, 7, 8, 11], pent: [0, 2, 4, 7, 9], mpent: [0, 3, 5, 7, 10] };
 const sdeg = (sc, i) => sc[((i % sc.length) + sc.length) % sc.length] + 12 * Math.floor(i / sc.length);
 function chordOf(d, bi) {
   const p = d.prog[bi]; if (Array.isArray(p)) return p;
@@ -1013,60 +1020,63 @@ function genMelody(d, part, seed) {
 const R_FOLK = ['x.x.x.xx', 'x.xx.x..', 'x.x.xxx.', 'x...x...'], R_CALM = ['x...x.x.', 'x.......', 'x.x.x...', 'x...x...'], R_SPARSE = ['x.......', 'x...x...', 'x.x.....', 'x...x.x.'];
 const R_BATTLE = ['x.x.x.xx', 'x.xxx.x.', 'xx.xx.x.', 'x.x.xxx.'], R_FANF = ['x.x.x...', 'x.xxx.x.', 'x...x.x.', 'x.x.x.x.'], R_LONG = ['x.......', 'x...x...'];
 const F_BATTLE = ['full', 'full', 'high', 'full'];
+const R_EPIC = ['x...x.x.', 'x.......', 'x..x..x.', 'x...x...'];
 const SONGS = {
   // menu
   menu: { title: 'Four Crowns', root: 50, mode: 'dor', bpm: 76, prog: [0, 6, 2, 3, 0, 6, 3, 4], seed: 11, pad: { i: 'strings', v: .04 }, arp: { i: 'harp', p: '0.1.2.4.' }, bass: { p: '0.......', d: 8, v: .11 }, lead: { i: 'strings', r: R_CALM, v: .13, alt: { i: 'brass', v: .9 } }, counter: { i: 'harp', r: R_LONG }, drums: { b: 'x.......', intro: true, v: .6 } },
   // overworld (rotates; day, night or both)
   wander: { title: 'The Wandering Knight', legacy: true, tod: 'both', len: 180 },
-  road: { title: 'The Open Road', tod: 'day', root: 55, mode: 'ion', bpm: 108, prog: [0, 4, 5, 3, 0, 4, 3, 4], seed: 21, lead: { i: 'flute', r: R_FOLK, alt: { i: 'recorder', o: 12, v: .8 } }, arp: { i: 'lute', p: '0.2.1.2.' }, bass: { p: '0...4...' }, pad: { i: 'strings', v: .025 }, drums: { t: 'x..x.x..', h: '..x...x.' }, counter: { i: 'harp', r: R_LONG } },
-  fields: { title: 'Fields of Gold', tod: 'day', root: 50, mode: 'ion', bpm: 92, prog: [0, 3, 0, 4, 5, 3, 1, 4], seed: 31, lead: { i: 'recorder', r: R_CALM, alt: { i: 'flute', o: 12 } }, arp: { i: 'harp', p: '0.2.4.2.' }, pad: { i: 'strings', v: .03 }, bass: { p: '0.......', d: 6 }, drums: { t: 'x.......' } },
-  hills: { title: 'Over the Hills', tod: 'day', root: 57, mode: 'mix', bpm: 116, sub: 3, bar: 6, prog: [0, 6, 3, 0, 0, 6, 4, 0], seed: 41, lead: { i: 'fiddle', r: ['x.xx.x', 'xxxx.x', 'x..x..', 'xxx.xx'], alt: { i: 'recorder', o: 12 } }, arp: { i: 'lute', p: '0.2.1.' }, bass: { p: '0..4..' }, drums: { t: 'x..x..', h: '..x..x' } },
-  oldroads: { title: 'Old Roads', tod: 'both', root: 52, mode: 'dor', bpm: 84, prog: [0, 3, 0, 6, 0, 3, 4, 0], seed: 51, lead: { i: 'fiddle', r: R_CALM, alt: { i: 'flute', o: 12 } }, arp: { i: 'lute', p: '0.1.2.1.' }, drone: { n: [0, 7], v: .035, t: 'triangle' }, drums: { t: 'x...x..x' }, bass: { p: '0...0...' } },
-  pilgrim: { title: "The Pilgrim's Way", tod: 'both', root: 53, mode: 'lyd', bpm: 96, prog: [0, 1, 0, 1, 5, 1, 4, 0], seed: 61, lead: { i: 'recorder', r: R_FOLK, alt: { i: 'harp', o: 12 } }, arp: { i: 'lute', p: '0.2.1.2.' }, bass: { p: '0...0.4.' }, drums: { t: 'x...x...' }, pad: { i: 'strings', v: .025 } },
-  starlit: { title: 'Starlit Road', tod: 'night', vol: 4.2, root: 45, mode: 'aeo', bpm: 66, prog: [0, 5, 2, 6, 0, 5, 6, 0], seed: 71, lead: { i: 'bell', r: R_SPARSE, v: .11 }, pad: { i: 'strings', v: .03 }, arp: { i: 'harp', p: '0.1.2.3.', v: .055 }, drone: { n: [0], v: .035, t: 'triangle' } },
-  moon: { title: 'Moon over the Greywater', tod: 'night', vol: 3.4, root: 47, mode: 'aeo', bpm: 72, bar: 12, prog: [0, 5, 3, 4, 0, 5, 6, 4], seed: 81, lead: { i: 'flute', r: ['x.....x.x...', 'x.x.x.x.....', 'x.....x.....', 'x.x...x.x.x.'] }, arp: { i: 'harp', p: '0.1.2.4.2.1.', v: .055 }, pad: { i: 'choir', v: .025 } },
+  road: { title: 'The Open Road', tod: 'day', root: 55, mode: 'ion', bpm: 108, prog: [0, 4, 5, 3, 0, 4, 3, 4], seed: 21, lead: { i: 'flute', r: R_FOLK, alt: { i: 'recorder', o: 0, v: .8 } }, arp: { i: 'lute', p: '0.2.1.2.' }, bass: { p: '0...4...' }, pad: { i: 'strings', v: .025 }, drums: { t: 'x..x.x..', h: '..x...x.' }, counter: { i: 'harp', r: R_LONG } },
+  fields: { title: 'Fields of Gold', tod: 'day', root: 50, mode: 'ion', bpm: 92, prog: [0, 3, 0, 4, 5, 3, 1, 4], seed: 31, lead: { i: 'recorder', r: R_CALM, alt: { i: 'flute', o: 0 } }, arp: { i: 'harp', p: '0.2.4.2.' }, pad: { i: 'strings', v: .03 }, bass: { p: '0.......', d: 6 }, drums: { t: 'x.......' } },
+  hills: { title: 'Over the Hills', tod: 'day', root: 57, mode: 'mix', bpm: 116, sub: 3, bar: 6, prog: [0, 6, 3, 0, 0, 6, 4, 0], seed: 41, lead: { i: 'fiddle', r: ['x.xx.x', 'xxxx.x', 'x..x..', 'xxx.xx'], alt: { i: 'recorder', o: 0 } }, arp: { i: 'lute', p: '0.2.1.' }, bass: { p: '0..4..' }, drums: { t: 'x..x..', h: '..x..x' } },
+  oldroads: { title: 'Old Roads', tod: 'both', root: 52, mode: 'dor', bpm: 84, prog: [0, 3, 0, 6, 0, 3, 4, 0], seed: 51, lead: { i: 'fiddle', r: R_CALM, alt: { i: 'flute', o: 0 } }, arp: { i: 'lute', p: '0.1.2.1.' }, drone: { n: [0, 7], v: .035, t: 'triangle' }, drums: { t: 'x...x..x' }, bass: { p: '0...0...' } },
+  pilgrim: { title: "The Pilgrim's Way", tod: 'both', root: 53, mode: 'lyd', bpm: 96, prog: [0, 1, 0, 1, 5, 1, 4, 0], seed: 61, lead: { i: 'recorder', r: R_FOLK, alt: { i: 'harp', o: 0 } }, arp: { i: 'lute', p: '0.2.1.2.' }, bass: { p: '0...0.4.' }, drums: { t: 'x...x...' }, pad: { i: 'strings', v: .025 } },
+  starlit: { title: 'Starlit Road', tod: 'night', vol: 4.2, root: 45, mode: 'aeo', bpm: 66, prog: [0, 5, 2, 6, 0, 5, 6, 0], seed: 71, lead: { i: 'bell', o: 0, r: R_SPARSE, v: .11 }, pad: { i: 'strings', v: .03 }, arp: { i: 'harp', p: '0.1.2.3.', v: .055 }, drone: { n: [0], v: .035, t: 'triangle' } },
+  moon: { title: 'Moon over the Greywater', tod: 'night', vol: 3.4, root: 47, mode: 'aeo', bpm: 72, bar: 12, prog: [0, 5, 3, 4, 0, 5, 6, 4], seed: 81, lead: { i: 'flute', o: 0, r: ['x.....x.x...', 'x.x.x.x.....', 'x.....x.....', 'x.x...x.x.x.'] }, arp: { i: 'harp', p: '0.1.2.1.2.1.', v: .055 }, pad: { i: 'hum', v: .025 } },
   embers: { title: 'Embers', tod: 'night', root: 48, mode: 'aeo', mel: 'mpent', bpm: 60, prog: [0, 0, 5, 5, 3, 3, 4, 4], seed: 91, lead: { i: 'flute', r: R_SPARSE }, arp: { i: 'pluck', p: '0...2...' }, drone: { n: [0, 7], v: .045, t: 'triangle' }, pad: { i: 'organ', v: .02 } },
   // combat
-  combat1: { title: 'Steel and Blood', root: 50, mode: 'hmin', bpm: 150, prog: [0, 5, 3, 4, 0, 5, 3, 4], seed: 101, form: F_BATTLE, lead: { i: 'brass', r: R_BATTLE, alt: { i: 'strings', o: 12 } }, arp: { i: 'pluck', p: '04040404', v: .05 }, bass: { i: 'bassP', p: '00.00.0.' }, pad: { i: 'strings', v: .025 }, drums: { k: 'x...x.x.', s: '....x...', h: 'x.x.x.x.', b: 'x.......', intro: true } },
-  combat2: { title: 'Clash of Crowns', root: 52, mode: 'phr', bpm: 140, prog: [0, 1, 0, 6, 0, 1, 5, 6], seed: 111, form: F_BATTLE, lead: { i: 'strings', r: R_BATTLE, alt: { i: 'brass' } }, bass: { i: 'bassP', p: '0.0.0.0.' }, arp: { i: 'harpsi', p: '0.1.2.1.', v: .05 }, drums: { k: 'x..x..x.', s: '....x..x', h: 'xxxxxxxx', b: 'x...x...', intro: true } },
-  hollow_fight: { title: 'The Dead March', root: 48, mode: 'phr', bpm: 120, prog: [0, 1, 0, 1, 5, 1, 0, 0], seed: 121, form: F_BATTLE, lead: { i: 'choir', r: ['x...x...', 'x.x.x...', 'x...x.x.', 'xxx.x...'], alt: { i: 'bell', o: 12 } }, pad: { i: 'choir', v: .035 }, bass: { i: 'bassP', p: '0..0..0.' }, arp: { i: 'bell', p: '0...1...', v: .045 }, drums: { b: 'x..x..x.', k: 'x.......', s: '....x...', intro: true } },
-  circle_fight: { title: 'Knives in the Dark', root: 45, mode: 'hmin', bpm: 144, prog: [0, 0, 5, 4, 0, 0, 3, 4], seed: 131, form: F_BATTLE, lead: { i: 'pluck', o: 24, r: ['x.xx.x.x', 'xx.x.xx.', 'x.x.x.x.', 'x.xxx...'], v: .11, alt: { i: 'harpsi' } }, bass: { i: 'bassP', p: '0.00.0.0' }, pad: { i: 'strings', v: .025 }, drums: { k: 'x...x...', h: '.x.x.x.x', s: '......x.', intro: true } },
+  combat1: { title: 'Steel and Blood', root: 50, mode: 'aeo', bpm: 144, prog: [0, 5, 2, 6, 0, 5, 6, 4], seed: 101, form: F_BATTLE, lead: { i: 'brass', o: 0, r: R_EPIC, v: .16, alt: { i: 'strings', o: 12 } }, stab: { p: 'x.....x.' }, bass: { i: 'bassP', p: '00000000', v: .12 }, pad: { i: 'choir', v: .035 }, counter: { i: 'choir', r: R_LONG, v: .06 }, drums: { k: 'x...x...', s: '....x...', b: 'x..x..x.', intro: true } },
+  combat2: { title: 'Clash of Crowns', root: 52, mode: 'phr', bpm: 136, prog: [0, 1, 0, 6, 0, 1, 5, 6], seed: 111, form: F_BATTLE, lead: { i: 'strings', o: 0, r: R_EPIC, v: .16, alt: { i: 'brass', o: 0 } }, stab: { p: 'x..x..x.' }, bass: { i: 'bassP', p: '0.0.0000', v: .12 }, pad: { i: 'choir', v: .035 }, drums: { b: 'x..x..x.', k: 'x.......', s: '....x..x', intro: true } },
+  hollow_fight: { title: 'The Dead March', root: 48, mode: 'phr', bpm: 120, prog: [0, 1, 0, 1, 5, 1, 0, 0], seed: 121, form: F_BATTLE, lead: { i: 'choir', r: ['x...x...', 'x.x.x...', 'x...x.x.', 'xxx.x...'], alt: { i: 'bell', o: 0 } }, stab: { p: 'x.......' }, pad: { i: 'choir', v: .035 }, bass: { i: 'bassP', p: '0..0..0.' }, arp: { i: 'bell', p: '0...1...', v: .045 }, drums: { b: 'x..x..x.', k: 'x.......', s: '....x...', intro: true } },
+  circle_fight: { title: 'Knives in the Dark', root: 45, mode: 'hmin', bpm: 140, prog: [0, 0, 5, 4, 0, 0, 3, 4], seed: 131, form: F_BATTLE, lead: { i: 'strings', o: 12, r: R_BATTLE, v: .13, alt: { i: 'harpsi', o: 0 } }, stab: { p: 'x.......' }, bass: { i: 'bassP', p: '0.00.0.0' }, pad: { i: 'strings', v: .03 }, drums: { k: 'x...x...', s: '......x.', b: 'x.......', intro: true } },
   // bosses and duels
-  boss: { title: 'The Chieftain', root: 53, mode: 'hmin', bpm: 132, prog: [0, 5, 3, 4, 0, 5, 6, 4], seed: 141, form: F_BATTLE, lead: { i: 'brass', r: R_BATTLE, alt: { i: 'strings', o: 12 } }, pad: { i: 'choir', v: .03 }, bass: { i: 'bassP', p: '0.0.0.0.' }, drums: { k: 'x.x.x.x.', s: '....x...', b: 'x...x...', h: 'x.x.x.x.', intro: true } },
-  duel: { title: 'Trial by Combat', root: 50, mode: 'dor', bpm: 128, prog: [0, 6, 0, 6, 3, 6, 4, 0], seed: 151, form: F_BATTLE, lead: { i: 'brass', r: R_FANF, alt: { i: 'fiddle', o: 12 } }, pad: { i: 'strings', v: .025 }, bass: { p: '0.0.0.4.' }, drums: { b: 'x..x..x.', s: '....x...', intro: true } },
-  tourney: { title: 'The Tourney of Solmont', root: 55, mode: 'ion', bpm: 132, prog: [0, 3, 4, 0, 0, 3, 4, 4], seed: 161, form: F_BATTLE, lead: { i: 'brass', r: R_FOLK, alt: { i: 'recorder', o: 12 } }, arp: { i: 'harpsi', p: '0.2.1.2.' }, bass: { p: '0...4...' }, drums: { k: 'x...x...', s: '....x...', m: 'x.x.x.x.', intro: true } },
-  greymother: { title: 'The Grey Mother', root: 47, mode: 'hmin', bpm: 116, prog: [0, 0, 5, 5, 3, 3, 4, 4], seed: 171, form: F_BATTLE, lead: { i: 'strings', r: R_BATTLE, alt: { i: 'choir' } }, arp: { i: 'harpsi', p: '0.1.2.1.' }, bass: { i: 'bassP', p: '0.0.0.0.' }, pad: { i: 'organ', v: .025 }, drums: { k: 'x.......', s: '....x...', b: '....x..x', h: '..x...x.', intro: true } },
-  hollowking: { title: 'The Hollow King', root: 50, mode: 'phr', bpm: 100, prog: [0, 1, 0, 1, 5, 6, 1, 0], seed: 181, form: F_BATTLE, lead: { i: 'choir', r: ['x.......', 'x...x...', 'x.x.x...', 'x...x.x.'], v: .15, alt: { i: 'brass' } }, pad: { i: 'choir', v: .045 }, drone: { n: [0], o: -24, v: .06 }, drums: { b: 'x..x..x.', k: 'x...x...', s: '....x...', intro: true }, bass: { i: 'bassP', p: '0..0..0.' }, arp: { i: 'bell', p: '0...2...', v: .045 } },
-  last_stand: { title: 'The Last Stand', root: 45, mode: 'aeo', bpm: 138, prog: [0, 5, 2, 6, 0, 5, 6, 4], seed: 191, form: F_BATTLE, lead: { i: 'brass', r: R_BATTLE, alt: { i: 'strings', o: 12 } }, arp: { i: 'pluck', p: '04040404', v: .045 }, bass: { i: 'bassP', p: '0.0.0.0.' }, pad: { i: 'choir', v: .035 }, drums: { k: 'x..x.xx.', s: '....x...', b: 'x.......', h: 'x.x.x.x.', intro: true } },
+  boss: { title: 'The Chieftain', root: 53, mode: 'hmin', bpm: 132, prog: [0, 5, 3, 4, 0, 5, 6, 4], seed: 141, form: F_BATTLE, lead: { i: 'brass', o: 0, r: R_EPIC, v: .16, alt: { i: 'choir', o: 0 } }, stab: { p: 'x...x...' }, pad: { i: 'choir', v: .035 }, bass: { i: 'bassP', p: '0.0.0.0.' }, drums: { k: 'x.x.x.x.', s: '....x...', b: 'x...x...', intro: true } },
+  duel: { title: 'Trial by Combat', root: 50, mode: 'dor', bpm: 128, prog: [0, 6, 0, 6, 3, 6, 4, 0], seed: 151, form: F_BATTLE, lead: { i: 'brass', o: 0, r: R_FANF, alt: { i: 'fiddle', o: 0 } }, pad: { i: 'strings', v: .025 }, bass: { p: '0.0.0.4.' }, drums: { b: 'x..x..x.', s: '....x...', intro: true } },
+  tourney: { title: 'The Tourney of Solmont', root: 55, mode: 'ion', bpm: 132, prog: [0, 3, 4, 0, 0, 3, 4, 4], seed: 161, form: F_BATTLE, lead: { i: 'brass', o: 0, r: R_FOLK, alt: { i: 'recorder', o: 0 } }, arp: { i: 'lute', p: '0.2.1.2.' }, bass: { p: '0...4...' }, drums: { k: 'x...x...', s: '....x...', t: 'x.x.x.x.', intro: true } },
+  greymother: { title: 'The Grey Mother', root: 47, mode: 'hmin', bpm: 116, prog: [0, 0, 5, 5, 3, 3, 4, 4], seed: 171, form: F_BATTLE, lead: { i: 'strings', o: 0, r: R_BATTLE, alt: { i: 'hum' } }, arp: { i: 'pluck', p: '0.1.2.1.' }, bass: { i: 'bassP', p: '0.0.0.0.' }, pad: { i: 'organ', v: .025 }, drums: { k: 'x.......', s: '....x...', b: '....x..x', intro: true } },
+  hollowking: { title: 'The Hollow King', root: 50, mode: 'phr', bpm: 100, prog: [0, 1, 0, 1, 5, 6, 1, 0], seed: 181, form: F_BATTLE, lead: { i: 'hum', o: 0, r: ['x.......', 'x...x...', 'x.x.x...', 'x...x.x.'], v: .15, alt: { i: 'brass' } }, pad: { i: 'hum', v: .045 }, drone: { n: [0], o: -24, v: .06 }, drums: { b: 'x..x..x.', k: 'x...x...', s: '....x...', intro: true }, bass: { i: 'bassP', p: '0..0..0.' }, arp: { i: 'bell', p: '0...2...', v: .045 } },
+  last_stand: { title: 'The Last Stand', root: 45, mode: 'aeo', bpm: 138, prog: [0, 5, 2, 6, 0, 5, 6, 4], seed: 191, form: F_BATTLE, lead: { i: 'brass', o: 12, r: R_EPIC, v: .16, alt: { i: 'strings', o: 12 } }, stab: { p: 'x..x..x.' }, bass: { i: 'bassP', p: '00000000' }, pad: { i: 'choir', v: .04 }, counter: { i: 'choir', r: R_LONG, v: .06 }, drums: { k: 'x..x.xx.', s: '....x...', b: 'x.......', intro: true } },
   // villages, one per kingdom
-  town_0: { title: 'Hearth and Home (Albion)', root: 48, mode: 'ion', bpm: 104, prog: [0, 4, 5, 3, 0, 3, 4, 0], seed: 201, lead: { i: 'recorder', r: R_FOLK, alt: { i: 'flute', o: 12 } }, arp: { i: 'lute', p: '0.2.1.2.' }, bass: { p: '0...4...' }, drums: { t: 'x..x.x..' } },
-  town_1: { title: 'The Valorian Market', root: 53, mode: 'lyd', bpm: 116, swing: .12, prog: [0, 1, 0, 4, 5, 1, 4, 0], seed: 211, lead: { i: 'recorder', r: R_FOLK, alt: { i: 'harpsi', o: 12 } }, arp: { i: 'harpsi', p: '0.1.2.4.' }, bass: { p: '0.4.0.4.' }, drums: { m: 'x.x.x.x.', t: 'x...x...' } },
+  town_0: { title: 'Hearth and Home (Albion)', root: 48, mode: 'ion', bpm: 104, prog: [0, 4, 5, 3, 0, 3, 4, 0], seed: 201, lead: { i: 'recorder', r: R_FOLK, alt: { i: 'flute', o: 0 } }, arp: { i: 'lute', p: '0.2.1.2.' }, bass: { p: '0...4...' }, drums: { t: 'x..x.x..' } },
+  town_1: { title: 'The Valorian Market', root: 53, mode: 'lyd', bpm: 116, swing: .12, prog: [0, 1, 0, 4, 5, 1, 4, 0], seed: 211, lead: { i: 'recorder', r: R_FOLK, alt: { i: 'lute', o: 0 } }, arp: { i: 'lute', p: '0.1.2.1.' }, bass: { p: '0.4.0.4.' }, drums: { t: 'x..xx...', b: 'x.......' } },
   town_2: { title: 'The Mead Hall (Draven)', root: 52, mode: 'aeo', bpm: 96, prog: [0, 6, 5, 6, 0, 3, 4, 0], seed: 221, lead: { i: 'fiddle', r: R_FOLK, alt: { i: 'brass', o: -12 } }, drone: { n: [0, 7], v: .04 }, arp: { i: 'lute', p: '0..1..2.' }, bass: { p: '0.......' }, drums: { t: 'x..x..x.', b: 'x.......' } },
-  town_3: { title: 'Glade of Lanterns (Eldoria)', root: 55, mode: 'ion', mel: 'pent', bpm: 88, prog: [0, 5, 3, 4, 0, 5, 1, 4], seed: 231, lead: { i: 'flute', r: R_CALM, alt: { i: 'harp', o: 12 } }, arp: { i: 'harp', p: '0.2.4.2.' }, pad: { i: 'choir', v: .025 }, counter: { i: 'bell', o: 12, r: R_LONG, v: .045 }, drums: { t: 'x.......' } },
+  town_3: { title: 'Glade of Lanterns (Eldoria)', root: 55, mode: 'ion', mel: 'pent', bpm: 88, prog: [0, 5, 3, 4, 0, 5, 1, 4], seed: 231, lead: { i: 'flute', o: 0, r: R_CALM, alt: { i: 'harp', o: 0 } }, arp: { i: 'harp', p: '0.2.1.2.' }, pad: { i: 'hum', v: .025 }, counter: { i: 'bell', o: 0, r: R_LONG, v: .045 }, drums: { t: 'x.......' } },
   // castles, one per kingdom
-  castle_0: { title: 'The Court of Aldhaven', root: 50, mode: 'ion', bpm: 90, prog: [0, 3, 4, 0, 5, 3, 4, 0], seed: 241, lead: { i: 'brass', r: R_FANF, alt: { i: 'strings', o: 12 } }, pad: { i: 'strings', v: .035 }, arp: { i: 'harp', p: '0.1.2.1.' }, bass: { p: '0...0...' }, drums: { b: 'x...x...', s: '....x.x.' } },
-  castle_1: { title: 'Solmont Palace', root: 45, mode: 'ion', bpm: 120, bar: 6, prog: [0, 4, 0, 4, 3, 0, 4, 0], seed: 251, lead: { i: 'strings', r: ['x.....', 'x.x.x.', 'x...x.', 'xx.x.x'], alt: { i: 'flute', o: 12 } }, bass: { p: '0.....', d: 3 }, arp: { i: 'harpsi', p: '..1.2.' }, pad: { i: 'strings', v: .02 } },
-  castle_2: { title: 'Ravenspire', root: 48, mode: 'phr', bpm: 84, prog: [0, 1, 0, 6, 0, 1, 5, 1], seed: 261, lead: { i: 'brass', o: 0, r: R_CALM, alt: { i: 'choir', o: 12 } }, drone: { n: [0, 7], v: .045 }, pad: { i: 'organ', v: .025 }, bass: { p: '0...0...' }, drums: { b: 'x..x....', k: 'x.......' } },
-  castle_3: { title: 'Sylvanreach', root: 52, mode: 'dor', bpm: 76, prog: [0, 3, 0, 3, 6, 3, 4, 0], seed: 271, lead: { i: 'flute', r: R_CALM, alt: { i: 'bell' } }, arp: { i: 'harp', p: '0.1.2.4.' }, pad: { i: 'choir', v: .03 }, counter: { i: 'bell', o: 12, r: R_LONG, v: .045 } },
+  castle_0: { title: 'The Court of Aldhaven', root: 50, mode: 'ion', bpm: 90, prog: [0, 3, 4, 0, 5, 3, 4, 0], seed: 241, lead: { i: 'brass', r: R_FANF, alt: { i: 'strings', o: 0 } }, pad: { i: 'strings', v: .035 }, arp: { i: 'harp', p: '0.1.2.1.' }, bass: { p: '0...0...' }, drums: { b: 'x...x...', t: '....x.x.' } },
+  castle_1: { title: 'Solmont Palace', root: 45, mode: 'ion', bpm: 120, bar: 6, prog: [0, 4, 0, 4, 3, 0, 4, 0], seed: 251, lead: { i: 'strings', r: ['x.....', 'x.x.x.', 'x...x.', 'xx.x.x'], alt: { i: 'flute', o: 0 } }, bass: { p: '0.....', d: 3 }, arp: { i: 'lute', p: '..1.2.' }, pad: { i: 'strings', v: .02 } },
+  castle_2: { title: 'Ravenspire', root: 48, mode: 'phr', bpm: 84, prog: [0, 1, 0, 6, 0, 1, 5, 1], seed: 261, lead: { i: 'brass', o: 0, r: R_CALM, alt: { i: 'hum', o: 0 } }, drone: { n: [0, 7], v: .045 }, pad: { i: 'organ', v: .025 }, bass: { p: '0...0...' }, drums: { b: 'x..x....', k: 'x.......' } },
+  castle_3: { title: 'Sylvanreach', root: 52, mode: 'dor', bpm: 76, prog: [0, 3, 0, 3, 6, 3, 4, 0], seed: 271, lead: { i: 'flute', o: 0, r: R_CALM, alt: { i: 'bell' } }, arp: { i: 'harp', p: '0.1.2.1.' }, pad: { i: 'hum', v: .03 }, counter: { i: 'bell', o: 0, r: R_LONG, v: .045 } },
   // other places
-  camp: { title: 'Brigand Camp', root: 45, mode: 'dor', bpm: 100, prog: [0, 0, 6, 6, 0, 0, 3, 4], seed: 281, lead: { i: 'pluck', o: 24, r: ['x..x..x.', 'x.x..x..', 'xx..x...', 'x..x.x.x'], v: .1 }, bass: { i: 'bassP', p: '0..0..0.' }, drums: { t: 'x..x..x.', h: '....x...', intro: true }, drone: { n: [0, 7], v: .025 } },
-  ruins: { title: 'Forgotten Places', root: 47, mode: 'phr', bpm: 64, prog: [0, 1, 0, 6, 0, 1, 5, 1], seed: 291, lead: { i: 'bell', r: ['x.......', '....x...', 'x...x...', 'x.......'], v: .1 }, pad: { i: 'choir', v: .025 }, drone: { n: [0, 7], v: .035, t: 'triangle' }, arp: { i: 'harp', p: '0.......', v: .05 } },
-  sacred: { title: 'The Old Gods', root: 52, mode: 'lyd', bpm: 70, prog: [0, 1, 0, 1, 5, 1, 4, 0], seed: 301, lead: { i: 'flute', r: R_CALM, alt: { i: 'choir' } }, arp: { i: 'harp', p: '0.1.2.4.' }, pad: { i: 'choir', v: .03 }, counter: { i: 'bell', o: 12, r: R_LONG, v: .045 } },
+  camp: { title: 'Brigand Camp', root: 45, mode: 'dor', bpm: 100, prog: [0, 0, 6, 6, 0, 0, 3, 4], seed: 281, lead: { i: 'pluck', o: 12, r: ['x..x..x.', 'x.x..x..', 'xx..x...', 'x..x.x.x'], v: .1 }, bass: { i: 'bassP', p: '0..0..0.' }, drums: { t: 'x..x..x.', h: '....x...', intro: true }, drone: { n: [0, 7], v: .025 } },
+  ruins: { title: 'Forgotten Places', root: 47, mode: 'phr', bpm: 64, prog: [0, 1, 0, 6, 0, 1, 5, 1], seed: 291, lead: { i: 'bell', o: 0, r: ['x.......', '....x...', 'x...x...', 'x.......'], v: .1 }, pad: { i: 'hum', v: .025 }, drone: { n: [0, 7], v: .035, t: 'triangle' }, arp: { i: 'harp', p: '0.......', v: .05 } },
+  sacred: { title: 'The Old Gods', root: 52, mode: 'lyd', bpm: 70, prog: [0, 1, 0, 1, 5, 1, 4, 0], seed: 301, lead: { i: 'flute', o: 0, r: R_CALM, alt: { i: 'hum' } }, arp: { i: 'harp', p: '0.1.2.1.' }, pad: { i: 'hum', v: .03 }, counter: { i: 'bell', o: 0, r: R_LONG, v: .045 } },
+  desert: { title: 'Sands of Valoria', root: 50, mode: 'phrd', bpm: 96, prog: [0, 1, 0, 1, 3, 1, 0, 0], seed: 361, lead: { i: 'flute', r: ['x.x.xxx.', 'x...x.x.', 'xx.x.x..', 'x.......'], alt: { i: 'lute', o: 0 } }, arp: { i: 'lute', p: '0..1..0.' }, bass: { p: '0..0....' }, drone: { n: [0, 7], v: .035 }, drums: { t: 'x..x.x..', m: '..x...x.' } },
   // story mode
-  barrow: { title: 'The Barrow', root: 50, mode: 'phr', bpm: 58, prog: [0, 0, 1, 1, 0, 0, 6, 1], seed: 311, lead: { i: 'choir', r: R_SPARSE, v: .1 }, counter: { i: 'bell', o: 12, r: R_LONG, v: .045 }, drone: { n: [0, 7], v: .055 }, drums: { k: 'x.x.....', v: .5 } },
-  chronicle: { title: 'The Chronicle', root: 50, mode: 'dor', bpm: 72, prog: [0, 6, 2, 3, 0, 6, 3, 0], seed: 321, form: ['full', 'high', 'full', 'break'], lead: { i: 'strings', r: R_CALM, alt: { i: 'flute', o: 12 } }, arp: { i: 'harp', p: '0.2.4.2.' }, pad: { i: 'strings', v: .035 } },
-  end_good: { title: 'A Realm at Peace', root: 55, mode: 'ion', bpm: 80, prog: [0, 4, 5, 3, 0, 3, 4, 0], seed: 331, form: ['full', 'high', 'high', 'break'], lead: { i: 'strings', r: R_CALM, alt: { i: 'brass' } }, arp: { i: 'harp', p: '0.1.2.4.' }, pad: { i: 'strings', v: .04 }, bass: { p: '0...0...' }, drums: { b: 'x.......', intro: true, v: .6 } },
-  end_dark: { title: 'Ashes', root: 45, mode: 'aeo', bpm: 62, prog: [0, 5, 3, 4, 0, 5, 6, 0], seed: 341, form: ['full', 'high', 'full', 'break'], lead: { i: 'strings', r: R_CALM, alt: { i: 'choir' } }, pad: { i: 'choir', v: .035 }, drone: { n: [0], v: .035, t: 'triangle' }, counter: { i: 'bell', o: 12, r: R_LONG, v: .045 } },
-  fallen: { title: 'Fallen', root: 50, mode: 'aeo', bpm: 56, prog: [0, 5, 3, 4], seed: 351, form: ['full', 'high'], lead: { i: 'choir', r: R_SPARSE, v: .1 }, pad: { i: 'strings', v: .035 }, counter: { i: 'bell', o: 12, r: R_LONG, v: .04 } },
+  barrow: { title: 'The Barrow', root: 50, mode: 'phr', bpm: 58, prog: [0, 0, 1, 1, 0, 0, 6, 1], seed: 311, lead: { i: 'hum', r: R_SPARSE, v: .1 }, counter: { i: 'bell', o: 0, r: R_LONG, v: .045 }, drone: { n: [0, 7], v: .055 }, drums: { k: 'x.x.....', v: .5 } },
+  chronicle: { title: 'The Chronicle', root: 50, mode: 'dor', bpm: 72, prog: [0, 6, 2, 3, 0, 6, 3, 0], seed: 321, form: ['full', 'high', 'full', 'break'], lead: { i: 'strings', o: 0, r: R_CALM, alt: { i: 'flute', o: 0 } }, arp: { i: 'harp', p: '0.2.1.2.' }, pad: { i: 'strings', v: .035 } },
+  end_good: { title: 'A Realm at Peace', root: 55, mode: 'ion', bpm: 80, prog: [0, 4, 5, 3, 0, 3, 4, 0], seed: 331, form: ['full', 'high', 'high', 'break'], lead: { i: 'strings', o: 0, r: R_CALM, alt: { i: 'brass' } }, arp: { i: 'harp', p: '0.1.2.1.' }, pad: { i: 'strings', v: .04 }, bass: { p: '0...0...' }, drums: { b: 'x.......', intro: true, v: .6 } },
+  end_dark: { title: 'Ashes', root: 45, mode: 'aeo', bpm: 62, prog: [0, 5, 3, 4, 0, 5, 6, 0], seed: 341, form: ['full', 'high', 'full', 'break'], lead: { i: 'strings', o: 0, r: R_CALM, alt: { i: 'hum' } }, pad: { i: 'hum', v: .035 }, drone: { n: [0], v: .035, t: 'triangle' }, counter: { i: 'bell', o: 0, r: R_LONG, v: .045 } },
+  fallen: { title: 'Fallen', root: 50, mode: 'aeo', bpm: 56, prog: [0, 5, 3, 4], seed: 351, form: ['full', 'high'], lead: { i: 'hum', o: 0, r: R_SPARSE, v: .1 }, pad: { i: 'strings', v: .035 }, counter: { i: 'bell', o: 0, r: R_LONG, v: .04 } },
 };
 // forts: marching variations of each kingdom's castle theme
 ['Albion', 'Valoria', 'Draven', 'Eldoria'].forEach((n, k) => {
   const c = SONGS['castle_' + k], six = (c.bar || 8) === 6;
-  SONGS['fort_' + k] = Object.assign({}, c, { title: `The ${n} Garrison`, bpm: c.bpm + 18, seed: c.seed + 5, pad: null, form: ['full', 'high', 'full', 'break'], drums: six ? { s: 'x.x.xx', b: 'x.....', intro: true } : { s: 'x.x.x.xx', k: 'x...x...', b: 'x.......', intro: true } });
+  SONGS['fort_' + k] = Object.assign({}, c, { title: `The ${n} Garrison`, bpm: c.bpm + 18, seed: c.seed + 5, pad: null, form: ['full', 'high', 'full', 'break'], drums: six ? { t: 'x.x.xx', b: 'x.....', intro: true } : { t: 'x.x.x.xx', k: 'x...x...', b: 'x.......', s: '......x.', v: .85, intro: true } });
 });
 const OW_SONGS = ['wander', 'road', 'fields', 'hills', 'oldroads', 'pilgrim', 'starlit', 'moon', 'embers'];
 const URGENT_SONGS = ['menu', 'end_good', 'end_dark', 'fallen', 'combat1', 'combat2', 'hollow_fight', 'circle_fight', 'boss', 'duel', 'tourney', 'greymother', 'hollowking', 'last_stand'];
 const END_DARK = ['ashes', 'grey_throne', 'hollow_crown', 'long_night', 'conqueror', 'usurper', 'puppet', 'outlaw'];
+function inDesert() { const tx = Math.floor(P.x / TS), ty = Math.floor(P.y / TS); let n = 0; for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) if (terAt(tx + dx, ty + dy) === T.DESERT) n++; return n >= 22; }
 const PLACE_R = { castle: 20, village: 13, outpost: 10, camp: 13, ruin: 10, hidden: 8 };
 
 /* ---------------- Canvas & input ---------------- */
@@ -1238,6 +1248,9 @@ const ATYPES = {
   bear: { name: 'Bear', hp: 170, dmg: 21, spd: 100, range: 36, cd: 1.8, wind: .6, faction: 'wild', xp: 55, gold: [0, 0], r: 16, animal: true },
   villager: { name: 'Villager', hp: 30, dmg: 0, spd: 55, range: 0, cd: 9, faction: 'civ', xp: 0, gold: [0, 3], r: 10, civ: true },
   npc: { name: 'Townsfolk', hp: 60, dmg: 0, spd: 50, range: 0, cd: 9, faction: 'civ', xp: 0, gold: [0, 0], r: 11, civ: true, important: true },
+  scorpion: { name: 'Giant Scorpion', hp: 34, dmg: 8, spd: 105, range: 30, cd: 1.3, wind: .35, faction: 'wild', xp: 13, gold: [0, 0], r: 10, animal: true },
+  jackal: { name: 'Jackal', hp: 26, dmg: 5, spd: 155, range: 26, cd: .9, wind: .28, faction: 'wild', xp: 9, gold: [0, 0], r: 9, animal: true },
+  camel: { name: 'Camel', hp: 90, dmg: 10, spd: 110, range: 30, cd: 1.6, wind: .4, faction: 'wild', xp: 12, gold: [0, 0], r: 13, animal: true, passive: true },
   horse: { name: 'Horse', hp: 999, dmg: 0, spd: 190, range: 0, cd: 9, faction: 'civ', r: 12, civ: true },
   // story mode
   cultist: { name: 'Ashen Cultist', hp: 44, dmg: 9, spd: 90, range: 38, cd: 1.25, wind: .4, faction: 'bandit', xp: 18, gold: [5, 14], r: 11, weapon: 'sword' },
@@ -1254,7 +1267,7 @@ const SKIN = ['#e8c49a', '#d8a878', '#c08858', '#9a6a44', '#f0d0b0'];
    WORLD GENERATION
    ===================================================================== */
 const TS = 32, WW = 360, WH = 360, CH = 16, CW = Math.ceil(WW / CH), CHH = Math.ceil(WH / CH);
-const T = { SEA: 0, WATER: 1, FORD: 2, SAND: 3, GRASS: 4, PLAINS: 5, FOREST: 6, DENSE: 7, HILL: 8, MOUNT: 9, PASS: 10, ROAD: 11, BRIDGE: 12, FARM: 13, SWAMP: 14, SNOW: 15, FLOOR: 16, DIRT: 17 };
+const T = { SEA: 0, WATER: 1, FORD: 2, SAND: 3, GRASS: 4, PLAINS: 5, FOREST: 6, DENSE: 7, HILL: 8, MOUNT: 9, PASS: 10, ROAD: 11, BRIDGE: 12, FARM: 13, SWAMP: 14, SNOW: 15, FLOOR: 16, DIRT: 17, DESERT: 18 };
 const TINFO = [
   { n: 'Sea', c: '#24507e', spd: 0, block: 1, mm: '#1f4674' },
   { n: 'River', c: '#3170aa', spd: 0, block: 1, mm: '#3a7cc0' },
@@ -1274,6 +1287,7 @@ const TINFO = [
   { n: 'Snowy Peaks', c: '#dfe4e8', spd: 0, block: 1, mm: '#eceff2' },
   { n: 'Courtyard', c: '#8e8879', spd: 1.1, mm: '#a19b8c' },
   { n: 'Campground', c: '#7c6647', spd: 1, mm: '#86704e' },
+  { n: 'Desert', c: '#d6b976', spd: .88, mm: '#dcc07c' },
 ];
 let W = null;
 function terAt(tx, ty) { if (tx < 0 || ty < 0 || tx >= WW || ty >= WH) return T.SEA; return W.ter[ty * WW + tx]; }
@@ -1291,7 +1305,7 @@ function genWorld(seed) {
     seed, ter: new Uint8Array(N), own: new Uint8Array(N), solid: new Uint8Array(N), wall: new Uint8Array(N), clear: new Uint8Array(N), bord: new Uint8Array(N),
     hgt: new Float32Array(N), places: [], objs: [], chunkTrees: [], chunkObjs: [], interacts: [], caps: [], rivers: [], landCount: [0, 0, 0, 0], names: new Set()
   };
-  const nH = makeNoise(seed + 11), nM = makeNoise(seed + 23), nR = makeNoise(seed + 37), nB = makeNoise(seed + 41), nC = makeNoise(seed + 53), nG = makeNoise(seed + 67);
+  const nH = makeNoise(seed + 11), nM = makeNoise(seed + 23), nR = makeNoise(seed + 37), nB = makeNoise(seed + 41), nC = makeNoise(seed + 53), nG = makeNoise(seed + 67), nD = makeNoise(seed + 79);
   const C = WW / 2;
   const caps = [[C - 92 + sri(-6, 6), C - 90 + sri(-6, 6)], [C + 92 + sri(-6, 6), C - 90 + sri(-6, 6)], [C + 92 + sri(-6, 6), C + 92 + sri(-6, 6)], [C - 92 + sri(-6, 6), C + 92 + sri(-6, 6)]];
   W.caps = caps;
@@ -1323,6 +1337,7 @@ function genWorld(seed) {
         else if (border < 15 && (t === T.GRASS || t === T.PLAINS)) t = T.HILL;
       }
       if (b1 === 2 && t === T.GRASS && m > .5) t = T.FOREST;
+      if (b1 === 1 && border > 3 && (t === T.GRASS || t === T.PLAINS) && fbm(nD, x / 30 + 300, y / 30, 3) > .555 + (m - .45) * .9) t = T.DESERT;
     }
     // central lake
     const dl = Math.hypot(x - C, y - C) + (nC(x / 8, y / 8) - .5) * 9;
@@ -1554,12 +1569,13 @@ function genWorld(seed) {
   for (let i = 0; i < CW * CHH; i++) { W.chunkTrees.push([]); W.chunkObjs.push([]); }
   for (let ty = 1; ty < WH - 1; ty++) for (let tx = 1; tx < WW - 1; tx++) {
     const i = ty * WW + tx; if (W.clear[i] || W.solid[i]) continue; const t = ter[i];
-    const p = t === T.DENSE ? .9 : t === T.FOREST ? .55 : t === T.SWAMP ? .16 : t === T.HILL ? .07 : t === T.GRASS ? .028 : t === T.PLAINS ? .01 : t === T.PASS ? .03 : 0;
+    const p = t === T.DENSE ? .9 : t === T.FOREST ? .55 : t === T.SWAMP ? .16 : t === T.HILL ? .07 : t === T.GRASS ? .028 : t === T.PLAINS ? .01 : t === T.PASS ? .03 : t === T.DESERT ? .05 : 0;
     const cnt = (t === T.DENSE && hash2(tx + 5, ty + 9) < .45) ? 2 : 1;
     for (let c = 0; c < cnt; c++) {
       const hr = hash2(tx * 13 + c * 7, ty * 17 + c); if (hr >= p) continue;
       const k = W.own[i]; const r2 = hash2(tx + c * 3, ty * 3 + 1); let kind;
-      if (t === T.HILL || t === T.PASS) kind = 1; else if (t === T.SWAMP) kind = r2 < .5 ? 3 : 2;
+      if (t === T.DESERT) kind = r2 < .42 ? 4 : 5;
+      else if (t === T.HILL || t === T.PASS) kind = 1; else if (t === T.SWAMP) kind = r2 < .5 ? 3 : 2;
       else if (k === 2) kind = r2 < .5 ? 1 : r2 < .65 ? 3 : 0;
       else if (k === 3) kind = r2 < .5 ? 0 : r2 < .8 ? 2 : 1;
       else if (k === 1) kind = r2 < .6 ? 0 : r2 < .8 ? 2 : 1;
@@ -1907,6 +1923,7 @@ function damage(t, amt, src, o = {}) {
   for (let i = 0; i < 7 * QMUL(); i++) addPart(t.x, t.y, rand(-110, 110), rand(-120, 30), armored && Math.random() < .5 ? '#ffe8a0' : '#9a1a12', rand(.3, .6), 2.5, 220);
   if (settings.dmgNums) addText(t.x + rand(-8, 8), t.y - 26, Math.round(amt) + (o.crit ? '!' : ''), o.crit ? '#ffd24a' : '#fff4e0', o.crit ? 19 : 14);
   SND.play('hit', src === P ? 1 : .4);
+  if (t.kind === 'camel' && Math.random() < .6) SND.play('grunt');
   if (src) {
     if (!t.civ) { t.target = src; t.returning = false; }
     if (src === P) { if (!wasHostile) crime(t); if (t.place != null) alertPlace(t.place, P); }
@@ -1943,6 +1960,8 @@ function kill(t, src) {
     if (t.kind === 'wolf' && chance(.4)) dropItem(t.x, t.y, 'furs');
     if (t.kind === 'boar') dropItem(t.x, t.y, chance(.7) ? 'meat' : 'furs');
     if (t.kind === 'bear') { dropItem(t.x, t.y, 'furs'); dropItem(t.x + 10, t.y, 'meat'); }
+    if (t.kind === 'jackal' && chance(.25)) dropItem(t.x, t.y, 'furs');
+    if (t.kind === 'camel') { dropItem(t.x, t.y, 'meat'); dropItem(t.x + 10, t.y, 'meat'); }
   } else if (!t.civ) {
     const p = t.kind === 'leader' ? .7 : t.kind === 'knight' ? .35 : .1;
     if (chance(p)) { const tier = Math.min(4, Math.max(0, (t.tier || 1) - (t.kind === 'leader' ? 0 : 1))); dropItem(t.x, t.y, pick(LOOT_TIERS[tier]), rollQual(tier)); }
@@ -1980,7 +1999,7 @@ function enemyStrike(e, tg) {
     projs.push({ x: e.x + Math.cos(a) * 14, y: e.y + Math.sin(a) * 14, vx: Math.cos(a) * 430, vy: Math.sin(a) * 430, dmg: e.dmg, src: e, life: 1.1 });
     if (dist(e.x, e.y, P.x, P.y) < 600) SND.play('arrow'); return;
   }
-  if (dist(e.x, e.y, P.x, P.y) < 500) SND.play(e.kind === 'bear' || e.kind === 'leader' ? 'swingH' : 'swing', .5);
+  if (dist(e.x, e.y, P.x, P.y) < 500) SND.play(e.kind === 'scorpion' ? 'sting' : e.kind === 'bear' || e.kind === 'leader' ? 'swingH' : 'swing', .5);
   const d = dist(e.x, e.y, tg.x, tg.y); const a = Math.atan2(tg.y - e.y, tg.x - e.x);
   if (d <= e.range + tg.r + 3 && Math.abs(angDiff(e.face, a)) < 1.4) damage(tg, e.dmg * rand(.85, 1.15), e);
 }
@@ -2367,10 +2386,16 @@ function updateSpawns(dt) {
 function trySpawnWild() {
   for (let t = 0; t < 8; t++) {
     const a = rand(0, TAU), d = rand(800, 1100); const x = P.x + Math.cos(a) * d, y = P.y + Math.sin(a) * d;
-    const ter = terAtPx(x, y); if (![T.FOREST, T.DENSE, T.HILL, T.GRASS, T.PLAINS, T.SWAMP].includes(ter) || collides(x, y, 12)) continue;
+    const ter = terAtPx(x, y); if (![T.FOREST, T.DENSE, T.HILL, T.GRASS, T.PLAINS, T.SWAMP, T.DESERT].includes(ter) || collides(x, y, 12)) continue;
     if (W.places.some(p => (p.type === 'village' || p.type === 'castle' || p.type === 'outpost') && dist(p.x, p.y, x, y) < 22 * TS)) continue;
     const forest = ter === T.FOREST || ter === T.DENSE; const r = Math.random();
     const o = { wild: true, home: { x, y }, leash: 700, wanderR: 160 };
+    if (ter === T.DESERT) {
+      if (r < .45) { for (let i = 0; i < randi(1, 2); i++) { const f = findFree(x + rand(-40, 40), y + rand(-40, 40)); mkActor('scorpion', f.x, f.y, o); } }
+      else if (r < .75 && P.lvl >= 2) { const n = randi(2, P.lvl >= 4 ? 4 : 3); for (let i = 0; i < n; i++) { const f = findFree(x + rand(-40, 40), y + rand(-40, 40)); mkActor('jackal', f.x, f.y, o); } SND.play('yip'); }
+      else mkActor('camel', x, y, Object.assign({ passiveA: true }, o));
+      return;
+    }
     if (forest ? r < .55 : r < .35) { const n = randi(2, P.lvl >= 3 ? 4 : 3); for (let i = 0; i < n; i++) { const f = findFree(x + rand(-40, 40), y + rand(-40, 40)); mkActor('wolf', f.x, f.y, o); } }
     else if (forest && r > .85 && P.lvl >= 3) mkActor('bear', x, y, o);
     else mkActor('boar', x, y, Object.assign({ passiveA: true }, o));
@@ -2651,8 +2676,10 @@ function evTrader() {
 }
 function evWolves() {
   if (P.lvl < 2 || ownerAtPx(P.x, P.y) == null) return evCaravan();
-  const a = rand(0, TAU); for (let i = 0; i < randi(3, 4); i++) { const f = findFree(P.x + Math.cos(a) * 520 + rand(-50, 50), P.y + Math.sin(a) * 520 + rand(-50, 50)); const w = mkActor('wolf', f.x, f.y, { wild: true, home: { x: f.x, y: f.y }, leash: 900 }); w.target = P; }
-  SND.play('howl'); toast('A wolf pack howls nearby… they have your scent.', 'bad');
+  const sand = terAtPx(P.x, P.y) === T.DESERT;
+  const a = rand(0, TAU); for (let i = 0; i < randi(3, 4); i++) { const f = findFree(P.x + Math.cos(a) * 520 + rand(-50, 50), P.y + Math.sin(a) * 520 + rand(-50, 50)); const w = mkActor(sand ? 'jackal' : 'wolf', f.x, f.y, { wild: true, home: { x: f.x, y: f.y }, leash: 900 }); w.target = P; }
+  if (sand) { SND.play('yip'); toast('Jackals yip across the dunes… they have your scent.', 'bad'); }
+  else { SND.play('howl'); toast('A wolf pack howls nearby… they have your scent.', 'bad'); }
 }
 
 /* ---------------- Shops ---------------- */
@@ -3146,6 +3173,14 @@ function renderChunk(g, cx, cy) {
         if (t !== T.SWAMP && h < .12) { g.fillStyle = '#3f6a2a'; circ(g, px + 10 + h2 * 12, py + 18, 6); g.fillStyle = '#4f7e34'; circ(g, px + 9 + h2 * 12, py + 16, 4); }
         break;
       }
+      case T.DESERT: {
+        g.strokeStyle = shade(col, -.12); g.lineWidth = 1.2;
+        for (let i = 0; i < 2; i++) { const rx = px + hash2(tx * 5 + i, ty) * 20, ry = py + 7 + hash2(tx, ty * 5 + i) * 20; g.beginPath(); g.moveTo(rx, ry); g.quadraticCurveTo(rx + 6, ry - 3, rx + 12, ry); g.stroke(); g.strokeStyle = shade(col, .14); g.beginPath(); g.moveTo(rx + 1, ry - 1.5); g.quadraticCurveTo(rx + 6, ry - 4.5, rx + 11, ry - 1.5); g.stroke(); g.strokeStyle = shade(col, -.12); }
+        g.fillStyle = shade(col, -.2); for (let i = 0; i < 2; i++) circ(g, px + hash2(i, tx * 3) * 30, py + hash2(ty * 3, i) * 30, .9);
+        if (h2 < .025) { g.fillStyle = '#a08a68'; ell(g, px + 16, py + 18, 4.5, 3); g.fillStyle = '#bca684'; ell(g, px + 15, py + 17, 2.6, 1.8); }
+        if (h < .006) { g.fillStyle = '#ece6d6'; ell(g, px + 12, py + 16, 4, 3); g.fillRect(px + 15, py + 15, 8, 1.6); circ(g, px + 23, py + 15.8, 1.4); g.fillStyle = '#5a5040'; circ(g, px + 11, py + 15.5, .8); circ(g, px + 13, py + 15.5, .8); }
+        break;
+      }
       case T.SAND: g.fillStyle = shade(col, -.08); for (let i = 0; i < 3; i++) circ(g, px + hash2(i, tx) * 30, py + hash2(ty, i + 3) * 30, 1); break;
       case T.DIRT: g.fillStyle = shade(col, -.15); for (let i = 0; i < 3; i++) circ(g, px + hash2(i, tx * 3) * 30, py + hash2(ty * 3, i) * 30, 1.5); break;
       case T.PASS: g.fillStyle = shade(col, -.2); for (let i = 0; i < 5; i++) circ(g, px + hash2(i, tx) * 30, py + hash2(ty, i) * 30, 1.2 + h * 1.5); break;
@@ -3201,10 +3236,32 @@ function pick2(h, arr) { return arr[Math.floor(h * 1000) % arr.length]; }
 
 /* ---------------- Tree sprites ---------------- */
 const treeSprites = [];
+function drawDesertPlant(g, kind, v, bx, by) {
+  const j = (v - 1) * .08;
+  if (kind === 4) { // saguaro cactus
+    const c1 = shade('#5f8f3c', j), c2 = shade('#4a7430', j), c3 = shade('#7aa852', j), H = 44 + v * 6;
+    g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, bx + 7, by - 1, 12, 4.5);
+    const arm = (dir, y0, len, up) => { g.fillStyle = c2; rrect(g, dir > 0 ? bx + 3 : bx - 3 - len, by - y0 - 3.5, len, 7, 3.5); g.fill(); rrect(g, dir > 0 ? bx + len - 4 : bx - len - 3, by - y0 - up, 7, up, 3.5); g.fill(); g.fillStyle = c1; rrect(g, dir > 0 ? bx + len - 3.5 : bx - len - 2.5, by - y0 - up, 3, up - 2, 1.5); g.fill(); };
+    arm(-1, H * .45, 13, 16); if (v !== 1) arm(1, H * .62, 11, 14);
+    g.fillStyle = c2; rrect(g, bx - 6.5, by - H, 13, H, 6.5); g.fill();
+    g.fillStyle = c1; rrect(g, bx - 4.5, by - H + 1, 5, H - 3, 2.5); g.fill();
+    g.strokeStyle = shade(c2, -.25); g.lineWidth = 1; [-2.5, 2.5].forEach(dx => { g.beginPath(); g.moveTo(bx + dx, by - H + 5); g.lineTo(bx + dx, by - 2); g.stroke(); });
+    g.fillStyle = c3; for (let i = 0; i < 7; i++) circ(g, bx - 4 + (i % 3) * 4, by - H + 6 + i * (H / 8), .8);
+    if (v === 2) { g.fillStyle = '#e86a8a'; circ(g, bx, by - H + 1, 3); g.fillStyle = '#ffd24a'; circ(g, bx, by - H + 1, 1.2); }
+  } else { // dry desert brush
+    const cs = ['#8a8a4a', '#a09a58', '#7a6e3a'].map(c2 => shade(c2, j));
+    g.fillStyle = 'rgba(0,0,0,.18)'; ell(g, bx + 5, by - 1, 15, 5);
+    g.strokeStyle = shade('#6a5030', j); g.lineWidth = 1.4; g.lineCap = 'round';
+    for (let i = 0; i < 7; i++) { const a = -Math.PI / 2 + (i - 3) * .38; g.beginPath(); g.moveTo(bx, by - 2); g.lineTo(bx + Math.cos(a) * (13 + (i % 2) * 5), by - 4 + Math.sin(a) * (12 + (i % 3) * 3)); g.stroke(); }
+    [[-7, -8, 6], [6, -9, 6.5], [0, -14, 7], [-3, -6, 5]].forEach(([dx, dy, r], i) => { g.fillStyle = cs[i % 3]; circ(g, bx + dx, by + dy, r + v * .6); });
+    g.fillStyle = shade(cs[1], .2); circ(g, bx - 2, by - 16, 2.5); circ(g, bx + 5, by - 11, 1.8);
+  }
+}
 function buildTreeSprites() {
   treeSprites.length = 0;
-  for (let kind = 0; kind < 4; kind++) for (let v = 0; v < 3; v++) {
+  for (let kind = 0; kind < 6; kind++) for (let v = 0; v < 3; v++) {
     const c = document.createElement('canvas'); c.width = 72; c.height = 90; const g = c.getContext('2d'); const bx = 36, by = 82;
+    if (kind >= 4) { drawDesertPlant(g, kind, v, bx, by); treeSprites.push(c); continue; }
     g.fillStyle = 'rgba(0,0,0,.22)'; ell(g, bx + 8, by - 2, 22, 8);
     g.fillStyle = kind === 2 ? '#d8d4c8' : '#5a3c22'; g.fillRect(bx - 3, by - 20, 6, 20);
     if (kind === 2) { g.fillStyle = '#333'; g.fillRect(bx - 3, by - 14, 3, 2); g.fillRect(bx, by - 8, 3, 2); }
@@ -3463,21 +3520,54 @@ function drawHorse(g, x, y, face, hb, walk, rider, allegiance) {
   g.restore();
 }
 function drawAnimal(g, e) {
+  if (e.kind === 'scorpion' || e.kind === 'camel') return drawDesertAnimal(g, e);
   g.save(); g.translate(e.x, e.y);
-  const big = e.kind === 'bear' ? 1.5 : e.kind === 'boar' ? 1.05 : 1;
+  const big = e.kind === 'bear' ? 1.5 : e.kind === 'boar' ? 1.05 : e.kind === 'jackal' ? .85 : 1;
   g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, 3, 8 * big, 16 * big, 6 * big);
   g.rotate(e.face); if (e.flash > 0) g.filter = 'brightness(2.2)';
   if (e.dead) g.globalAlpha = Math.max(0, 1 - (e.deadT - 7) / 3);
   const s = Math.sin(e.walk * 1.5) * 4;
-  const col = e.kind === 'wolf' ? '#7a7a80' : e.kind === 'boar' ? '#4a3a2e' : '#5a3a22';
+  const col = e.kind === 'wolf' ? '#7a7a80' : e.kind === 'jackal' ? '#b08a58' : e.kind === 'boar' ? '#4a3a2e' : '#5a3a22';
+  const canine = e.kind === 'wolf' || e.kind === 'jackal';
   g.fillStyle = shade(col, -.3); [[8, -5], [8, 5], [-8, -5], [-8, 5]].forEach(([lx, ly], i) => ell(g, (lx + (i % 3 ? s : -s)) * big, ly * big, 3.5 * big, 2.2 * big));
-  if (e.kind === 'wolf') { g.fillStyle = col; g.beginPath(); g.moveTo(-12, -2); g.quadraticCurveTo(-24, Math.sin(e.walk) * 4, -26, 0); g.quadraticCurveTo(-22, 3, -12, 2); g.fill(); }
+  if (canine) { g.fillStyle = col; g.beginPath(); g.moveTo(-12 * big, -2); g.quadraticCurveTo(-24 * big, Math.sin(e.walk) * 4, -26 * big, 0); g.quadraticCurveTo(-22 * big, 3, -12 * big, 2); g.fill(); if (e.kind === 'jackal') { g.fillStyle = '#3a2a1a'; circ(g, -25 * big, 0, 2); } }
   g.fillStyle = col; ell(g, 0, 0, 13 * big, 6.5 * big);
   g.fillStyle = shade(col, .15); ell(g, -2 * big, 0, 8 * big, 3.5 * big);
   g.fillStyle = col; ell(g, 13 * big, 0, 6 * big, 5 * big);
+  if (e.kind === 'jackal') { ell(g, 17, 0, 4.5, 2.2); g.fillStyle = '#222'; circ(g, 21, 0, 1.1); g.fillStyle = shade(col, -.25); g.beginPath(); g.moveTo(9, -3); g.lineTo(6, -9); g.lineTo(12, -4); g.fill(); g.beginPath(); g.moveTo(9, 3); g.lineTo(6, 9); g.lineTo(12, 4); g.fill(); if (e.wind > 0) { g.fillStyle = '#fff'; g.fillRect(16, -1.2, 3.5, 2.4); } }
   if (e.kind === 'wolf') { ell(g, 19, 0, 5, 2.6); g.fillStyle = '#222'; circ(g, 23.5, 0, 1.2); g.fillStyle = shade(col, -.2); ell(g, 11, -4, 2.2, 1.4); ell(g, 11, 4, 2.2, 1.4); if (e.wind > 0) { g.fillStyle = '#fff'; g.fillRect(19, -1.5, 4, 3); } }
   if (e.kind === 'boar') { g.fillStyle = '#6a5040'; ell(g, 19, 0, 3.5, 3); g.fillStyle = '#f0ece0'; g.beginPath(); g.moveTo(17, -3); g.lineTo(22, -6); g.lineTo(18, -1); g.fill(); g.beginPath(); g.moveTo(17, 3); g.lineTo(22, 6); g.lineTo(18, 1); g.fill(); g.fillStyle = '#2a1a10'; g.fillRect(-10, -1, 16, 2); }
   if (e.kind === 'bear') { g.fillStyle = shade(col, -.2); circ(g, 17, -6, 3.2); circ(g, 17, 6, 3.2); g.fillStyle = '#8a6a4a'; ell(g, 24, 0, 4, 3.5); g.fillStyle = '#111'; circ(g, 27, 0, 1.6); }
+  g.restore();
+}
+function drawDesertAnimal(g, e) {
+  g.save(); g.translate(e.x, e.y);
+  if (e.dead) g.globalAlpha = Math.max(0, 1 - (e.deadT - 7) / 3);
+  const s = Math.sin(e.walk * 2) * 3;
+  if (e.kind === 'scorpion') {
+    g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, 2, 5, 13, 5);
+    g.rotate(e.face); if (e.flash > 0) g.filter = 'brightness(2.2)';
+    const col = '#7a5230', dk = '#4a3018';
+    g.strokeStyle = dk; g.lineWidth = 1.6; g.lineCap = 'round';
+    for (let i = 0; i < 4; i++) for (const sd of [-1, 1]) { const lx = 4 - i * 3.5, w = (i % 2 ? s : -s) * .6; g.beginPath(); g.moveTo(lx, sd * 3); g.lineTo(lx - 2 + w, sd * 9); g.lineTo(lx - 4 + w, sd * 11); g.stroke(); }
+    g.fillStyle = col; ell(g, 1, 0, 8, 5);
+    for (let i = 1; i <= 5; i++) { const cx2 = -4 - i * 3.6, cy2 = Math.sin(i * .5 + (e.wind > 0 ? 1 : 0)) * 1.5; g.fillStyle = i === 5 ? '#c84a2a' : shade(col, i % 2 ? -.1 : .05); circ(g, cx2, cy2, 3 - i * .25); }
+    g.fillStyle = '#1a1008'; g.beginPath(); g.moveTo(-24, -1); g.lineTo(-28, 0); g.lineTo(-24, 1.5); g.fill();
+    for (const sd of [-1, 1]) { g.strokeStyle = col; g.lineWidth = 2.4; g.beginPath(); g.moveTo(7, sd * 3); g.lineTo(12, sd * 7); g.stroke(); g.fillStyle = shade(col, .08); ell(g, 15, sd * 7.5, 4, 2.6); g.fillStyle = dk; g.beginPath(); g.moveTo(17, sd * 6); g.lineTo(21, sd * (e.wind > 0 ? 8.5 : 6.5)); g.lineTo(17.5, sd * 8.5); g.fill(); }
+    g.fillStyle = '#111'; circ(g, 7.5, -1.5, .8); circ(g, 7.5, 1.5, .8);
+  } else { // camel
+    const big = 1.3;
+    g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, 3, 10, 20, 7);
+    g.rotate(e.face); if (e.flash > 0) g.filter = 'brightness(2.2)';
+    const col = '#c49a5c';
+    g.fillStyle = shade(col, -.3); [[9, -6], [9, 6], [-9, -6], [-9, 6]].forEach(([lx, ly], i) => ell(g, (lx + (i % 3 ? s : -s)) * big, ly * big, 3.4 * big, 2.2 * big));
+    g.fillStyle = col; ell(g, 0, 0, 14 * big, 7 * big);
+    g.fillStyle = shade(col, .12); circ(g, -1 * big, 0, 5.5 * big); g.fillStyle = shade(col, .22); circ(g, -2 * big, -1, 3 * big);
+    g.fillStyle = shade(col, -.35); g.beginPath(); g.moveTo(-14 * big, 0); g.lineTo(-19 * big, Math.sin(e.walk) * 2); g.lineWidth = 2; g.strokeStyle = shade(col, -.35); g.stroke();
+    g.fillStyle = col; ell(g, 16 * big, 0, 7 * big, 3.2 * big); ell(g, 24 * big, 0, 5 * big, 3.6 * big);
+    g.fillStyle = shade(col, -.25); ell(g, 22 * big, -3.5 * big, 1.6, 1.2); ell(g, 22 * big, 3.5 * big, 1.6, 1.2);
+    g.fillStyle = '#2a1a10'; circ(g, 28.5 * big, -1.2, .9); circ(g, 28.5 * big, 1.2, .9);
+  }
   g.restore();
 }
 function drawCart(g, e) {
@@ -3703,7 +3793,7 @@ function openMap() {
   const tg = $('mapToggles');
   tg.innerHTML = Object.keys(MAPF).map(k => `<div class="tog ${MAPF[k] ? 'on' : ''}" data-f="${k}"><span class="box"></span>${MAPF_N[k]}</div>`).join('');
   tg.querySelectorAll('.tog').forEach(el => el.onclick = () => { MAPF[el.dataset.f] = !MAPF[el.dataset.f]; el.classList.toggle('on', MAPF[el.dataset.f]); });
-  $('mapLegend').innerHTML = `<div><i style="background:${TINFO[T.GRASS].mm}"></i>Grassland</div><div><i style="background:${TINFO[T.FOREST].mm}"></i>Forest</div><div><i style="background:${TINFO[T.MOUNT].mm}"></i>Mountains</div><div><i style="background:${TINFO[T.WATER].mm}"></i>River / Lake</div><div><i style="background:${TINFO[T.ROAD].mm}"></i>Road</div><div><i style="background:#c0302a"></i>Bandit camp (tier)</div><div><i style="background:#ffd24a"></i>Hidden place / quest</div><div><i style="background:#6ad0ff;border-radius:50%"></i>Waypoint</div>` + KDATA.map(k => `<div><i style="background:${k.color}"></i>${k.name}</div>`).join('');
+  $('mapLegend').innerHTML = `<div><i style="background:${TINFO[T.GRASS].mm}"></i>Grassland</div><div><i style="background:${TINFO[T.FOREST].mm}"></i>Forest</div><div><i style="background:${TINFO[T.DESERT].mm}"></i>Desert</div><div><i style="background:${TINFO[T.MOUNT].mm}"></i>Mountains</div><div><i style="background:${TINFO[T.WATER].mm}"></i>River / Lake</div><div><i style="background:${TINFO[T.ROAD].mm}"></i>Road</div><div><i style="background:#c0302a"></i>Bandit camp (tier)</div><div><i style="background:#ffd24a"></i>Hidden place / quest</div><div><i style="background:#6ad0ff;border-radius:50%"></i>Waypoint</div>` + KDATA.map(k => `<div><i style="background:${k.color}"></i>${k.name}</div>`).join('');
   $('mapExplored').innerHTML = `${exploredPct()}% of the realms charted<br>${W.places.filter(p => p.disc).length} of ${W.places.length} places found<br>${W.places.filter(p => p.type === 'camp' && p.cleared).length} camps cleared`;
   mapView.cx = P.x / TS; mapView.cy = P.y / TS; mapView.z = 3; mapView.sel = null; $('mapInfo').classList.add('hidden');
 }
@@ -5353,7 +5443,9 @@ function update(dt) {
   if ((G.autosaveT += dt) >= 180) { G.autosaveT = 0; saveGame(true); }
   if ((ambT -= dt) <= 0) {
     ambT = rand(1.5, 4);
-    if (isNight()) SND.play('cricket'); else if ([T.FOREST, T.DENSE, T.GRASS, T.HILL].includes(terAtPx(P.x, P.y))) SND.play('bird');
+    const amb = terAtPx(P.x, P.y);
+    if (amb === T.DESERT) { if (!isNight()) { if (Math.random() < .4) SND.play('wind'); } else if (Math.random() < .12) SND.play('yip'); else SND.play('cricket'); }
+    else if (isNight()) SND.play('cricket'); else if ([T.FOREST, T.DENSE, T.GRASS, T.HILL].includes(amb)) SND.play('bird');
     if (W.objs.some(o => o.k === 'campfire' && dist(o.x, o.y, P.x, P.y) < 260)) SND.play('fire');
   }
   G.shake *= Math.pow(.004, dt);
