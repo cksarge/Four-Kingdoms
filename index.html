@@ -684,7 +684,7 @@ function mix(h1, h2, t) {
   const r = Math.round(lerp(a >> 16 & 255, b >> 16 & 255, t)), g = Math.round(lerp(a >> 8 & 255, b >> 8 & 255, t)), bl = Math.round(lerp(a & 255, b & 255, t));
   return '#' + ((1 << 24) + (r << 16) + (g << 8) + bl).toString(16).slice(1);
 }
-function compass(dx, dy) { const a = Math.atan2(dy, dx); const dirs = ['E', 'SE', 'S', 'SW', 'W', 'NW', 'N', 'NE']; return dirs[(Math.round(a / (Math.PI / 4)) + 8) % 8]; }
+function compass(dx, dy) { const a = Math.atan2(dy, dx); const dirs = ['East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest', 'North', 'Northeast']; return dirs[(Math.round(a / (Math.PI / 4)) + 8) % 8]; }
 
 /* ---------------- Settings ---------------- */
 const DEFAULT_SETTINGS = { music: 0.45, sound: 0.7, effects: 0.6, shake: true, dmgNums: true, minimap: true, uiScale: 1, quality: 'high' };
@@ -1390,6 +1390,8 @@ function genWorld(seed) {
     addObj({ k: 'bannerpole', x: (cx + 2.2) * TS, y: (cy + 9) * TS, w: 6, h: 6, owner: k });
     const name = KDATA[k].castle; W.names.add(name);
     const pl = P_({ type: 'castle', k, owner: k, name, tx: cx, ty: cy, r: 30, gate: [cx, cy + 12] });
+    W.interacts.push({ type: 'sign', x: (cx - 4) * TS, y: (cy + 11.5) * TS, place: pl.id });
+    addObj({ k: 'sign', x: (cx - 4) * TS - 70, y: (cy + 11.5) * TS - 80, w: 140, h: 80, place: pl.id });
     pl.spots = { ruler: [cx + .5, cy - 1.2], armorer: [cx + 7, cy + 6.8], stable: [cx - 6, cy - 3.6], guards: [[cx - 1.5, cy + 10], [cx + 2.5, cy + 10], [cx - 3, cy - 1], [cx + 4, cy - 1], [cx, cy + 5]] };
     // town
     let placed = 0;
@@ -1430,7 +1432,7 @@ function genWorld(seed) {
     for (let f = 0; f < sri(2, 3); f++) { const ang = srng() * TAU, r = sr(10, 13); makeFarm(Math.round(tx + Math.cos(ang) * r) - 3, Math.round(ty + Math.sin(ang) * r) - 2, k); }
     pl.spots = { elder: [tx + .5, ty + 1.2], merchant: [tx - 3, ty - .6] };
     W.interacts.push({ type: 'sign', x: (tx + 3.5) * TS, y: (ty + 3.6) * TS, place: pl.id });
-    addObj({ k: 'sign', x: (tx + 3.5) * TS - 8, y: (ty + 3.6) * TS - 20, w: 16, h: 20 });
+    addObj({ k: 'sign', x: (tx + 3.5) * TS - 70, y: (ty + 3.6) * TS - 80, w: 140, h: 80, place: pl.id });
   }
   // ---------- Outposts ----------
   for (let k = 0; k < 4; k++) {
@@ -1669,7 +1671,7 @@ function useItem(uid) {
     const h = W.places.filter(p => p.type === 'hidden' && !p.disc && !p.rumor);
     if (!h.length) { toast('The map shows only places you already know.'); removeItem(uid, 1); return; }
     const t = h.sort((a, c) => dist(P.x, P.y, a.x, a.y) - dist(P.x, P.y, c.x, c.y))[0];
-    t.rumor = true; revealArea(t.tx, t.ty, 6); removeItem(uid, 1); toast(`The treasure map marks <b>${t.name}</b>, ${compass(t.x - P.x, t.y - P.y)} of here.`, 'gold'); SND.play('quest');
+    t.rumor = true; revealArea(t.tx, t.ty, 6); removeItem(uid, 1); toast(`The treasure map marks <b>${t.name}</b>, ${compass(t.x - P.x, t.y - P.y).toLowerCase()} of here.`, 'gold'); SND.play('quest');
   }
 }
 function quickUse(kind) {
@@ -2367,7 +2369,7 @@ function trySpawnWild() {
 let Q = null;
 function newQuests() { Q = { active: [], done: [], tracked: null, next: 1 }; }
 function nearestPlace(x, y, filter) { let best = null, bd = 1e9; W.places.forEach(p => { if (!filter(p)) return; const d = dist(x, y, p.x, p.y); if (d < bd) { bd = d; best = p; } }); return best; }
-function dirTo(from, to) { return compass(to.x - from.x, to.y - from.y); }
+function dirTo(from, to) { return compass(to.x - from.x, to.y - from.y).toLowerCase(); } // for use mid-sentence
 function leagues(d) { return (d / TS / 10).toFixed(1); }
 function randomLandSpot(cx, cy, rmin, rmax) {
   for (let t = 0; t < 80; t++) { const a = rand(0, TAU), r = rand(rmin, rmax) * TS; const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r; const tr = terAtPx(x, y); if (!collides(x, y, 12) && tr !== T.FORD && tr !== T.ROAD) return { x, y }; }
@@ -2591,7 +2593,7 @@ function evSkirmish() {
   const a = Math.atan2(W.places[y].y - o.y, W.places[y].x - o.x); const cx = o.x + Math.cos(a) * 12 * TS, cy = o.y + Math.sin(a) * 12 * TS;
   for (let i = 0; i < 4; i++) { const f = findFree(cx - 80 + rand(-50, 50), cy + rand(-60, 60)); mkActor('soldier', f.x, f.y, { k: x, foeOf: y, transient: true, roam: true, aggro: 380, home: { x: cx, y: cy } }); }
   for (let i = 0; i < 4; i++) { const f = findFree(cx + 80 + rand(-50, 50), cy + rand(-60, 60)); mkActor(i === 0 ? 'knight' : 'soldier', f.x, f.y, { k: y, foeOf: x, transient: true, roam: true, aggro: 380, home: { x: cx, y: cy } }); }
-  toast(`⚔ ${KDATA[x].name} and ${KDATA[y].name} soldiers clash near <b>${o.name}</b>, ${compass(cx - P.x, cy - P.y)} of you.`, 'war', bannerURL(x));
+  toast(`⚔ ${KDATA[x].name} and ${KDATA[y].name} soldiers clash near <b>${o.name}</b>, ${compass(cx - P.x, cy - P.y).toLowerCase()} of you.`, 'war', bannerURL(x));
   G.skirmish = { x: cx, y: cy, t: G.time };
 }
 function roadPath(a, b) {
@@ -2632,7 +2634,7 @@ function evTrader() {
   const a = rand(0, TAU); const f = findFree(P.x + Math.cos(a) * 260, P.y + Math.sin(a) * 260);
   const e = mkActor('npc', f.x, f.y, { role: 'trader', name: 'Ysolde the Far-Wanderer', transient: true, stand: true, expire: G.time + 240, cart: true });
   e.shop = makeShop('trader', null, null);
-  toast(`✦ A rare traveling merchant, <b>Ysolde the Far-Wanderer</b>, has set up ${compass(f.x - P.x, f.y - P.y)} of you!`, 'gold'); SND.play('bell');
+  toast(`✦ A rare traveling merchant, <b>Ysolde the Far-Wanderer</b>, has set up ${compass(f.x - P.x, f.y - P.y).toLowerCase()} of you!`, 'gold'); SND.play('bell');
 }
 function evWolves() {
   if (P.lvl < 2 || ownerAtPx(P.x, P.y) == null) return evCaravan();
@@ -2750,8 +2752,14 @@ function openChest(it, pl) {
   toast(`Looted ${gold ? `<b style="color:#ffd24a">${gold} gold</b>` : ''}${gold && found.length ? ', ' : ''}${found.join(', ')}`, 'gold');
   // auto-equip horse if found & none
 }
+function signDest(pl) {
+  const near = (f, n) => W.places.filter(p => p !== pl && f(p)).sort((a, b) => dist(a.x, a.y, pl.x, pl.y) - dist(b.x, b.y, pl.x, pl.y)).slice(0, n);
+  if (pl.type === 'castle') return [...near(p => p.type === 'village', 1), ...near(p => p.type === 'castle', 3)];
+  const home = W.places[pl.owner];
+  return [home, ...near(p => (p.type === 'village' || p.type === 'castle') && p !== home, 3)];
+}
 function readSign(pl) {
-  const others = W.places.filter(p => (p.type === 'village' || p.type === 'castle') && p !== pl).sort((a, b) => dist(a.x, a.y, pl.x, pl.y) - dist(b.x, b.y, pl.x, pl.y)).slice(0, 3);
+  const others = signDest(pl);
   others.forEach(o => { if (!o.disc) { o.disc = true; } });
   openDialog({
     name: 'Signpost', role: `${pl.name} · ${KDATA[pl.owner].full}`, portrait: 'sign',
@@ -3218,7 +3226,7 @@ function drawStruct(g, o, t) {
       if (o.k === 'chapel') { g.fillStyle = kd.stone; g.fillRect(x + w / 2 - 8, ry - 16, 16, 20); g.fillStyle = kd.accent; g.fillRect(x + w / 2 - 1.5, ry - 26, 3, 12); g.fillRect(x + w / 2 - 5, ry - 22, 10, 3); }
       else if (o.k === 'smithy' || (o.v || 0) > .5) { g.fillStyle = '#6a5a50'; g.fillRect(x + w - 16, ry - 6, 8, 12); if (Math.random() < .05 * QMUL()) addPart(x + w - 12, ry - 8, rand(-6, 6), rand(-26, -14), 'rgba(200,200,200,.5)', 2.2, 5); }
       if (o.k === 'smithy') { g.fillStyle = '#3a3a40'; g.fillRect(x + w + 4, y + h - 10, 14, 6); g.fillRect(x + w + 8, y + h - 4, 6, 6); }
-      if (o.k === 'stable') { g.fillStyle = '#d8c060'; ell(g, x + w + 10, y + h - 6, 9, 6); }
+      if (o.k === 'stable') { g.fillStyle = '#d8c060'; ell(g, x + w + 12, y + h + 30, 9, 6); } // hay beside the stablemaster
       if (o.k === 'barracks') drawWavingBanner(g, k, x + w / 2 - 7, ry - 20, 14, 20, t);
       break;
     }
@@ -3252,7 +3260,7 @@ function drawStruct(g, o, t) {
     case 'well': { const cx = x + w / 2, cy = y + h / 2; g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, cx + 4, cy + 6, 16, 10); g.fillStyle = '#8a8478'; circ(g, cx, cy, 15); g.fillStyle = '#2a4a6a'; circ(g, cx, cy, 9); g.strokeStyle = '#5a3a20'; g.lineWidth = 3; g.beginPath(); g.moveTo(cx - 15, cy - 2); g.lineTo(cx - 15, cy - 26); g.lineTo(cx + 15, cy - 26); g.lineTo(cx + 15, cy - 2); g.stroke(); g.fillStyle = kd.roof; g.beginPath(); g.moveTo(cx - 20, cy - 24); g.lineTo(cx, cy - 36); g.lineTo(cx + 20, cy - 24); g.fill(); break; }
     case 'stall': { g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(x + 4, y + 6, w, h); g.fillStyle = '#7a5530'; g.fillRect(x, y + h - 14, w, 14); ['#d8a040', '#c04a3a', '#6aa040', '#e0d0a0'].forEach((c, i) => { g.fillStyle = c; circ(g, x + 8 + i * 13, y + h - 12, 4); }); for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? '#f0e8d8' : kd.color; g.fillRect(x - 2 + i * (w + 4) / 6, y - 14, (w + 4) / 6 + .5, 16); } g.fillStyle = '#3a2a1a'; g.fillRect(x, y, 2, h); g.fillRect(x + w - 2, y, 2, h); break; }
     case 'hay': g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, x + 20, y + 26, 16, 7); g.fillStyle = '#c8a840'; circ(g, x + 16, y + 16, 14); g.fillStyle = '#e0c860'; circ(g, x + 13, y + 12, 8); break;
-    case 'sign': g.fillStyle = '#4a3018'; g.fillRect(x + 7, y, 3, 22); g.fillStyle = '#8a6030'; g.fillRect(x - 6, y, 26, 10); g.fillStyle = '#3a2410'; g.fillRect(x - 3, y + 4, 20, 1.5); break;
+    case 'sign': drawSignpost(g, o); break;
     case 'wtower': {
       g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(x + 10, y + 10, w, h);
       g.strokeStyle = '#5a3a1e'; g.lineWidth = 4; g.beginPath(); g.moveTo(x + 4, y + h); g.lineTo(x + 8, y - 30); g.moveTo(x + w - 4, y + h); g.lineTo(x + w - 8, y - 30); g.moveTo(x + 4, y + h - 10); g.lineTo(x + w - 8, y - 20); g.stroke();
@@ -3278,6 +3286,36 @@ function drawStruct(g, o, t) {
     case 'rubble': g.fillStyle = '#7a766e'; for (let i = 0; i < 4; i++) ell(g, x + hash2(i, o.v * 99) * w, y + hash2(o.v * 77, i) * h, 5, 3.5); g.fillStyle = '#5a7a3a'; circ(g, x + 4, y + 4, 3); break;
     case 'hidden': drawHidden(g, o, t); break;
   }
+}
+function drawSignpost(g, o) {
+  const bx = o.x + o.w / 2, by = o.y + o.h;
+  if (!o.dest) o.dest = signDest(W.places[o.place]).map(p => { const a = Math.atan2(p.y - by, p.x - bx); return { name: p.name, k: p.owner, a, label: `${p.name}  ${leagues(dist(bx, by, p.x, p.y))} lg` }; });
+  const n = o.dest.length, H = 20 + n * 12;
+  g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, bx + 3, by, 8, 3.5);
+  g.fillStyle = '#5a3a1e'; g.fillRect(bx - 2.5, by - H, 5, H); g.fillStyle = '#7a5230'; g.fillRect(bx - 2.5, by - H, 2, H);
+  g.fillStyle = '#4a2e16'; circ(g, bx, by - H, 3.2);
+  signQueue.push(o); // planks are drawn after buildings so houses never hide them
+}
+const signQueue = [];
+function drawSignPlanks(g, o) {
+  const bx = o.x + o.w / 2, by = o.y + o.h, H = 20 + o.dest.length * 12;
+  g.font = 'bold 8.5px "EB Garamond", Georgia, serif'; g.textBaseline = 'middle'; g.textAlign = 'center';
+  o.dest.forEach((s, i) => {
+    const dir = Math.cos(s.a) >= 0 ? 1 : -1, tilt = clamp(Math.sin(s.a), -1, 1) * .13, tw = g.measureText(s.label).width + 10;
+    const col = KDATA[s.k].color, y = by - H + 7 + i * 12;
+    g.save(); g.translate(bx, y); g.rotate(dir > 0 ? tilt : -tilt);
+    const x0 = dir > 0 ? -3 : -(tw + 6), x1 = dir > 0 ? tw + 6 : 3;
+    g.beginPath();
+    if (dir > 0) { g.moveTo(x0, -4.5); g.lineTo(x1 - 5, -4.5); g.lineTo(x1, 0); g.lineTo(x1 - 5, 4.5); g.lineTo(x0, 4.5); }
+    else { g.moveTo(x1, -4.5); g.lineTo(x0 + 5, -4.5); g.lineTo(x0, 0); g.lineTo(x0 + 5, 4.5); g.lineTo(x1, 4.5); }
+    g.closePath(); g.fillStyle = col; g.fill(); g.lineWidth = 1; g.strokeStyle = shade(col, -.45); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,.18)'; g.fillRect(Math.min(x0, x1) + (dir > 0 ? 0 : 5), -4.5, tw + 1, 2);
+    const tx = (x0 + x1) / 2 + (dir > 0 ? -2 : 2);
+    g.lineWidth = 2.2; g.strokeStyle = 'rgba(0,0,0,.55)'; g.strokeText(s.label, tx, .5); g.fillStyle = '#fff4dc'; g.fillText(s.label, tx, .5);
+    g.fillStyle = '#3a2410'; circ(g, 0, 0, 1.3);
+    g.restore();
+  });
+  g.textBaseline = 'alphabetic';
 }
 function drawTent(g, x, y, w, h, c1, c2, soldier, k) {
   g.fillStyle = 'rgba(0,0,0,.22)'; g.beginPath(); g.moveTo(x + 6, y + h + 4); g.lineTo(x + w / 2 + 10, y + 2); g.lineTo(x + w + 8, y + h + 4); g.fill();
@@ -3995,6 +4033,7 @@ function renderWorld(t) {
     } else if (it.o) drawStruct(g, it.o, t);
     else drawEntity(g, it.e, t);
   }
+  signQueue.forEach(o => drawSignPlanks(g, o)); signQueue.length = 0;
   // projectiles
   g.strokeStyle = '#d8c8a0'; g.lineWidth = 2;
   for (const p of projs) { const a = Math.atan2(p.vy, p.vx) || p.a || 0; if (!p.stuck) p.a = a; const aa = p.stuck ? p.a : a; g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(p.x - Math.cos(aa) * 14, p.y - Math.sin(aa) * 14); g.stroke(); g.fillStyle = '#eee'; g.fillRect(p.x - Math.cos(aa) * 14 - 1, p.y - Math.sin(aa) * 14 - 1, 3, 3); }
@@ -4247,8 +4286,7 @@ const sT = b => clamp(Math.max(b, Math.ceil(P.lvl / 3)), 1, 4);
 const LS = () => 1 + (P.lvl - 1) * .07;
 function sScale(e, hp, dmg) { e.hp = e.maxHp = Math.round(hp * LS()); if (dmg) e.dmg = dmg * (1 + (P.lvl - 1) * .04); }
 function sSoon(fn) { const s = STORY; const go = () => { if (STORY !== s || G.state === 'menu') return; if (dialogOpen || G.state !== 'play' || UI.stack.length) { setTimeout(go, 400); return; } fn(); }; setTimeout(go, 350); }
-const DIRW = { E: 'east', SE: 'southeast', S: 'south', SW: 'southwest', W: 'west', NW: 'northwest', N: 'north', NE: 'northeast' };
-const dirW = (from, to) => DIRW[compass(to.x - from.x, to.y - from.y)];
+const dirW = dirTo;
 
 /* ---------------- Story places (resolved once per world, then cached) ---------------- */
 function sref(key, fn) { if (STORY.refs[key] == null) { const p = fn(); STORY.refs[key] = p ? p.id : 0; } return W.places[STORY.refs[key]]; }
