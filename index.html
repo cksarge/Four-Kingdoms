@@ -426,6 +426,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         </div>
       </div>
       <div class="credit">Progress saves to this browser</div>
+      <div class="credit hidden" id="soundHint">♪ Click anywhere or press any key to turn on music</div>
     </div>
   </div>
 
@@ -705,6 +706,7 @@ const SND = {
     if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
     const c = this.ctx = new AC();
+    c.onstatechange = soundHint;
     const master = c.createGain(); master.gain.value = 0.9; master.connect(c.destination);
     const comp = c.createDynamicsCompressor(); comp.connect(master);
     this.music = c.createGain(); this.sfx = c.createGain(); this.fx = c.createGain();
@@ -1906,7 +1908,7 @@ function damage(t, amt, src, o = {}) {
   if (settings.dmgNums) addText(t.x + rand(-8, 8), t.y - 26, Math.round(amt) + (o.crit ? '!' : ''), o.crit ? '#ffd24a' : '#fff4e0', o.crit ? 19 : 14);
   SND.play('hit', src === P ? 1 : .4);
   if (src) {
-    if (!t.civ) t.target = src;
+    if (!t.civ) { t.target = src; t.returning = false; }
     if (src === P) { if (!wasHostile) crime(t); if (t.place != null) alertPlace(t.place, P); }
     if (t.civ) { t.flee = 3; t.fleeFrom = src; }
   }
@@ -1996,6 +1998,15 @@ function think(e) {
     if (threat) { e.flee = 2; e.fleeFrom = threat; }
     return;
   }
+  // bandits, cultists and the Hollow give up once the player gets away, then walk home and ignore the player until they arrive
+  if (e.returning) {
+    if (e.target) e.returning = false; // struck or alerted on the way home
+    else if (dist(e.x, e.y, e.home.x, e.home.y) > 48 && G.time - e.retT < 25) return;
+    else { e.returning = false; if (!e.boss) e.hp = e.maxHp; }
+  }
+  if ((e.faction === 'bandit' || e.faction === 'hollow') && e.target && e.target.isPlayer && (G.state !== 'play' || dist(e.x, e.y, P.x, P.y) > Math.max(560, e.aggro * 1.4) || (!e.roam && dist(e.x, e.y, e.home.x, e.home.y) > e.leash * 1.5))) {
+    e.target = null; e.wind = 0; e.returning = true; e.retT = G.time; return;
+  }
   if (e.target && (e.target.dead || dist(e.x, e.y, e.target.x, e.target.y) > e.aggro * 2.2 || !hostile(e, e.target) || (e.target.isPlayer && G.state !== 'play'))) e.target = null;
   if (!e.target || Math.random() < .25) {
     const n = nearestHostile(e, e.target ? Math.min(e.aggro, dist(e.x, e.y, e.target.x, e.target.y) * .7) : e.aggro);
@@ -2028,6 +2039,8 @@ function updateActor(e, dt) {
     }
     if (e.wind > 0) { sm *= .2; e.wind -= dt; if (e.wind <= 0) { e.swing = .22; e.atkCd = e.cd * rand(.85, 1.25); enemyStrike(e, tg); } }
     if (!e.follow && !e.roam && dist(e.x, e.y, e.home.x, e.home.y) > e.leash * 1.7) { e.target = null; e.wind = 0; }
+  } else if (e.returning) {
+    gx = e.home.x; gy = e.home.y; sm = 1.15;
   } else if (e.follow) {
     const lead = e.followE && !e.followE.dead ? e.followE : P; const d = dist(e.x, e.y, lead.x, lead.y);
     if (lead === P && d > 900 && !e.caravan) { const f = findFree(P.x - Math.cos(P.face) * 120, P.y - Math.sin(P.face) * 120); e.x = f.x; e.y = f.y; }
@@ -5367,6 +5380,11 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 
+/* ---------------- Audio unlock ----------------
+   Browsers only allow sound after the player interacts with the page, so any click, tap or key press anywhere starts it. */
+function soundHint() { const on = SND.ctx && SND.ctx.state === 'running'; $('soundHint').classList.toggle('hidden', !!on); }
+['pointerdown', 'keydown', 'touchstart'].forEach(ev => addEventListener(ev, () => { if (!SND.ctx || SND.ctx.state !== 'running') { SND.init(); soundHint(); } }, true));
+
 /* ---------------- Boot ---------------- */
 (function boot() {
   resize();
@@ -5378,6 +5396,8 @@ function frame(now) {
     prepareWorld(seed); resetState();
     refreshMenu(); UI.show('mainMenu');
     $('loading').classList.add('done');
+    try { SND.init(); } catch (e) { } // plays right away if the browser allows it; otherwise on the first click or key press
+    soundHint();
     requestAnimationFrame(frame);
   }, 30);
 })();
