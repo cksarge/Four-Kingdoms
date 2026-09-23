@@ -4,7 +4,7 @@ A top-down medieval open-world RPG in a single HTML file. You play a poorly equi
 
 ## Play
 
-Open `four_kingdoms.html` in a modern browser. There is nothing to install and no server. Progress and settings save to your browser's local storage.
+Play online at **https://cksarge.github.io/Four-Kingdoms/**, or download `index.html` and open it in a modern browser. There is nothing to install and no server. Progress and settings save to your browser's local storage.
 
 ## Controls
 
