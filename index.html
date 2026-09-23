@@ -4077,8 +4077,11 @@ function updateHUD(force) {
   setIf('sh', S.hid + '|' + P.mounted + '|' + !!horseEnt, () => { const sl = $('slotH'); sl.querySelector('img').src = S.hid ? itemIcon(S.hid) : itemIcon('old_horse'); sl.querySelector('img').style.opacity = S.hid ? 1 : .3; sl.querySelector('.sn').textContent = S.horse ? S.horse.name : 'No Horse'; sl.querySelector('.ss').textContent = S.horse ? (P.mounted ? `Riding · ×${S.hspd} speed` : 'Dismounted · [F] to ride') : 'On foot'; sl.classList.toggle('mounted', P.mounted); });
   // quest tracker
   const qs = Q.active.slice().sort((a, b) => (b.id === Q.tracked) - (a.id === Q.tracked)).slice(0, 3);
-  const qh = qs.map(q => { const tg = questTarget(q); return `<div class="qt hudbox ${q.id === Q.tracked ? 'tracked' : ''}${q.type === 'story' && q.main ? ' story' : ''}"><div class="qn">${esc(q.title)}</div><div class="qo">${esc(questObjective(q))}</div>${tg ? `<div class="qd">${leagues(dist(P.x, P.y, tg.x, tg.y))} leagues ${compass(tg.x - P.x, tg.y - P.y)}</div>` : ''}</div>`; }).join('') + (Q.active.length > 3 ? `<div class="qd" style="padding-left:10px;color:var(--muted);font-style:italic;font-size:12px">+${Q.active.length - 3} more — press J</div>` : '');
-  setIf('qt', qh, v => $('questTracker').innerHTML = v);
+  const qd = q => { const tg = questTarget(q); return tg ? `${leagues(dist(P.x, P.y, tg.x, tg.y))} leagues ${compass(tg.x - P.x, tg.y - P.y)}` : ''; };
+  const qh = qs.map(q => `<div class="qt hudbox ${q.id === Q.tracked ? 'tracked' : ''}${q.type === 'story' && q.main ? ' story' : ''}"><div class="qn">${esc(q.title)}</div><div class="qo">${esc(questObjective(q))}</div><div class="qd"${qd(q) ? '' : ' hidden'}></div></div>`).join('') + (Q.active.length > 3 ? `<div class="qd" style="padding-left:10px;color:var(--muted);font-style:italic;font-size:12px">+${Q.active.length - 3} more — press J</div>` : '');
+  setIf('qt', qh, v => $('questTracker').innerHTML = v); // rebuilt only when quests or objectives change, so cards don't re-animate
+  const qdEls = $('questTracker').querySelectorAll('.qt .qd');
+  qs.forEach((q, i) => { const el = qdEls[i]; if (el) { const t = qd(q); if (el.textContent !== t) { el.textContent = t; el.hidden = !t; } } });
   // prompt
   let pr = '';
   if (G.state === 'play' && !paused()) {
