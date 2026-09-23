@@ -395,7 +395,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <span><kbd>WASD</kbd>Move</span><span><kbd>LMB</kbd>Attack</span>
         <span><kbd>RMB</kbd>Block</span><span><kbd>Space</kbd>Dodge</span>
         <span><kbd>E</kbd>Interact</span><span><kbd>F</kbd>Horse</span>
-        <span><kbd>Shift</kbd>+LMB Any</span><span><kbd>J</kbd>Quests</span>
+        <span><kbd>Shift</kbd>+Click Hit friendlies</span><span><kbd>Q</kbd>Sprint</span><span><kbd>J</kbd>Quests</span>
       </div>
       <div class="hudbtns">
         <button class="hbtn" data-open="inv" title="Inventory (I)">I · Pack</button>
@@ -580,8 +580,8 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div class="cols">
         <div><kbd>W A S D</kbd> Move</div><div><kbd>Mouse</kbd> Aim</div>
         <div><kbd>LMB</kbd> Attack (hold to chain)</div><div><kbd>RMB</kbd> Block with shield</div>
-        <div><kbd>Space</kbd> Dodge roll</div><div><kbd>E</kbd> Talk / loot / interact</div>
-        <div><kbd>F</kbd> Mount, dismount, call horse</div><div><kbd>Shift</kbd>+<kbd>LMB</kbd> Attack non-hostiles</div>
+        <div><kbd>Space</kbd> Dodge: time it just as a blow lands to take no damage</div><div><kbd>E</kbd> Talk / loot / interact</div>
+        <div><kbd>F</kbd> Mount, dismount, call horse</div><div><kbd>Q</kbd> Sprint (hold; drains stamina)</div><div><kbd>Shift</kbd>+<kbd>LMB</kbd> Hit friendly or neutral characters (villagers, guards, animals). Hurting people is a crime</div>
         <div><kbd>I</kbd> Inventory</div><div><kbd>M</kbd> Map</div>
         <div><kbd>K</kbd> Diplomacy (kingdoms)</div><div><kbd>J</kbd> Quest journal</div>
         <div><kbd>1</kbd>–<kbd>3</kbd> Eat food / drink potion</div><div><kbd>Esc</kbd> Pause / close</div>
@@ -760,6 +760,7 @@ const SND = {
       case 'howl': this.tone(420, 1.6, 'sine', .05, 'fx', 0, 1.35, .3); break;
       case 'fire': this.noise(.05, .06, 'fx', 2400, 3); break;
       case 'arrow': this.noise(.15, .15, 'sfx', 2500, 3, .4); break;
+      case 'perfect': this.noise(.18, .2, 'sfx', 2200, 1.5, 2.2); this.tone(1320, .25, 'triangle', .09, 'sfx', .03); this.tone(1980, .3, 'sine', .06, 'sfx', .07); break;
       // desert
       case 'wind': this.noise(2.4, .07, 'fx', 380, .6, 2.6); this.noise(1.8, .035, 'fx', 1400, 1.2, 1.6, 'bandpass', .5); break;
       case 'yip': [0, .13, .27, .36].forEach((w, i) => this.tone(rand(880, 1250), .11 + (i === 3 ? .25 : 0), 'sine', .045, 'fx', w, i === 3 ? .7 : 1.35)); break;
@@ -1759,12 +1760,14 @@ function toggleMount() {
   if (d < 70) mount();
   else { if (d > 1400) { const f = findFree(P.x - Math.cos(P.face) * 500, P.y - Math.sin(P.face) * 500); horseEnt.x = f.x; horseEnt.y = f.y; } horseEnt.called = true; toast('You whistle for your horse.'); SND.play('hoof'); }
 }
+// Dodging is about timing: a hit in the first 0.2s of the sidestep is avoided entirely, a later one is only softened.
+const DODGE_T = .35, DODGE_PERFECT = .2;
 function tryDodge() {
   const cost = G.time - (P.lastDodge ?? -9) < 1.5 ? 42 : 28; // rolling again right away costs extra
   if (P.dodge > 0 || P.st < cost || G.state !== 'play') return;
   let mx = (input.keys.KeyD ? 1 : 0) - (input.keys.KeyA ? 1 : 0), my = (input.keys.KeyS ? 1 : 0) - (input.keys.KeyW ? 1 : 0);
   if (!mx && !my) { mx = Math.cos(P.face); my = Math.sin(P.face); }
-  const l = Math.hypot(mx, my); P.dodgeX = mx / l; P.dodgeY = my / l; P.dodge = .28; P.iframes = .32; P.st -= cost; P.stDelay = 1.1; P.lastDodge = G.time; P.blocking = false;
+  const l = Math.hypot(mx, my); P.dodgeX = mx / l; P.dodgeY = my / l; P.dodge = DODGE_T; P.st -= cost; P.stDelay = 1.1; P.lastDodge = G.time; P.blocking = false;
   SND.play('dodge'); for (let i = 0; i < 6; i++) addPart(P.x, P.y + 8, rand(-40, 40), rand(-30, 0), '#b8a888', .4, 3);
 }
 function startAttack() {
@@ -1795,14 +1798,18 @@ function updatePlayer(dt) {
   if (countItem('supplies')) spd *= .9;
   P.blocking = input.rmb && P.S.block > 0 && !P.mounted && P.st > 1 && P.dodge <= 0 && P.swing <= 0;
   if (P.blocking) spd *= .45;
+  if (!input.keys.KeyQ) P.winded = false; else if (P.st <= 0) P.winded = true;
+  P.sprinting = !!input.keys.KeyQ && ml > 0 && !P.winded && !P.blocking && P.dodge <= 0 && P.swing <= 0 && P.st > 0 && (P.st > 20 || P.sprinting);
+  if (P.sprinting) spd *= P.mounted ? 1.2 : 1.35;
   if (P.swing > 0) spd *= P.mounted ? .9 : .65;
   let vx = mx * spd, vy = my * spd;
-  if (P.dodge > 0) { P.dodge -= dt; const ds = P.mounted ? 330 : 430; vx = P.dodgeX * ds; vy = P.dodgeY * ds; }
+  if (P.dodge > 0) { P.dodge -= dt; const ds = P.mounted ? 150 : 110; vx = P.dodgeX * ds; vy = P.dodgeY * ds; }
   if (P.kbx || P.kby) { vx += P.kbx; vy += P.kby; P.kbx *= Math.pow(.002, dt); P.kby *= Math.pow(.002, dt); if (Math.abs(P.kbx) + Math.abs(P.kby) < 4) P.kbx = P.kby = 0; }
   const ox = P.x, oy = P.y; moveEnt(P, vx * dt, vy * dt);
   const moved = Math.hypot(P.x - ox, P.y - oy);
   if (moved > .1) { P.walk += moved * .09; if (P.mounted) P.hface = turnToward(P.hface, Math.atan2(P.y - oy, P.x - ox), dt * 7); }
   P.stepT -= moved; if (P.stepT < 0) { P.stepT = P.mounted ? 38 : 44; SND.play(P.mounted ? 'hoof' : 'step', P.mounted ? .8 : 1); }
+  if (P.sprinting) { P.st = Math.max(0, P.st - 16 * dt); P.stDelay = .5; }
   if (P.stDelay > 0) P.stDelay -= dt; else P.st = Math.min(P.maxSt, P.st + (P.blocking ? 6 : P.mounted ? 30 : 26) * dt);
   if ((input.lmb || input.clicked) && P.atkCd <= 0 && P.dodge <= 0 && P.st >= P.S.cost * .5) startAttack();
   input.clicked = false;
@@ -1895,6 +1902,17 @@ function damage(t, amt, src, o = {}) {
     if (P.iframes > 0 || G.state !== 'play') return 0;
     let a = amt;
     P.combatT = 6;
+    if (P.dodge > 0) {
+      const into = DODGE_T - P.dodge;
+      if (into < DODGE_PERFECT) {
+        P.st = Math.min(P.maxSt, P.st + 8); SND.play('perfect');
+        addText(P.x, P.y - 34, 'Perfect dodge!', '#ffe08a', 13);
+        for (let i = 0; i < 8; i++) addPart(P.x, P.y, rand(-90, 90), rand(-90, 40), '#fff4c0', .35, 2.5);
+        return 0;
+      }
+      a *= .2 + .5 * (into - DODGE_PERFECT) / (DODGE_T - DODGE_PERFECT);
+      if (settings.dmgNums) addText(P.x, P.y - 34, 'Grazed', '#d8d0b8', 12);
+    }
     if (P.blocking && src) {
       const ang = Math.atan2(src.y - P.y, src.x - P.x);
       if (Math.abs(angDiff(P.face, ang)) < 1.3) {
@@ -4230,6 +4248,7 @@ function updateHUD(force) {
   if (G.state === 'play' && !paused()) {
     const b = findInteract(); if (b) pr = `<kbd>E</kbd> ${interactLabel(b)}`;
     if (!P.mounted && horseEnt && dist(P.x, P.y, horseEnt.x, horseEnt.y) < 70) pr += (pr ? ' &nbsp; ' : '') + '<kbd>F</kbd> Mount horse';
+    if (input.shift) pr = '<span style="color:#ff9a7a">⚠ Holding Shift: your attacks will hit friendly and neutral characters</span>' + (pr ? ' &nbsp; ' + pr : '');
   }
   setIf('pr', pr, v => { $('prompt').innerHTML = v; $('prompt').classList.toggle('show', !!v); });
 }
