@@ -1760,10 +1760,11 @@ function toggleMount() {
   else { if (d > 1400) { const f = findFree(P.x - Math.cos(P.face) * 500, P.y - Math.sin(P.face) * 500); horseEnt.x = f.x; horseEnt.y = f.y; } horseEnt.called = true; toast('You whistle for your horse.'); SND.play('hoof'); }
 }
 function tryDodge() {
-  if (P.dodge > 0 || P.st < 18 || G.state !== 'play') return;
+  const cost = G.time - (P.lastDodge ?? -9) < 1.5 ? 42 : 28; // rolling again right away costs extra
+  if (P.dodge > 0 || P.st < cost || G.state !== 'play') return;
   let mx = (input.keys.KeyD ? 1 : 0) - (input.keys.KeyA ? 1 : 0), my = (input.keys.KeyS ? 1 : 0) - (input.keys.KeyW ? 1 : 0);
   if (!mx && !my) { mx = Math.cos(P.face); my = Math.sin(P.face); }
-  const l = Math.hypot(mx, my); P.dodgeX = mx / l; P.dodgeY = my / l; P.dodge = .28; P.iframes = .32; P.st -= 18; P.stDelay = .6; P.blocking = false;
+  const l = Math.hypot(mx, my); P.dodgeX = mx / l; P.dodgeY = my / l; P.dodge = .28; P.iframes = .32; P.st -= cost; P.stDelay = 1.1; P.lastDodge = G.time; P.blocking = false;
   SND.play('dodge'); for (let i = 0; i < 6; i++) addPart(P.x, P.y + 8, rand(-40, 40), rand(-30, 0), '#b8a888', .4, 3);
 }
 function startAttack() {
