@@ -52,6 +52,12 @@ b,strong{font-weight:600}
 .qt .qn{font-family:var(--fh);font-size:11.5px;color:var(--gold-l);font-weight:700;letter-spacing:.04em}
 .qt .qo{font-size:13px;color:var(--ink);line-height:1.2}
 .qt .qd{font-size:11px;color:var(--muted);font-style:italic}
+.qt.story{border-left-color:#e8a23a}
+.qt.story .qn::before{content:'✦ ';color:#ffcf4a}
+#bossBar{position:absolute;left:50%;bottom:112px;transform:translateX(-50%);width:min(460px,64vw);text-align:center;pointer-events:none}
+#bossBar .bbN{font-family:var(--fh);font-weight:700;color:#ffd0c0;letter-spacing:.12em;font-size:13px;text-shadow:0 1px 3px #000,0 0 10px #000}
+#bossBar .bbT{height:10px;border:1px solid #8a3a2a;background:rgba(0,0,0,.65);border-radius:3px;overflow:hidden;margin-top:3px}
+#bossBar .bbF{height:100%;background:linear-gradient(180deg,#e0503a,#8a1a12);transform-origin:left;transition:transform .15s}
 #hudTR{position:absolute;right:12px;top:12px;display:flex;flex-direction:column;align-items:flex-end;gap:7px}
 .hudrow{display:flex;gap:7px}
 .goldbox{display:flex;align-items:center;gap:7px;padding:5px 12px;font-family:var(--fh);font-weight:700;font-size:17px;color:var(--gold-l)}
@@ -325,6 +331,28 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .help .cols{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px}
 .help p{margin:6px 0}
 .confirmBox{margin-top:14px;padding:12px;border:1px solid #9a4a3a;border-radius:6px;background:rgba(80,20,10,.25);text-align:center}
+#modeScreen .panel,#contScreen .panel{width:min(420px,calc(94vw/var(--ui-scale)))}
+.modeBox{margin:6px auto 0;display:flex;flex-direction:column;gap:10px}
+.modeCard .mcS{font-size:12.5px;color:var(--muted);font-style:italic;margin-top:5px}
+.modeCard{text-align:left;cursor:pointer;padding:11px 14px;border:1px solid #9a7536;border-radius:6px;background:linear-gradient(180deg,rgba(92,65,40,.55),rgba(40,28,17,.7));transition:transform .12s,border-color .15s,background .15s}
+.modeCard:hover{transform:translateY(-1px);border-color:var(--gold-l);background:linear-gradient(180deg,rgba(130,94,50,.6),rgba(50,35,20,.75))}
+.modeCard .mcT{font-family:var(--fh);font-weight:900;letter-spacing:.12em;color:var(--gold-l);font-size:14px}
+.modeCard .mcD{font-size:14px;color:var(--ink2);line-height:1.3;margin-top:3px}
+.modeCard.story .mcT::before{content:'✦ ';color:#ffcf4a}
+#endScreen{background:radial-gradient(ellipse at center,rgba(40,26,8,.55),rgba(0,0,0,.93))}
+#endScreen .panel{width:min(760px,calc(94vw/var(--ui-scale)));max-height:calc(92vh/var(--ui-scale));overflow-y:auto;overflow-x:hidden;text-align:center}
+.endKicker{font-family:var(--fh);font-weight:900;letter-spacing:.5em;color:var(--gold);font-size:15px;margin-bottom:6px}
+#endTitle{font-size:32px}
+.endBody{text-align:left;font-size:16.5px;line-height:1.5;color:var(--ink)}
+.endBody p{margin:0 0 10px}
+.endBody h4{font-family:var(--fh);color:var(--gold);font-size:12px;letter-spacing:.14em;margin:16px 0 6px}
+.endBody ul{margin:0;padding-left:20px;color:var(--ink2);font-size:14.5px;line-height:1.4}
+.endStats{margin:14px 0 6px;color:var(--muted);font-style:italic;font-size:14px}
+.endPips{display:flex;gap:5px;justify-content:center;align-items:center;flex-wrap:wrap;margin:4px 0 14px}
+.endPips span{width:12px;height:12px;border-radius:50%;border:1px solid #9a7536;background:rgba(0,0,0,.3)}
+.endPips span.on{background:radial-gradient(circle,#ffe08a,#c8902a);box-shadow:0 0 6px rgba(255,200,90,.6)}
+.endPips em{margin-left:8px;font-size:13px;color:var(--ink2)}
+.endBtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 
 @keyframes toastIn{from{opacity:0;transform:translateY(-14px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes slideIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
@@ -377,6 +405,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <button class="hbtn" data-open="pause" title="Menu (Esc)">Esc</button>
       </div>
     </div>
+    <div id="bossBar" class="hidden"><div class="bbN" id="bbN"></div><div class="bbT"><div class="bbF" id="bbF"></div></div></div>
     <div id="prompt" class="hudbox"></div>
     <div id="toasts"></div>
     <div id="areaTitle"><div class="at1" id="at1"></div><div class="atl"></div><div class="at2" id="at2"></div></div>
@@ -395,12 +424,35 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
           <button class="btn" id="btnMenuSettings">Settings</button>
           <button class="btn" id="btnHow">How to Play</button>
         </div>
-        <div id="newConfirm" class="confirmBox hidden">
-          <div style="margin-bottom:8px">Starting anew forges a fresh realm. Your existing save stays until you save again.</div>
-          <button class="btn gold sm" id="btnNewYes">Begin Anew</button> <button class="btn sm" id="btnNewNo">Cancel</button>
-        </div>
       </div>
-      <div class="credit">Single-file edition · Progress saves to this browser</div>
+      <div class="credit">Progress saves to this browser</div>
+    </div>
+  </div>
+
+  <!-- NEW GAME -->
+  <div id="modeScreen" class="screen">
+    <div class="panel rv">
+      <div class="closeX" data-close>✕</div>
+      <div class="ptitle" style="font-size:26px">NEW GAME</div>
+      <div class="orn">✦</div>
+      <div id="modePick" class="modeBox">
+        <div class="modeCard story" data-mode="story"><div class="mcT">STORY MODE</div><div class="mcD">Follow a hedge knight's tale across the four kingdoms. Your choices shape the realm and decide one of many endings.</div></div>
+        <div class="modeCard" data-mode="sandbox"><div class="mcT">SANDBOX</div><div class="mcD">The open realm with no story. Explore, fight, trade and meddle in diplomacy for as long as you like.</div></div>
+      </div>
+      <div id="newConfirm" class="confirmBox hidden">
+        <div style="margin-bottom:10px" id="newConfirmText"></div>
+        <button class="btn gold sm" id="btnNewYes">Begin Anew</button> <button class="btn sm" id="btnNewNo">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTINUE -->
+  <div id="contScreen" class="screen">
+    <div class="panel rv">
+      <div class="closeX" data-close>✕</div>
+      <div class="ptitle" style="font-size:26px">CONTINUE</div>
+      <div class="orn">✦</div>
+      <div id="contList" class="modeBox"></div>
     </div>
   </div>
 
@@ -565,6 +617,19 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
     </div>
   </div>
 
+  <!-- THE END (story mode) -->
+  <div id="endScreen" class="screen">
+    <div class="panel rv">
+      <div class="endKicker">THE END</div>
+      <div class="ptitle" id="endTitle"></div>
+      <div class="orn">✦</div>
+      <div class="endBody" id="endBody"></div>
+      <div class="endStats" id="endStats"></div>
+      <div class="endPips" id="endPips"></div>
+      <div class="endBtns"><button class="btn gold" id="btnEndSandbox">Continue in Sandbox</button><button class="btn" id="btnEndMenu">Main Menu</button></div>
+    </div>
+  </div>
+
   <div id="dialog"><div class="panel rv"><div class="dPortrait"><canvas id="dPort" width="128" height="128"></canvas></div><div style="flex:1"><div class="dName" id="dName"></div><div class="dRole" id="dRole"></div><div class="dText" id="dText"></div><div class="dOpts" id="dOpts"></div></div></div></div>
   <div id="tooltip"></div>
 </div>
@@ -693,41 +758,314 @@ const SND = {
       case 'howl': this.tone(420, 1.6, 'sine', .05, 'fx', 0, 1.35, .3); break;
       case 'fire': this.noise(.05, .06, 'fx', 2400, 3); break;
       case 'arrow': this.noise(.15, .15, 'sfx', 2500, 3, .4); break;
+      // story mode
+      case 'mainquest': [392, 523, 659, 784].forEach((f, i) => this.tone(f, .7, 'triangle', .13, 'sfx', i * .11)); this.tone(196, 1.3, 'sine', .1, 'sfx'); break;
+      case 'story': this.tone(784, .3, 'sine', .1); this.tone(1175, .45, 'sine', .08, 'sfx', .08); break;
+      case 'narrate': this.noise(.22, .12, 'sfx', 3000, .8, .5); this.noise(.1, .07, 'sfx', 1500, 1, 1, 'bandpass', .12); break;
+      case 'hollow': this.tone(220, 1.5, 'sine', .08, 'fx', 0, .7, .3); this.tone(233, 1.5, 'sine', .05, 'fx', .1, .72, .3); this.noise(1.3, .05, 'fx', 600, 4, .5); break;
+      case 'boss': this.noise(1.2, .5, 'sfx', 120, .7, .4, 'lowpass'); this.tone(55, 1.5, 'sine', .35, 'sfx', 0, .6); [146.83, 174.61, 220].forEach(f => this.tone(f, 1.8, 'sawtooth', .035, 'fx', .05, 1, .35)); break;
+      case 'seal': this.noise(.25, .5, 'sfx', 2500, 1, .3); this.noise(2.2, .45, 'sfx', 90, .6, .5, 'lowpass', .1); this.tone(45, 2.2, 'sine', .3, 'sfx', .1, .7); break;
+      case 'duel': [392, 392, 523, 659].forEach((f, i) => this.tone(f, i === 3 ? .6 : .16, 'sawtooth', .07, 'fx', i * .14, 1, .02)); break;
+      case 'crowd': this.noise(1.6, .18, 'fx', 1200, .5, 1.2); this.noise(1.2, .12, 'fx', 2500, .8, .8, 'bandpass', .1); break;
+      case 'yield': this.tone(523, .3, 'triangle', .1); this.tone(392, .55, 'triangle', .08, 'sfx', .15); break;
+      case 'shard': [784, 988, 1175, 1568, 1976].forEach((f, i) => this.tone(f, 1.3, 'sine', .07, 'sfx', i * .06)); this.noise(.9, .05, 'sfx', 6000, 2, 1.5, 'highpass'); break;
+      case 'bones': [0, .05, .11, .16].forEach(w => this.noise(.05, .22, 'sfx', rand(2500, 4000), 4, 1, 'bandpass', w)); this.tone(180, .2, 'square', .04, 'sfx', 0, .5); break;
+      case 'ending': [196, 247, 294, 392, 494].forEach((f, i) => this.tone(f, 2.6, 'triangle', .08, 'sfx', i * .05)); break;
     }
   },
+  /* ----- music: procedural songs chosen by what the player is doing ----- */
   startMusic() {
-    const c = this.ctx; if (!c) return;
-    // drone
-    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 520; lp.connect(this.music);
-    const dg = c.createGain(); dg.gain.value = .22; dg.connect(lp);
-    [73.42, 110, 146.83].forEach((f, i) => { const o = c.createOscillator(); o.type = i === 1 ? 'triangle' : 'sine'; o.frequency.value = f; o.detune.value = rand(-6, 6); o.connect(dg); o.start(); });
-    const lfo = c.createOscillator(), lg = c.createGain(); lfo.frequency.value = .07; lg.gain.value = .12; lfo.connect(lg); lg.connect(dg.gain); lfo.start();
-    this.nextT = c.currentTime + .5;
-    this.timer = setInterval(() => this.schedule(), 120);
+    if (this.mtimer) return;
+    Object.assign(this, { songs: [], curId: null, pend: null, pendT: 0, owId: null, owT: 0, awayT: 0, combatT: 0, combatId: 'combat1', combatKind: 'combat1', narr: false, lastTick: performance.now() / 1000 });
+    this.mtimer = setInterval(() => { try { this.musicTick(); } catch (e) { } this.scheduleSongs(); }, 100);
   },
-  schedule() {
-    const c = this.ctx; if (!c || c.state !== 'running') return;
-    const chords = [[0, 3, 7, 10], [-2, 2, 5, 9], [-5, -2, 2, 5], [0, 3, 7, 12], [-4, 0, 3, 7], [-2, 2, 5, 10]];
-    const base = 293.66; const night = typeof isNight === 'function' && isNight();
-    const tempo = night ? .62 : .48;
-    while (this.nextT < c.currentTime + .4) {
-      const b = this.beat++; if (b % 16 === 0) this.chord = (this.chord + 1 + (Math.random() < .3 ? 1 : 0)) % chords.length;
-      const ch = chords[this.chord];
-      if (b % 8 === 0) ch.forEach((s, i) => this.pluck(base / 2 * Math.pow(2, s / 12), this.nextT + i * .03, .07, 2.4));
-      if (Math.random() < (night ? .35 : .58)) {
-        const s = pick(ch) + (Math.random() < .5 ? 12 : 0);
-        this.pluck(base * Math.pow(2, s / 12), this.nextT, .09, 1.1);
-      }
-      this.nextT += tempo;
+  musicTick() {
+    const now = performance.now() / 1000, dt = Math.min(.5, now - this.lastTick); this.lastTick = now;
+    if (!this.ctx || this.ctx.state !== 'running') return;
+    if (!OW_SONGS.includes(this.curId)) this.awayT += dt;
+    const want = this.pickMusic(dt);
+    if (want !== this.pend) { this.pend = want; this.pendT = 0; } else this.pendT += dt;
+    if (want !== this.curId && this.pendT >= (URGENT_SONGS.includes(want) ? .2 : 1.2)) this.switchTo(want);
+  },
+  pickMusic(dt) {
+    if (G.state === 'menu' || !P || !W) return 'menu';
+    if (G.state === 'ending') return STORY && END_DARK.includes(STORY.ending) ? 'end_dark' : 'end_good';
+    if (G.state === 'dead') return 'fallen';
+    if (dialogOpen && this.narr) return 'chronicle';
+    let boss = null, bd = 820, foes = 0, hol = 0, cir = 0;
+    for (const e of ents) {
+      if (e.dead || !playerHostileTo(e)) continue; const d = dist(P.x, P.y, e.x, e.y);
+      if ((e.boss || (e.kind === 'leader' && e.target === P)) && d < bd) { bd = d; boss = e; }
+      if (d < 560 && (e.target === P || e.aggroPlayer)) { foes++; if (e.faction === 'hollow') hol++; if (e.kind === 'cultist' || e.kind === 'assassin') cir++; }
     }
+    if (boss) {
+      if (boss.kind === 'hollow_king') return 'hollowking';
+      if (boss.kind === 'champion') return STORY && Q.active.some(q => q.sid === 'r2') ? 'tourney' : 'duel';
+      if (/Wren/.test(boss.name)) return 'greymother';
+      return 'boss';
+    }
+    if (STORY && Q.active.some(q => q.sid === 'fin' && q.sp)) return 'last_stand';
+    if (foes) { if (this.combatT <= 0) this.combatId = this.combatId === 'combat1' ? 'combat2' : 'combat1'; this.combatT = 8; this.combatKind = hol ? 'hollow_fight' : cir ? 'circle_fight' : this.combatId; }
+    else this.combatT -= dt;
+    if (this.combatT > 0) return this.combatKind;
+    let best = null, br = 1;
+    for (const p of W.places) { const R = PLACE_R[p.type] * TS, d = dist(P.x, P.y, p.x, p.y); if (d < R && d / R < br) { br = d / R; best = p; } }
+    if (best) switch (best.type) {
+      case 'castle': return 'castle_' + best.owner;
+      case 'village': return 'town_' + best.owner;
+      case 'outpost': return 'fort_' + best.owner;
+      case 'camp': if (!best.cleared) return 'camp'; break;
+      case 'ruin': return STORY && STORY.path && best.id === STORY.refs.barrow ? 'barrow' : 'ruins';
+      case 'hidden': return ['grove', 'shrine', 'chapel'].includes(HIDDEN_DEFS[best.def].kind) ? 'sacred' : 'ruins';
+    }
+    return this.overworld(dt);
   },
-  pluck(f, t, vol, dur) {
+  overworld(dt) {
+    const night = isNight(), ok = id => SONGS[id].tod === 'both' || SONGS[id].tod === (night ? 'night' : 'day');
+    if (this.curId === this.owId) { this.owT += dt; this.awayT = 0; }
+    if (!this.owId || !ok(this.owId) || this.owT > (SONGS[this.owId].len || 170) || this.awayT > 60) {
+      this.owId = pick(OW_SONGS.filter(id => ok(id) && id !== this.owId)); this.owT = 0; this.awayT = 0;
+    }
+    return this.owId;
+  },
+  switchTo(id) {
+    const def = SONGS[id]; if (!def || !this.ctx) return;
+    const c = this.ctx, fade = URGENT_SONGS.includes(id) && id !== 'menu' ? 1.2 : 2.5;
+    this.songs.forEach(s => { if (s.alive) this.stopSong(s, fade); });
+    const g = c.createGain(); g.gain.setValueAtTime(.0001, c.currentTime); g.gain.exponentialRampToValueAtTime(def.vol || (def.legacy ? 1 : 2.8), c.currentTime + fade); g.connect(this.music);
+    const s = { id, def, g, step: 0, t: c.currentTime + .05, alive: true, drones: [], st: { beat: 0, chord: 0 } };
+    if (def.lead) s.mel = genMelody(def, def.lead, def.seed);
+    if (def.counter) s.cnt = genMelody(def, Object.assign({ o: 0, range: [0, 6] }, def.counter), def.seed + 99);
+    this.startDrone(s);
+    this.songs.push(s); this.curId = id;
+  },
+  stopSong(s, fade) {
+    const c = this.ctx, now = c.currentTime; s.alive = false; s.end = now + fade + .3;
+    s.g.gain.cancelScheduledValues(now); s.g.gain.setValueAtTime(Math.max(.0001, s.g.gain.value), now); s.g.gain.exponentialRampToValueAtTime(.0001, now + fade);
+    s.drones.forEach(o => { try { o.stop(now + fade + .1); } catch (e) { } });
+    setTimeout(() => { try { s.g.disconnect(); } catch (e) { } }, (fade + 1) * 1000);
+  },
+  scheduleSongs() {
+    const c = this.ctx; if (!c || c.state !== 'running' || !this.songs) return;
+    const ahead = c.currentTime + .35;
+    for (const s of this.songs) {
+      if (!s.alive) continue;
+      if (s.t < c.currentTime - .1) s.t = c.currentTime + .02;
+      while (s.t < ahead) { if (s.def.legacy) this.legacyStep(s); else this.songStep(s); }
+    }
+    this.songs = this.songs.filter(s => s.alive || c.currentTime < s.end);
+  },
+  songStep(s) {
+    const d = s.def, bar = d.bar || 8, nb = d.prog.length, step = s.step++, si = step % bar, bi = Math.floor(step / bar) % nb, loop = Math.floor(step / (bar * nb));
+    const form = d.form || ['intro', 'full', 'high', 'break'], sec = form[loop % form.length];
+    const base = 60 / d.bpm / (d.sub || 2); let dur = base; if (d.swing) dur *= si % 2 ? 1 - d.swing : 1 + d.swing;
+    const T = s.t; s.t += dur;
+    const ch = chordOf(d, bi), F = semi => HZ(d.root + semi), dst = s.g;
+    if (d.pad && si === 0) this.pad(d.pad.i || 'strings', ch.slice(0, 3).map(x => F(x + (d.pad.o || 0))), T, bar * base * 1.02, d.pad.v ?? .04, dst);
+    if (d.arp) { const c = patAt(d.arp.p, si); if (c != null) this.voice(d.arp.i || 'pluck', F(ctone(ch, c) + (d.arp.o || 0)), T, (d.arp.d || 2) * base, d.arp.v ?? .07, dst); }
+    if (d.bass && sec !== 'break' && (sec !== 'intro' || d.bass.intro !== false)) { const c = patAt(d.bass.p, si); if (c != null) this.voice(d.bass.i || 'bass', F(ctone(ch, c) + (d.bass.o ?? -12)), T, (d.bass.d || 2) * base, d.bass.v ?? .13, dst); }
+    if (d.drums && sec !== 'break' && (sec !== 'intro' || d.drums.intro)) for (const k of 'kshtbm') { const p = d.drums[k]; if (p && p[si % p.length] === 'x') this.drum(k, T, d.drums.v || 1, dst); }
+    if (s.mel && sec !== 'intro') {
+      const alt = (sec === 'high' || sec === 'break') ? d.lead.alt : null, n = s.mel[bi][si];
+      if (n) this.voice(alt ? alt.i : d.lead.i, F(n.p + (alt && alt.o || 0)), T, n.d * base, (d.lead.v ?? .14) * (sec === 'break' ? .75 : 1) * (alt && alt.v || 1), dst);
+    }
+    if (s.cnt && sec === 'high') { const n = s.cnt[bi][si]; if (n) this.voice(d.counter.i || 'harp', F(n.p), T, n.d * base, d.counter.v ?? .07, dst); }
+  },
+  startDrone(s) {
+    const d = s.def, c = this.ctx;
+    if (d.legacy) { // the original Four Kingdoms theme, kept exactly as it was
+      const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 520; lp.connect(s.g);
+      const dg = c.createGain(); dg.gain.value = .22; dg.connect(lp);
+      [73.42, 110, 146.83].forEach((f, i) => { const o = c.createOscillator(); o.type = i === 1 ? 'triangle' : 'sine'; o.frequency.value = f; o.detune.value = rand(-6, 6); o.connect(dg); o.start(); s.drones.push(o); });
+      const lfo = c.createOscillator(), lg = c.createGain(); lfo.frequency.value = .07; lg.gain.value = .12; lfo.connect(lg); lg.connect(dg.gain); lfo.start(); s.drones.push(lfo);
+      return;
+    }
+    if (!d.drone) return;
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = d.drone.lp || 480;
+    const dg = c.createGain(); dg.gain.value = d.drone.v || .05; lp.connect(dg); dg.connect(s.g);
+    d.drone.n.forEach(n => { const o = c.createOscillator(); o.type = d.drone.t || 'sawtooth'; o.frequency.value = HZ(d.root + n + (d.drone.o ?? -12)); o.detune.value = rand(-5, 5); o.connect(lp); o.start(); s.drones.push(o); });
+    const lfo = c.createOscillator(), lg = c.createGain(); lfo.frequency.value = .08; lg.gain.value = (d.drone.v || .05) * .45; lfo.connect(lg); lg.connect(dg.gain); lfo.start(); s.drones.push(lfo);
+  },
+  legacyStep(s) {
+    const chords = [[0, 3, 7, 10], [-2, 2, 5, 9], [-5, -2, 2, 5], [0, 3, 7, 12], [-4, 0, 3, 7], [-2, 2, 5, 10]];
+    const base = 293.66, night = isNight(), tempo = night ? .62 : .48, T = s.t;
+    const b = s.st.beat++; if (b % 16 === 0) s.st.chord = (s.st.chord + 1 + (Math.random() < .3 ? 1 : 0)) % chords.length;
+    const ch = chords[s.st.chord];
+    if (b % 8 === 0) ch.forEach((x, i) => this.pluck(base / 2 * Math.pow(2, x / 12), T + i * .03, .07, 2.4, s.g));
+    if (Math.random() < (night ? .35 : .58)) { const x = pick(ch) + (Math.random() < .5 ? 12 : 0); this.pluck(base * Math.pow(2, x / 12), T, .09, 1.1, s.g); }
+    s.t += tempo;
+  },
+  pluck(f, t, vol, dur, dst) {
     const c = this.ctx, o = c.createOscillator(), g = c.createGain(), fl = c.createBiquadFilter();
     o.type = 'triangle'; o.frequency.value = f; fl.type = 'lowpass'; fl.frequency.setValueAtTime(f * 5, t); fl.frequency.exponentialRampToValueAtTime(f * 1.2, t + dur);
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(fl); fl.connect(g); g.connect(this.music); o.start(t); o.stop(t + dur + .1);
+    o.connect(fl); fl.connect(g); g.connect(dst || this.music); o.start(t); o.stop(t + dur + .1);
+  },
+  /* ----- instruments ----- */
+  osc(type, f, t, end, dst, detune = 0) { const o = this.ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, t); if (detune) o.detune.value = detune; o.connect(dst); o.start(t); o.stop(end); return o; },
+  envG(t, a, v, hold, rel, dst) {
+    const g = this.ctx.createGain(), pk = Math.max(.0002, v); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(pk, t + a);
+    if (hold > 0) g.gain.setValueAtTime(pk, t + a + hold); g.gain.exponentialRampToValueAtTime(.0001, t + a + Math.max(0, hold) + rel); g.connect(dst); return g;
+  },
+  vib(o, t, f, depth, end, rate = 5.2) { const l = this.ctx.createOscillator(), lg = this.ctx.createGain(); l.frequency.value = rate; lg.gain.setValueAtTime(0, t); lg.gain.linearRampToValueAtTime(f * depth, t + .35); l.connect(lg); lg.connect(o.frequency); l.start(t); l.stop(end); },
+  noiseSrc(t, dur) { const s = this.ctx.createBufferSource(); s.buffer = this.noiseBuf; s.start(t, Math.random() * .5); s.stop(t + dur + .05); return s; },
+  noiseHit(t, dur, v, type, freq, q, dst) { const s = this.noiseSrc(t, dur), f = this.ctx.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q; const g = this.envG(t, .002, v, 0, dur, dst); s.connect(f); f.connect(g); },
+  voice(inst, f, t, dur, v, dst) {
+    const c = this.ctx;
+    switch (inst) {
+      case 'pluck': case 'lute': case 'harpsi': case 'bassP': {
+        const dec = { pluck: Math.max(.6, dur * 1.4), lute: 1.3, harpsi: .7, bassP: Math.max(.3, dur * 1.1) }[inst];
+        const fl = c.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.setValueAtTime(Math.min(15000, f * { pluck: 5, lute: 4, harpsi: 9, bassP: 3 }[inst]), t); fl.frequency.exponentialRampToValueAtTime(f * 1.1, t + dec);
+        const g = this.envG(t, .005, v * ({ harpsi: .5, lute: .7 }[inst] || 1), 0, dec, dst); fl.connect(g);
+        this.osc(inst === 'pluck' ? 'triangle' : inst === 'harpsi' ? 'square' : 'sawtooth', f, t, t + dec + .05, fl);
+        if (inst === 'lute') this.osc('triangle', f * 2, t, t + dec, fl, 4);
+        break;
+      }
+      case 'harp': { const g = this.envG(t, .004, v, 0, 2.2, dst); this.osc('triangle', f, t, t + 2.3, g); this.osc('sine', f * 2, t, t + 1.4, this.envG(t, .004, v * .35, 0, 1.3, dst)); break; }
+      case 'bell': [[1, 1, 2.8], [2.76, .35, 1.6], [5.4, .15, .9]].forEach(([m, a, dd]) => this.osc('sine', f * m, t, t + dd + .05, this.envG(t, .003, v * a, 0, dd, dst))); break;
+      case 'flute': case 'recorder': {
+        const hold = Math.max(.05, dur - .08), end = t + hold + .35, g = this.envG(t, inst === 'flute' ? .06 : .03, v, hold, .14, dst);
+        this.vib(this.osc(inst === 'flute' ? 'sine' : 'triangle', f, t, end, g), t, f, .006, end);
+        if (inst === 'flute') { const n = this.noiseSrc(t, hold + .2), nf = c.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = f * 2; nf.Q.value = 2; n.connect(nf); nf.connect(this.envG(t, .05, v * .1, hold, .1, dst)); }
+        break;
+      }
+      case 'fiddle': case 'strings': {
+        const hold = Math.max(.05, dur - .1), end = t + hold + .5, fl = c.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = f * (inst === 'fiddle' ? 5 : 3.5);
+        fl.connect(this.envG(t, inst === 'fiddle' ? .04 : .1, v * .5, hold, .25, dst));
+        [-7, 7].forEach(dt => this.vib(this.osc('sawtooth', f, t, end, fl, dt), t, f, .005, end));
+        break;
+      }
+      case 'brass': {
+        const hold = Math.max(.05, dur - .08), end = t + hold + .3, fl = c.createBiquadFilter(); fl.type = 'lowpass';
+        fl.frequency.setValueAtTime(f * 1.5, t); fl.frequency.exponentialRampToValueAtTime(f * 6, t + .06); fl.frequency.exponentialRampToValueAtTime(f * 3, t + .25);
+        fl.connect(this.envG(t, .05, v * .55, hold, .18, dst)); this.osc('sawtooth', f, t, end, fl); this.osc('sawtooth', f, t, end, fl, 6);
+        break;
+      }
+      case 'choir': {
+        const hold = Math.max(.1, dur - .15), end = t + hold + .8, g = this.envG(t, .22, v * .8, hold, .45, dst), src = c.createGain();
+        [[800, 5, 1], [1150, 6, .6], [2900, 8, .25]].forEach(([ff, q, a]) => { const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = ff; bp.Q.value = q; const bg = c.createGain(); bg.gain.value = a; src.connect(bp); bp.connect(bg); bg.connect(g); });
+        [-9, 9].forEach(dt => this.vib(this.osc('sawtooth', f, t, end, src, dt), t, f, .007, end, 4.6));
+        break;
+      }
+      case 'organ': { const hold = Math.max(.05, dur - .05), g = this.envG(t, .03, v, hold, .12, dst); [[1, 1], [2, .5], [3, .25]].forEach(([m, a]) => { const gg = c.createGain(); gg.gain.value = a; gg.connect(g); this.osc('sine', f * m, t, t + hold + .2, gg); }); break; }
+      default: { // 'bass'
+        const hold = Math.max(.05, dur * .8), fl = c.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = 700;
+        fl.connect(this.envG(t, .006, v, hold, .12, dst)); this.osc('triangle', f, t, t + hold + .2, fl); this.osc('sine', f, t, t + hold + .2, fl);
+      }
+    }
+  },
+  pad(inst, fs, t, dur, v, dst) {
+    fs.forEach(f => {
+      if (inst === 'organ' || inst === 'choir') { this.voice(inst, f, t, dur, v * (inst === 'choir' ? 1.3 : 1), dst); return; }
+      const fl = this.ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = Math.min(2400, f * 4);
+      fl.connect(this.envG(t, .5, v, Math.max(.1, dur - .5), .9, dst)); [-8, 8].forEach(dt => this.osc('sawtooth', f, t, t + dur + 1, fl, dt));
+    });
+  },
+  drum(k, t, v, dst) {
+    switch (k) {
+      case 'k': this.osc('sine', 140, t, t + .3, this.envG(t, .003, .55 * v, 0, .28, dst)).frequency.exponentialRampToValueAtTime(42, t + .12); break;
+      case 's': this.noiseHit(t, .16, .2 * v, 'bandpass', 1900, .8, dst); this.osc('triangle', 190, t, t + .1, this.envG(t, .002, .1 * v, 0, .08, dst)); break;
+      case 'h': this.noiseHit(t, .04, .05 * v, 'highpass', 7000, .7, dst); break;
+      case 't': this.noiseHit(t, .12, .16 * v, 'lowpass', 900, .8, dst); this.osc('sine', 190, t, t + .14, this.envG(t, .002, .15 * v, 0, .12, dst)).frequency.exponentialRampToValueAtTime(120, t + .1); break;
+      case 'b': this.osc('sine', 85, t, t + .65, this.envG(t, .004, .5 * v, 0, .6, dst)).frequency.exponentialRampToValueAtTime(48, t + .4); this.noiseHit(t, .3, .15 * v, 'lowpass', 280, .7, dst); break;
+      case 'm': [0, .025, .05].forEach(w => this.noiseHit(t + w, .05, .04 * v, 'highpass', 5500, 1, dst)); break;
+    }
   }
 };
+
+/* ---------------- Songs ----------------
+   Each song is data: root note (MIDI), mode, tempo, chord progression (scale degrees), and parts.
+   Melodies are generated from each song's seed, so a song always plays the same tune.
+   Arrangement cycles through intro / full / high (counter-melody, alternate lead) / break sections. */
+const HZ = m => 440 * Math.pow(2, (m - 69) / 12);
+const MODES = { ion: [0, 2, 4, 5, 7, 9, 11], dor: [0, 2, 3, 5, 7, 9, 10], phr: [0, 1, 3, 5, 7, 8, 10], lyd: [0, 2, 4, 6, 7, 9, 11], mix: [0, 2, 4, 5, 7, 9, 10], aeo: [0, 2, 3, 5, 7, 8, 10], hmin: [0, 2, 3, 5, 7, 8, 11], pent: [0, 2, 4, 7, 9], mpent: [0, 3, 5, 7, 10] };
+const sdeg = (sc, i) => sc[((i % sc.length) + sc.length) % sc.length] + 12 * Math.floor(i / sc.length);
+function chordOf(d, bi) {
+  const p = d.prog[bi]; if (Array.isArray(p)) return p;
+  const sc = MODES[d.mode], ch = [0, 2, 4, 6].map(k => sdeg(sc, p + k));
+  return ch[0] > 6 ? ch.map(x => x - 12) : ch;
+}
+const ctone = (ch, c) => ch[c % 4] + 12 * Math.floor(c / 4);
+const patAt = (p, i) => { const ch = p[i % p.length]; return ch === '.' ? null : +ch; };
+function genMelody(d, part, seed) {
+  const r = mulberry32(seed), sc = MODES[part.mel || d.mel || d.mode], L = sc.length, bar = d.bar || 8, nb = d.prog.length;
+  const [lo, hi] = part.range || [-2, L + 3], o = part.o ?? 12, rh = part.r.map(x => x.padEnd(bar, '.').slice(0, bar));
+  const snap = (idx, cls) => { for (let k = 0; k <= L; k++) for (const s of [idx + k, idx - k]) if (s >= lo && s <= hi && cls.includes(((sdeg(sc, s) % 12) + 12) % 12)) return s; return clamp(idx, lo, hi); };
+  let cur = Math.round((lo + hi) / 2); const bars = [], shapes = [];
+  for (let b = 0; b < nb; b++) {
+    const cls = chordOf(d, b).slice(0, 3).map(x => ((x % 12) + 12) % 12), pat = rh[b % rh.length], notes = new Array(bar).fill(null), idxs = [];
+    const on = []; for (let i = 0; i < bar; i++) if (pat[i] === 'x') on.push(i);
+    const src = b >= nb / 2 && b < nb - 1 ? shapes[b - nb / 2] : null; // second half echoes the first
+    on.forEach((s, j) => {
+      if (j === 0) cur = snap(src ? src[0] : cur + (r() < .5 ? 1 : -1), cls);
+      else if (src && src[j] != null) cur = clamp(idxs[0] + src[j] - src[0], lo, hi);
+      else { const rv = r(); cur = rv < .6 ? cur + (r() < .5 ? 1 : -1) : rv < .8 ? cur + (r() < .5 ? 2 : -2) : snap(cur + (r() < .5 ? 3 : -3), cls); cur = clamp(cur, lo, hi); }
+      if (b === nb - 1 && j === on.length - 1) cur = snap(cur, [((sdeg(sc, 0) % 12) + 12) % 12]);
+      idxs.push(cur);
+      const next = on[j + 1] ?? bar; notes[s] = { p: sdeg(sc, cur) + o, d: Math.min(next - s, part.hold || 6) };
+    });
+    shapes.push(idxs); bars.push(notes);
+  }
+  return bars;
+}
+const R_FOLK = ['x.x.x.xx', 'x.xx.x..', 'x.x.xxx.', 'x...x...'], R_CALM = ['x...x.x.', 'x.......', 'x.x.x...', 'x...x...'], R_SPARSE = ['x.......', 'x...x...', 'x.x.....', 'x...x.x.'];
+const R_BATTLE = ['x.x.x.xx', 'x.xxx.x.', 'xx.xx.x.', 'x.x.xxx.'], R_FANF = ['x.x.x...', 'x.xxx.x.', 'x...x.x.', 'x.x.x.x.'], R_LONG = ['x.......', 'x...x...'];
+const F_BATTLE = ['full', 'full', 'high', 'full'];
+const SONGS = {
+  // menu
+  menu: { title: 'Four Crowns', root: 50, mode: 'dor', bpm: 76, prog: [0, 6, 2, 3, 0, 6, 3, 4], seed: 11, pad: { i: 'strings', v: .04 }, arp: { i: 'harp', p: '0.1.2.4.' }, bass: { p: '0.......', d: 8, v: .11 }, lead: { i: 'strings', r: R_CALM, v: .13, alt: { i: 'brass', v: .9 } }, counter: { i: 'harp', r: R_LONG }, drums: { b: 'x.......', intro: true, v: .6 } },
+  // overworld (rotates; day, night or both)
+  wander: { title: 'The Wandering Knight', legacy: true, tod: 'both', len: 180 },
+  road: { title: 'The Open Road', tod: 'day', root: 55, mode: 'ion', bpm: 108, prog: [0, 4, 5, 3, 0, 4, 3, 4], seed: 21, lead: { i: 'flute', r: R_FOLK, alt: { i: 'recorder', o: 12, v: .8 } }, arp: { i: 'lute', p: '0.2.1.2.' }, bass: { p: '0...4...' }, pad: { i: 'strings', v: .025 }, drums: { t: 'x..x.x..', h: '..x...x.' }, counter: { i: 'harp', r: R_LONG } },
+  fields: { title: 'Fields of Gold', tod: 'day', root: 50, mode: 'ion', bpm: 92, prog: [0, 3, 0, 4, 5, 3, 1, 4], seed: 31, lead: { i: 'recorder', r: R_CALM, alt: { i: 'flute', o: 12 } }, arp: { i: 'harp', p: '0.2.4.2.' }, pad: { i: 'strings', v: .03 }, bass: { p: '0.......', d: 6 }, drums: { t: 'x.......' } },
+  hills: { title: 'Over the Hills', tod: 'day', root: 57, mode: 'mix', bpm: 116, sub: 3, bar: 6, prog: [0, 6, 3, 0, 0, 6, 4, 0], seed: 41, lead: { i: 'fiddle', r: ['x.xx.x', 'xxxx.x', 'x..x..', 'xxx.xx'], alt: { i: 'recorder', o: 12 } }, arp: { i: 'lute', p: '0.2.1.' }, bass: { p: '0..4..' }, drums: { t: 'x..x..', h: '..x..x' } },
+  oldroads: { title: 'Old Roads', tod: 'both', root: 52, mode: 'dor', bpm: 84, prog: [0, 3, 0, 6, 0, 3, 4, 0], seed: 51, lead: { i: 'fiddle', r: R_CALM, alt: { i: 'flute', o: 12 } }, arp: { i: 'lute', p: '0.1.2.1.' }, drone: { n: [0, 7], v: .035, t: 'triangle' }, drums: { t: 'x...x..x' }, bass: { p: '0...0...' } },
+  pilgrim: { title: "The Pilgrim's Way", tod: 'both', root: 53, mode: 'lyd', bpm: 96, prog: [0, 1, 0, 1, 5, 1, 4, 0], seed: 61, lead: { i: 'recorder', r: R_FOLK, alt: { i: 'harp', o: 12 } }, arp: { i: 'lute', p: '0.2.1.2.' }, bass: { p: '0...0.4.' }, drums: { t: 'x...x...' }, pad: { i: 'strings', v: .025 } },
+  starlit: { title: 'Starlit Road', tod: 'night', vol: 4.2, root: 45, mode: 'aeo', bpm: 66, prog: [0, 5, 2, 6, 0, 5, 6, 0], seed: 71, lead: { i: 'bell', r: R_SPARSE, v: .11 }, pad: { i: 'strings', v: .03 }, arp: { i: 'harp', p: '0.1.2.3.', v: .055 }, drone: { n: [0], v: .035, t: 'triangle' } },
+  moon: { title: 'Moon over the Greywater', tod: 'night', vol: 3.4, root: 47, mode: 'aeo', bpm: 72, bar: 12, prog: [0, 5, 3, 4, 0, 5, 6, 4], seed: 81, lead: { i: 'flute', r: ['x.....x.x...', 'x.x.x.x.....', 'x.....x.....', 'x.x...x.x.x.'] }, arp: { i: 'harp', p: '0.1.2.4.2.1.', v: .055 }, pad: { i: 'choir', v: .025 } },
+  embers: { title: 'Embers', tod: 'night', root: 48, mode: 'aeo', mel: 'mpent', bpm: 60, prog: [0, 0, 5, 5, 3, 3, 4, 4], seed: 91, lead: { i: 'flute', r: R_SPARSE }, arp: { i: 'pluck', p: '0...2...' }, drone: { n: [0, 7], v: .045, t: 'triangle' }, pad: { i: 'organ', v: .02 } },
+  // combat
+  combat1: { title: 'Steel and Blood', root: 50, mode: 'hmin', bpm: 150, prog: [0, 5, 3, 4, 0, 5, 3, 4], seed: 101, form: F_BATTLE, lead: { i: 'brass', r: R_BATTLE, alt: { i: 'strings', o: 12 } }, arp: { i: 'pluck', p: '04040404', v: .05 }, bass: { i: 'bassP', p: '00.00.0.' }, pad: { i: 'strings', v: .025 }, drums: { k: 'x...x.x.', s: '....x...', h: 'x.x.x.x.', b: 'x.......', intro: true } },
+  combat2: { title: 'Clash of Crowns', root: 52, mode: 'phr', bpm: 140, prog: [0, 1, 0, 6, 0, 1, 5, 6], seed: 111, form: F_BATTLE, lead: { i: 'strings', r: R_BATTLE, alt: { i: 'brass' } }, bass: { i: 'bassP', p: '0.0.0.0.' }, arp: { i: 'harpsi', p: '0.1.2.1.', v: .05 }, drums: { k: 'x..x..x.', s: '....x..x', h: 'xxxxxxxx', b: 'x...x...', intro: true } },
+  hollow_fight: { title: 'The Dead March', root: 48, mode: 'phr', bpm: 120, prog: [0, 1, 0, 1, 5, 1, 0, 0], seed: 121, form: F_BATTLE, lead: { i: 'choir', r: ['x...x...', 'x.x.x...', 'x...x.x.', 'xxx.x...'], alt: { i: 'bell', o: 12 } }, pad: { i: 'choir', v: .035 }, bass: { i: 'bassP', p: '0..0..0.' }, arp: { i: 'bell', p: '0...1...', v: .045 }, drums: { b: 'x..x..x.', k: 'x.......', s: '....x...', intro: true } },
+  circle_fight: { title: 'Knives in the Dark', root: 45, mode: 'hmin', bpm: 144, prog: [0, 0, 5, 4, 0, 0, 3, 4], seed: 131, form: F_BATTLE, lead: { i: 'pluck', o: 24, r: ['x.xx.x.x', 'xx.x.xx.', 'x.x.x.x.', 'x.xxx...'], v: .11, alt: { i: 'harpsi' } }, bass: { i: 'bassP', p: '0.00.0.0' }, pad: { i: 'strings', v: .025 }, drums: { k: 'x...x...', h: '.x.x.x.x', s: '......x.', intro: true } },
+  // bosses and duels
+  boss: { title: 'The Chieftain', root: 53, mode: 'hmin', bpm: 132, prog: [0, 5, 3, 4, 0, 5, 6, 4], seed: 141, form: F_BATTLE, lead: { i: 'brass', r: R_BATTLE, alt: { i: 'strings', o: 12 } }, pad: { i: 'choir', v: .03 }, bass: { i: 'bassP', p: '0.0.0.0.' }, drums: { k: 'x.x.x.x.', s: '....x...', b: 'x...x...', h: 'x.x.x.x.', intro: true } },
+  duel: { title: 'Trial by Combat', root: 50, mode: 'dor', bpm: 128, prog: [0, 6, 0, 6, 3, 6, 4, 0], seed: 151, form: F_BATTLE, lead: { i: 'brass', r: R_FANF, alt: { i: 'fiddle', o: 12 } }, pad: { i: 'strings', v: .025 }, bass: { p: '0.0.0.4.' }, drums: { b: 'x..x..x.', s: '....x...', intro: true } },
+  tourney: { title: 'The Tourney of Solmont', root: 55, mode: 'ion', bpm: 132, prog: [0, 3, 4, 0, 0, 3, 4, 4], seed: 161, form: F_BATTLE, lead: { i: 'brass', r: R_FOLK, alt: { i: 'recorder', o: 12 } }, arp: { i: 'harpsi', p: '0.2.1.2.' }, bass: { p: '0...4...' }, drums: { k: 'x...x...', s: '....x...', m: 'x.x.x.x.', intro: true } },
+  greymother: { title: 'The Grey Mother', root: 47, mode: 'hmin', bpm: 116, prog: [0, 0, 5, 5, 3, 3, 4, 4], seed: 171, form: F_BATTLE, lead: { i: 'strings', r: R_BATTLE, alt: { i: 'choir' } }, arp: { i: 'harpsi', p: '0.1.2.1.' }, bass: { i: 'bassP', p: '0.0.0.0.' }, pad: { i: 'organ', v: .025 }, drums: { k: 'x.......', s: '....x...', b: '....x..x', h: '..x...x.', intro: true } },
+  hollowking: { title: 'The Hollow King', root: 50, mode: 'phr', bpm: 100, prog: [0, 1, 0, 1, 5, 6, 1, 0], seed: 181, form: F_BATTLE, lead: { i: 'choir', r: ['x.......', 'x...x...', 'x.x.x...', 'x...x.x.'], v: .15, alt: { i: 'brass' } }, pad: { i: 'choir', v: .045 }, drone: { n: [0], o: -24, v: .06 }, drums: { b: 'x..x..x.', k: 'x...x...', s: '....x...', intro: true }, bass: { i: 'bassP', p: '0..0..0.' }, arp: { i: 'bell', p: '0...2...', v: .045 } },
+  last_stand: { title: 'The Last Stand', root: 45, mode: 'aeo', bpm: 138, prog: [0, 5, 2, 6, 0, 5, 6, 4], seed: 191, form: F_BATTLE, lead: { i: 'brass', r: R_BATTLE, alt: { i: 'strings', o: 12 } }, arp: { i: 'pluck', p: '04040404', v: .045 }, bass: { i: 'bassP', p: '0.0.0.0.' }, pad: { i: 'choir', v: .035 }, drums: { k: 'x..x.xx.', s: '....x...', b: 'x.......', h: 'x.x.x.x.', intro: true } },
+  // villages, one per kingdom
+  town_0: { title: 'Hearth and Home (Albion)', root: 48, mode: 'ion', bpm: 104, prog: [0, 4, 5, 3, 0, 3, 4, 0], seed: 201, lead: { i: 'recorder', r: R_FOLK, alt: { i: 'flute', o: 12 } }, arp: { i: 'lute', p: '0.2.1.2.' }, bass: { p: '0...4...' }, drums: { t: 'x..x.x..' } },
+  town_1: { title: 'The Valorian Market', root: 53, mode: 'lyd', bpm: 116, swing: .12, prog: [0, 1, 0, 4, 5, 1, 4, 0], seed: 211, lead: { i: 'recorder', r: R_FOLK, alt: { i: 'harpsi', o: 12 } }, arp: { i: 'harpsi', p: '0.1.2.4.' }, bass: { p: '0.4.0.4.' }, drums: { m: 'x.x.x.x.', t: 'x...x...' } },
+  town_2: { title: 'The Mead Hall (Draven)', root: 52, mode: 'aeo', bpm: 96, prog: [0, 6, 5, 6, 0, 3, 4, 0], seed: 221, lead: { i: 'fiddle', r: R_FOLK, alt: { i: 'brass', o: -12 } }, drone: { n: [0, 7], v: .04 }, arp: { i: 'lute', p: '0..1..2.' }, bass: { p: '0.......' }, drums: { t: 'x..x..x.', b: 'x.......' } },
+  town_3: { title: 'Glade of Lanterns (Eldoria)', root: 55, mode: 'ion', mel: 'pent', bpm: 88, prog: [0, 5, 3, 4, 0, 5, 1, 4], seed: 231, lead: { i: 'flute', r: R_CALM, alt: { i: 'harp', o: 12 } }, arp: { i: 'harp', p: '0.2.4.2.' }, pad: { i: 'choir', v: .025 }, counter: { i: 'bell', o: 12, r: R_LONG, v: .045 }, drums: { t: 'x.......' } },
+  // castles, one per kingdom
+  castle_0: { title: 'The Court of Aldhaven', root: 50, mode: 'ion', bpm: 90, prog: [0, 3, 4, 0, 5, 3, 4, 0], seed: 241, lead: { i: 'brass', r: R_FANF, alt: { i: 'strings', o: 12 } }, pad: { i: 'strings', v: .035 }, arp: { i: 'harp', p: '0.1.2.1.' }, bass: { p: '0...0...' }, drums: { b: 'x...x...', s: '....x.x.' } },
+  castle_1: { title: 'Solmont Palace', root: 45, mode: 'ion', bpm: 120, bar: 6, prog: [0, 4, 0, 4, 3, 0, 4, 0], seed: 251, lead: { i: 'strings', r: ['x.....', 'x.x.x.', 'x...x.', 'xx.x.x'], alt: { i: 'flute', o: 12 } }, bass: { p: '0.....', d: 3 }, arp: { i: 'harpsi', p: '..1.2.' }, pad: { i: 'strings', v: .02 } },
+  castle_2: { title: 'Ravenspire', root: 48, mode: 'phr', bpm: 84, prog: [0, 1, 0, 6, 0, 1, 5, 1], seed: 261, lead: { i: 'brass', o: 0, r: R_CALM, alt: { i: 'choir', o: 12 } }, drone: { n: [0, 7], v: .045 }, pad: { i: 'organ', v: .025 }, bass: { p: '0...0...' }, drums: { b: 'x..x....', k: 'x.......' } },
+  castle_3: { title: 'Sylvanreach', root: 52, mode: 'dor', bpm: 76, prog: [0, 3, 0, 3, 6, 3, 4, 0], seed: 271, lead: { i: 'flute', r: R_CALM, alt: { i: 'bell' } }, arp: { i: 'harp', p: '0.1.2.4.' }, pad: { i: 'choir', v: .03 }, counter: { i: 'bell', o: 12, r: R_LONG, v: .045 } },
+  // other places
+  camp: { title: 'Brigand Camp', root: 45, mode: 'dor', bpm: 100, prog: [0, 0, 6, 6, 0, 0, 3, 4], seed: 281, lead: { i: 'pluck', o: 24, r: ['x..x..x.', 'x.x..x..', 'xx..x...', 'x..x.x.x'], v: .1 }, bass: { i: 'bassP', p: '0..0..0.' }, drums: { t: 'x..x..x.', h: '....x...', intro: true }, drone: { n: [0, 7], v: .025 } },
+  ruins: { title: 'Forgotten Places', root: 47, mode: 'phr', bpm: 64, prog: [0, 1, 0, 6, 0, 1, 5, 1], seed: 291, lead: { i: 'bell', r: ['x.......', '....x...', 'x...x...', 'x.......'], v: .1 }, pad: { i: 'choir', v: .025 }, drone: { n: [0, 7], v: .035, t: 'triangle' }, arp: { i: 'harp', p: '0.......', v: .05 } },
+  sacred: { title: 'The Old Gods', root: 52, mode: 'lyd', bpm: 70, prog: [0, 1, 0, 1, 5, 1, 4, 0], seed: 301, lead: { i: 'flute', r: R_CALM, alt: { i: 'choir' } }, arp: { i: 'harp', p: '0.1.2.4.' }, pad: { i: 'choir', v: .03 }, counter: { i: 'bell', o: 12, r: R_LONG, v: .045 } },
+  // story mode
+  barrow: { title: 'The Barrow', root: 50, mode: 'phr', bpm: 58, prog: [0, 0, 1, 1, 0, 0, 6, 1], seed: 311, lead: { i: 'choir', r: R_SPARSE, v: .1 }, counter: { i: 'bell', o: 12, r: R_LONG, v: .045 }, drone: { n: [0, 7], v: .055 }, drums: { k: 'x.x.....', v: .5 } },
+  chronicle: { title: 'The Chronicle', root: 50, mode: 'dor', bpm: 72, prog: [0, 6, 2, 3, 0, 6, 3, 0], seed: 321, form: ['full', 'high', 'full', 'break'], lead: { i: 'strings', r: R_CALM, alt: { i: 'flute', o: 12 } }, arp: { i: 'harp', p: '0.2.4.2.' }, pad: { i: 'strings', v: .035 } },
+  end_good: { title: 'A Realm at Peace', root: 55, mode: 'ion', bpm: 80, prog: [0, 4, 5, 3, 0, 3, 4, 0], seed: 331, form: ['full', 'high', 'high', 'break'], lead: { i: 'strings', r: R_CALM, alt: { i: 'brass' } }, arp: { i: 'harp', p: '0.1.2.4.' }, pad: { i: 'strings', v: .04 }, bass: { p: '0...0...' }, drums: { b: 'x.......', intro: true, v: .6 } },
+  end_dark: { title: 'Ashes', root: 45, mode: 'aeo', bpm: 62, prog: [0, 5, 3, 4, 0, 5, 6, 0], seed: 341, form: ['full', 'high', 'full', 'break'], lead: { i: 'strings', r: R_CALM, alt: { i: 'choir' } }, pad: { i: 'choir', v: .035 }, drone: { n: [0], v: .035, t: 'triangle' }, counter: { i: 'bell', o: 12, r: R_LONG, v: .045 } },
+  fallen: { title: 'Fallen', root: 50, mode: 'aeo', bpm: 56, prog: [0, 5, 3, 4], seed: 351, form: ['full', 'high'], lead: { i: 'choir', r: R_SPARSE, v: .1 }, pad: { i: 'strings', v: .035 }, counter: { i: 'bell', o: 12, r: R_LONG, v: .04 } },
+};
+// forts: marching variations of each kingdom's castle theme
+['Albion', 'Valoria', 'Draven', 'Eldoria'].forEach((n, k) => {
+  const c = SONGS['castle_' + k], six = (c.bar || 8) === 6;
+  SONGS['fort_' + k] = Object.assign({}, c, { title: `The ${n} Garrison`, bpm: c.bpm + 18, seed: c.seed + 5, pad: null, form: ['full', 'high', 'full', 'break'], drums: six ? { s: 'x.x.xx', b: 'x.....', intro: true } : { s: 'x.x.x.xx', k: 'x...x...', b: 'x.......', intro: true } });
+});
+const OW_SONGS = ['wander', 'road', 'fields', 'hills', 'oldroads', 'pilgrim', 'starlit', 'moon', 'embers'];
+const URGENT_SONGS = ['menu', 'end_good', 'end_dark', 'fallen', 'combat1', 'combat2', 'hollow_fight', 'circle_fight', 'boss', 'duel', 'tourney', 'greymother', 'hollowking', 'last_stand'];
+const END_DARK = ['ashes', 'grey_throne', 'hollow_crown', 'long_night', 'conqueror', 'usurper', 'puppet', 'outlaw'];
+const PLACE_R = { castle: 20, village: 13, outpost: 10, camp: 13, ruin: 10, hidden: 8 };
 
 /* ---------------- Canvas & input ---------------- */
 const cv = $('game');
@@ -849,6 +1187,18 @@ const ITEMS = {
   supplies: { name: 'Supply Crate', type: 'quest', val: 0, desc: 'Food, arrows and bandages for a garrison.' },
   ledger: { name: 'Bandit Ledger', type: 'quest', val: 0, desc: 'Coded payments — some stamped with a royal seal.' },
   clue: { name: 'Ruined Journal', type: 'quest', val: 0, desc: 'The last entries of a vanished garrison.' },
+  // story mode
+  ashen_letter: { name: 'Bloodstained Letter', type: 'quest', val: 0, desc: 'Sealed in grey wax stamped with a flame. A courier died carrying it.' },
+  ashen_ledger: { name: "Paymaster's Ledger", type: 'quest', val: 0, desc: 'Payments in coin stamped with a grey flame.' },
+  ashen_token: { name: 'Ashen Token', type: 'quest', val: 0, desc: 'Grey iron, stamped with a flame. Vesper will know it.' },
+  maelis_letters: { name: "Maelis's Letters", type: 'quest', val: 0, desc: "Chancellor Maelis's orders from the Ashen Circle." },
+  ulfar_letters: { name: "Ulfar's Letters", type: 'quest', val: 0, desc: 'Orders from the Ashen Circle, and a purse of Albion silver.' },
+  wren_seal: { name: 'Grey Wax Seal', type: 'quest', val: 0, desc: 'Grey wax pressed with a small bird: a wren.' },
+  seal_shard: { name: 'Fragment of the Seal', type: 'quest', val: 0, desc: 'Cold as a grave. Runes of the First King circle its edge.' },
+  shard_0: { name: 'Albion Ember Shard', type: 'quest', val: 0, k: 0, desc: "A shard of Aurek's Ember Crown, kept by the house of Albion. It is warm to the touch." },
+  shard_1: { name: 'Valorian Ember Shard', type: 'quest', val: 0, k: 1, desc: "A shard of Aurek's Ember Crown, kept by the house of Valoria. It is warm to the touch." },
+  shard_2: { name: 'Draven Ember Shard', type: 'quest', val: 0, k: 2, desc: "A shard of Aurek's Ember Crown, kept by the house of Draven. It is warm to the touch." },
+  shard_3: { name: 'Eldorian Ember Shard', type: 'quest', val: 0, k: 3, desc: "A shard of Aurek's Ember Crown, kept by the house of Eldoria. It is warm to the touch." },
 };
 const LOOT_TIERS = [
   ['iron_sword', 'round_shield', 'leather', 'bread', 'meat', 'bandage', 'iron', 'furs', 'wine'],
@@ -887,6 +1237,13 @@ const ATYPES = {
   villager: { name: 'Villager', hp: 30, dmg: 0, spd: 55, range: 0, cd: 9, faction: 'civ', xp: 0, gold: [0, 3], r: 10, civ: true },
   npc: { name: 'Townsfolk', hp: 60, dmg: 0, spd: 50, range: 0, cd: 9, faction: 'civ', xp: 0, gold: [0, 0], r: 11, civ: true, important: true },
   horse: { name: 'Horse', hp: 999, dmg: 0, spd: 190, range: 0, cd: 9, faction: 'civ', r: 12, civ: true },
+  // story mode
+  cultist: { name: 'Ashen Cultist', hp: 44, dmg: 9, spd: 90, range: 38, cd: 1.25, wind: .4, faction: 'bandit', xp: 18, gold: [5, 14], r: 11, weapon: 'sword' },
+  assassin: { name: 'Ashen Blade', hp: 64, dmg: 12, spd: 118, range: 40, cd: .95, wind: .3, faction: 'bandit', xp: 34, gold: [12, 26], r: 11, weapon: 'sword' },
+  wight: { name: 'Hollow Dead', hp: 58, dmg: 10, spd: 72, range: 44, cd: 1.5, wind: .5, faction: 'hollow', xp: 22, gold: [0, 6], r: 11, weapon: 'sword' },
+  hknight: { name: 'Hollow Knight', hp: 190, dmg: 17, spd: 82, range: 56, cd: 1.5, wind: .55, faction: 'hollow', xp: 75, gold: [10, 30], r: 13, weapon: 'great' },
+  hollow_king: { name: 'The Hollow King', hp: 1300, dmg: 24, spd: 80, range: 66, cd: 1.5, wind: .6, faction: 'hollow', xp: 700, gold: [250, 350], r: 16, weapon: 'great' },
+  champion: { name: 'Champion', hp: 180, dmg: 16, spd: 98, range: 54, cd: 1.2, wind: .42, faction: 'civ', xp: 60, gold: [0, 0], r: 12, weapon: 'sword' },
 };
 const TIER_MULT = [null, { hp: 1, dmg: 1 }, { hp: 1.35, dmg: 1.3 }, { hp: 1.8, dmg: 1.6 }, { hp: 2.4, dmg: 2.0 }];
 const CLOTH = ['#6b4a2e', '#4a5a3a', '#5a3a3a', '#3a3a4a', '#6a5a3a', '#4a3a2a', '#5a4a5a'];
@@ -1261,7 +1618,7 @@ function astar(sx, sy, ex, ey) {
 /* =====================================================================
    GAME STATE, PLAYER, ENTITIES, COMBAT, AI
    ===================================================================== */
-const G = { state: 'menu', time: 0, dipT: 0, eventT: 60, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, lastPlace: -1, questT: 0, menuCam: { x: 0, y: 0, a: 0 } };
+const G = { state: 'menu', mode: 'sandbox', time: 0, dipT: 0, eventT: 60, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, lastPlace: -1, questT: 0, menuCam: { x: 0, y: 0, a: 0 } };
 let ents = [], pickups = [], projs = [], parts = [], texts = [];
 let P = null, horseEnt = null, nextEid = 1;
 const cam = { x: 0, y: 0, sx: 0, sy: 0 };
@@ -1483,7 +1840,7 @@ function playerHostileTo(e) {
   if (e.kind === 'horse' || e.important) return false;
   if (e.faction === 'civ') return !!e.aggroPlayer && !e.civ;
   if (e.ally || e.follower) return false;
-  if (e.faction === 'bandit') return true;
+  if (e.faction === 'bandit' || e.faction === 'hollow') return true;
   if (e.faction === 'wild') return !e.passiveA || !!e.aggroPlayer;
   if (e.faction[0] === 'k') {
     if (e.aggroPlayer || e.questFoe) return true;
@@ -1502,6 +1859,7 @@ function hostile(a, b) {
   if (a.ally) return b.faction !== 'civ' && playerHostileTo(b);
   if (b.ally) return a.faction !== 'civ' && playerHostileTo(a);
   const fa = a.faction, fb = b.faction; if (fa === fb) return false;
+  if (fa === 'hollow' || fb === 'hollow') return true;
   if (a.foeOf != null && b.k === a.foeOf) return true;
   if (b.foeOf != null && a.k === b.foeOf) return true;
   if (fa === 'bandit' || fb === 'bandit') { if (fa === 'wild' || fb === 'wild') return false; return true; }
@@ -1570,7 +1928,7 @@ function crime(t) {
 function aggroNearby(k, r) { ents.forEach(e => { if (e.faction === 'k' + k && !e.dead && dist(e.x, e.y, P.x, P.y) < r) { e.aggroPlayer = true; e.target = P; } }); }
 function kill(t, src) {
   t.dead = true; t.hp = 0; t.deadT = 0; t.wind = 0;
-  SND.play('death');
+  SND.play(t.faction === 'hollow' ? 'bones' : 'death');
   for (let i = 0; i < 14 * QMUL(); i++) addPart(t.x, t.y, rand(-140, 140), rand(-160, 40), '#8a1a12', rand(.4, .9), 3, 260);
   const byP = src === P || (src && src.ally);
   if (byP) { gainXP(t.xp); G.kills++; }
@@ -2092,7 +2450,7 @@ function makeQuest(type, giver, k) {
   return q;
 }
 function acceptQuest(q) {
-  if (Q.active.length >= 8) { toast('Your journal is full (8 active quests).', 'bad'); return false; }
+  if (Q.active.filter(a => a.type !== 'story').length >= 8) { toast('Your journal is full (8 active quests).', 'bad'); return false; }
   q.id = Q.next++; q.started = G.time; Q.active.push(q); if (!Q.tracked) Q.tracked = q.id;
   if (q.give) addItem(q.give, 1, 1, true);
   if (q.type === 'find') pickups.push({ x: q.spot.x, y: q.spot.y, vx: 0, vy: 0, type: 'qitem', id: 'heirloom', q: 1, t: 1, qid: q.id });
@@ -2112,10 +2470,12 @@ function questTarget(q) {
     case 'find': return q.stage === 0 ? { x: q.spot.x, y: q.spot.y, r: 5 * TS } : { x: W.places[q.giver].x, y: W.places[q.giver].y };
     case 'escort': case 'supplies': case 'deliver': case 'message': { const p = W.places[q.target]; return { x: p.x, y: p.y }; }
     case 'assist': case 'raid': return q.loc;
+    case 'story': return storyTarget(q);
   }
   return null;
 }
 function questObjective(q) {
+  if (q.type === 'story') return storyObjective(q);
   if (q.type === 'find') return q.stage === 0 ? q.obj : `Return the ${q.thing} to ${q.giverName}`;
   if (q.type === 'investigate') return q.stage === 0 ? q.obj : q.stage === 1 ? 'Defeat the ruin\'s occupants' : 'Search the ruin for clues';
   if (q.type === 'assist') return q.stage === 0 ? `Ride to the battle` : q.obj;
@@ -2165,6 +2525,7 @@ function questUpdate() {
         else if (G.time - q.started > q.limit) { failQuest(q, `${W.places[q.target].name} was ransacked by bandits.`); addRep(W.places[q.target].owner, -3, 'Failed to defend a village', true); q.foes.forEach(e => { e.quest = null; }); }
         break;
       }
+      case 'story': storyUpdate(q); break;
     }
   }
 }
@@ -2172,6 +2533,7 @@ function questOnKill(t) { }
 function questOnCamp(pl) { }
 function questOnPickup(p) {
   const q = Q.active.find(a => a.id === p.qid); if (!q) return;
+  if (q.type === 'story') return storyPickup(q, p);
   if (q.type === 'find') { q.stage = 1; toast(`Found the ${q.thing}! Return it to ${q.giverName}.`, 'gold'); }
   if (q.type === 'investigate') { W.places[q.place].investigated = true; completeQuest(q); }
 }
@@ -2413,6 +2775,7 @@ function talkTo(e) {
       return openShop(getShop(e), e);
     }
     case 'traveler': e.say = { text: e.follow ? 'Lead on — I will follow.' : 'Safe travels!', t: 2.5 }; return;
+    case 'story': return storyTalk(e);
     case 'citizen': e.say = { text: pick(BARKS.citizen), t: 3 }; return;
   }
   if (e.faction && e.faction[0] === 'k') {
@@ -2459,6 +2822,8 @@ function rewardText(q) {
 }
 function rulerDialog(e, k) {
   const kd = KDATA[k];
+  const so = storyRulerStep(k);
+  if (so && K.rep[k] <= -40) { so.fn(e); return; }
   if (K.rep[k] <= -40) { e.say = { text: 'Guards! Seize this traitor!', t: 3 }; aggroNearby(k, 900); return; }
   let foe = -1, fv = 0; for (let j = 0; j < 4; j++) if (j !== k && getRel(k, j) < fv) { fv = getRel(k, j); foe = j; }
   let friend = -1, frv = 25; for (let j = 0; j < 4; j++) if (j !== k && getRel(k, j) > frv) { frv = getRel(k, j); friend = j; }
@@ -2472,6 +2837,7 @@ function rulerDialog(e, k) {
     { t: '<span class="dn">QUEST</span>Is there a task for me, Your Majesty?', dis: Q.active.some(q => q.royal === k), fn: () => { const q = makeKingdomQuest(k); if (!q) { openDialog({ name: e.name, role: kd.rulerTitle, portrait: e, text: 'Not at present. Return later.', options: [{ t: 'Farewell', fn: closeDialog }] }); return; } questOfferDialog(e, null, q); } },
     { t: '<span class="dn">COUNCIL</span>Let us discuss matters of state. (Diplomacy)', fn: () => { closeDialog(); UI.open('dip'); selectKingdom(k); } },
   ];
+  if (so) opts.unshift({ t: `<span class="dn">✦ STORY</span>${esc(so.label)}`, fn: () => so.fn(e) });
   if (P.allegiance !== k) opts.push({ t: `<span class="dn">OATH</span>I would swear my sword to ${kd.name}.`, dis: rep < 30, fn: () => { closeDialog(); dipAction(k, 'allegiance'); } });
   opts.push({ t: 'Farewell, Your Majesty.', fn: closeDialog });
   openDialog({ name: e.name, role: kd.rulerTitle, portrait: e, text, options: opts });
@@ -2673,6 +3039,12 @@ function drawMiscIcon(g, id, b) {
     case 'heirloom': g.strokeStyle = '#d8d0c0'; g.beginPath(); g.moveTo(-10, -22); g.quadraticCurveTo(0, -4, 10, -22); g.stroke(); g.fillStyle = '#d0d4dc'; circ(g, 0, 4, 13); g.fillStyle = '#a0a8b8'; circ(g, 0, 4, 9); g.fillStyle = '#4a7ad0'; circ(g, 0, 4, 4); break;
     case 'supplies': g.fillStyle = '#9a6a3a'; g.fillRect(-20, -16, 40, 32); g.strokeStyle = '#5a3a1a'; g.strokeRect(-20, -16, 40, 32); g.beginPath(); g.moveTo(-20, -16); g.lineTo(20, 16); g.moveTo(20, -16); g.lineTo(-20, 16); g.stroke(); break;
     case 'ledger': case 'clue': g.fillStyle = id === 'ledger' ? '#5a2a1a' : '#3a4a3a'; g.fillRect(-16, -20, 32, 40); g.fillStyle = '#e8dcb8'; g.fillRect(-12, -18, 26, 36); g.fillStyle = id === 'ledger' ? '#5a2a1a' : '#3a4a3a'; g.fillRect(-16, -20, 8, 40); g.strokeStyle = '#9a8a6a'; g.lineWidth = 1; for (let i = -12; i < 16; i += 5) { g.beginPath(); g.moveTo(-4, i); g.lineTo(10, i); g.stroke(); } break;
+    case 'ashen_letter': g.fillStyle = '#e4d6b4'; g.fillRect(-20, -13, 40, 26); g.strokeStyle = '#b8a070'; g.beginPath(); g.moveTo(-20, -13); g.lineTo(0, 3); g.lineTo(20, -13); g.stroke(); g.fillStyle = '#8a1a14'; circ(g, -12, 8, 3); circ(g, 14, -5, 2); g.fillStyle = '#8c8c90'; circ(g, 0, 3, 6.5); g.fillStyle = '#4a4a4e'; g.beginPath(); g.moveTo(0, -2); g.quadraticCurveTo(4, 3, 0, 7); g.quadraticCurveTo(-4, 3, 0, -2); g.fill(); break;
+    case 'ashen_ledger': case 'maelis_letters': case 'ulfar_letters': { const c = id === 'ashen_ledger' ? '#4a4a50' : id === 'maelis_letters' ? '#2d5aa8' : '#3b2a4c'; g.fillStyle = c; g.fillRect(-16, -20, 32, 40); g.fillStyle = '#e8dcb8'; g.fillRect(-12, -18, 26, 36); g.fillStyle = c; g.fillRect(-16, -20, 8, 40); g.strokeStyle = '#9a8a6a'; g.lineWidth = 1; for (let i = -12; i < 16; i += 5) { g.beginPath(); g.moveTo(-4, i); g.lineTo(10, i); g.stroke(); } g.fillStyle = '#8c8c90'; circ(g, 7, 12, 4.5); break; }
+    case 'wren_seal': g.fillStyle = '#8c8c90'; circ(g, 0, 0, 18); g.fillStyle = '#6a6a70'; circ(g, 0, 0, 13); g.fillStyle = '#34343a'; ell(g, -1, 2, 7, 4.5); circ(g, 6, -3, 3.5); g.beginPath(); g.moveTo(9, -4); g.lineTo(14, -2); g.lineTo(9, -1); g.fill(); g.beginPath(); g.moveTo(-6, 1); g.lineTo(-13, 6); g.lineTo(-5, 5); g.fill(); break;
+    case 'seal_shard': g.fillStyle = '#7a8a90'; g.beginPath(); g.moveTo(-18, -8); g.lineTo(4, -20); g.lineTo(18, -2); g.lineTo(8, 18); g.lineTo(-14, 12); g.closePath(); g.fill(); g.strokeStyle = '#bfe8ff'; g.lineWidth = 1.5; g.shadowColor = '#8fd8ff'; g.shadowBlur = 8; g.beginPath(); g.moveTo(-8, -4); g.lineTo(-2, -10); g.moveTo(2, 0); g.lineTo(8, -6); g.moveTo(-6, 6); g.lineTo(4, 8); g.stroke(); g.shadowBlur = 0; break;
+    case 'ashen_token': g.fillStyle = '#6a6a70'; circ(g, 0, 0, 17); g.strokeStyle = '#3a3a40'; g.lineWidth = 2; g.beginPath(); g.arc(0, 0, 13, 0, TAU); g.stroke(); g.fillStyle = '#c8c8cc'; g.beginPath(); g.moveTo(0, -10); g.quadraticCurveTo(8, 0, 0, 10); g.quadraticCurveTo(-8, 0, 0, -10); g.fill(); break;
+    case 'shard_0': case 'shard_1': case 'shard_2': case 'shard_3': g.shadowColor = '#ffb040'; g.shadowBlur = 14; g.fillStyle = '#f08a2a'; g.beginPath(); g.moveTo(0, -24); g.lineTo(12, -4); g.lineTo(6, 18); g.lineTo(-7, 18); g.lineTo(-12, -2); g.closePath(); g.fill(); g.shadowBlur = 0; g.fillStyle = 'rgba(255,240,180,.7)'; g.beginPath(); g.moveTo(0, -24); g.lineTo(-4, 4); g.lineTo(-12, -2); g.fill(); g.fillStyle = KDATA[b.k].color; g.fillRect(-11, 18, 22, 6); break;
     default: g.fillStyle = '#888'; circ(g, 0, 0, 16);
   }
 }
@@ -2952,6 +3324,12 @@ function lookFor(e) {
     case 'soldier': L = { body: '#9ba1a8', mail: 1, head: 'helm', skin: e.skin, tabard: kc, weapon: { wk: 'spear', len: 48, col: '#b8bec4' }, shield: { b: ITEMS.iron_shield, col: kc } }; break;
     case 'guard': L = { body: '#8e8464', head: 'helm', pauld: 1, skin: e.skin, tabard: kc, weapon: { wk: 'sword', len: 30, col: '#c8ced4' }, shield: { b: ITEMS.knight_shield, col: kc } }; break;
     case 'knight': L = { body: '#d2d8de', shiny: 1, head: 'great', plume: kc, pauld: 1, skin: e.skin, tabard: kc, cape: kc, weapon: { wk: 'sword', len: 40, col: '#e2e8ee' }, shield: { b: ITEMS.knight_shield, col: kc } }; break;
+    case 'cultist': L = { body: '#6a6a6e', head: 'hood', hood: '#38383c', skin: e.skin, weapon: { wk: 'sword', len: 24, col: '#9a9ea4' } }; break;
+    case 'assassin': L = { body: '#2a2a30', head: 'hood', hood: '#1a1a20', skin: e.skin, cape: '#4a1a1a', weapon: { wk: 'sword', len: 26, col: '#d0d6dc' } }; break;
+    case 'wight': L = { body: '#5a6260', mail: 1, head: 'helm', skin: '#aebcb6', weapon: { wk: 'sword', len: 28, col: '#7a7060' }, shield: chance(.4) ? { b: ITEMS.round_shield, col: '#4a4640' } : null }; break;
+    case 'hknight': L = { body: '#4a5058', head: 'great', plume: '#2a3a3a', pauld: 1, skin: '#9aaaa4', cape: '#1e2426', weapon: { wk: 'great', len: 44, col: '#9ab8c0', glow: '#8fd8ff' } }; break;
+    case 'hollow_king': L = { body: '#2e343c', head: 'crown', hair: '#c8d4d4', skin: '#8e9c9a', cape: '#141a20', pauld: 1, weapon: { wk: 'great', len: 50, col: '#bfe8ff', glow: '#8fd8ff' } }; break;
+    case 'champion': L = { body: '#d2d8de', shiny: 1, head: 'great', plume: kc, pauld: 1, skin: e.skin, tabard: kc, cape: kc, weapon: { wk: 'sword', len: 40, col: '#e2e8ee' }, shield: { b: ITEMS.knight_shield, col: kc } }; break;
     case 'villager': L = e.role === 'traveler' ? { body: '#6a5a44', head: 'hood', hood: '#5a4a34', skin: e.skin } : { body: e.cloth, head: chance(.5) ? 'hair' : 'cap', hair: pick(['#3a2a1a', '#6a4a2a', '#a8884a', '#2a2020']), skin: e.skin }; break;
     case 'npc':
       if (e.role === 'ruler') L = { body: kc, head: 'crown', hair: '#8a7a6a', skin: '#e8c49a', cape: '#f0ece0', ermine: 1, tabard: KDATA[e.k].accent };
@@ -3064,6 +3442,7 @@ function drawPortrait(cv2, e) {
   const g = cv2.getContext('2d'); const W2 = cv2.width; g.clearRect(0, 0, W2, W2);
   const k = e && e.k != null ? e.k : null;
   const bg = g.createRadialGradient(W2 / 2, W2 * .4, 5, W2 / 2, W2 / 2, W2 * .7); bg.addColorStop(0, k != null ? shade(KDATA[k].color, -.3) : '#4a3a28'); bg.addColorStop(1, '#120c07'); g.fillStyle = bg; g.fillRect(0, 0, W2, W2);
+  if (e === 'ember') { g.save(); g.scale(W2 / 128, W2 / 128); g.translate(64, 70); g.shadowColor = '#ff9a3a'; g.shadowBlur = 26; g.fillStyle = '#f0b040'; g.beginPath(); g.moveTo(-40, 18); g.lineTo(-44, -18); g.lineTo(-22, 0); g.lineTo(0, -36); g.lineTo(22, 0); g.lineTo(44, -18); g.lineTo(40, 18); g.closePath(); g.fill(); g.shadowBlur = 0; g.fillStyle = '#c0302a'; circ(g, 0, 2, 6); g.fillStyle = '#8a5a14'; g.fillRect(-40, 18, 80, 9); g.restore(); return; }
   if (e === 'sign') { g.save(); g.translate(W2 / 2, W2 / 2); g.fillStyle = '#4a3018'; g.fillRect(-4, -10, 8, 60); g.fillStyle = '#8a6030'; g.beginPath(); g.moveTo(-40, -30); g.lineTo(30, -30); g.lineTo(42, -18); g.lineTo(30, -6); g.lineTo(-40, -6); g.fill(); g.fillStyle = '#8a6030'; g.beginPath(); g.moveTo(40, 4); g.lineTo(-30, 4); g.lineTo(-42, 16); g.lineTo(-30, 28); g.lineTo(40, 28); g.fill(); g.restore(); return; }
   const L = e && e.kind ? lookFor(e) : { body: KDATA[k || 0].color, head: 'crown', hair: '#8a7a6a', skin: '#e8c49a', cape: '#f0ece0', ermine: 1 };
   const s = W2 / 128; g.save(); g.scale(s, s);
@@ -3145,7 +3524,7 @@ function drawMinimap() {
    ===================================================================== */
 const UI = {
   stack: [],
-  ids: { pause: 'pauseScreen', inv: 'invScreen', map: 'mapScreen', dip: 'dipScreen', quests: 'questScreen', settings: 'settingsScreen', help: 'helpScreen', shop: 'shopScreen' },
+  ids: { mode: 'modeScreen', cont: 'contScreen', pause: 'pauseScreen', inv: 'invScreen', map: 'mapScreen', dip: 'dipScreen', quests: 'questScreen', settings: 'settingsScreen', help: 'helpScreen', shop: 'shopScreen' },
   open(n) {
     if (dialogOpen) closeDialog();
     if (this.isOpen(n)) return;
@@ -3185,7 +3564,7 @@ document.addEventListener('mouseout', e => { const t = e.target.closest('[data-t
 /* ---------------- Dialog ---------------- */
 let dialogOpen = false;
 function openDialog(d) {
-  dialogOpen = true; $('dName').textContent = d.name; $('dRole').textContent = d.role || ''; $('dText').innerHTML = d.text;
+  dialogOpen = true; SND.narr = d.portrait === 'ember'; $('dName').textContent = d.name; $('dRole').textContent = d.role || ''; $('dText').innerHTML = d.text;
   drawPortrait($('dPort'), d.portrait);
   const box = $('dOpts'); box.innerHTML = '';
   d.options.forEach((o, i) => { const b = document.createElement('button'); b.className = 'dOpt'; b.innerHTML = `<span class="dn">${i + 1}.</span>` + o.t; if (o.dis) b.disabled = true; b.onclick = () => { if (!o.dis) o.fn(); }; box.appendChild(b); });
@@ -3442,14 +3821,14 @@ function renderQuests() {
   const q = arr.find(x => x.id === qSel);
   if (!q) { det.innerHTML = '<div class="empty">Select a quest.</div>'; return; }
   const tg = qTab === 'active' ? questTarget(q) : null;
-  det.innerHTML = `<h2>${esc(q.title)}</h2><div class="psub" style="text-align:left">Given by ${esc(q.giverName || '')}${q.k != null ? ` · ${KDATA[q.k].full}` : ''}</div><p>${q.desc}</p>
+  det.innerHTML = `<h2>${esc(q.title)}</h2><div class="psub" style="text-align:left">${q.type === 'story' && q.main ? '<b style="color:#ffcf4a;font-style:normal">✦ Main Quest</b> · ' : ''}Given by ${esc(q.giverName || '')}${q.k != null ? ` · ${KDATA[q.k].full}` : ''}</div><p>${q.desc}</p>
     ${qTab === 'active' ? `<p><b style="color:var(--gold)">Objective:</b> ${esc(questObjective(q))}${tg ? ` — ${leagues(dist(P.x, P.y, tg.x, tg.y))} leagues ${compass(tg.x - P.x, tg.y - P.y)}` : ''}</p>` : `<p><b>${q.failed ? '<span style="color:#f08070">Failed</span>' : '<span style="color:#8fe07a">Completed</span>'}</b> on day ${q.doneDay}</p>`}
     <div style="color:var(--gold);font-family:var(--fh);font-size:12px;letter-spacing:.1em">REWARDS</div><div class="rewards">${rewardText(q).split(' · ').map(r => `<span>${r}</span>`).join('')}</div>
-    ${qTab === 'active' ? `<div class="iacts"><button class="btn sm gold" id="qTrack">${Q.tracked === q.id ? 'Tracking' : 'Track Quest'}</button><button class="btn sm" id="qMap">Show on Map</button><button class="btn sm red" id="qAb">Abandon</button></div>` : ''}`;
+    ${qTab === 'active' ? `<div class="iacts"><button class="btn sm gold" id="qTrack">${Q.tracked === q.id ? 'Tracking' : 'Track Quest'}</button><button class="btn sm" id="qMap">Show on Map</button>${q.type === 'story' ? '' : '<button class="btn sm red" id="qAb">Abandon</button>'}</div>` : ''}`;
   if (qTab === 'active') {
     $('qTrack').onclick = () => { Q.tracked = q.id; renderQuests(); updateHUD(true); };
     $('qMap').onclick = () => { UI.open('map'); if (tg) { mapView.cx = tg.x / TS; mapView.cy = tg.y / TS; } };
-    $('qAb').onclick = () => { abandonQuest(q); renderQuests(); };
+    if ($('qAb')) $('qAb').onclick = () => { abandonQuest(q); renderQuests(); };
   }
 }
 
@@ -3524,25 +3903,29 @@ function drawEntity(g, e, t) {
   if (e.animal) { drawAnimal(g, e); return; }
   if (e.cart) drawCart(g, e);
   if (e.ally) { g.strokeStyle = 'rgba(106,208,255,.7)'; g.lineWidth = 2; g.beginPath(); g.ellipse(e.x, e.y + 8, 14, 6, 0, 0, TAU); g.stroke(); }
-  drawHuman(g, e.x, e.y, e.face, lookFor(e), { walk: e.walk, flash: e.flash, swing: e.swing > 0 ? { p: 1 - e.swing / .22, dir: 1, arc: 1.8 } : null, wind: e.wind });
+  const ho = { walk: e.walk, flash: e.flash, swing: e.swing > 0 ? { p: 1 - e.swing / .22, dir: 1, arc: 1.8 } : null, wind: e.wind };
+  if (e.scale) { g.save(); g.translate(e.x, e.y); g.scale(e.scale, e.scale); drawHuman(g, 0, 0, e.face, lookFor(e), ho); g.restore(); }
+  else drawHuman(g, e.x, e.y, e.face, lookFor(e), ho);
 }
 function drawOverlays(g, e, t) {
   if (e.dead || e.kind === 'horse') return;
   const hostileP = playerHostileTo(e); const near = dist(e.x, e.y, P.x, P.y);
-  const showBar = (hostileP && (e.hp < e.maxHp || e.target === P)) || ((e.kind === 'leader' || e.kind === 'knight' || e.kind === 'bear') && hostileP && near < 500) || ((e.ally || e.role === 'traveler') && e.hp < e.maxHp) || (!hostileP && !e.important && e.hp < e.maxHp && near < 400);
-  const top = e.y - (e.animal ? 22 : 28) - (e.kind === 'bear' ? 8 : 0);
+  const showBar = (hostileP && (e.hp < e.maxHp || e.target === P)) || ((e.kind === 'leader' || e.kind === 'knight' || e.kind === 'bear' || e.boss) && hostileP && near < 500) || ((e.ally || e.role === 'traveler') && e.hp < e.maxHp) || (!hostileP && !e.important && e.hp < e.maxHp && near < 400);
+  const top = e.y - (e.animal ? 22 : 28) - (e.kind === 'bear' ? 8 : 0) - (e.scale ? (e.scale - 1) * 28 : 0);
   if (showBar) {
-    const w = e.kind === 'leader' || e.kind === 'knight' || e.kind === 'bear' ? 46 : 34; const f = clamp(e.hp / e.maxHp, 0, 1);
+    const w = e.kind === 'leader' || e.kind === 'knight' || e.kind === 'bear' || e.boss ? 46 : 34; const f = clamp(e.hp / e.maxHp, 0, 1);
     g.fillStyle = 'rgba(0,0,0,.65)'; g.fillRect(e.x - w / 2 - 1, top - 1, w + 2, 6);
     g.fillStyle = hostileP ? (f > .5 ? '#d8403a' : '#ff6a3a') : e.ally || e.role === 'traveler' ? '#5ab0e0' : '#b8b090'; g.fillRect(e.x - w / 2, top, w * f, 4);
   }
-  if ((e.kind === 'leader' || e.kind === 'knight' || (e.role && e.role !== 'citizen')) && near < 260) {
+  if ((e.kind === 'leader' || e.kind === 'knight' || e.boss || e.named || (e.role && e.role !== 'citizen')) && near < 260) {
     g.font = `${e.role ? 'italic ' : ''}11px "EB Garamond", Georgia, serif`; g.textAlign = 'center';
     const nm = e.kind === 'knight' && e.k != null ? `Knight of ${KDATA[e.k].name}` : e.name;
     g.lineWidth = 3; g.strokeStyle = 'rgba(0,0,0,.8)'; g.strokeText(nm, e.x, top - 5); g.fillStyle = hostileP ? '#ffb0a0' : e.role === 'ruler' ? '#ffd76a' : '#f0e6cc'; g.fillText(nm, e.x, top - 5);
   }
   if (e.role === 'elder' && e.place != null) { const pl = W.places[e.place]; if ((pl.offers && pl.offers.length) || pl.request || !pl.offers) { const b = Math.sin(t * 4) * 3; g.font = 'bold 20px Cinzel, Georgia'; g.textAlign = 'center'; g.lineWidth = 4; g.strokeStyle = '#000'; g.strokeText('!', e.x, top - 18 + b); g.fillStyle = '#ffd24a'; g.fillText('!', e.x, top - 18 + b); } }
-  if (e.role === 'ruler' && !Q.active.some(q => q.royal === e.k) && K.rep[e.k] >= -10) { const b = Math.sin(t * 4) * 3; g.font = 'bold 18px Cinzel, Georgia'; g.textAlign = 'center'; g.lineWidth = 4; g.strokeStyle = '#000'; g.strokeText('♛', e.x, top - 18 + b); g.fillStyle = '#ffd24a'; g.fillText('♛', e.x, top - 18 + b); }
+  const sMark = STORY && (e.role === 'story' || e.role === 'ruler') && storyWants(e);
+  if (sMark) { const b = Math.sin(t * 4) * 3; g.font = 'bold 20px Cinzel, Georgia'; g.textAlign = 'center'; g.lineWidth = 4; g.strokeStyle = '#000'; g.strokeText('✦', e.x, top - 18 + b); g.fillStyle = '#ffcf4a'; g.fillText('✦', e.x, top - 18 + b); }
+  else if (e.role === 'ruler' && !Q.active.some(q => q.royal === e.k) && K.rep[e.k] >= -10) { const b = Math.sin(t * 4) * 3; g.font = 'bold 18px Cinzel, Georgia'; g.textAlign = 'center'; g.lineWidth = 4; g.strokeStyle = '#000'; g.strokeText('♛', e.x, top - 18 + b); g.fillStyle = '#ffd24a'; g.fillText('♛', e.x, top - 18 + b); }
   if (e.say) {
     g.font = '13px "EB Garamond", Georgia, serif'; const tw = g.measureText(e.say.text).width + 16; const bx = e.x - tw / 2, by = top - 34;
     g.globalAlpha = Math.min(1, e.say.t * 3); g.fillStyle = 'rgba(245,234,205,.95)'; rrect(g, bx, by, tw, 22, 6); g.fill(); g.strokeStyle = '#6a4a22'; g.lineWidth = 1; g.stroke();
@@ -3677,6 +4060,11 @@ function updateHUD(force) {
   $('xpFill').style.transform = `scaleX(${P.xp / xpNeed(P.lvl)})`;
   setIf('lvl', P.lvl, v => $('hudLvl').textContent = v);
   setIf('gold', P.gold, v => $('goldText').textContent = fmt(v));
+  if (STORY) {
+    let boss = null, bd = 760; for (const e of ents) if (e.boss && !e.dead && playerHostileTo(e)) { const d = dist(P.x, P.y, e.x, e.y); if (d < bd) { bd = d; boss = e; } }
+    setIf('boss', boss ? boss.id : 0, () => { $('bossBar').classList.toggle('hidden', !boss); if (boss) $('bbN').textContent = boss.name.toUpperCase(); });
+    if (boss) $('bbF').style.transform = `scaleX(${clamp(boss.hp / boss.maxHp, 0, 1)})`;
+  } else setIf('boss', 0, () => $('bossBar').classList.add('hidden'));
   if (!force && (hudT -= 1) > 0) return; hudT = 10;
   const tt = tod(); const tn = tt < .22 ? 'Night' : tt < .3 ? 'Dawn' : tt < .45 ? 'Morning' : tt < .55 ? 'Midday' : tt < .7 ? 'Afternoon' : tt < .8 ? 'Dusk' : 'Night';
   setIf('clk', `${isNight() ? '☾' : '☀'} Day ${dayNum()} · ${tn}`, v => $('clock').textContent = v);
@@ -3689,7 +4077,7 @@ function updateHUD(force) {
   setIf('sh', S.hid + '|' + P.mounted + '|' + !!horseEnt, () => { const sl = $('slotH'); sl.querySelector('img').src = S.hid ? itemIcon(S.hid) : itemIcon('old_horse'); sl.querySelector('img').style.opacity = S.hid ? 1 : .3; sl.querySelector('.sn').textContent = S.horse ? S.horse.name : 'No Horse'; sl.querySelector('.ss').textContent = S.horse ? (P.mounted ? `Riding · ×${S.hspd} speed` : 'Dismounted · [F] to ride') : 'On foot'; sl.classList.toggle('mounted', P.mounted); });
   // quest tracker
   const qs = Q.active.slice().sort((a, b) => (b.id === Q.tracked) - (a.id === Q.tracked)).slice(0, 3);
-  const qh = qs.map(q => { const tg = questTarget(q); return `<div class="qt hudbox ${q.id === Q.tracked ? 'tracked' : ''}"><div class="qn">${esc(q.title)}</div><div class="qo">${esc(questObjective(q))}</div>${tg ? `<div class="qd">${leagues(dist(P.x, P.y, tg.x, tg.y))} leagues ${compass(tg.x - P.x, tg.y - P.y)}</div>` : ''}</div>`; }).join('') + (Q.active.length > 3 ? `<div class="qd" style="padding-left:10px;color:var(--muted);font-style:italic;font-size:12px">+${Q.active.length - 3} more — press J</div>` : '');
+  const qh = qs.map(q => { const tg = questTarget(q); return `<div class="qt hudbox ${q.id === Q.tracked ? 'tracked' : ''}${q.type === 'story' && q.main ? ' story' : ''}"><div class="qn">${esc(q.title)}</div><div class="qo">${esc(questObjective(q))}</div>${tg ? `<div class="qd">${leagues(dist(P.x, P.y, tg.x, tg.y))} leagues ${compass(tg.x - P.x, tg.y - P.y)}</div>` : ''}</div>`; }).join('') + (Q.active.length > 3 ? `<div class="qd" style="padding-left:10px;color:var(--muted);font-style:italic;font-size:12px">+${Q.active.length - 3} more — press J</div>` : '');
   setIf('qt', qh, v => $('questTracker').innerHTML = v);
   // prompt
   let pr = '';
@@ -3733,20 +4121,43 @@ $('pauseScreen').addEventListener('click', e => {
   else if (a === 'quitNoSave') toMainMenu();
 });
 function toMainMenu() { UI.closeAll(); closeDialog(); G.state = 'menu'; $('hud').classList.add('off'); refreshMenu(); UI.show('mainMenu'); }
-function hasSave() { try { return !!localStorage.getItem('fk_save'); } catch (e) { return false; } }
+const saveKey = (mode = G.mode) => mode === 'story' ? 'fk_story' : 'fk_save';
+function hasSave(mode = G.mode) { try { return !!localStorage.getItem(saveKey(mode)); } catch (e) { return false; } }
+function readSave(mode) { try { return JSON.parse(localStorage.getItem(saveKey(mode)) || 'null'); } catch (e) { return null; } }
+let pendingMode = 'sandbox';
 function refreshMenu() {
-  $('btnContinue').classList.toggle('hidden', !hasSave()); $('newConfirm').classList.add('hidden');
+  $('btnContinue').classList.toggle('hidden', !hasSave('sandbox') && !hasSave('story'));
   $('menuBanners').innerHTML = KDATA.map((k, i) => `<div><img src="${bannerURL(i)}" alt="">${k.name.toUpperCase()}</div>`).join('');
 }
-$('btnNew').onclick = () => { SND.init(); if (hasSave()) $('newConfirm').classList.remove('hidden'); else startNew(); };
-$('btnNewYes').onclick = () => startNew();
-$('btnNewNo').onclick = () => $('newConfirm').classList.add('hidden');
-$('btnContinue').onclick = () => { SND.init(); continueGame(); };
+function saveSummary(d) {
+  const day = Math.floor((d.time || 0) / DAYLEN + .3) + 1, when = d.savedAt ? new Date(d.savedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+  let top = `Day ${day} · Level ${d.P && d.P.lvl || 1}`;
+  if (d.story) { const mq = (d.Q.active || []).find(q => q.type === 'story' && q.main); top = (d.story.done ? 'Story complete · free roam' : mq ? esc(mq.title) : 'In progress') + ' · ' + top; }
+  return top + (when ? `<div class="mcS">Saved ${esc(when)}</div>` : '');
+}
+$('btnNew').onclick = () => { SND.init(); $('newConfirm').classList.add('hidden'); $('modePick').classList.remove('hidden'); UI.open('mode'); };
+document.querySelectorAll('#modePick .modeCard').forEach(el => el.addEventListener('click', () => {
+  pendingMode = el.dataset.mode; SND.play('ui');
+  if (!hasSave(pendingMode)) { UI.closeAll(); startNew(pendingMode); return; }
+  $('newConfirmText').innerHTML = `You already have a ${pendingMode} game in progress. Starting a new one forges a fresh realm, and your old ${pendingMode} save will be <b>overwritten</b> the next time you save.`;
+  $('modePick').classList.add('hidden'); $('newConfirm').classList.remove('hidden');
+}));
+$('btnNewYes').onclick = () => { UI.closeAll(); startNew(pendingMode); };
+$('btnNewNo').onclick = () => { $('newConfirm').classList.add('hidden'); $('modePick').classList.remove('hidden'); };
+$('btnContinue').onclick = () => {
+  SND.init(); const sb = readSave('sandbox'), st = readSave('story');
+  if (!sb || !st) { continueGame(st ? 'story' : 'sandbox'); return; }
+  $('contList').innerHTML = [['story', st, 'STORY MODE'], ['sandbox', sb, 'SANDBOX']].map(([m, d, t]) => `<div class="modeCard${m === 'story' ? ' story' : ''}" data-mode="${m}"><div class="mcT">${t}</div><div class="mcD">${saveSummary(d)}</div></div>`).join('');
+  $('contList').querySelectorAll('.modeCard').forEach(el => el.onclick = () => { SND.play('ui'); UI.closeAll(); continueGame(el.dataset.mode); });
+  UI.open('cont');
+};
 $('btnMenuSettings').onclick = () => { SND.init(); UI.open('settings'); };
 $('btnHow').onclick = () => UI.open('help');
 $('btnRespawn').onclick = () => respawnPlayer();
 $('btnLoadSave').onclick = () => { UI.hide('deathScreen'); if (hasSave()) continueGame(); else { toast('No save found — rising again instead.', 'bad'); respawnPlayer(); } };
 $('btnDeathMenu').onclick = () => { UI.hide('deathScreen'); toMainMenu(); };
+$('btnEndSandbox').onclick = () => { UI.hide('endScreen'); G.state = 'play'; saveGame(true); toast('The tale is told, but the realm endures. The world is yours to roam.', 'gold'); };
+$('btnEndMenu').onclick = () => { UI.hide('endScreen'); toMainMenu(); };
 
 function withLoading(text, fn) { $('loadText').textContent = text; $('loading').classList.remove('done'); setTimeout(() => { try { fn(); } finally { $('loading').classList.add('done'); } }, 60); }
 function prepareWorld(seed) { genWorld(seed); buildPalette(); buildTreeSprites(); buildMapLayers(); chunkCache.clear(); }
@@ -3757,23 +4168,25 @@ function resetState() {
   newKingdoms(); newQuests(); newFog();
 }
 function beginPlay() {
-  G.state = 'play'; UI.hide('mainMenu'); UI.closeAll(); $('hud').classList.remove('off');
+  G.state = 'play'; UI.hide('mainMenu'); UI.hide('endScreen'); UI.closeAll(); $('hud').classList.remove('off');
   cam.x = P.x; cam.y = P.y; updateDiscovery(); updateHUD(true);
 }
-function startNew() {
+function startNew(mode = 'sandbox') {
   withLoading('FORGING A NEW REALM…', () => {
+    G.mode = mode; STORY = mode === 'story' ? newStory() : null;
     prepareWorld(Math.floor(Math.random() * 1e9)); resetState(); newPlayer();
     const s = W.start; s.disc = true; W.places[0].disc = true; revealArea(s.tx, s.ty, 22);
     genVillageOffers(s); const easy = makeQuest('camp', s, s.owner); if (easy) s.offers[0] = easy;
     beginPlay();
+    if (STORY) { storyBegin(); setTimeout(() => toast('Tip: press <kbd>J</kbd> for your quest journal. Main quests are marked with ✦.', ''), 9000); return; }
     setTimeout(() => toast(`You arrive in <b>${s.name}</b> with a wooden sword and ${P.gold} gold. Speak to the village elder <kbd>E</kbd> to find work.`, 'gold'), 1200);
     setTimeout(() => toast('Tip: press <kbd>K</kbd> for Diplomacy, <kbd>M</kbd> for the map, <kbd>I</kbd> for your pack.', ''), 5500);
   });
 }
-function continueGame() {
-  let d; try { d = JSON.parse(localStorage.getItem('fk_save')); } catch (e) { d = null; }
+function continueGame(mode = G.mode) {
+  const d = readSave(mode);
   if (!d) { toast('Save data could not be read.', 'bad'); return; }
-  withLoading('RETURNING TO THE REALM…', () => { if (!W || W.seed !== d.seed) prepareWorld(d.seed); loadGame(d); beginPlay(); toast(`Welcome back. Day ${dayNum()}.`, 'gold'); });
+  withLoading('RETURNING TO THE REALM…', () => { G.mode = mode; if (!W || W.seed !== d.seed) prepareWorld(d.seed); loadGame(d); beginPlay(); toast(`Welcome back. Day ${dayNum()}.`, 'gold'); });
 }
 
 /* ---------------- Save / load ---------------- */
@@ -3787,11 +4200,12 @@ function saveGame(silent) {
     P: { x: P.x, y: P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
     horse: horseEnt ? { x: horseEnt.x, y: horseEnt.y } : null,
     K: { rel: K.rel, aff: K.aff, rep: K.rep, mil: K.mil, reasons: K.reasons, events: K.events, kev: K.kev, repWhy: K.repWhy, gifts: K.gifts, log: K.log, cd: {} },
-    Q: { active: Q.active.filter(q => q.type !== 'raid').map(qStrip), done: Q.done.map(qStrip), tracked: Q.tracked, next: Q.next },
+    Q: { active: Q.active.filter(q => q.type !== 'raid' && q.sid !== 'hraid').map(qStrip), done: Q.done.map(qStrip), tracked: Q.tracked, next: Q.next },
     places: W.places.map(p => ({ disc: p.disc, rumor: p.rumor, cleared: p.cleared, chestOpened: p.chestOpened, clearedAt: p.clearedAt, dead: p.dead, owner: p.owner, blessed: p.blessed, investigated: p.investigated, rumorUsed: p.rumorUsed, backerRevealed: p.backerRevealed })),
     exp: packBits(EXP), settings,
   };
-  try { localStorage.setItem('fk_save', JSON.stringify(data)); if (!silent) { toast('Game saved.', 'good'); SND.play('pickup'); } else toast('Autosaved.', ''); }
+  if (G.mode === 'story') { data.mode = 'story'; data.story = STORY; }
+  try { localStorage.setItem(saveKey(), JSON.stringify(data)); if (!silent) { toast('Game saved.', 'good'); SND.play('pickup'); } else toast('Autosaved.', ''); }
   catch (e) { toast('Could not save: browser storage is unavailable or full.', 'bad'); }
 }
 function loadGame(d) {
@@ -3811,8 +4225,1059 @@ function loadGame(d) {
     if (q.type === 'investigate' && q.stage === 1) q.stage = 0;
     if (q.type === 'investigate' && q.stage === 2) pickups.push({ x: W.places[q.place].x, y: W.places[q.place].y + TS, vx: 0, vy: 0, type: 'qitem', id: 'clue', q: 1, t: 1, qid: q.id });
     if (q.type === 'assist') q.stage = 0;
+    if (q.type === 'story') { q.sp = 0; q.amb = 0; q.x0 = 0; }
   });
+  G.mode = d.mode === 'story' ? 'story' : 'sandbox'; STORY = d.story || null;
   if (d.settings) { settings = Object.assign({}, DEFAULT_SETTINGS, d.settings); saveSettings(); applySettings(); }
+}
+
+/* =====================================================================
+   STORY MODE — quest engine, story content and endings.
+   Sandbox games never create STORY, so nothing below runs for them.
+   ===================================================================== */
+let STORY = null;
+const storyOn = () => !!STORY && !STORY.done;
+function newStory() { return { v: 1, path: null, f: {}, refs: {}, spots: {}, deeds: [], qdone: [], saved: 0, lost: 0, lostV: [], raids: false, raidT: 480, done: false, ending: null }; }
+const SF = (k, v) => v === undefined ? STORY.f[k] : (STORY.f[k] = v);
+function deed(t) { STORY.deeds.push({ d: dayNum(), t }); logEvent(t, []); }
+const sT = b => clamp(Math.max(b, Math.ceil(P.lvl / 3)), 1, 4);
+const LS = () => 1 + (P.lvl - 1) * .07;
+function sScale(e, hp, dmg) { e.hp = e.maxHp = Math.round(hp * LS()); if (dmg) e.dmg = dmg * (1 + (P.lvl - 1) * .04); }
+function sSoon(fn) { const s = STORY; const go = () => { if (STORY !== s || G.state === 'menu') return; if (dialogOpen || G.state !== 'play' || UI.stack.length) { setTimeout(go, 400); return; } fn(); }; setTimeout(go, 350); }
+const DIRW = { E: 'east', SE: 'southeast', S: 'south', SW: 'southwest', W: 'west', NW: 'northwest', N: 'north', NE: 'northeast' };
+const dirW = (from, to) => DIRW[compass(to.x - from.x, to.y - from.y)];
+
+/* ---------------- Story places (resolved once per world, then cached) ---------------- */
+function sref(key, fn) { if (STORY.refs[key] == null) { const p = fn(); STORY.refs[key] = p ? p.id : 0; } return W.places[STORY.refs[key]]; }
+function sspot(key, fn) { if (!STORY.spots[key]) { const s = fn(); STORY.spots[key] = { x: Math.round(s.x), y: Math.round(s.y) }; } return STORY.spots[key]; }
+const soff = (p, dx, dy) => ({ x: p.x + dx * TS, y: p.y + dy * TS });
+const rulerPos = k => ({ x: W.places[k].x, y: W.places[k].y - 1.2 * TS });
+function ruinNear(key, from, filt) {
+  return sref(key, () => { const used = Object.values(STORY.refs); return nearestPlace(from.x, from.y, p => p.type === 'ruin' && !used.includes(p.id) && (!filt || filt(p))) || nearestPlace(from.x, from.y, p => p.type === 'ruin' && !used.includes(p.id)) || nearestPlace(from.x, from.y, p => p.type === 'ruin'); });
+}
+const SP = {
+  camp: () => sref('camp', () => nearestPlace(W.start.x, W.start.y, p => p.type === 'camp' && p.tier <= 2) || nearestPlace(W.start.x, W.start.y, p => p.type === 'camp')),
+  barrow: () => ruinNear('barrow', W.start, p => !p.guarded && dist(p.x, p.y, W.start.x, W.start.y) < 150 * TS),
+  hidden: kind => sref('h_' + kind, () => W.places.find(p => p.type === 'hidden' && HIDDEN_DEFS[p.def].kind === kind) || nearestPlace(W.start.x, W.start.y, p => p.type === 'ruin')),
+  ruinIn: (key, k) => ruinNear(key, W.places[k], p => p.owner === k),
+  villageOf: (key, k, from) => sref(key, () => nearestPlace(from.x, from.y, p => p.type === 'village' && p.owner === k) || W.places[k]),
+};
+const B = () => SP.barrow();
+const grove = () => SP.hidden('grove');
+const hermit = () => SP.hidden('hermit');
+const sCourierSpot = () => sspot('courier', () => randomLandSpot(W.start.x, W.start.y, 12, 20));
+const sMeetV = () => sref('meetV', () => nearestPlace(B().x, B().y, p => p.type === 'village' && p.owner !== 0) || W.places[1]);
+function sWorstFoe(k) { let j = (k + 2) % 4, v = 999; for (let o = 0; o < 4; o++) if (o !== k && getRel(k, o) < v) { v = getRel(k, o); j = o; } return j; }
+function sWarSpot(k, j) {
+  return sspot('war' + k + '_' + j, () => {
+    const o = nearestPlace(W.places[j].x, W.places[j].y, p => p.type === 'outpost' && p.owner === k) || W.places[k];
+    const a = Math.atan2(W.places[j].y - o.y, W.places[j].x - o.x); return randomLandSpot(o.x + Math.cos(a) * 10 * TS, o.y + Math.sin(a) * 10 * TS, 0, 6);
+  });
+}
+
+/* ---------------- Characters ---------------- */
+const LK = {
+  tam: { body: '#7a6a4a', head: 'hair', hair: '#8a6a3a', skin: '#e0b890' },
+  courier: { body: '#9c3b2c', head: 'hair', hair: '#3a2a1a', skin: '#d8a878', cape: '#6e1a12' },
+  wren: { body: '#3a3440', head: 'hood', hood: '#26222c', skin: '#f0d0b0', cape: '#15131a', weapon: { wk: 'sword', len: 20, col: '#c8ced4' } },
+  corvin: { body: '#6a6a6e', head: 'hood', hood: '#3a3a3e', skin: '#d8b090' },
+  caddock: { body: '#6a5a3a', head: 'hair', hair: '#d8d8d0', beard: 1, skin: '#e0c0a0' },
+  vesper: { body: '#26262c', head: 'hood', hood: '#16161c', skin: '#e8c8a8', cape: '#5a1a1a', weapon: { wk: 'sword', len: 24, col: '#c8ced4' } },
+  thessaly: { body: '#2e6e4b', head: 'hood', hood: '#1e5e3b', skin: '#e8d0b0', cape: '#15502c', weapon: { wk: 'bow', len: 20, col: '#6a4424' } },
+  brom: { body: '#5a4a3a', head: 'cap', skin: '#c89868' },
+  herald: { body: '#2f6fd6', head: 'cap', skin: '#e0b890', cape: '#f5d76e' },
+};
+const envoyLook = k => ({ body: KDATA[k].color, head: 'hair', hair: '#5a4a3a', skin: '#e0b890', cape: KDATA[k].accent });
+function knightLook(k, wk = 'sword') {
+  const kc = KDATA[k].color;
+  return { body: '#d2d8de', shiny: 1, head: 'great', plume: kc, pauld: 1, skin: '#e0b48a', tabard: kc, cape: kc, weapon: { wk, len: { great: 44, axe: 30, spear: 48 }[wk] || 40, col: '#e2e8ee' }, shield: wk === 'great' || wk === 'spear' ? null : { b: ITEMS.knight_shield, col: kc } };
+}
+const fakeP = (look, k) => ({ kind: 'npc', _look: look, k });
+const SPK = e => ({ name: e.name, role: e.srole || '', portrait: e });
+const NARR = { name: 'Chronicle', role: '', portrait: 'ember' };
+function rulerSpk(k) { const e = ents.find(x => x.role === 'ruler' && x.k === k && !x.dead); return { name: KDATA[k].ruler, role: KDATA[k].rulerTitle, portrait: e || { royal: true, k } }; }
+const N = {
+  tam: () => ({ key: 'tam', name: 'Tam the Shepherd', role: `Shepherd of ${W.start.name}`, look: LK.tam, at: soff(W.start, 2, 3.2), k: 0 }),
+  courier: () => ({ key: 'courier', name: 'Wounded Courier', role: 'Royal courier of Albion', look: LK.courier, at: sCourierSpot(), k: 0 }),
+  wren: () => ({ key: 'wren', name: 'Lady Wren', role: 'Spymaster of Albion', look: LK.wren, at: soff(W.places[0], -2, 2.5), k: 0 }),
+  corvin: at => ({ key: 'corvin', name: 'Corvin', role: 'Adept of the Ashen Circle', look: LK.corvin, at }),
+  caddock: at => ({ key: 'caddock', name: 'Brother Caddock', role: 'Hermit scholar of the Old Gods', look: LK.caddock, at: at || soff(hermit(), 2.5, 1) }),
+  thessaly: at => ({ key: 'thessaly', name: 'Warden Thessaly', role: 'Warden of the Eldorian forests', look: LK.thessaly, at, k: 3 }),
+  vesper: at => ({ key: 'vesper', name: 'Vesper', role: 'Blade of the Ashen Circle', look: LK.vesper, at }),
+};
+const SIDLE = { tam: 'Gods keep you, sir knight.', wren: 'The walls have ears, knight.', caddock: 'The dead are patient. We cannot afford to be.', thessaly: 'Walk softly in my forest.', vesper: 'Not here. Not now.', herald: 'The lists are open to all who dare!', brom: 'I saw nothing, sir. Nothing at all.' };
+
+/* ---------------- Dialog helpers ---------------- */
+function sChat(sp, pages, opts) {
+  let i = 0;
+  const show = () => {
+    const pg = pages[i], who = Array.isArray(pg) ? pg[0] : sp, txt = Array.isArray(pg) ? pg[1] : pg, last = i >= pages.length - 1;
+    if (who === NARR) SND.play('narrate');
+    openDialog({ name: who.name, role: who.role, portrait: who.portrait, text: txt, options: last ? (opts || [{ t: 'Continue', fn: closeDialog }]) : [{ t: 'Continue ▸', fn: () => { i++; show(); } }] });
+  };
+  show();
+}
+const goOn = (q, t = 'Continue') => [{ t, fn: () => { sAdvance(q); closeDialog(); } }];
+
+/* ---------------- Step builders ---------------- */
+const S_GO = (obj, at, r, say) => ({ t: 'go', obj, at, r: r || 6, say });
+const S_TALK = (obj, npc, talk, x) => Object.assign({ t: 'talk', obj, npc, talk }, x);
+const S_RULER = (obj, k, talk, x) => Object.assign({ t: 'ruler', obj, k, talk }, x);
+const S_FIGHT = (obj, at, waves, x) => Object.assign({ t: 'fight', obj, at, waves }, x);
+const S_DUEL = (obj, at, champ, x) => Object.assign({ t: 'duel', obj, at, champ, near: 12 }, x);
+const S_CLEAR = (obj, place, x) => Object.assign({ t: 'clear', obj, place }, x);
+const S_ITEM = (obj, at, item, x) => Object.assign({ t: 'item', obj, at, item }, x);
+const S_COND = (obj, test, x) => Object.assign({ t: 'cond', obj, test }, x);
+const S_ESCORT = (obj, npc, at, x) => Object.assign({ t: 'escort', obj, npc, at }, x);
+const S_MULTI = (obj, subs, x) => Object.assign({ t: 'multi', obj, subs }, x);
+
+/* ---------------- Engine ---------------- */
+const SQ = {};
+const sStep = q => SQ[q.sid] ? SQ[q.sid].steps[q.stage] : null;
+const sObj = (st, q) => typeof st.obj === 'function' ? st.obj(q) : st.obj;
+const sK = (st, q) => typeof st.k === 'function' ? st.k(q) : st.k;
+const fv = (v, q) => typeof v === 'function' ? v(q) : v;
+function sSkip(q) { const def = SQ[q.sid]; while (q.stage < def.steps.length && def.steps[q.stage].skip && def.steps[q.stage].skip(q)) q.stage++; }
+function sStart(sid, data) {
+  const def = SQ[sid];
+  const q = Object.assign({ id: Q.next++, type: 'story', sid, stage: 0, sp: 0, started: G.time, main: !def.side }, data);
+  q.k = def.k != null ? fv(def.k, q) : null;
+  q.title = fv(def.title, q); q.desc = fv(def.desc, q); q.giverName = fv(def.giver, q) || '';
+  const r = fv(def.reward, q) || {};
+  q.reward = { gold: r.gold || 0, xp: r.xp || 0, rep: r.rep || {}, rel: r.rel || [], items: r.items || [] };
+  Q.active.push(q); if (!def.side || !Q.tracked) Q.tracked = q.id;
+  sSkip(q);
+  if (!def.quiet) { toast(`<b>${def.side ? 'Quest' : 'Main quest'}:</b> ${esc(q.title)}`, 'gold'); SND.play(def.side ? 'quest' : 'mainquest'); }
+  updateHUD(true);
+  return q;
+}
+function sAdvance(q, n = 1) {
+  if (!Q.active.includes(q)) return;
+  q.stage += n; q.sp = 0; q.w = 0; q.wt = 0; q.foes = null; q.amb = 0; q.x0 = 0;
+  sSkip(q);
+  if (q.stage >= SQ[q.sid].steps.length) return sFinish(q);
+  toast(`<b>${esc(q.title)}</b> — ${esc(storyObjective(q))}`, 'gold'); SND.play('story');
+  updateHUD(true);
+}
+function sFinish(q) {
+  STORY.qdone.push(q.sid);
+  completeQuest(q);
+  const def = SQ[q.sid]; if (def.done) def.done(q);
+}
+function sSubDone(q, id) { q.m = q.m || {}; q.m[id] = 1; updateHUD(true); }
+function storyObjective(q) {
+  const st = sStep(q); if (!st) return '';
+  let o = sObj(st, q); if (st.limit && q.sp && q.t0) o += ` (${Math.max(0, Math.ceil(st.limit - (G.time - q.t0)))}s)`;
+  return o;
+}
+function storyTarget(q) {
+  const st = sStep(q); if (!st) return null;
+  switch (st.t) {
+    case 'ruler': return rulerPos(sK(st, q));
+    case 'talk': { const s = st.npc(q), e = sEnt(s.key); return e ? { x: e.x, y: e.y } : { x: s.at.x, y: s.at.y }; }
+    case 'clear': { const p = st.place(q); return { x: p.x, y: p.y }; }
+    case 'cond': { const a = st.at ? st.at(q) : null; return a ? { x: a.x, y: a.y } : null; }
+    case 'multi': {
+      let best = null, bd = 1e12;
+      st.subs(q).forEach(s => { if (q.m && q.m[s.id]) return; const t = s.k != null ? rulerPos(s.k) : s.at(q); const d = dist(P.x, P.y, t.x, t.y); if (d < bd) { bd = d; best = t; } });
+      return best;
+    }
+    default: { const a = st.at(q); return a ? { x: a.x, y: a.y } : null; }
+  }
+}
+function storyUpdate(q) {
+  if (!storyOn()) return;
+  const st = sStep(q); if (!st) return;
+  const tg = storyTarget(q);
+  switch (st.t) {
+    case 'go': if (tg && dist(P.x, P.y, tg.x, tg.y) < st.r * TS) { const say = st.say; sAdvance(q); if (say) say(q); } break;
+    case 'clear': { const p = st.place(q); if (!q.sp) { q.sp = 1; p.rumor = true; } if (p.cleared) sAdvance(q); break; }
+    case 'item': if (!pickups.some(p => p.qid === q.id && p.id === st.item)) { const a = st.at(q); pickups.push({ x: a.x, y: a.y, vx: 0, vy: 0, type: 'qitem', id: st.item, q: 1, t: 1, qid: q.id }); } break;
+    case 'cond': if (st.test(q)) sAdvance(q); break;
+    case 'fight': case 'duel': sFight(q, st, tg); break;
+    case 'escort': sEscort(q, st, tg); break;
+    case 'multi': if (st.subs(q).every(s => q.m && q.m[s.id])) sAdvance(q); break;
+  }
+}
+function storyPickup(q, p) { const st = sStep(q); if (st && st.t === 'item' && p.id === st.item) sAdvance(q); }
+function sEnt(key) { return ents.find(e => e.skey === key && !e.dead); }
+function sEnsure(s, q) {
+  if (sEnt(s.key) || dist(P.x, P.y, s.at.x, s.at.y) > 1600) return;
+  const f = findFree(s.at.x, s.at.y);
+  mkActor('npc', f.x, f.y, { role: 'story', skey: s.key, name: s.name, srole: s.role || '', _look: s.look, k: s.k, stand: true, standFace: Math.PI / 2, quest: q.id });
+}
+function sNpcSpecs(q, st) {
+  const out = [];
+  if (st.t === 'talk') out.push(st.npc(q));
+  if (st.t === 'escort') out.push(Object.assign({}, st.npc(q), { follow: true }));
+  if (st.npcs) out.push(...st.npcs(q));
+  return out;
+}
+function storyTalk(e) {
+  for (const q of Q.active) {
+    if (q.type !== 'story') continue; const st = sStep(q);
+    if (st && st.t === 'talk' && st.npc(q).key === e.skey) { st.talk(q, e); return; }
+  }
+  e.say = { text: SIDLE[e.skey] || 'Well met, knight.', t: 3 };
+}
+function storyRulerStep(k) {
+  if (!storyOn()) return null;
+  for (const q of Q.active) {
+    if (q.type !== 'story') continue; const st = sStep(q); if (!st) continue;
+    if (st.t === 'ruler' && sK(st, q) === k) return { q, label: sObj(st, q), fn: e => st.talk(q, e) };
+    if (st.t === 'multi') { const s = st.subs(q).find(s => s.k === k && !(q.m && q.m[s.id])); if (s) return { q, label: sObj(st, q), fn: e => s.talk(q, e, s.id) }; }
+  }
+  return null;
+}
+function storyWants(e) {
+  if (!storyOn()) return false;
+  if (e.role === 'ruler') return !!storyRulerStep(e.k);
+  for (const q of Q.active) { if (q.type !== 'story') continue; const st = sStep(q); if (st && st.t === 'talk' && st.npc(q).key === e.skey) return true; }
+  return false;
+}
+
+/* ---------------- Combat steps ---------------- */
+function sWave(q, st, tg) {
+  const waves = fv(st.waves, q), list = waves && waves[q.w]; if (!list) return;
+  list.forEach(([kind, n, ex = {}]) => {
+    for (let i = 0; i < n; i++) {
+      const a = rand(0, TAU), r = (ex.r || 3) * TS * Math.sqrt(Math.random());
+      const f = findFree(tg.x + Math.cos(a) * r, tg.y + Math.sin(a) * r);
+      const e = mkActor(kind, f.x, f.y, Object.assign({ tier: ex.hp ? undefined : sT(ex.tier || 1), quest: q.id, roam: true, home: { x: tg.x, y: tg.y }, leash: 900, aggro: 440 }, ex.o));
+      if (ex.name) e.name = ex.name;
+      if (ex.hp) sScale(e, ex.hp, ex.dmg);
+      if (ex.boss) e.boss = true;
+      if (ex.yieldAt) Object.assign(e, { yieldAt: ex.yieldAt, ykey: ex.key, yname: ex.yname, ysay: ex.ysay });
+      if (dist(e.x, e.y, P.x, P.y) < 700) e.target = P;
+      q.foes.f.push(e);
+    }
+  });
+}
+function sDuel(q, st, tg) {
+  const c = st.champ(q), f = findFree(tg.x + 70, tg.y);
+  const e = mkActor('champion', f.x, f.y, { name: c.name, k: c.k, _look: c.look, aggroPlayer: true, boss: true, quest: q.id, home: { x: tg.x, y: tg.y }, leash: 900, roam: true, aggro: 520, yieldAt: .3, ykey: c.yieldKey, yname: c.name, ysay: 'I yield! I yield!' });
+  sScale(e, 180 * c.p, 16 * Math.sqrt(c.p));
+  e.say = { text: c.say || 'Have at you!', t: 3 };
+  q.foes.f.push(e);
+}
+function sYield(e, q) {
+  Object.assign(e, { yielded: true, boss: false, target: null, aggroPlayer: false, questFoe: false, wind: 0, roam: false });
+  e.say = { text: e.ysay || 'I yield!', t: 3 };
+  SND.play(e.kind === 'champion' && Q.active.some(a => a.sid === 'r2') ? 'crowd' : 'yield');
+  if (e.ykey) Object.assign(e, { faction: 'civ', civ: true, important: true, role: 'story', skey: e.ykey, name: e.yname || e.name, stand: true, home: { x: e.x, y: e.y }, quest: q.id });
+  else Object.assign(e, { faction: 'civ', transient: true, quest: null, home: { x: e.x + rand(-300, 300), y: e.y + 420 } });
+}
+function sFightEnd(q) {
+  const R = q.foes; if (!R) return;
+  R.f.forEach(e => { if (!e.dead && !e.yielded) { e.quest = null; e.transient = true; } });
+  R.a.forEach(e => { if (e.dead) return; if (e.alias) removeEnt(e); else e.leaveAt = G.time + 45; });
+  R.p.forEach(e => { e.prot = 0; });
+}
+function sFight(q, st, tg) {
+  if (!q.sp) {
+    if (!tg || dist(P.x, P.y, tg.x, tg.y) > (st.near || 20) * TS) return;
+    q.sp = 1; q.w = 0; q.wt = 0; q.t0 = G.time; q.foes = { f: [], a: [], p: [] };
+    if (st.allies) q.foes.a = st.allies(q, tg.x, tg.y) || [];
+    if (st.protect) q.foes.p = st.protect(q, tg.x, tg.y) || [];
+    if (st.t === 'duel') sDuel(q, st, tg); else sWave(q, st, tg);
+    if (st.msg) toast(st.msg, 'war');
+    SND.play(st.sfx || (st.t === 'duel' ? 'duel' : q.foes.f.some(e => e.faction === 'hollow') ? 'hollow' : 'horn'));
+    return;
+  }
+  const R = q.foes; if (!R) { q.sp = 0; return; }
+  R.p.forEach(e => { if (e.dead && !e.lost) { e.lost = 1; if (st.onLoss) st.onLoss(q, e); } });
+  R.f.forEach(e => { if (!e.dead && !e.yielded && e.yieldAt && e.hp < e.maxHp * e.yieldAt) sYield(e, q); });
+  if (st.limit && G.time - q.t0 > st.limit) { sFightEnd(q); if (st.fail) st.fail(q); return; }
+  if (!R.f.every(e => e.dead || e.yielded)) return;
+  const waves = st.t === 'fight' ? fv(st.waves, q) : null;
+  if (waves && q.w + 1 < waves.length) {
+    if (!q.wt) { q.wt = G.time + 2.5; return; }
+    if (G.time < q.wt) return;
+    q.wt = 0; q.w++; R.f = []; sWave(q, st, tg);
+    const m = st.waveMsg && st.waveMsg[q.w]; if (m) toast(m, 'war');
+    SND.play(R.f.some(e => e.boss) ? 'boss' : R.f.some(e => e.faction === 'hollow') ? 'hollow' : 'horn');
+    return;
+  }
+  sFightEnd(q); if (st.won) st.won(q); sAdvance(q);
+}
+function sEscort(q, st, tg) {
+  const s = st.npc(q); let e = sEnt(s.key);
+  if (!e) { const f = findFree(P.x + 30, P.y + 20); e = mkActor('npc', f.x, f.y, { role: 'story', skey: s.key, name: s.name, srole: s.role || '', _look: s.look, k: s.k, quest: q.id }); }
+  if (!e.follow) Object.assign(e, { follow: true, stand: false, followDist: 55, spd: 150 });
+  if (!q.x0) { q.x0 = P.x; q.y0 = P.y; q.tot = Math.max(1, dist(P.x, P.y, tg.x, tg.y)); }
+  if (st.ambush && !q.amb && dist(P.x, P.y, q.x0, q.y0) > q.tot * .4) {
+    q.amb = 1; const a = Math.atan2(tg.y - P.y, tg.x - P.x);
+    st.ambush.forEach(([kind, n, ex = {}]) => { for (let i = 0; i < n; i++) { const f = findFree(P.x + Math.cos(a) * 360 + rand(-70, 70), P.y + Math.sin(a) * 360 + rand(-70, 70)); const b = mkActor(kind, f.x, f.y, { tier: sT(ex.tier || 1), transient: true, roam: true, aggro: 440 }); b.target = P; } });
+    if (st.amsg) { toast(st.amsg, 'war'); SND.play('horn'); }
+  }
+  if (dist(e.x, e.y, tg.x, tg.y) < 7 * TS) { Object.assign(e, { follow: false, stand: true, home: { x: e.x, y: e.y } }); sAdvance(q); }
+}
+function sKAllies(k, x, y, ns, nk) {
+  const out = [];
+  for (let i = 0; i < ns + nk; i++) { const f = findFree(x + rand(-4, 4) * TS, y + rand(3, 6) * TS); out.push(mkActor(i < nk ? 'knight' : 'soldier', f.x, f.y, { k, ally: true, roam: true, home: { x, y }, leash: 1200, aggro: 520, tier: sT(2) })); }
+  return out;
+}
+function sNamedAlly(kind, name, look, x, y, o) {
+  const f = findFree(x + rand(-2, 2) * TS, y + 3 * TS);
+  const e = mkActor(kind, f.x, f.y, Object.assign({ ally: true, roam: true, home: { x, y }, leash: 1200, aggro: 520, name, _look: look, named: true, alias: 1 }, o));
+  sScale(e, 300, 15); return e;
+}
+const sThessAlly = (x, y) => sNamedAlly('soldier', 'Thessaly', LK.thessaly, x, y, { k: 3, ranged: true, range: 250, cd: 1.5, windT: .5 });
+function sEnvoy(q, k, x, y) {
+  const f = findFree(x, y);
+  const e = mkActor('npc', f.x, f.y, { role: 'story', skey: 'envoy' + k, name: `Envoy of ${KDATA[k].name}`, _look: envoyLook(k), k, stand: true, quest: q.id, prot: 1 });
+  e.important = false; e.hp = e.maxHp = 260; return e;
+}
+
+/* ---------------- Story tick: NPC upkeep and Hollow raids ---------------- */
+let sTickT = 0;
+function storyTick(dt) {
+  if (!storyOn() || (sTickT -= dt) > 0) return; sTickT = .5;
+  const want = new Map();
+  Q.active.forEach(q => { if (q.type !== 'story') return; const st = sStep(q); if (st) sNpcSpecs(q, st).forEach(s => want.set(s.key, [s, q])); });
+  want.forEach(([s, q]) => { if (!s.follow && s.at) sEnsure(s, q); });
+  ents.filter(e => !e.dead && ((e.role === 'story' && !e.prot && (!want.has(e.skey) || (!e.follow && dist(P.x, P.y, e.x, e.y) > 2600))) || (e.leaveAt && G.time > e.leaveAt && dist(P.x, P.y, e.x, e.y) > 600))).forEach(removeEnt);
+  if (STORY.raids && !Q.active.some(q => q.sid === 'hraid' || q.sid === 'fin' || q.sid === 'coup')) {
+    STORY.raidT -= .5;
+    if (STORY.raidT <= 0) { STORY.raidT = rand(360, 520); sRaid(); }
+  }
+}
+function sRaid() {
+  const v = nearestPlace(P.x, P.y, p => p.type === 'village' && dist(P.x, P.y, p.x, p.y) < 2600 && dist(P.x, P.y, p.x, p.y) > 500 && !STORY.lostV.includes(p.id));
+  if (!v) return;
+  sStart('hraid', { v: v.id });
+  toast(`☠ The Hollow are attacking <b>${v.name}</b>, ${dirTo(P, v)} of you!`, 'war', bannerURL(v.owner)); SND.play('hollow');
+}
+
+/* ---------------- Act I: The Hedge Knight (shared prologue) ---------------- */
+SQ.p1 = {
+  title: 'A Rider in the Dark', giver: 'Tam the Shepherd', k: 0,
+  desc: () => `A shepherd of ${W.start.name} saw a royal courier run off the road by hooded men. Find the rider before they finish him.`,
+  reward: { gold: 30, xp: 60 },
+  steps: [
+    S_TALK('Speak with Tam the Shepherd', N.tam, (q, e) => sChat(SPK(e), [
+      `Sir knight! Gods be thanked. A rider came off the road ${dirW(W.start, sCourierSpot())} of the village not an hour past. Royal colors, arrow in his back. Three men in grey hoods ran him down into the brush.`,
+      `I'm only a shepherd. But you've a sword... of a sort.`,
+    ], [
+      { t: 'Show me where. I will find him.', fn: () => { sAdvance(q); closeDialog(); } },
+      { t: '"Of a sort?" It is a very fine wooden sword. ...Where did he fall?', fn: () => { SF('wit', 1); sAdvance(q); sChat(SPK(e), ['Oh, very fine, sir. Very... sturdy. Go, before they finish him!']); } },
+    ])),
+    S_FIGHT('Find the courier and drive off his attackers', () => sCourierSpot(), [[['bandit', 3, { tier: 1, name: 'Hooded Cutthroat' }]]], { near: 16, msg: 'Hooded cutthroats stand over the fallen courier!', npcs: () => [N.courier()] }),
+    S_TALK('Speak with the dying courier', N.courier, (q, e) => sChat(SPK(e), [
+      `...A knight? Good. Listen. The seal... don't let them have it. Take it to King Aldric. Only the King. Not...`,
+      [NARR, 'He presses a letter into your hand. The wax is grey, stamped with a small flame.'],
+      `...the ashes... are rising...`,
+    ], [{ t: 'Close his eyes.', fn: () => { addItem('ashen_letter', 1, 1); Object.assign(e, { dead: true, deadT: 0, hp: 0 }); deed(`Found a dying courier of Albion on the road near ${W.start.name}.`); sAdvance(q); closeDialog(); } }])),
+  ],
+  done: () => sStart('p2'),
+};
+SQ.p2 = {
+  title: "The King's Letter", giver: 'The dying courier', k: 0,
+  desc: () => `The courier died with a letter sealed in grey wax. He begged you to bring it to King Aldric at ${W.places[0].name}, and to no one else.`,
+  reward: { gold: 40, xp: 60, rep: { 0: 4 } },
+  steps: [
+    S_RULER('Bring the letter to King Aldric', 0, q => sChat(rulerSpk(0), [
+      `A hedge knight with a wooden sword, carrying one of my couriers' letters. Speak.`,
+      [NARR, "You tell him of the road, the hooded men and the courier's last words. The King turns the letter over, and his face goes still."],
+      `Grey wax, stamped with a flame. I have not seen that mark since my father's day, when the Ashen Circle was hunted out of these lands.`,
+      `My spymaster will make sense of this. Lady Wren waits in the courtyard. Give the letter to her, knight, and you have my thanks.`,
+    ], [
+      { t: 'It is an honor, Your Majesty.', fn: () => { addRep(0, 4, 'Served the King faithfully'); sAdvance(q); closeDialog(); } },
+      { t: 'Thanks are kind. Coin is kinder.', fn: () => { P.gold += 40; SF('mercenary', 1); sAdvance(q); sChat(rulerSpk(0), ['Ha! Honest, at least. Take these forty crowns, then, and go and see Lady Wren.']); } },
+    ])),
+    S_TALK('Give the letter to Lady Wren', N.wren, (q, e) => sChat(SPK(e), [
+      `So you're the one who found Tobin. He was one of mine.`,
+      [NARR, 'She breaks the grey seal, reads, and frowns.'],
+      `A cipher. Clever. It will take me a few days to break it.`,
+      `The men who killed him came out of a bandit camp ${dirW(W.start, SP.camp())} of ${W.start.name}. Brigands don't seal letters in grey wax, knight. Someone paid them. Burn that camp out and bring me whatever their paymaster kept.`,
+    ], [{ t: 'Consider it done.', fn: () => { removeItemById('ashen_letter'); sAdvance(q); closeDialog(); } }])),
+  ],
+  done: () => sStart('p3'),
+};
+SQ.p3 = {
+  title: 'Blood on the Road', giver: 'Lady Wren', k: 0,
+  desc: () => `Lady Wren believes the courier's killers were paid. Destroy the bandit camp ${dirW(W.start, SP.camp())} of ${W.start.name} and search it for the paymaster's ledger.`,
+  reward: { gold: 80, xp: 100, rep: { 0: 6 } },
+  steps: [
+    S_CLEAR(() => `Clear the ${SP.camp().name.toLowerCase()}`, () => SP.camp()),
+    S_ITEM("Search the camp for the paymaster's ledger", () => soff(SP.camp(), -1.5, .5), 'ashen_ledger'),
+    S_TALK('Bring the ledger to Lady Wren', N.wren, (q, e) => sChat(SPK(e), [
+      `Payments in coin stamped with a grey flame. Ashen coin. And here: "Forty crowns, for the digging at ${B().name}."`,
+      `The Ashen Circle served Aurek, the First King, who ruled all four realms as one before his crown was broken. They swore to make the realm one again. I thought they were a story for frightening novices.`,
+      `I've broken Tobin's cipher, too. "The seal weakens. When the Hollow King wakes, the crowns will beg for a savior."`,
+      `Go to ${B().name}, ${dirW(W.places[0], B())} of here, and find out what the Circle is digging for.`,
+    ], [
+      { t: 'I will leave at once.', fn: () => { removeItemById('ashen_ledger'); sAdvance(q); closeDialog(); } },
+      { t: 'The Hollow King? You must be jesting.', fn: () => { removeItemById('ashen_ledger'); sAdvance(q); sChat(SPK(e), ['I never jest before supper, knight. Go.']); } },
+    ])),
+  ],
+  done: () => sStart('p4'),
+};
+function sBranch(p) {
+  STORY.path = p; STORY.raids = true; STORY.raidT = 480;
+  if (p === 'ancient') SND.play('seal');
+  deed({ conspiracy: 'Took an adept of the Ashen Circle prisoner.', ancient: `Broke the seal beneath ${B().name}.`, rise: 'Accepted a token from the Ashen Circle.' }[p]);
+}
+SQ.p4 = {
+  title: 'The Cracked Seal', giver: 'Lady Wren', k: 0,
+  desc: () => `The Ashen Circle is digging at ${B().name}. Find out what they are after.`,
+  reward: { gold: 100, xp: 140 },
+  steps: [
+    S_FIGHT(() => `Drive the Ashen Circle from ${B().name}`, () => B(), [[['cultist', 3, { tier: 1 }], ['cultist', 1, { name: 'Ashen Adept', boss: true, hp: 120, dmg: 10, yieldAt: .35, key: 'corvin', yname: 'Corvin', ysay: 'Enough! I yield!' }]]], { near: 14, msg: 'Grey-robed cultists chant around a cracked stone seal!' }),
+    S_TALK('Question the captured cultist', () => N.corvin(soff(B(), 1, 1)), (q, e) => sChat(SPK(e), [
+      `Too late, knight. Can you feel it? The cold under the stones? We cracked Aurek's seal. The Hollow King is stirring.`,
+      `When his dead march, the four crowns will beg for a savior, and the Circle has already chosen one. The realm will be one again, as it was meant to be.`,
+      `Unless... you would rather be on the winning side. The Circle rewards the bold. Take my token to Vesper, and she will make you far more than a hedge knight.`,
+    ], [
+      { t: '<span class="dn">JUSTICE</span>You will answer to Lady Wren. On your feet.', fn: () => { sBranch('conspiracy'); sAdvance(q); sChat(NARR, ["You bind Corvin's hands. Behind you, the cracked seal lets out a long, cold breath.", 'The Circle is real, and it has friends in high places. You mean to find every one of them.']); } },
+      { t: '<span class="dn">THE SEAL</span>Stand aside. I want to see what lies beneath.', fn: () => { sBranch('ancient'); sAdvance(q); sChat(NARR, ['You push past Corvin and lay your hand on the seal. The stone is cold as a grave, and under your palm it splits.', 'A howl rises from the dark below. Corvin runs into the night, laughing.']); } },
+      { t: '<span class="dn">AMBITION</span>...Tell me more about this Vesper.', fn: () => { sBranch('rise'); addItem('ashen_token', 1, 1, true); sAdvance(q); sChat(SPK(e), [`Wise. She waits in ${sMeetV().name}. Show her this.`, [NARR, 'Corvin presses a token of grey iron into your palm and limps off into the dark. A hedge knight need not stay a hedge knight forever.']]); } },
+    ])),
+  ],
+  done: () => sStart({ conspiracy: 'c1', ancient: 'b1', rise: 'r1' }[STORY.path]),
+};
+
+/* ---------------- Path I: The Ashen Circle (conspiracy) ---------------- */
+function sConspAllies(x, y, stage) {
+  const out = [];
+  if (SF('thessaly') === 'ally') out.push(sThessAlly(x, y));
+  if (stage !== 'summit') {
+    if (SF('told') === 'yes') out.push(...sKAllies(0, x, y, 2, 2));
+    if (SF('maelis')) out.push(...sKAllies(1, x, y, 2, 0));
+    if (stage === 'fin' && SF('ulfar') === 'truth') out.push(...sKAllies(2, x, y, 2, 0));
+    if (stage === 'fin' && SF('joined')) out.push(sNamedAlly('assassin', 'Lady Wren', LK.wren, x, y));
+  }
+  return out;
+}
+SQ.c1 = {
+  title: "A Prisoner's Road", giver: 'Your own conscience', k: 0,
+  desc: () => `Corvin, an adept of the Ashen Circle, is your prisoner. Bring him to Lady Wren at ${W.places[0].name}. His masters will want him silenced.`,
+  reward: { gold: 60, xp: 130, rep: { 0: 5 } },
+  steps: [
+    S_ESCORT(() => `Escort Corvin to ${W.places[0].name}`, () => N.corvin(), () => soff(W.places[0], 0, 6), { ambush: [['assassin', 2, { tier: 1 }], ['cultist', 2, { tier: 1 }]], amsg: 'Ashen Blades! They mean to silence Corvin!' }),
+    S_TALK('Bring Corvin before Lady Wren', N.wren, (q, e) => { const C = { name: 'Corvin', role: 'Adept of the Ashen Circle', portrait: sEnt('corvin') || fakeP(LK.corvin) }; sChat(SPK(e), [
+      `Well. The hedge knight brings me a present.`,
+      `Names, adept. Or I let the King's gaoler practice his craft.`,
+      [C, `...Three. One in every court but this one. Chancellor Maelis of Valoria. Skald Ulfar, who whispers in the Warlord's ear. Warden Thessaly of Eldoria.`],
+      `Royal servants, every one. We cannot accuse them on a traitor's word. We need proof from each court.`,
+      `Go to Valoria, Draven and Eldoria, in whatever order you please. I'll keep our friend comfortable.`,
+    ], [{ t: 'I will bring you proof.', fn: () => { const c = sEnt('corvin'); if (c) removeEnt(c); deed('Delivered Corvin to Lady Wren. He named three agents of the Circle.'); sAdvance(q); closeDialog(); } }]); },
+    { npcs: () => [N.corvin(soff(W.places[0], -.5, 3.2))] }),
+  ],
+  done: () => { sStart('c2v'); sStart('c2d'); sStart('c2e'); sSoon(() => toast('Three main quests await in <b>Valoria</b>, <b>Draven</b> and <b>Eldoria</b>. Complete them in any order.', 'gold')); },
+};
+const vRuin = () => SP.ruinIn('v_ruin', 1);
+SQ.c2v = {
+  title: "The Chancellor's Ledger", giver: 'Lady Wren', k: 1,
+  desc: () => `Corvin named Chancellor Maelis of Valoria as an agent of the Circle. Seek an audience with Queen Isabeau at ${W.places[1].name}.`,
+  reward: { gold: 150, xp: 200, rep: { 1: 6 } },
+  steps: [
+    S_RULER('Speak with Queen Isabeau', 1, q => sChat(rulerSpk(1), [
+      `You accuse my Chancellor? Bold words from a knight nobody has heard of.`,
+      `And yet... Maelis's accounts do not balance, and his barges sail empty to nowhere. His men come and go by night from ${vRuin().name}, ${dirW(W.places[1], vRuin())} of here.`,
+      `Bring me proof, and I will listen.`,
+    ], goOn(q, 'As you command, Your Majesty.'))),
+    S_FIGHT(() => `Search ${vRuin().name} for Maelis's secrets`, () => vRuin(), [[['bandit', 2, { tier: 2, name: 'Smuggler' }], ['cultist', 2, { tier: 2 }]]], { near: 14, msg: "Maelis's smugglers and a pair of grey-robes guard the ruin!" }),
+    S_ITEM("Take the Chancellor's letters", () => soff(vRuin(), 0, 1), 'maelis_letters'),
+    S_RULER('Bring the letters to Queen Isabeau', 1, q => sChat(rulerSpk(1), [
+      `Payments from the Circle... and orders. Maelis was to poison the grain treaty with Albion and let both our peoples starve.`,
+      `You found this, knight, so I will let you choose. Shall I hang him in the square? Or would you rather keep a Chancellor in your pocket?`,
+    ], [
+      { t: '<span class="dn">EXPOSE</span>Let Valoria see him for what he is.', fn: () => { removeItemById('maelis_letters'); SF('maelis', 'exposed'); addRep(1, 12, 'Exposed Chancellor Maelis'); addRel(0, 1, 10, 'The Maelis affair', 'Valoria thanked Albion for exposing a traitor at court.'); deed('Exposed Chancellor Maelis of Valoria as an agent of the Circle.'); sAdvance(q); sChat(rulerSpk(1), ['Then it is done. Valoria remembers its friends, knight.']); } },
+      { t: '<span class="dn">TURN</span>Let him keep his post, and report to me.', fn: () => { removeItemById('maelis_letters'); SF('maelis', 'turned'); P.gold += 250; addRep(1, 4, 'Kept a secret for the Queen'); deed('Turned Chancellor Maelis into your informant.'); sAdvance(q); sChat(rulerSpk(1), ['Ruthless. I like you more than I should. Maelis will pay handsomely for the privilege. Here are 250 crowns, as a first installment.']); } },
+    ])),
+  ],
+  done: () => sC2Check(),
+};
+const dRuin = () => SP.ruinIn('d_ruin', 2);
+const grukk = p => ({ name: 'Grukk Ironhide', k: 2, p, look: Object.assign(knightLook(2, 'axe'), { head: 'helm', shiny: 0, body: '#6f6a72' }), say: 'Draven! DRAVEN!' });
+SQ.c2d = {
+  title: "The Skald's Song", giver: 'Lady Wren', k: 2,
+  desc: () => `Corvin named Skald Ulfar, advisor to Warlord Morgath, as an agent of the Circle. In Draven, they say, only strength earns a hearing.`,
+  reward: { gold: 160, xp: 220, rep: { 2: 5 } },
+  steps: [
+    S_RULER('Speak with Warlord Morgath', 2, q => sChat(rulerSpk(2), [
+      `You come to Ravenspire to call my skald a traitor?`,
+      [NARR, 'The Warlord laughs, and his hall laughs with him.'],
+      `In Draven, words are wind. Blood is truth. Face my champion, Grukk Ironhide, outside my gates. If you are still standing afterwards, I will hear you.`,
+    ], goOn(q, 'Then let it be blood.'))),
+    S_DUEL('Defeat Grukk Ironhide in trial by combat', () => soff(W.places[2], 0, 14), () => grukk(1.25)),
+    S_RULER('Return to Warlord Morgath', 2, q => sChat(rulerSpk(2), [
+      `Ha! Grukk will feel that for a week. Speak, then.`,
+      [NARR, 'You tell him everything Corvin said.'],
+      `Ulfar left three days ago, "to commune with the old gods" at ${dRuin().name}, ${dirW(W.places[2], dRuin())} of here. Bring me his head, or his secrets.`,
+    ], goOn(q, 'I will bring you both.'))),
+    S_FIGHT(() => `Hunt down Skald Ulfar at ${dRuin().name}`, () => dRuin(), [[['cultist', 3, { tier: 2 }], ['assassin', 1, { name: 'Skald Ulfar', boss: true, hp: 360, dmg: 14 }]]], { near: 14, msg: 'Skald Ulfar and his grey-robes are waiting for you!' }),
+    S_ITEM("Search Ulfar's belongings", () => soff(dRuin(), 0, 1), 'ulfar_letters'),
+    S_RULER("Bring Ulfar's letters to Morgath", 2, q => sChat(NARR, [
+      `Ulfar's letters are orders from the Circle. The silver that bought him was minted in Albion, stamped with King Aldric's own face.`,
+      `If Morgath sees that, he will blame Albion.`,
+    ], [
+      { t: '<span class="dn">TRUTH</span>Show Morgath everything, Albion silver and all.', fn: () => { removeItemById('ulfar_letters'); SF('ulfar', 'truth'); addRep(2, 12, 'Unmasked Skald Ulfar'); addRel(0, 2, -15, "Albion silver in Draven's court", 'Warlord Morgath accused Albion of buying his skald.'); deed('Showed Warlord Morgath proof that Albion silver bought his skald.'); sAdvance(q); sChat(rulerSpk(2), ['Albion silver. Of course. Aldric smiles at you and slides the knife in. Draven will not forget this, knight, and neither will I.']); } },
+      { t: '<span class="dn">SPARE ALBION</span>Hide the Albion silver. Show him the rest.', fn: () => { removeItemById('ulfar_letters'); SF('ulfar', 'hid'); addRep(2, 8, 'Unmasked Skald Ulfar'); deed('Hid evidence of Albion silver from Warlord Morgath.'); sAdvance(q); sChat(rulerSpk(2), ['The Circle. Cowards in robes. Draven remembers who unmasked them, knight.']); } },
+    ])),
+  ],
+  done: () => sC2Check(),
+};
+const burnSpot = () => sspot('burn', () => randomLandSpot(grove().x, grove().y, 12, 20));
+SQ.c2e = {
+  title: 'The Warden of the Grove', giver: 'Lady Wren', k: 3,
+  desc: () => `Corvin named Warden Thessaly of Eldoria as an agent of the Circle. High Lady Sylwen should hear of it.`,
+  reward: { gold: 140, xp: 220, rep: { 3: 5 } },
+  steps: [
+    S_RULER('Speak with High Lady Sylwen', 3, q => sChat(rulerSpk(3), [
+      `Thessaly? She has guarded our forests for twenty winters.`,
+      `And yet she has been... absent. She keeps to ${grove().name}, ${dirW(W.places[3], grove())} of here. Find her and judge her with your own eyes. I will abide by what you find.`,
+    ], goOn(q, 'I will find her.'))),
+    S_TALK(() => `Find Warden Thessaly at ${grove().name}`, () => N.thessaly(soff(grove(), 2.5, 1)), (q, e) => sChat(SPK(e), [
+      `Sylwen's knight, or the Circle's? Choose your words carefully.`,
+      `I have been hunting the Circle for a year. Grey-robes have been lighting rings of fire in the Thornwood, ritual fires. They will burn again tonight, ${dirW(grove(), burnSpot())} of here.`,
+      `Help me stop them. Judge me afterwards.`,
+    ], goOn(q, 'Lead the way.'))),
+    S_FIGHT('Stop the ritual fires in the Thornwood', () => burnSpot(), [[['cultist', 4, { tier: 2 }], ['cultist', 1, { name: 'Fire-Priest Orrin', boss: true, hp: 320, dmg: 13 }]]], { near: 16, msg: 'Cultists chant around a ring of fire!', allies: (q, x, y) => [sThessAlly(x, y)] }),
+    S_TALK('Speak with Thessaly', () => N.thessaly(soff(burnSpot(), 1, 1)), (q, e) => sChat(SPK(e), [
+      `Orrin. A priest of the Circle, and a Valorian. You see now? Corvin named me because I was getting close.`,
+      `So, knight. What will you tell Sylwen?`,
+    ], [
+      { t: '<span class="dn">TRUST</span>I believe you. The Circle lied.', fn: () => { SF('thessaly', 'ally'); addRep(3, 10, 'Cleared Warden Thessaly'); deed("Cleared Warden Thessaly of the Circle's slander."); sAdvance(q); sChat(SPK(e), ['Then when the Circle shows its face, I will be at your side.']); } },
+      { t: '<span class="dn">ARREST</span>That is for Sylwen to decide. You are coming with me.', fn: () => { SF('thessaly', 'arrested'); addRep(3, -8, 'Arrested Warden Thessaly'); deed('Arrested Warden Thessaly on the word of a cultist.'); sAdvance(q); sChat(SPK(e), ['...Fool. You are doing their work for them.']); } },
+    ])),
+  ],
+  done: () => sC2Check(),
+};
+function sC2Check() { if (['c2v', 'c2d', 'c2e'].every(s => STORY.qdone.includes(s))) sStart('c3'); }
+SQ.c3 = {
+  title: 'Murder in the Dungeon', giver: 'Lady Wren', k: 0,
+  desc: () => `You have proof from three courts. Return to Lady Wren at ${W.places[0].name}.`,
+  reward: { gold: 100, xp: 180 },
+  steps: [
+    S_TALK(() => `Return to Lady Wren at ${W.places[0].name}`, () => ({ key: 'brom', name: 'Gaoler Brom', role: `Gaoler of ${W.places[0].name}`, look: LK.brom, at: soff(W.places[0], -2, 2.5), k: 0 }), (q, e) => sChat(SPK(e), [
+      `Sir! Thank the gods it's you. The prisoner, Corvin, is dead in his cell. Throat cut. And Lady Wren is gone. She rode out at dawn.`,
+      `Nobody went down to him but her, sir. I swear it on my mother.`,
+      `He had this clenched in his fist.`,
+      [NARR, "A scrap of grey wax, stamped not with a flame but with a small bird. A wren. There was a second, smaller seal under the flame on the courier's letter, and it was the same bird. Tobin was not running from the Circle's bandits. He was running from her."],
+    ], [
+      { t: '<span class="dn">THE KING</span>King Aldric must hear of this.', fn: () => { addItem('wren_seal', 1, 1, true); sAdvance(q); closeDialog(); } },
+      { t: '<span class="dn">SILENCE</span>No. If Wren falls, it will be by my hand.', fn: () => { addItem('wren_seal', 1, 1, true); SF('told', 'no'); deed("Kept Lady Wren's treachery secret from the King."); sAdvance(q, 2); sChat(SPK(e), ['...As you say, sir. I saw nothing.']); } },
+    ])),
+    S_RULER('Tell King Aldric the truth about Lady Wren', 0, q => sChat(rulerSpk(0), [
+      `Wren? She has served me for twenty years...`,
+      [NARR, 'You set the grey seal on the arm of his throne. For a long while the King says nothing.'],
+      `Then my own house bought the Circle's knives. Gods forgive me.`,
+      `When you face her, my knights will ride with you. Bring her back alive if you can. Albion will judge its own.`,
+    ], [{ t: 'It will be done, Your Majesty.', fn: () => { removeItemById('wren_seal'); SF('told', 'yes'); addRep(0, 10, 'Uncovered treason at court'); deed("Revealed Lady Wren's treachery to King Aldric."); sAdvance(q); closeDialog(); } }])),
+  ],
+  done: () => sStart('c4'),
+};
+function sSummitPair() {
+  if (SF('sumA') == null) { let best = PAIRS[0], bv = 999; PAIRS.forEach(p => { if (getRel(p[0], p[1]) < bv) { bv = getRel(p[0], p[1]); best = p; } }); SF('sumA', best[0]); SF('sumB', best[1]); }
+  return [SF('sumA'), SF('sumB')];
+}
+const summitV = () => { const [a, b] = sSummitPair(); return SP.villageOf('summit', a, W.places[b]); };
+SQ.c4 = {
+  title: () => `The Summit at ${summitV().name}`, giver: () => SF('maelis') === 'turned' ? 'Chancellor Maelis' : 'Gaoler Brom', k: () => sSummitPair()[0],
+  desc: () => { const [a, b] = sSummitPair(); return `${SF('maelis') === 'turned' ? 'Your informant Maelis sends word' : 'Word reaches you from the gaol'}: envoys of ${KDATA[a].name} and ${KDATA[b].name} are meeting in secret at ${summitV().name} to talk of peace. Vesper, the Circle's blade, means to murder them both and start a war.`; },
+  reward: { gold: 220, xp: 280 },
+  steps: [
+    S_GO(() => `Reach the summit at ${summitV().name}`, () => soff(summitV(), 0, 2), 8),
+    S_FIGHT('Protect the envoys', () => soff(summitV(), 0, 2), [
+      [['assassin', 2, { tier: 2 }], ['cultist', 2, { tier: 2 }]],
+      [['assassin', 2, { tier: 2 }], ['cultist', 2, { tier: 2 }]],
+      [['assassin', 1, { name: 'Vesper', boss: true, hp: 620, dmg: 15, yieldAt: .2, key: 'vesper', yname: 'Vesper', ysay: 'Enough!', o: { _look: LK.vesper } }], ['cultist', 2, { tier: 2 }]],
+    ], {
+      near: 10, msg: 'Ashen Blades leap from the rooftops! Protect the envoys!', waveMsg: ['', 'More blades close in!', 'Vesper herself enters the fray!'],
+      protect: (q, x, y) => sSummitPair().map((k, i) => sEnvoy(q, k, x + (i ? 1.5 : -1.5) * TS, y)),
+      onLoss: (q, e) => { const [a, b] = sSummitPair(); SF('envoyDead', 1); addRel(a, b, -25, 'Envoy murdered at the summit', `The ${KDATA[e.k].name} envoy was murdered at the peace summit in ${summitV().name}.`); toast(`The envoy of ${KDATA[e.k].name} has been slain!`, 'war', bannerURL(e.k)); },
+      allies: (q, x, y) => sConspAllies(x, y, 'summit'),
+      won: () => { const [a, b] = sSummitPair(); if (!SF('envoyDead')) { addRel(a, b, 22, 'Peace summit', `Envoys of ${KDATA[a].name} and ${KDATA[b].name} made peace at ${summitV().name}.`); deed(`Saved the peace summit between ${KDATA[a].name} and ${KDATA[b].name}.`); } else deed(`The peace summit at ${summitV().name} ended in blood.`); if (!sEnt('vesper')) SF('vesper', 'dead'); },
+    }),
+    S_TALK('Confront Vesper', () => N.vesper(soff(summitV(), 2, 2)), (q, e) => sChat(SPK(e), [
+      `Well struck, knight. Kill me, then. Wren will finish it anyway.`,
+      `The rite at the barrow has already begun.`,
+    ], [
+      { t: '<span class="dn">SPARE</span>Tell me how to stop the rite, and you live.', fn: () => { SF('vesper', 'spared'); deed('Spared Vesper in exchange for the secrets of the rite.'); sAdvance(q); sChat(SPK(e), ['Wren has her acolytes ringed around the seal, feeding it. I will call half of them away. Face her quickly, before she notices.', [NARR, 'Vesper melts into the crowd. You doubt you have seen the last of her.']]); } },
+      { t: '<span class="dn">KILL</span>No more bargains with the Circle.', fn: () => { SF('vesper', 'dead'); deed("Executed Vesper, the Circle's blade."); Object.assign(e, { dead: true, deadT: 0 }); sAdvance(q); sChat(NARR, ["Vesper's last breath is a laugh. On her body you find a map of the barrow, with a ring of acolytes drawn around the seal."]); } },
+    ]), { skip: () => !sEnt('vesper') }),
+  ],
+  done: () => sStart('c5'),
+};
+SQ.c5 = {
+  title: 'The Ember Rite', giver: () => SF('vesper') === 'spared' ? 'Vesper' : 'A map from Vesper\'s body', k: 0,
+  desc: () => `Lady Wren has gone back to ${B().name} to finish waking the Hollow King. Stop her.`,
+  reward: { gold: 300, xp: 400 },
+  steps: [
+    S_FIGHT(() => `Break through to Lady Wren at ${B().name}`, () => B(), () => [[['cultist', SF('vesper') === 'spared' ? 3 : 5, { tier: 3 }], ['wight', 3, { tier: 2 }]]], { near: 16, msg: 'The rite has begun. The dead claw up through the earth!', allies: (q, x, y) => sConspAllies(x, y, 'rite') }),
+    S_TALK('Face Lady Wren', () => ({ key: 'wren', name: 'Lady Wren', role: 'The Grey Mother of the Ashen Circle', look: LK.wren, at: soff(B(), 0, -1.5), k: 0 }), (q, e) => sChat(SPK(e), [
+      `You. My best mistake.`,
+      `Four crowns, knight. Four hundred years of burned villages and dead sons. I will give them one enemy and one savior: Albion. Is that so monstrous?`,
+      `Join me. The Circle needs a champion the people will love. I have watched you. It could be you.`,
+    ], [
+      { t: '<span class="dn">DUTY</span>It ends here, Wren. Yield.', fn: () => { sAdvance(q); sChat(SPK(e), ['Pity.', [NARR, 'Lady Wren draws two long knives.']]); } },
+      { t: '<span class="dn">JOIN</span>...Show me this new realm.', fn: () => { SF('joined', 1); SF('wren', 'ally'); deed('Joined Lady Wren and the Ashen Circle.'); sAdvance(q, 3); sChat(SPK(e), ['I knew it. Stand with me, then. He is waking. When he rises, we will be the ones who put him down, and the four crowns will kneel to their saviors.']); } },
+    ])),
+    S_FIGHT('Defeat Lady Wren', () => B(), [[['assassin', 1, { name: 'Lady Wren', boss: true, hp: 820, dmg: 16, yieldAt: .15, key: 'wren', yname: 'Lady Wren', ysay: 'Enough... enough.', o: { _look: LK.wren } }], ['cultist', 2, { tier: 3 }]]], { near: 30, msg: 'Lady Wren attacks!' }),
+    S_TALK("Decide Lady Wren's fate", () => ({ key: 'wren', name: 'Lady Wren', role: 'Defeated', look: LK.wren, at: soff(B(), 0, -1.5), k: 0 }), (q, e) => sChat(SPK(e), ['Finish it, then.'], [
+      { t: '<span class="dn">JUSTICE</span>You will stand trial before the King and the four courts.', fn: () => { SF('wren', 'arrested'); deed('Took Lady Wren alive to face judgment.'); sAdvance(q); sChat(NARR, ['You bind her wrists. But the rite was already done.', 'The seal splits with a sound like thunder under the world, and the Hollow King rises.']); } },
+      { t: '<span class="dn">EXECUTE</span>Draw your blade.', fn: () => { SF('wren', 'dead'); deed('Executed Lady Wren at the barrow.'); Object.assign(e, { dead: true, deadT: 0 }); sAdvance(q); sChat(NARR, ['It is quick. But the rite was already done.', 'The seal splits with a sound like thunder under the world, and the Hollow King rises.']); } },
+    ]), { skip: () => !sEnt('wren') }),
+  ],
+  done: () => { if (!SF('wren')) SF('wren', 'dead'); sStart('fin'); },
+};
+
+/* ---------------- Path II: The Hollow King (ancient threat) ---------------- */
+SQ.b1 = {
+  title: 'What Sleeps Below', giver: 'The broken seal', k: 0,
+  desc: () => `You broke the seal beneath ${B().name}. Something has woken.`,
+  reward: { gold: 80, xp: 160 },
+  steps: [
+    S_FIGHT('Survive the Hollow', () => B(), [[['wight', 4, { tier: 1 }]]], { near: 30, msg: 'The dead claw their way up out of the barrow!' }),
+    S_ITEM('Take a fragment of the broken seal', () => soff(B(), 0, -.5), 'seal_shard'),
+    S_TALK('Report to Lady Wren', N.wren, (q, e) => sChat(SPK(e), [
+      `You broke it. Of course you did.`,
+      [NARR, 'She turns the seal fragment in her fingers. Frost creeps across her glove.'],
+      `Only one man alive still reads Aurek's runes: Brother Caddock, a hermit who gave his life to the First King's legends. He lives at ${hermit().name}, ${dirW(W.places[0], hermit())} of here. Go to him. I will warn the King.`,
+    ], goOn(q, 'I will find him.'))),
+  ],
+  done: () => sStart('b2'),
+};
+SQ.b2 = {
+  title: 'The Hermit Scholar', giver: 'Lady Wren', k: null,
+  desc: () => `Brother Caddock, a hermit who studies the First King, may know how to put the dead back to sleep. He lives at ${hermit().name}.`,
+  reward: { xp: 150 },
+  steps: [
+    S_TALK(() => `Find Brother Caddock at ${hermit().name}`, () => N.caddock(), (q, e) => sChat(SPK(e), [
+      `Cold hands, cold eyes. You've touched the seal, haven't you? Sit. I'll tell you what you've done.`,
+      `Aurek the First ruled all four lands as one. When he grew old he refused to die. He struck a bargain with the grave, and the grave kept its word. He still reigns down there, over the Hollow.`,
+      `The founders of the four houses broke his Ember Crown into four shards, and each swore to keep one. The seal was the lock on his tomb. You've broken the lock.`,
+      `Now he will hunt the shards. If he gathers them, he rises whole. If you gather them first, the crown can be forged again to bind him. Or perhaps to end him; the old texts disagree.`,
+      `The four rulers each keep a shard. They won't hand them over for a pretty smile.`,
+    ], [{ t: 'Then I will earn them.', fn: () => { removeItemById('seal_shard'); deed('Learned the legend of Aurek and the Ember Crown from Brother Caddock.'); sAdvance(q); closeDialog(); } }])),
+  ],
+  done: () => { ['sa', 'sv', 'sd', 'se', 'blore'].forEach(s => sStart(s)); sSoon(() => toast('Four shards, four crowns. The shard quests can be done in any order.', 'gold')); },
+};
+const battle = () => SP.hidden('battle'), chapel = () => SP.hidden('chapel');
+SQ.blore = {
+  side: true, title: 'Echoes of Aurek', giver: 'Brother Caddock', k: null,
+  desc: () => `Caddock says the old texts disagree about whether Aurek can truly die. The answer may lie at ${battle().name} and ${chapel().name}.`,
+  reward: { xp: 200, gold: 60 },
+  steps: [
+    S_GO(() => `Search ${battle().name}`, () => battle(), 5, () => sChat(NARR, ['Among the rusted blades stands a carved stone: "Here Aurek fell, and rose, and fell again. Only fire from his own crown can burn him."'])),
+    S_GO(() => `Search ${chapel().name}`, () => chapel(), 5, () => sChat(NARR, ['Half-sunk in the marsh, a faded fresco shows four figures bringing hammers down on a crown, and a crowned skeleton crumbling to ash.'])),
+    S_TALK('Tell Brother Caddock what you found', () => N.caddock(), (q, e) => sChat(SPK(e), [
+      `A crown struck apart at the moment of binding... So the shards can unmake him. But their power would be gone forever, and the old bond between the four houses with it.`,
+      `Remember it when the time comes, knight.`,
+    ], [{ t: 'I will remember.', fn: () => { SF('lore', 1); deed('Learned how the Hollow King might be destroyed forever.'); sAdvance(q); closeDialog(); } }])),
+  ],
+};
+const aTomb = () => SP.ruinIn('a_tomb', 0);
+const rise = () => STORY.path === 'rise';
+const shardGiver = () => rise() ? 'The lure of the Ember Crown' : 'Brother Caddock';
+SQ.sa = {
+  title: 'The Albion Shard', giver: shardGiver, k: 0,
+  desc: () => `King Aldric's house has kept a shard of the Ember Crown for four hundred years.`,
+  reward: { gold: 120, xp: 220, rep: { 0: 5 } },
+  steps: [
+    S_RULER("Ask King Aldric for Albion's shard", 0, q => sChat(rulerSpk(0), [
+      rise() ? `You want my family's shard? Many knights want many things.` : `Wren told me what you woke. So the old tales are true.`,
+      `The shard lies in the tomb of my forefathers at ${aTomb().name}, ${dirW(W.places[0], aTomb())} of here. If the Hollow are hunting it, they will be there already.`,
+      `Take it, with my blessing. Better in your hands than his.`,
+    ], goOn(q, 'I will go at once.'))),
+    S_FIGHT(() => `Recover the shard from ${aTomb().name}`, () => aTomb(), [[['wight', 4, { tier: 2 }], ['hknight', 1, { tier: 1 }]]], { near: 14, msg: 'The Hollow have come for the shard!' }),
+    S_ITEM("Take Albion's Ember Shard", () => soff(aTomb(), 0, -.5), 'shard_0'),
+  ],
+  done: () => sShardGot(0),
+};
+const sVaultSpot = () => sspot('vault', () => randomLandSpot(W.places[1].x, W.places[1].y, 22, 30));
+SQ.sv = {
+  title: 'The Valorian Shard', giver: shardGiver, k: 1,
+  desc: () => `Queen Isabeau keeps Valoria's shard in her treasury.`,
+  reward: { gold: 100, xp: 220 },
+  steps: [
+    S_RULER("Ask Queen Isabeau for Valoria's shard", 1, q => sChat(rulerSpk(1), [
+      `The shard? It sits in my treasury, beside my finest pearls.`,
+      `Everything in Valoria has a price, knight. Even the end of the world.`,
+    ], [
+      { t: '<span class="dn">BUY</span>Name your price. (900 gold)', dis: P.gold < 900, fn: () => { P.gold -= 900; addItem('shard_1', 1, 1); q.route = 'buy'; deed('Bought the Valorian shard for 900 gold.'); sAdvance(q, 99); sChat(rulerSpk(1), ['A pleasure doing business. Do try not to lose it.']); } },
+      { t: '<span class="dn">TRADE</span>What would you have me do?', fn: () => { q.route = 'trade'; sAdvance(q); sChat(rulerSpk(1), ['Draven chokes my caravans in the mountain passes. Bring Valoria and Draven to Neutral terms, and the shard is yours.', [NARR, 'Use Diplomacy (K) to mend relations: gifts, royal letters, quests for both crowns, or mediating peace.']]); } },
+      { t: '<span class="dn">STEAL</span>(Say nothing. Take it by force.)', fn: () => { q.route = 'steal'; sAdvance(q); sChat(NARR, [`Palace servants whisper that the shard is being moved to a vault ${dirW(W.places[1], sVaultSpot())} of the palace. The escort is small.`]); } },
+      { t: 'Perhaps another time.', fn: closeDialog },
+    ])),
+    S_COND(() => `Bring Valoria and Draven to Neutral terms (now ${Math.round(getRel(1, 2))}, need above -25)`, () => getRel(1, 2) > -25, { skip: q => q.route !== 'trade' }),
+    S_RULER('Return to Queen Isabeau', 1, q => sChat(rulerSpk(1), ['My caravans roll again. A bargain is a bargain.'], [{ t: 'Thank you, Your Majesty.', fn: () => { addItem('shard_1', 1, 1); addRep(1, 8, 'Brought peace to the passes'); deed('Earned the Valorian shard by making peace with Draven.'); sAdvance(q); closeDialog(); } }]), { skip: q => q.route !== 'trade' }),
+    S_FIGHT('Ambush the treasury escort', () => sVaultSpot(), [[['soldier', 3, { tier: 2, o: { k: 1, questFoe: true } }], ['knight', 1, { tier: 2, o: { k: 1, questFoe: true } }]]], { skip: q => q.route !== 'steal', near: 14, msg: 'The treasury escort draws steel!', won: () => { addRep(1, -20, 'Robbed the royal treasury'); SF('stoleV', 1); deed("Stole the Valorian shard from Queen Isabeau's treasury."); } }),
+    S_ITEM('Take the Valorian shard from the strongbox', () => sVaultSpot(), 'shard_1', { skip: q => q.route !== 'steal' }),
+  ],
+  done: () => sShardGot(1),
+};
+SQ.sd = {
+  title: 'The Draven Shard', giver: shardGiver, k: 2,
+  desc: () => `Warlord Morgath wears Draven's shard on a chain around his neck.`,
+  reward: { gold: 120, xp: 240, rep: { 2: 5 } },
+  steps: [
+    S_RULER("Ask Warlord Morgath for Draven's shard", 2, q => { const foe = sWorstFoe(2); sChat(rulerSpk(2), [
+      `This?`,
+      [NARR, 'Morgath lifts a shard of red crystal on an iron chain. It glows like a coal.'],
+      `My grandfather's grandfather took it from a Valorian corpse. Take it from me, or earn it.`,
+    ], [
+      { t: '<span class="dn">DUEL</span>I will face your champion.', fn: () => { q.route = 'duel'; sAdvance(q); sChat(rulerSpk(2), ['Ha! Grukk has been bored. Outside my gates, knight.']); } },
+      { t: `<span class="dn">WAR</span>I will fight your war against ${KDATA[foe].name}.`, fn: () => { q.route = 'war'; SF('dfoe', foe); sAdvance(q, 2); sChat(rulerSpk(2), [`A ${KDATA[foe].name} warband is camped near our border. Break it, and the shard is yours.`]); } },
+      { t: `<span class="dn">OATH</span>I will swear my sword to Draven.${K.rep[2] < 30 ? ' (Reputation 30)' : ''}`, dis: K.rep[2] < 30 || P.allegiance === 2, fn: () => { q.route = 'oath'; dipAction(2, 'allegiance'); addItem('shard_2', 1, 1); deed('Swore fealty to Warlord Morgath for the Draven shard.'); sAdvance(q, 99); sChat(rulerSpk(2), ["Then you are Draven's now. Wear this, and let the dead come."]); } },
+      { t: 'Perhaps another time.', fn: closeDialog },
+    ]); }),
+    S_DUEL('Defeat Grukk Ironhide', () => soff(W.places[2], 0, 14), () => grukk(1.4), { skip: q => q.route !== 'duel' }),
+    S_FIGHT(() => `Break the ${KDATA[SF('dfoe') ?? 0].name} warband`, () => sWarSpot(2, SF('dfoe') ?? 0), () => { const j = SF('dfoe') ?? 0; return [[['soldier', 4, { tier: 2, o: { k: j, foeOf: 2, questFoe: true } }], ['knight', 1, { tier: 2, o: { k: j, foeOf: 2, questFoe: true } }]]]; }, { skip: q => q.route !== 'war', near: 16, allies: (q, x, y) => sKAllies(2, x, y, 3, 0), msg: 'Battle is joined!', won: () => addRel(2, SF('dfoe') ?? 0, -8, 'Border battle') }),
+    S_RULER('Claim the shard from Morgath', 2, q => sChat(rulerSpk(2), ['Hah! I have not seen a fight like that in years. Here. The shard is yours.'], [{ t: 'Draven has my thanks.', fn: () => { addItem('shard_2', 1, 1); deed('Won the Draven shard from Warlord Morgath.'); sAdvance(q); closeDialog(); } }])),
+  ],
+  done: () => sShardGot(2),
+};
+SQ.se = {
+  title: 'The Eldorian Shard', giver: shardGiver, k: 3,
+  desc: () => `High Lady Sylwen's shard rests in ${grove().name}, in the keeping of Warden Thessaly.`,
+  reward: { gold: 120, xp: 240, rep: { 3: 6 } },
+  steps: [
+    S_RULER("Ask High Lady Sylwen for Eldoria's shard", 3, q => sChat(rulerSpk(3), [
+      `The shard has never left the forest. It rests in ${grove().name}, ${dirW(W.places[3], grove())} of here, and Warden Thessaly guards it.`,
+      `The Hollow have been seen in the Thornwood. Go to her. If Thessaly trusts you, the shard is yours.`,
+    ], goOn(q, 'I will go to her.'))),
+    S_TALK(() => `Find Warden Thessaly at ${grove().name}`, () => N.thessaly(soff(grove(), 2.5, 1)), (q, e) => sChat(SPK(e), [
+      rise() ? `Another hand reaching for the shard. At least yours holds a sword.` : `You're the knight who broke the seal. Bold, or foolish.`,
+      `The dead came last night, and they will come again. Hold the grove with me, and the shard is yours.`,
+    ], goOn(q, 'Together, then.'))),
+    S_FIGHT(() => `Defend ${grove().name} from the Hollow`, () => grove(), [[['wight', 4, { tier: 2 }]], [['wight', 3, { tier: 2 }], ['hknight', 1, { tier: 1 }]], [['wight', 5, { tier: 2 }]]], { near: 10, msg: 'The Hollow march on the grove!', waveMsg: ['', 'More dead shamble out of the trees!', 'The last of the Hollow charge!'], allies: (q, x, y) => [sThessAlly(x, y)] }),
+    S_TALK('Speak with Thessaly', () => N.thessaly(soff(grove(), 2.5, 1)), (q, e) => sChat(SPK(e), [
+      `You fought like one of us. Here. It has been in my keeping for eleven years.`,
+      [NARR, 'She presses a shard of warm, green-gold crystal into your hand.'],
+      `When the Hollow King comes for it, send for me. I will be there.`,
+    ], [{ t: 'I will.', fn: () => { addItem('shard_3', 1, 1); SF('thessaly', 'ally'); deed('Defended the grove beside Warden Thessaly and earned the Eldorian shard.'); sAdvance(q); closeDialog(); } }])),
+  ],
+  done: () => sShardGot(3),
+};
+function sShardGot(k) {
+  SF('sh' + k, 1); SND.play('shard');
+  const n = [0, 1, 2, 3].filter(j => SF('sh' + j)).length;
+  if (n < 4) { toast(`Ember shards gathered: <b>${n} / 4</b>`, 'gold'); return; }
+  sStart(STORY.path === 'ancient' ? 'b6' : 'r7');
+}
+const sRallyN = q => Object.keys(q.m || {}).length;
+function sRallyTalk(q, e, k, id) {
+  const rep = K.rep[k];
+  const war = [0, 1, 2, 3].find(j => j !== k && SF('ral' + j) && SF('ral' + j) !== 'no' && relStatus(k, j).n === 'At War');
+  const L = ['The dead are walking. We have all seen them.', { 0: 'Albion will not be the kingdom that hid behind its walls.', 1: 'Soldiers cost coin, knight, and Valorian soldiers cost a great deal of it.', 2: 'Draven fears nothing, living or dead. But we do not bleed for free.', 3: 'The forest remembers Aurek. It remembers the burning.' }[k]];
+  if (war != null) L.push(`But I will not march beside ${KDATA[war].name} while we are at war with them. Make peace first.`);
+  const done = (v, t) => { SF('ral' + k, v); sSubDone(q, id); sChat(rulerSpk(k), [t]); };
+  sChat(rulerSpk(k), L, [
+    { t: `<span class="dn">RALLY</span>Stand with the realm.${rep < 25 ? ' (Reputation 25)' : ''}`, dis: rep < 25 || war != null, fn: () => { addRep(k, 4, 'Answered the call against the Hollow'); deed(`${KDATA[k].name} pledged soldiers against the Hollow King.`); done('yes', `${KDATA[k].name} will march. You have my word.`); } },
+    { t: '<span class="dn">GOLD</span>I will pay for your soldiers. (400 gold)', dis: P.gold < 400 || war != null, fn: () => { P.gold -= 400; deed(`Paid ${KDATA[k].name} to send soldiers against the Hollow King.`); done('paid', 'Coin spends as well as loyalty. A company will march.'); } },
+    { t: 'Then the realm will fight without you.', fn: () => { deed(`${KDATA[k].name} refused to march against the Hollow King.`); done('no', 'So be it.'); } },
+    { t: 'I will return.', fn: closeDialog },
+  ]);
+}
+SQ.b6 = {
+  title: 'The Council of Crowns', giver: 'Brother Caddock', k: null,
+  desc: () => `You hold all four shards. Caddock says the crown must be forged again at ${B().name}, and the Hollow King will throw his whole host at you to stop it. Ask the four crowns for soldiers.`,
+  reward: { gold: 200, xp: 300 },
+  steps: [
+    S_TALK('Bring the shards to Brother Caddock', () => N.caddock(), (q, e) => sChat(SPK(e), [
+      `Four shards... I never thought I would see them together again.`,
+      `The crown can only be forged where it was broken, at ${B().name}. And he will come for it with everything he has. You'll need an army, knight. Four armies.`,
+    ], goOn(q, 'Then I will ask for them.'))),
+    S_MULTI(q => `Rally the four crowns (${sRallyN(q)}/4 answered)`, () => [0, 1, 2, 3].map(k => ({ id: 'k' + k, k, talk: (q, e, id) => sRallyTalk(q, e, k, id) }))),
+    S_TALK('Return to Brother Caddock', () => N.caddock(), (q, e) => { const n = [0, 1, 2, 3].filter(k => SF('ral' + k) && SF('ral' + k) !== 'no').length; sChat(SPK(e), [
+      n >= 3 ? `${n} crowns stand with us! Not since Aurek's day have the four houses marched under one cause.` : n ? `${n === 1 ? 'One crown' : 'Two crowns'}. It will have to be enough.` : 'No one? Then it is you and me, knight, and I am old.',
+      `Go to ${B().name}. I will meet you there.`,
+    ], goOn(q, 'To the barrow.')); }),
+  ],
+  done: () => sStart('fin'),
+};
+
+/* ---------------- Path III: The Ember Throne (rise to power) ---------------- */
+const circle = () => SF('patron') === 'circle' && !SF('defied');
+const liege = () => SF('liege') ?? 0;
+const rivalOf = () => { if (SF('rival') == null) SF('rival', sWorstFoe(liege())); return SF('rival'); };
+SQ.r1 = {
+  title: "The Circle's Offer", giver: 'Corvin', k: () => sMeetV().owner,
+  desc: () => `Corvin gave you a token of grey iron and a name: Vesper, who waits in ${sMeetV().name}.`,
+  reward: { xp: 140 },
+  steps: [
+    S_TALK(() => `Meet Vesper in ${sMeetV().name}`, () => Object.assign(N.vesper(soff(sMeetV(), -1.5, 2.5)), { role: 'Envoy of the Ashen Circle' }), (q, e) => sChat(SPK(e), [
+      `Corvin's token, and you are not Corvin. Interesting.`,
+      `The Circle backs those who rise, knight. Gold. Doors that open. Rivals who stumble at the wrong moment.`,
+      `In return, when the day comes, you will do one thing for us. No questions asked.`,
+    ], [
+      { t: '<span class="dn">ACCEPT</span>Done. Open the doors.', fn: () => { removeItemById('ashen_token'); SF('patron', 'circle'); P.gold += 300; deed('Accepted the patronage of the Ashen Circle.'); sAdvance(q); sChat(SPK(e), ['Good. Here are 300 crowns to begin. The Tourney of Solmont opens soon. Win it. We will see that your opponents sleep badly the night before.']); } },
+      { t: '<span class="dn">REFUSE</span>I rise on my own, or not at all.', fn: () => { removeItemById('ashen_token'); SF('patron', 'self'); deed('Refused the Ashen Circle. You will rise on your own.'); sAdvance(q); sChat(SPK(e), ['Pride. A pretty thing, until it becomes a grave. The Tourney of Solmont opens soon. Win it, if you can.']); } },
+    ])),
+  ],
+  done: () => sStart('r2'),
+};
+const arena = () => soff(W.places[1], 6, 14);
+const tourN = () => ({ key: 'herald', name: 'Tourney Master Orlande', role: 'Master of the Tourney of Solmont', look: LK.herald, at: soff(W.places[1], 4, 12), k: 1 });
+const rig = () => SF('patron') === 'circle' ? .82 : 1;
+SQ.r2 = {
+  title: 'The Tourney of Solmont', giver: () => SF('patron') === 'circle' ? 'Vesper' : 'Rumor on the road', k: 1,
+  desc: () => `Queen Isabeau's tourney at ${W.places[1].name} draws knights from all four crowns. The champion wins gold, glory and the ear of every court.`,
+  reward: { gold: 300, xp: 320 },
+  steps: [
+    S_TALK(() => `Enter the tourney at ${W.places[1].name}`, tourN, (q, e) => sChat(SPK(e), [
+      `Another hopeful! Three bouts, each to the yield. Killing is frowned upon and fined heavily.`,
+      `Your first opponent is Sir Bryce of Albion. To the lists!`,
+    ], goOn(q, 'Ready.'))),
+    S_DUEL('Bout one: defeat Sir Bryce of Albion', arena, () => ({ name: 'Sir Bryce', k: 0, p: .9 * rig(), look: knightLook(0) }), { npcs: () => [tourN()] }),
+    S_DUEL('Bout two: defeat Dame Ilsabet of Eldoria', arena, () => ({ name: 'Dame Ilsabet', k: 3, p: 1.1 * rig(), look: knightLook(3, 'spear') }), { npcs: () => [tourN()] }),
+    S_DUEL('Final bout: defeat Grukk Ironhide of Draven', arena, () => grukk(1.3 * rig()), { npcs: () => [tourN()] }),
+    S_TALK('Claim your prize', tourN, (q, e) => sChat(SPK(e), [
+      `Lords and ladies of the four crowns, I give you the Champion of Solmont!`,
+      ...(SF('patron') === 'circle' ? [[NARR, 'As the crowd roars, Orlande leans close. "A grey-cloaked woman paid your final opponent\'s squire to loosen his buckles. Congratulations, Champion."']] : []),
+    ], [{ t: "Accept the champion's laurels and purse.", fn: () => { addItem('longsword', 2, 1); [0, 1, 2, 3].forEach(k => addRep(k, k === 1 ? 10 : 3, 'Champion of Solmont', k !== 1)); SF('champion', 1); deed('Won the Tourney of Solmont.'); sAdvance(q); closeDialog(); } }])),
+  ],
+  done: () => sStart('r3'),
+};
+SQ.r3 = {
+  title: 'A Crown to Serve', giver: 'Your ambition', k: null,
+  desc: 'Glory opens doors. Now walk through one: swear your sword to a crown. Rulers accept oaths from knights with 30 reputation or more; quests, cleared camps and gifts will raise yours.',
+  reward: { xp: 200 },
+  steps: [
+    S_COND('Swear allegiance to a ruler (reputation 30)', () => P.allegiance != null, { at: () => { const k = [0, 1, 2, 3].filter(j => K.rep[j] >= 30).sort((a, b) => dist(P.x, P.y, W.places[a].x, W.places[a].y) - dist(P.x, P.y, W.places[b].x, W.places[b].y))[0]; return k != null ? rulerPos(k) : null; } }),
+  ],
+  done: () => { SF('liege', P.allegiance); deed(`Swore fealty to ${KDATA[P.allegiance].ruler}.`); sStart('r4'); },
+};
+const liegeCamp = () => sref('r4camp', () => { const k = liege(), c = W.places[k]; return W.places.filter(p => p.type === 'camp' && !p.cleared && p.owner === k).sort((a, b) => a.tier - b.tier || dist(a.x, a.y, c.x, c.y) - dist(b.x, b.y, c.x, c.y))[0] || nearestPlace(c.x, c.y, p => p.type === 'camp' && !p.cleared) || nearestPlace(c.x, c.y, p => p.type === 'camp'); });
+const holding = () => sref('holding', () => { const c = W.places[liege()]; return nearestPlace(c.x, c.y, p => p.type === 'outpost' && p.owner === liege()) || nearestPlace(c.x, c.y, p => p.type === 'village' && p.owner === liege()); });
+SQ.r4 = {
+  title: 'Lands and Title', giver: () => KDATA[liege()].ruler, k: () => liege(),
+  desc: () => `${KDATA[liege()].ruler} grants lands to knights who can hold them.`,
+  reward: { gold: 250, xp: 300 },
+  steps: [
+    S_RULER(() => `Ask ${KDATA[liege()].ruler} for a holding`, () => liege(), q => sChat(rulerSpk(liege()), [
+      `My knights earn their lands, champion. Brigands from a ${liegeCamp().name.toLowerCase()} ${dirW(W.places[liege()], liegeCamp())} of here have bled ${holding().name} dry for a year.`,
+      `Clear them out, and ${holding().name} and its lands are yours to keep.`,
+    ], goOn(q, 'Consider them cleared.'))),
+    S_CLEAR(() => `Clear the ${liegeCamp().name.toLowerCase()} (tier ${liegeCamp().tier})`, liegeCamp),
+    S_RULER(() => `Return to ${KDATA[liege()].ruler}`, () => liege(), q => sChat(rulerSpk(liege()), [
+      'Kneel.',
+      [NARR, 'The flat of a royal blade touches one shoulder, then the other.'],
+      `Rise, Castellan of ${holding().name}.`,
+    ], [{ t: 'Rise.', fn: () => { SF('title', holding().name); addRep(liege(), 10, 'Granted a holding'); deed(`Was named Castellan of ${holding().name} by ${KDATA[liege()].ruler}.`); sAdvance(q); closeDialog(); } }])),
+  ],
+  done: () => sStart('r5'),
+};
+const envoySpot = () => sspot('envoyR', () => { const a = W.places[liege()], b = W.places[rivalOf()]; return randomLandSpot(lerp(a.x, b.x, .3), lerp(a.y, b.y, .3), 0, 8); });
+const harrowLook = () => Object.assign(knightLook(liege()), { head: 'hair', hair: '#8a6a3a', shiny: 0, body: '#5a4a6a', plume: null });
+const harrowN = at => ({ key: 'harrow', name: 'Lord Harrowgate', role: `A noble of ${KDATA[liege()].name}`, look: harrowLook(), at, k: liege() });
+SQ.r5 = {
+  title: () => SF('patron') === 'circle' ? 'The Price of Patronage' : 'The Jealous Lord', giver: () => SF('patron') === 'circle' ? 'Vesper' : 'Lord Harrowgate', k: () => liege(),
+  desc: () => SF('patron') === 'circle' ? 'Vesper has sent word. The Circle is ready to collect on its gold.' : `Not everyone at the court of ${KDATA[liege()].name} is pleased by your rise.`,
+  reward: { gold: 200, xp: 320 },
+  steps: [
+    S_TALK(() => `Meet Vesper outside ${W.places[liege()].name}`, () => N.vesper(soff(W.places[liege()], 3, 12)), (q, e) => sChat(SPK(e), [
+      `The day has come, Castellan. An envoy of ${KDATA[rivalOf()].name} is on the road to ${W.places[liege()].name} to sue for peace.`,
+      `Peace does not serve the Circle. See that the envoy never arrives. You will find the party ${dirW(W.places[liege()], envoySpot())} of the castle.`,
+    ], [
+      { t: 'Consider it done.', fn: () => { sAdvance(q); closeDialog(); } },
+      { t: '<span class="dn">DEFY</span>I will not murder an envoy.', fn: () => { SF('defied', 1); deed('Defied the Ashen Circle and refused to murder an envoy.'); sAdvance(q, 2); sChat(SPK(e), ['Then you are no use to us. Watch the shadows, Castellan.']); } },
+    ]), { skip: () => SF('patron') !== 'circle' }),
+    S_TALK(() => `Intercept the envoy of ${KDATA[rivalOf()].name}`, () => ({ key: 'renvoy', name: `Envoy of ${KDATA[rivalOf()].name}`, role: 'Bearing an offer of peace', look: envoyLook(rivalOf()), at: envoySpot(), k: rivalOf() }), (q, e) => sChat(SPK(e), [
+      `A knight of ${KDATA[liege()].name}! Well met. I carry an offer of peace for your ruler. Will you see me safely there?`,
+    ], [
+      { t: '<span class="dn">MURDER</span>(Strike the envoy down.)', fn: () => { SF('murder', 1); Object.assign(e, { dead: true, deadT: 0 }); addRel(liege(), rivalOf(), -30, 'Envoy murdered', `An envoy of ${KDATA[rivalOf()].name} was murdered on the road to ${W.places[liege()].name}.`); addRep(rivalOf(), -25, 'Murdered their envoy'); deed(`Murdered the envoy of ${KDATA[rivalOf()].name} for the Circle.`); sAdvance(q, 99); sChat(NARR, ['It is quick, and it is ugly. Somewhere, Vesper is smiling.']); } },
+      { t: '<span class="dn">SPARE</span>Go on. Deliver your offer, and forget you saw me.', fn: () => { SF('defied', 1); addRel(liege(), rivalOf(), 12, 'Offer of peace'); deed(`Let the envoy of ${KDATA[rivalOf()].name} pass, defying the Circle.`); sAdvance(q); sChat(SPK(e), ['...Thank you, sir knight. I will not forget it.']); } },
+    ]), { skip: () => SF('patron') !== 'circle' || SF('defied') }),
+    S_FIGHT("Survive the Circle's revenge", q => ({ x: q.ax, y: q.ay }), [[['assassin', 3, { tier: 2 }], ['cultist', 2, { tier: 2 }]]], { skip: q => { if (SF('patron') !== 'circle' || !SF('defied')) return true; const f = findFree(P.x + 160, P.y + 60); q.ax = f.x; q.ay = f.y; return false; }, near: 9999, msg: 'Ashen Blades! The Circle has come to collect in blood!' }),
+    S_TALK(() => `Answer Lord Harrowgate's challenge at ${W.places[liege()].name}`, () => harrowN(soff(W.places[liege()], -3, 12)), (q, e) => sChat(SPK(e), [
+      'So. The hedge knight with a new title. I will not share a hall with a peasant who got lucky in a tourney.',
+      'Steel, here and now, and let the court watch.',
+    ], goOn(q, 'As you wish.')), { skip: () => SF('patron') === 'circle' }),
+    S_DUEL('Defeat Lord Harrowgate', () => soff(W.places[liege()], -3, 14), () => ({ name: 'Lord Harrowgate', k: liege(), p: 1.25, look: harrowLook(), yieldKey: 'harrow', say: 'For my honor!' }), { skip: () => SF('patron') === 'circle' }),
+    S_TALK("Decide Lord Harrowgate's fate", () => harrowN(soff(W.places[liege()], -3, 14)), (q, e) => sChat(SPK(e), ['...I yield. Do what you will.'], [
+      { t: '<span class="dn">MERCY</span>Get up. The court has seen enough.', fn: () => { SF('merciful', 1); addRep(liege(), 6, 'Showed mercy to a rival'); deed('Spared Lord Harrowgate after defeating him.'); sAdvance(q); sChat(SPK(e), ['...You have more honor than I did. I will not forget it.']); } },
+      { t: '<span class="dn">NO MERCY</span>Finish it.', fn: () => { SF('ruthless', 1); addRep(liege(), -5, 'Killed a noble in a duel'); deed('Killed Lord Harrowgate before the court.'); Object.assign(e, { dead: true, deadT: 0 }); sAdvance(q); sChat(NARR, ['The court falls silent. Nobody will challenge you again.']); } },
+    ]), { skip: () => SF('patron') === 'circle' || !sEnt('harrow') }),
+  ],
+  done: () => sStart('r6'),
+};
+function rivalOutpost() {
+  if (STORY.refs.rOut == null) { const c = W.places[liege()], o = nearestPlace(c.x, c.y, p => p.type === 'outpost' && p.owner === rivalOf()); STORY.refs.rOut = o ? o.id : -1; }
+  return STORY.refs.rOut >= 0 ? W.places[STORY.refs.rOut] : null;
+}
+const rivalFortSpot = () => rivalOutpost() || sspot('rCamp', () => { const a = W.places[liege()], b = W.places[rivalOf()]; return randomLandSpot(lerp(a.x, b.x, .6), lerp(a.y, b.y, .6), 0, 8); });
+const rivalFortName = () => rivalOutpost() ? rivalOutpost().name : `the ${KDATA[rivalOf()].name} war camp`;
+SQ.r6 = {
+  title: 'The Road to Power', giver: () => KDATA[liege()].ruler, k: () => liege(),
+  desc: () => `${KDATA[liege()].name} has a rival: ${KDATA[rivalOf()].name}. There are two roads to greatness, war or peace.`,
+  reward: { gold: 350, xp: 420 },
+  steps: [
+    S_RULER(() => `Counsel ${KDATA[liege()].ruler} on ${KDATA[rivalOf()].name}`, () => liege(), q => sChat(rulerSpk(liege()), [
+      `${KDATA[rivalOf()].name} has been a thorn in our side for a generation. My generals want war. My treasurers want peace.`,
+      `What does the Castellan of ${SF('title') || 'my realm'} say?`,
+    ], [
+      { t: `<span class="dn">WAR</span>Break ${KDATA[rivalOf()].name}.`, fn: () => { SF('road', 'war'); addRel(liege(), rivalOf(), -30, 'War counsel', `${KDATA[liege()].name} prepares for war with ${KDATA[rivalOf()].name}.`); deed(`Counseled ${KDATA[liege()].name} to make war on ${KDATA[rivalOf()].name}.`); sAdvance(q); sChat(rulerSpk(liege()), [`Then lead my soldiers. Break their warband at the border, then take ${rivalFortName()}.`]); } },
+      { t: `<span class="dn">PEACE</span>Make ${KDATA[rivalOf()].name} a friend.`, fn: () => { SF('road', 'peace'); deed(`Counseled ${KDATA[liege()].name} to seek peace with ${KDATA[rivalOf()].name}.`); sAdvance(q, 3); sChat(rulerSpk(liege()), ['Peace, then, if you can make it. Bring us to friendship with them, and I will name you my Chancellor.', [NARR, 'Use Diplomacy (K) to raise relations between the two crowns: gifts, royal letters, quests for both, or an alliance proposal.']]); } },
+    ])),
+    S_FIGHT(() => `Break the ${KDATA[rivalOf()].name} warband at the border`, () => sWarSpot(liege(), rivalOf()), () => [[['soldier', 4, { tier: 2, o: { k: rivalOf(), foeOf: liege(), questFoe: true } }], ['knight', 1, { tier: 2, o: { k: rivalOf(), foeOf: liege(), questFoe: true } }]]], { near: 16, allies: (q, x, y) => sKAllies(liege(), x, y, 4, 0), msg: 'Battle is joined!' }),
+    S_FIGHT(() => rivalOutpost() ? `Take ${rivalOutpost().name}` : `Destroy ${rivalFortName()}`, rivalFortSpot, () => [[['guard', 3, { tier: 3, o: { k: rivalOf(), foeOf: liege(), questFoe: true } }], ['knight', 1, { tier: 3, o: { k: rivalOf(), foeOf: liege(), questFoe: true } }]]], {
+      near: 14, allies: (q, x, y) => sKAllies(liege(), x, y, 3, 1), msg: 'Storm the fort!',
+      won: () => { const o = rivalOutpost(); if (!o) { K.mil[rivalOf()] = Math.max(300, K.mil[rivalOf()] - 300); addRel(liege(), rivalOf(), -10, 'War camp destroyed'); SF('conquest', 1); deed(`Destroyed the ${KDATA[rivalOf()].name} war camp for ${KDATA[liege()].name}.`); return; } o.owner = liege(); if (o.spawned) despawnPlace(o); K.mil[rivalOf()] = Math.max(300, K.mil[rivalOf()] - 400); addRel(liege(), rivalOf(), -15, 'Fort taken', `${KDATA[liege()].name} captured ${o.name} from ${KDATA[rivalOf()].name}!`); SF('conquest', 1); deed(`Captured ${o.name} for ${KDATA[liege()].name}.`); toast(`⚔ <b>${o.name}</b> now flies the banner of ${KDATA[liege()].name}!`, 'war', bannerURL(liege())); },
+    }),
+    S_COND(() => `Bring ${KDATA[liege()].name} and ${KDATA[rivalOf()].name} to Friendly terms (now ${Math.round(getRel(liege(), rivalOf()))}, need 25)`, () => getRel(liege(), rivalOf()) >= 25, { skip: () => SF('road') !== 'peace' }),
+    S_RULER(() => `Report to ${KDATA[liege()].ruler}`, () => liege(), q => sChat(rulerSpk(liege()), SF('road') === 'war' ? [`${rivalOutpost() ? rivalOutpost().name + ' is ours' : 'Their war camp is ash'}! The bards are already singing of you.`] : [`Friendship with ${KDATA[rivalOf()].name}. I did not think I would live to see it.`, 'You have earned your seat at my right hand, Chancellor.'], [{ t: 'I serve the crown.', fn: () => { if (SF('road') === 'peace') { SF('chancellor', 1); deed(`Was named Chancellor of ${KDATA[liege()].name}.`); } addRep(liege(), 10, 'Served the crown'); sAdvance(q); closeDialog(); } }])),
+  ],
+  done: () => {
+    ['sa', 'sv', 'sd', 'se'].forEach(s => sStart(s));
+    sSoon(() => circle()
+      ? sChat({ name: 'Vesper', role: 'Envoy of the Ashen Circle', portrait: fakeP(LK.vesper) }, [`You have done well, Castellan. Now for the real prize. The seal beneath ${B().name} is broken, and the Hollow King stirs.`, "His Ember Crown lies in four shards, one in every court. Whoever forges it again holds Aurek's right: sovereign of all four lands. Gather the shards. The Circle will be watching."])
+      : sChat({ name: 'Brother Caddock', role: 'A letter from a hermit scholar', portrait: fakeP(LK.caddock) }, ['"To the knight who rose from nothing:', `The seal beneath ${B().name} is broken, and the dead will walk. Aurek's Ember Crown lies in four shards, one in each court. Forged again, it binds the Hollow King, and by the old law its bearer rules all four lands.`, 'I pray it falls to someone worthy. — Brother Caddock"']));
+  },
+};
+SQ.r7 = {
+  title: 'The Ember Throne', giver: () => circle() ? 'Vesper' : 'Brother Caddock', k: () => liege(),
+  desc: () => `All four shards are yours. At ${B().name}, where the crown was broken, it can be forged anew, if the Hollow King does not take it from you first.`,
+  reward: { xp: 200 },
+  steps: [
+    S_RULER(() => `Tell ${KDATA[liege()].ruler} you are ready`, () => liege(), q => sChat(rulerSpk(liege()), [
+      'All four? Then the dead will come for you, and for us.',
+      `Take my best soldiers to ${B().name}. Whatever happens there, ${KDATA[liege()].name} stands with you.`,
+    ], goOn(q, 'To the barrow.'))),
+  ],
+  done: () => sStart('fin'),
+};
+SQ.coup = {
+  title: 'The Usurper', giver: 'Your ambition', k: () => liege(),
+  desc: () => `You mean to take the throne of ${KDATA[liege()].name} by force.`,
+  reward: { xp: 400 },
+  steps: [
+    S_FIGHT(() => `Seize the throne at ${W.places[liege()].name}`, () => rulerPos(liege()), () => [[['guard', 4, { tier: 3, o: { k: liege(), questFoe: true } }], ['knight', 2, { tier: 3, o: { k: liege(), questFoe: true } }]]], { near: 14, msg: 'Treason! The royal guard stands against you!', won: () => { addRep(liege(), -40, 'Seized the throne by force'); deed(`Seized the throne of ${KDATA[liege()].name} by force.`); } }),
+  ],
+  done: () => sSoon(storyEnding),
+};
+
+/* ---------------- Finale (all paths) ---------------- */
+function sFinAllies(q, x, y) {
+  const p = STORY.path, out = [];
+  if (p === 'conspiracy') return sConspAllies(x, y, 'fin');
+  if (p === 'ancient') [0, 1, 2, 3].forEach(k => { const r = SF('ral' + k); if (r === 'yes') out.push(...sKAllies(k, x, y, 3, 1)); else if (r === 'paid') out.push(...sKAllies(k, x, y, 2, 0)); });
+  if (p === 'rise') {
+    out.push(...sKAllies(liege(), x, y, 3, 1));
+    if (SF('conquest')) out.push(...sKAllies(liege(), x, y, 2, 0));
+    if (SF('chancellor')) out.push(...sKAllies(rivalOf(), x, y, 2, 0));
+    if (circle()) out.push(sNamedAlly('assassin', 'Vesper', LK.vesper, x, y));
+  }
+  if (SF('thessaly') === 'ally') out.push(sThessAlly(x, y));
+  return out;
+}
+const sFinNpc = () => rise() && circle() ? N.vesper(soff(B(), 2, 2)) : N.caddock(soff(B(), 2, 2));
+function sFinalChoice(q, e) {
+  const pick = id => () => { SF('end', id); ['shard_0', 'shard_1', 'shard_2', 'shard_3'].forEach(s => removeItemById(s)); sAdvance(q); closeDialog(); };
+  if (STORY.path === 'ancient') {
+    const n = [0, 1, 2, 3].filter(k => SF('ral' + k) && SF('ral' + k) !== 'no').length;
+    sChat(SPK(e), [
+      'He is ash, for now. But listen. His laughter is still in the shards.',
+      'The crown must be forged tonight, knight, and someone must decide what becomes of it.',
+    ], [
+      { t: `<span class="dn">FOUR CROWNS</span>Forge the crown and give it to the four rulers, to hold together.${n < 3 ? ' (Requires three rallied crowns)' : ''}`, dis: n < 3, fn: pick('reforged') },
+      { t: '<span class="dn">SACRIFICE</span>Wear the crown, and bind him inside yourself forever.', fn: pick('last_oath') },
+      { t: `<span class="dn">SHATTER</span>Break the shards and burn him with his own crown.${SF('lore') ? '' : ' (Requires the truth of Aurek)'}`, dis: !SF('lore'), fn: pick('shattered') },
+      { t: '<span class="dn">CLAIM</span>Forge the crown... and take his power as your own.', fn: pick('hollow_crown') },
+    ]);
+    return;
+  }
+  const loved = [0, 1, 2, 3].filter(k => K.rep[k] >= 50).length;
+  const opts = [
+    { t: `<span class="dn">HIGH THRONE</span>Raise the crown and claim the throne of all four lands.${loved < 3 ? ' (Requires 50 reputation with three crowns)' : ''}`, dis: loved < 3, fn: pick('high_king') },
+    { t: `<span class="dn">CONQUEST</span>Crown yourself by right of the sword.${SF('road') !== 'war' ? ' (Requires the road of war)' : ''}`, dis: SF('road') !== 'war', fn: pick('conqueror') },
+    { t: `<span class="dn">FEALTY</span>Kneel, and offer the crown to ${KDATA[liege()].ruler}.`, fn: pick('protector') },
+    { t: `<span class="dn">USURP</span>Take the crown to ${W.places[liege()].name}, and take the throne by force.`, fn: pick('usurper') },
+  ];
+  if (circle()) opts.unshift({ t: '<span class="dn">THE CIRCLE</span>Let Vesper crown you, as the Circle promised.', fn: pick('puppet') });
+  sChat(SPK(e), circle()
+    ? ['It is done. He is ash, and the shards are yours. The Circle kept its promise, Castellan. Now keep yours.', 'Let me crown you. The Circle will handle the rest.']
+    : ['It is done, knight. He is ash.', 'The shards are warm in your hands. By the old law, whoever forges the crown rules all four lands. What will you do?'], opts);
+}
+SQ.fin = {
+  title: 'The Hollow King', giver: () => ({ conspiracy: 'The broken rite', ancient: 'Brother Caddock', rise: 'The Ember Crown' }[STORY.path]), k: null,
+  desc: () => `At ${B().name}, the Hollow King rises with all his host. End this.`,
+  reward: { gold: 500, xp: 900 },
+  steps: [
+    S_FIGHT(() => `Defeat the Hollow King at ${B().name}`, () => B(), [
+      [['wight', 5, { tier: 3 }], ['hknight', 1, { tier: 2 }]],
+      [['wight', 4, { tier: 3 }], ['hknight', 2, { tier: 3 }]],
+      [['hollow_king', 1, { name: 'Aurek, the Hollow King', boss: true, hp: 1350, dmg: 24, o: { scale: 1.3 } }], ['wight', 3, { tier: 3 }]],
+    ], { near: 18, sfx: 'seal', msg: "The earth splits open. The Hollow King's host pours out of the barrow!", waveMsg: ['', 'Hollow Knights rise from the grave-mist!', 'AUREK, THE HOLLOW KING, RISES!'], allies: sFinAllies, won: () => deed('Struck down Aurek, the Hollow King.') }),
+    S_TALK('Decide the fate of the Ember Crown', sFinNpc, sFinalChoice, { skip: () => STORY.path === 'conspiracy' }),
+  ],
+  done: () => { if (SF('end') === 'usurper') sStart('coup'); else sSoon(storyEnding); },
+};
+
+/* ---------------- Hollow raids (side quests in every path) ---------------- */
+SQ.hraid = {
+  side: true, quiet: true, title: q => `The Hollow at ${W.places[q.v].name}`, giver: q => W.places[q.v].name, k: q => W.places[q.v].owner,
+  desc: q => `The dead have come to ${W.places[q.v].name}. Destroy them before the village is overrun.`,
+  reward: q => ({ gold: 60 + P.lvl * 12, xp: 90 + P.lvl * 5, rep: { [W.places[q.v].owner]: 10 } }),
+  steps: [S_FIGHT(q => `Destroy the Hollow at ${W.places[q.v].name}`, q => W.places[q.v], () => [[['wight', 3 + Math.min(4, Math.floor(P.lvl / 2)), { tier: 1, r: 5 }], ...(P.lvl >= 6 ? [['hknight', 1, { tier: 1 }]] : [])]], {
+    near: 9999, limit: 240,
+    fail: q => { const v = W.places[q.v]; STORY.lost++; STORY.lostV.push(v.id); failQuest(q, `${v.name} fell to the Hollow.`); addRep(v.owner, -4, 'Failed to save a village from the Hollow', true); deed(`${v.name} fell to the Hollow.`); },
+  })],
+  done: q => { STORY.saved++; deed(`Drove the Hollow from ${W.places[q.v].name}.`); },
+};
+
+/* ---------------- Endings ---------------- */
+const ENDINGS = {
+  unmasked: { t: 'The Shadow Unmasked', p: () => ['Lady Wren stood trial before King Aldric and envoys of all four courts. Her confession named agents of the Circle in every hall, and for once the four crowns stood together to root them out.', 'The Hollow King is dust. The trial became a treaty, and the treaty became something like trust. They call you the Knight Who Unmasked the Shadow, and for a generation the borders are quiet.'] },
+  knife: { t: 'A Knife in the Dark', p: () => ['Lady Wren is gone and the Circle is scattered, but only a handful of people will ever know how close the realm came to falling. That is how the game of shadows is played.', 'The Hollow King is dust. The courts go back to their old quarrels, never knowing who saved them. Some nights you wonder whether Wren would have done it better.'] },
+  ashes: { t: 'Ashes of Four Crowns', p: () => ["The Circle is broken and the Hollow King is dust, but the lies Wren sowed had already taken root. Crown turned on crown, and the peace you fought for never came.", 'History will remember the knight who slew a dead king, and the four kingdoms that burned each other anyway.'] },
+  grey_throne: { t: 'The Grey Throne', p: () => ['Aurek rose, and fell to your blade exactly as Lady Wren had planned. Shaking with fear, the four crowns knelt before Albion and the champion who had saved them.', 'Nobody sees the grey hand behind the throne. Wren keeps the secrets; you keep the sword. The realm is one again, and quiet, and yours, in the dark where the Circle always ruled.'] },
+  reforged: { t: 'The Crown Reforged', p: () => ['At the barrow, four rulers laid their hands on the Ember Crown together. For the first time in four hundred years the kingdoms swore a common oath: the High Throne would stand empty, and the crown would pass between them as a symbol of the realm, never its master.', 'Aurek sleeps forever beneath a seal of four crowns. Children in all four kingdoms learn the name of the knight who brought their rulers to one table.'] },
+  last_oath: { t: 'The Last Oath', p: () => ["You set the Ember Crown on your own head, and the cold came into you. Aurek's hunger sleeps inside your heart now, chained by your will, and it will sleep for as long as you keep watch.", 'Year after year you stand vigil at the barrow while the realm forgets why it once feared the dark. Pilgrims bring flowers to the Silent Warden. You never tell them how loud he is.'] },
+  shattered: { t: 'Shattered Forever', p: () => ["You brought the shards down on the stone, and the crown's own fire burned the Hollow King out of the world. The shards went dark, and the old bond between the four houses died with them.", 'The dead do not walk again. The kingdoms go their own way, free of Aurek\'s shadow and free of his crown. Whatever the realm becomes now, it will choose for itself.'] },
+  hollow_crown: { t: 'The Hollow Crown', p: () => ["The crown fit perfectly. Aurek's power flowed into you like winter, and by morning the dead in the barrow knelt, not to him, but to you.", 'The four crowns sent armies. The armies did not come home, and now they march for you. The realm is one again, silent and cold, ruled forever by the knight who would not let it go.'] },
+  long_night: { t: 'The Long Night', p: () => ['The Hollow King fell, but too late. Village after village went dark while the crowns argued, and the realm was bled white by the time his host was broken.', 'The four kingdoms survive, barely, on the ashes of the villages they failed to protect. It will take a generation to rebuild. They remember you as the knight who won, and they remember what the winning cost.'] },
+  high_king: { t: 'The High Throne', p: () => ['In the ruins of the barrow you raised the Ember Crown, and the soldiers of three kingdoms knelt. Within the season the four courts acclaimed you sovereign of all four lands, the first since Aurek.', 'It began with a wooden sword. It ends on the High Throne, and for the first time in four centuries the realm is at peace. How long it lasts is a problem for another day.'] },
+  conqueror: { t: 'The Conqueror', p: () => [`You crowned yourself by right of the sword, and the sword proved right. The banners of ${KDATA[liege()].name} flew over fort after fort until no crown dared refuse your summons.`, `The realm is one again, held together by fear and iron. Your heralds call it peace. The widows of ${KDATA[rivalOf()].name} call it something else.`] },
+  protector: { t: 'Protector of the Realm', p: () => [`You knelt and placed the Ember Crown in the hands of ${KDATA[liege()].ruler}. ${KDATA[liege()].name} rose to lead the four kingdoms, and you stood at the throne's right hand as Protector of the Realm.`, `It is not a crown, but it is power, and it was honestly earned. The hedge knight from ${W.start.name} now commands armies, and rulers wait on your counsel.`] },
+  usurper: { t: 'The Usurper', p: () => [`${W.places[liege()].name} fell in a single bloody night. You sat the throne of ${KDATA[liege()].name} with the Ember Crown on your brow and the royal guard dead at your feet.`, 'You rule, and nobody loves you. Every cup might be poisoned and every shadow might hold a knife, so you sleep with a sword across your knees. Such is the price of a stolen throne.'] },
+  puppet: { t: 'The Puppet', p: () => ['Vesper set the Ember Crown on your head, and the four crowns knelt to the champion who had slain the Hollow King. The Circle made you a sovereign.', 'Every morning a letter sealed in grey wax arrives, telling you what to decree. You sign. The realm is one again, just as the Circle always wanted, and you are its most magnificent ornament.'] },
+  outlaw: { t: 'The Outlaw Knight', p: () => ['The Hollow King is gone, but it is not your name the bards sing. Three crowns have posted bounties on your head, and every road is watched.', 'You ride the borderlands with your hood pulled low, a legend to some and a curse to most. Perhaps that is its own kind of freedom.'] },
+};
+function sComputeEnding() {
+  const choice = SF('end');
+  if ([0, 1, 2, 3].filter(k => K.rep[k] <= -40).length >= 3 && !['hollow_crown', 'puppet', 'usurper'].includes(choice)) return 'outlaw';
+  if (STORY.path === 'conspiracy') {
+    if (SF('joined')) return 'grey_throne';
+    if (PAIRS.filter(([a, b]) => relStatus(a, b).n === 'At War').length >= 2) return 'ashes';
+    return SF('wren') === 'arrested' && SF('told') === 'yes' ? 'unmasked' : 'knife';
+  }
+  if (STORY.path === 'ancient') return choice !== 'hollow_crown' && STORY.lost >= 4 ? 'long_night' : (choice || 'last_oath');
+  return choice || 'protector';
+}
+function sRealmLine(k) {
+  const al = [], wr = [];
+  for (let j = 0; j < 4; j++) { if (j === k) continue; const s = relStatus(k, j).n; if (s === 'Allied') al.push(KDATA[j].name); else if (s === 'At War') wr.push(KDATA[j].name); }
+  const rel = [al.length ? `allied with ${al.join(' and ')}` : '', wr.length ? `at war with ${wr.join(' and ')}` : ''].filter(Boolean).join(', ') || 'at peace with its neighbors';
+  return `<b style="color:${KDATA[k].color}">${KDATA[k].name}</b> is ${rel}. Its people call you <i>${repTitle(k)}</i>.`;
+}
+function storyEnding() {
+  if (!STORY || STORY.done) return;
+  const id = sComputeEnding(), E = ENDINGS[id];
+  STORY.ending = id; STORY.done = true;
+  Q.active = Q.active.filter(q => q.type !== 'story'); Q.tracked = Q.active[0] ? Q.active[0].id : null;
+  ents = ents.filter(e => e.role !== 'story');
+  let seen = []; try { seen = JSON.parse(localStorage.getItem('fk_endings') || '[]'); } catch (e) { }
+  if (!seen.includes(id)) seen.push(id); try { localStorage.setItem('fk_endings', JSON.stringify(seen)); } catch (e) { }
+  const raid = STORY.saved || STORY.lost ? `<p>You drove the Hollow from ${STORY.saved} village${STORY.saved === 1 ? '' : 's'}${STORY.lost ? `; ${STORY.lost} fell to the dead` : ''}.</p>` : '';
+  $('endTitle').textContent = E.t.toUpperCase();
+  $('endBody').innerHTML = E.p().map(t => `<p>${t}</p>`).join('') + raid
+    + `<h4>THE FOUR KINGDOMS</h4>${[0, 1, 2, 3].map(k => `<p style="margin-bottom:5px">${sRealmLine(k)}</p>`).join('')}`
+    + `<h4>YOUR DEEDS</h4><ul>${STORY.deeds.slice(-14).map(d => `<li>${esc(d.t)}</li>`).join('')}</ul>`;
+  $('endStats').textContent = `Day ${dayNum()} · Level ${P.lvl} · ${fmt(G.kills)} foes slain · ${STORY.qdone.length} story quests completed`;
+  $('endPips').innerHTML = Object.keys(ENDINGS).map(k => `<span class="${seen.includes(k) ? 'on' : ''}" data-tip="${seen.includes(k) ? esc(ENDINGS[k].t) : 'Undiscovered ending'}"></span>`).join('') + `<em>${seen.length} / ${Object.keys(ENDINGS).length} endings discovered</em>`;
+  G.state = 'ending'; closeDialog(); UI.closeAll(); UI.show('endScreen'); SND.play('ending');
+  saveGame(true);
+}
+function storyBegin() {
+  sStart('p1');
+  sSoon(() => sChat(NARR, [
+    'Four hundred years ago, Aurek the First ruled every land from the Greywater to the Thornwood. When he died, his Ember Crown was broken into four shards, and four kingdoms rose from the pieces: Albion, Valoria, Draven and Eldoria.',
+    `They have warred ever since. You are a hedge knight of Albion, with a wooden sword, a padded coat, ${P.gold} coins and no name worth remembering. Yet.`,
+  ], [{ t: 'Begin', fn: closeDialog }]));
 }
 
 /* ---------------- Loop ---------------- */
@@ -3821,6 +5286,7 @@ function update(dt) {
   G.time += dt;
   input.wx = cam.x + (input.mx - VW / 2) / ZOOM; input.wy = cam.y + (input.my - VH / 2) / ZOOM;
   updatePlayer(dt);
+  if (STORY) storyTick(dt);
   for (const e of ents) { if (Math.abs(e.x - P.x) > 2600 || Math.abs(e.y - P.y) > 2600) { if (!e.follow) continue; } updateActor(e, dt); }
   separate(); updateProjs(dt); updatePickups(dt); updateFX(dt); updateSpawns(dt);
   if ((G.fogT -= dt) <= 0) { G.fogT = .25; updateDiscovery(); }
