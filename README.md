@@ -15,6 +15,15 @@ When you start a new game you choose a mode:
 
 Story and sandbox games are saved separately, so starting one never overwrites the other.
 
+## New game options
+
+Before a new game you can set:
+
+- **Difficulty**, in six levels: Peasant, Squire, Knight (the standard game), Champion, Warlord and Forsaken. Difficulty changes damage taken and dealt, enemy health, health and stamina regeneration, stamina costs, healing, how much gold you lose when you fall, your starting gear and gold, and how friendly the four kingdoms are at the start. Forsaken is an Ironman mode: you get one life, and dying erases the save.
+- **World size**, from Extra Small to Extra Large. Larger worlds have more villages, ruins and bandit camps.
+- **Homeland**, the kingdom you start in (sandbox only; the story always begins in Albion).
+- **Wildlife** (scarce, normal or abundant), **day length** (short, normal or long), and whether to **start with the map explored**.
+
 ## Controls
 
 | Key | Action |
