@@ -332,6 +332,35 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .help p{margin:6px 0}
 .confirmBox{margin-top:14px;padding:12px;border:1px solid #9a4a3a;border-radius:6px;background:rgba(80,20,10,.25);text-align:center}
 #modeScreen .panel,#contScreen .panel{width:min(420px,calc(94vw/var(--ui-scale)))}
+#modeScreen .panel.wide{width:min(820px,calc(96vw/var(--ui-scale)))}
+#setupBox{max-height:calc(94vh/var(--ui-scale) - 130px);overflow-y:auto;overflow-x:hidden;padding-right:8px;margin-right:-8px}
+.setLocked{opacity:.45;pointer-events:none}
+.lockNote{font-size:13px;color:#f08070;font-style:italic;margin-top:5px}
+.setH{font-family:var(--fh);font-weight:700;color:var(--gold);font-size:12px;letter-spacing:.16em;margin:14px 0 6px}
+.diffGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.diffCard{cursor:pointer;padding:8px 10px;border:1px solid #6a5028;border-radius:6px;background:rgba(0,0,0,.25);transition:all .12s}
+.diffCard:hover{border-color:var(--gold)}
+.diffCard.on{border-color:var(--gold-l);background:linear-gradient(180deg,rgba(130,94,50,.55),rgba(50,35,20,.7));box-shadow:0 0 10px rgba(216,178,90,.25)}
+.diffCard .dcN{font-family:var(--fh);font-weight:900;letter-spacing:.08em;color:var(--gold-l);font-size:14px}
+.diffCard .dcL{font-size:11px;color:var(--muted);letter-spacing:.1em;font-family:var(--fh)}
+.diffCard.iron .dcN{color:#ff8a70}
+.diffInfo{margin-top:8px;padding:10px 12px;border:1px solid rgba(154,117,54,.4);border-radius:6px;background:rgba(0,0,0,.28)}
+.diffInfo .dTag{font-style:italic;color:var(--ink);margin-bottom:6px;font-size:15px}
+.diffInfo table{width:100%;border-collapse:collapse;font-size:13.5px}
+.diffInfo td{padding:2px 4px;border-bottom:1px solid rgba(154,117,54,.15);color:var(--ink2)}
+.diffInfo td:last-child{text-align:right;color:var(--ink)}
+.diffInfo td.g{color:#8fe07a}.diffInfo td.b{color:#f08070}
+.choice{display:flex;gap:5px;flex-wrap:wrap}
+.choice .sb{flex:1;min-width:0;cursor:pointer;text-align:center;padding:7px 6px;border:1px solid #6a5028;border-radius:5px;background:rgba(0,0,0,.25);font-family:var(--fh);font-size:12px;letter-spacing:.04em;color:var(--ink2);white-space:nowrap}
+.choice .sb:hover{border-color:var(--gold)}
+.choice .sb.on{border-color:var(--gold-l);color:#fff8e0;background:linear-gradient(180deg,#8a6a2e,#5a4018)}
+.choice .sb img{height:18px;vertical-align:middle;margin-right:4px}
+.segNote{font-size:13px;color:var(--muted);font-style:italic;margin-top:5px}
+.setupRow{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.setChk{display:block;margin-top:14px;font-size:14.5px;color:var(--ink);cursor:pointer}
+.setChk span{color:var(--muted);font-style:italic;font-size:13px}
+.setBtns{display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+@media (max-width:620px){.diffGrid{grid-template-columns:repeat(2,1fr)}.setupRow{grid-template-columns:1fr}}
 .modeBox{margin:6px auto 0;display:flex;flex-direction:column;gap:10px}
 .modeCard .mcS{font-size:12.5px;color:var(--muted);font-style:italic;margin-top:5px}
 .modeCard{text-align:left;cursor:pointer;padding:11px 14px;border:1px solid #9a7536;border-radius:6px;background:linear-gradient(180deg,rgba(92,65,40,.55),rgba(40,28,17,.7));transition:transform .12s,border-color .15s,background .15s}
@@ -340,7 +369,8 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .modeCard .mcD{font-size:14px;color:var(--ink2);line-height:1.3;margin-top:3px}
 .modeCard.story .mcT::before{content:'✦ ';color:#ffcf4a}
 #endScreen{background:radial-gradient(ellipse at center,rgba(40,26,8,.55),rgba(0,0,0,.93))}
-#endScreen .panel{width:min(760px,calc(94vw/var(--ui-scale)));max-height:calc(92vh/var(--ui-scale));overflow-y:auto;overflow-x:hidden;text-align:center}
+#endScreen .panel{width:min(760px,calc(94vw/var(--ui-scale)));text-align:center}
+#endScreen .endBody{max-height:calc(92vh/var(--ui-scale) - 290px);overflow-y:auto;overflow-x:hidden;padding-right:8px}
 .endKicker{font-family:var(--fh);font-weight:900;letter-spacing:.5em;color:var(--gold);font-size:15px;margin-bottom:6px}
 #endTitle{font-size:32px}
 .endBody{text-align:left;font-size:16.5px;line-height:1.5;color:var(--ink)}
@@ -434,11 +464,27 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   <div id="modeScreen" class="screen">
     <div class="panel rv">
       <div class="closeX" data-close>✕</div>
-      <div class="ptitle" style="font-size:26px">NEW GAME</div>
+      <div class="ptitle" style="font-size:26px" id="modeTitle">NEW GAME</div>
       <div class="orn">✦</div>
       <div id="modePick" class="modeBox">
         <div class="modeCard story" data-mode="story"><div class="mcT">STORY MODE</div><div class="mcD">Follow a hedge knight's tale across the four kingdoms. Your choices shape the realm and decide one of many endings.</div></div>
         <div class="modeCard" data-mode="sandbox"><div class="mcT">SANDBOX</div><div class="mcD">The open realm with no story. Explore, fight, trade and meddle in diplomacy for as long as you like.</div></div>
+      </div>
+      <div id="setupBox" class="hidden">
+        <div class="setH">DIFFICULTY</div>
+        <div class="diffGrid" id="diffGrid"></div>
+        <div class="diffInfo" id="diffInfo"></div>
+        <div class="setH">WORLD SIZE</div>
+        <div class="choice" id="sizeSeg"></div>
+        <div class="segNote" id="sizeNote"></div>
+        <div id="kingSec"><div class="setH">HOMELAND</div><div class="choice" id="kingSeg"></div><div class="segNote">Where your tale begins. Your home kingdom starts out knowing you.</div></div>
+        <div class="setupRow">
+          <div><div class="setH">WILDLIFE</div><div class="choice" id="wildSeg"></div><div class="lockNote hidden" id="wildLock">Forsaken: always abundant</div></div>
+          <div><div class="setH">DAY LENGTH</div><div class="choice" id="daySeg"></div></div>
+        </div>
+        <label class="setChk" id="exploredChk"><input type="checkbox" id="optExplored"> Start with the whole map explored <span>(hidden places stay secret)</span></label>
+        <div class="lockNote hidden" id="exploredLock">Forsaken: you must discover the realm yourself</div>
+        <div class="setBtns"><button class="btn sm" id="btnSetupBack">Back</button><button class="btn gold" id="btnSetupGo">Forge the Realm</button></div>
       </div>
       <div id="newConfirm" class="confirmBox hidden">
         <div style="margin-bottom:10px" id="newConfirmText"></div>
@@ -1236,6 +1282,67 @@ function itemStats(it) {
 }
 function itemValue(it) { const b = ITEMS[it.id]; return Math.max(1, Math.round(b.val * (QUAL[it.q] ? QUAL[it.q].v : 1))); }
 
+/* ---------------- New-game options: difficulty and world ---------------- */
+// Knight is the original game, unchanged. Values are multipliers unless noted.
+const DIFFS = [
+  { name: 'Peasant', tag: 'Ideal for beginners and players who are here for the story.', dmgTaken: .5, dmgDealt: 1.3, enemyHp: .75, regen: 2.4, heal: 1.5, stRegen: 1.35, stCost: .75, goldLoss: .1, rel: 15, homeRep: 20, gold: 150, gear: ['iron_sword', 'round_shield', 'leather', 'old_horse'], items: [['bread', 6], ['bandage', 4], ['potion', 2]] },
+  { name: 'Squire', tag: 'A gentle challenge for players still learning to fight.', dmgTaken: .75, dmgDealt: 1.12, enemyHp: .88, regen: 1.4, heal: 1.2, stRegen: 1.15, stCost: .9, goldLoss: .2, rel: 8, homeRep: 15, gold: 80, gear: ['iron_sword', 'wooden_shield', 'padded'], items: [['bread', 4], ['bandage', 3], ['potion', 1]] },
+  { name: 'Knight', tag: 'The intended experience. Recommended for most players.', dmgTaken: 1, dmgDealt: 1, enemyHp: 1, regen: .8, heal: 1, stRegen: 1, stCost: 1, goldLoss: .25, rel: 0, homeRep: 10, gold: 25, gear: ['wooden_sword', 'wooden_shield', 'padded'], items: [['bread', 3], ['bandage', 2]] },
+  { name: 'Champion', tag: 'For seasoned fighters who have mastered blocking and dodging.', dmgTaken: 1.3, dmgDealt: .92, enemyHp: 1.15, regen: .45, heal: .85, stRegen: .9, stCost: 1.1, goldLoss: .35, rel: -8, homeRep: 5, gold: 10, gear: ['wooden_sword', 'wooden_shield', 'padded'], items: [['bread', 2], ['bandage', 1]] },
+  { name: 'Warlord', tag: 'For only the best of the best. Every fight could be your last.', dmgTaken: 1.65, dmgDealt: .85, enemyHp: 1.3, regen: .2, heal: .7, stRegen: .8, stCost: 1.2, goldLoss: .5, rel: -15, homeRep: 0, gold: 0, gear: ['wooden_sword', 'padded'], items: [['bread', 1]] },
+  { name: 'Forsaken', tag: 'Ironman. One life, and death erases your save. Verging on impossible.', ironman: true, dmgTaken: 2.3, dmgDealt: .75, enemyHp: 1.6, regen: 0, heal: .5, stRegen: .65, stCost: 1.35, goldLoss: 1, rel: -25, homeRep: -5, gold: 0, gear: [], items: [] },
+];
+const SIZES = [
+  { name: 'Extra Small', n: 224, note: 'A compact realm with short journeys and few bandit camps.' },
+  { name: 'Small', n: 296, note: 'A smaller realm. Towns are never far apart.' },
+  { name: 'Medium', n: 360, note: 'The standard realm.' },
+  { name: 'Large', n: 440, note: 'A broad realm with longer roads and more villages, ruins and camps.' },
+  { name: 'Extra Large', n: 520, note: 'A vast continent. Long journeys and far more bandits and raiders.' },
+];
+const DAYS = [{ name: 'Short', len: 300 }, { name: 'Normal', len: 480 }, { name: 'Long', len: 780 }];
+const WILDS = [{ name: 'Scarce', cap: 2, every: 7 }, { name: 'Normal', cap: 5, every: 4 }, { name: 'Abundant', cap: 9, every: 2.5 }];
+const normOpts = o => Object.assign({ diff: 2, size: 2, kingdom: 0, explored: false, day: 1, wild: 1 }, o || {});
+const DIFF = () => DIFFS[G.opts ? G.opts.diff : 2];
+function sizeCounts(n) { const f = n / 360; return { vil: Math.round(20 * Math.pow(f, 1.5)), camp: Math.round(18 * f * f) }; }
+function diffEffects(d) {
+  const pct = v => Math.round(v * 100) + '%', cmp = (v, lowGood) => v === 1 ? '' : (v < 1) === lowGood ? 'g' : 'b';
+  const regen = d.regen === 0 ? 'None' : d.regen >= 2 ? 'Very fast' : d.regen > 1 ? 'Fast' : d.regen === .8 ? 'Normal' : d.regen >= .4 ? 'Slow' : 'Very slow';
+  const gear = d.gear.length ? d.gear.map(id => ITEMS[id].name).join(', ') : 'Nothing but your fists';
+  return [
+    ['Damage you take', pct(d.dmgTaken), cmp(d.dmgTaken, true)],
+    ['Damage you deal', pct(d.dmgDealt), cmp(d.dmgDealt, false)],
+    ['Enemy health', pct(d.enemyHp), cmp(d.enemyHp, true)],
+    ['Health regeneration', regen, d.regen === .8 ? '' : d.regen > .8 ? 'g' : 'b'],
+    ['Healing from food and potions', pct(d.heal), cmp(d.heal, false)],
+    ['Stamina regeneration', pct(d.stRegen), cmp(d.stRegen, false)],
+    ['Stamina cost of attacks, dodges and sprinting', pct(d.stCost), cmp(d.stCost, true)],
+    ['Starting gear', gear, d.name === 'Knight' ? '' : DIFFS.indexOf(d) < 2 ? 'g' : 'b'],
+    ['Starting gold', d.gold, d.gold === 25 ? '' : d.gold > 25 ? 'g' : 'b'],
+    ['The four kingdoms', d.rel > 0 ? 'Friendlier than usual' : d.rel === 0 ? 'Uneasy, as usual' : d.rel <= -20 ? 'On the brink of war' : 'More hostile than usual', d.rel === 0 ? '' : d.rel > 0 ? 'g' : 'b'],
+    ['When you fall', d.ironman ? 'Game over. The save is erased' : `Lose ${pct(d.goldLoss)} of your gold`, d.ironman ? 'b' : cmp(d.goldLoss / .25, true)],
+  ];
+}
+// Start somewhere other than Albion (sandbox): pick that kingdom's village nearest its castle, and soften the nearby camps
+function applyStartKingdom(k) {
+  W.startK = k; if (!k) return;
+  const cap = W.places[k], vs = W.places.filter(p => p.type === 'village' && p.owner === k).sort((a, b) => dist(a.x, a.y, cap.x, cap.y) - dist(b.x, b.y, cap.x, cap.y));
+  W.start = vs[0] || cap; const s = W.start;
+  const near = W.places.filter(p => p.type === 'camp' && Math.hypot(p.tx - s.tx, p.ty - s.ty) < 75).sort((a, b) => Math.hypot(a.tx - s.tx, a.ty - s.ty) - Math.hypot(b.tx - s.tx, b.ty - s.ty));
+  if (near[0]) near[0].tier = 1; if (near[1]) near[1].tier = Math.min(near[1].tier, 2);
+}
+// Difficulty shapes the start: gear, gold, home reputation and how friendly the crowns are
+function applyNewGameOpts() {
+  const d = DIFF(), o = G.opts, home = o.kingdom;
+  P.inv = []; P.eq = { weapon: null, shield: null, armor: null, horse: null };
+  d.gear.forEach(id => { const it = addItem(id, 1, 1, true); const s = slotOf(ITEMS[id].type); if (s && s !== 'horse') P.eq[s] = it.uid; });
+  d.items.forEach(([id, n]) => addItem(id, 1, n, true));
+  P.gold = d.gold; recalc(); P.hp = P.maxHp; P.st = P.maxSt;
+  if (d.rel) PAIRS.forEach(([a, b]) => { const v = clamp(K.rel[a][b] + d.rel, -100, 100); K.rel[a][b] = K.rel[b][a] = v; K.aff[a][b] = K.aff[b][a] = clamp(K.aff[a][b] + d.rel, -100, 100); K.reasons[pk(a, b)].push({ t: d.rel > 0 ? 'An age of goodwill' : 'Dark and troubled times', v: d.rel }); });
+  K.rep = [0, 0, 0, 0]; K.repWhy = [[], [], [], []]; K.rep[home] = d.homeRep;
+  if (d.homeRep) K.repWhy[home].push({ t: `Born in ${KDATA[home].name}`, v: d.homeRep });
+  if (o.explored) { for (let cy = 0; cy < EH; cy++) for (let cx = 0; cx < EW; cx++) markCell(cx, cy); W.places.forEach(p => { if (p.type !== 'hidden') p.disc = true; }); }
+}
+
 /* ---------------- Actor archetypes ---------------- */
 const ATYPES = {
   bandit: { name: 'Bandit', hp: 36, dmg: 6, spd: 84, range: 36, cd: 1.45, wind: .42, faction: 'bandit', xp: 14, gold: [3, 10], r: 11, weapon: 'axe' },
@@ -1267,7 +1374,9 @@ const SKIN = ['#e8c49a', '#d8a878', '#c08858', '#9a6a44', '#f0d0b0'];
 /* =====================================================================
    WORLD GENERATION
    ===================================================================== */
-const TS = 32, WW = 360, WH = 360, CH = 16, CW = Math.ceil(WW / CH), CHH = Math.ceil(WH / CH);
+const TS = 32, CH = 16;
+let WW = 360, WH = 360, CW = Math.ceil(WW / CH), CHH = Math.ceil(WH / CH);
+function setWorldSize(n) { WW = WH = n; CW = Math.ceil(WW / CH); CHH = Math.ceil(WH / CH); EW = WW / EC; EH = WH / EC; }
 const T = { SEA: 0, WATER: 1, FORD: 2, SAND: 3, GRASS: 4, PLAINS: 5, FOREST: 6, DENSE: 7, HILL: 8, MOUNT: 9, PASS: 10, ROAD: 11, BRIDGE: 12, FARM: 13, SWAMP: 14, SNOW: 15, FLOOR: 16, DIRT: 17, DESERT: 18 };
 const TINFO = [
   { n: 'Sea', c: '#24507e', spd: 0, block: 1, mm: '#1f4674' },
@@ -1301,14 +1410,15 @@ const isMountT = t => t === T.MOUNT || t === T.SNOW;
 
 function genWorld(seed) {
   srng = mulberry32(seed * 7 + 13);
-  const N = WW * WH;
+  const N = WW * WH, f = WW / 360, sc = (n, pw = 1) => Math.round(n * Math.pow(f, pw));
   W = {
-    seed, ter: new Uint8Array(N), own: new Uint8Array(N), solid: new Uint8Array(N), wall: new Uint8Array(N), clear: new Uint8Array(N), bord: new Uint8Array(N),
+    size: WW, seed, ter: new Uint8Array(N), own: new Uint8Array(N), solid: new Uint8Array(N), wall: new Uint8Array(N), clear: new Uint8Array(N), bord: new Uint8Array(N),
     hgt: new Float32Array(N), places: [], objs: [], chunkTrees: [], chunkObjs: [], interacts: [], caps: [], rivers: [], landCount: [0, 0, 0, 0], names: new Set()
   };
   const nH = makeNoise(seed + 11), nM = makeNoise(seed + 23), nR = makeNoise(seed + 37), nB = makeNoise(seed + 41), nC = makeNoise(seed + 53), nG = makeNoise(seed + 67), nD = makeNoise(seed + 79);
   const C = WW / 2;
-  const caps = [[C - 92 + sri(-6, 6), C - 90 + sri(-6, 6)], [C + 92 + sri(-6, 6), C - 90 + sri(-6, 6)], [C + 92 + sri(-6, 6), C + 92 + sri(-6, 6)], [C - 92 + sri(-6, 6), C + 92 + sri(-6, 6)]];
+  const c92 = sc(92), c90 = sc(90);
+  const caps = [[C - c92 + sri(-6, 6), C - c90 + sri(-6, 6)], [C + c92 + sri(-6, 6), C - c90 + sri(-6, 6)], [C + c92 + sri(-6, 6), C + c92 + sri(-6, 6)], [C - c92 + sri(-6, 6), C + c92 + sri(-6, 6)]];
   W.caps = caps;
   const ter = W.ter;
   for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) {
@@ -1346,7 +1456,7 @@ function genWorld(seed) {
     ter[i] = t;
   }
   // Rivers
-  const rivDefs = [[C, C - 10, -Math.PI / 2], [C - 10, C, Math.PI], [C + 62, C - 8, -0.75], [C - 8, C + 60, 2.3]];
+  const rivDefs = [[C, C - sc(10), -Math.PI / 2], [C - sc(10), C, Math.PI], [C + sc(62), C - sc(8), -0.75], [C - sc(8), C + sc(60), 2.3]];
   rivDefs.forEach((d, id) => {
     let x = d[0], y = d[1]; const pts = []; let seaSteps = 0;
     for (let s = 0; s < 1200; s++) {
@@ -1432,7 +1542,8 @@ function genWorld(seed) {
   // ---------- Villages ----------
   const landOK = (tx, ty, r) => nearOK(tx, ty, r, t => !TINFO[t].block && t !== T.FORD && t !== T.FLOOR);
   let tries = 0;
-  while (W.places.filter(p => p.type === 'village').length < 20 && tries++ < 5000) {
+  const nVil = sc(20, 1.5);
+  while (W.places.filter(p => p.type === 'village').length < nVil && tries++ < sc(5000, 2)) {
     const tx = sri(22, WW - 23), ty = sri(22, WH - 23);
     if (!farDist(tx, ty, ['castle'], 36) || !farDist(tx, ty, ['village'], 30)) continue;
     if (!landOK(tx, ty, 8)) continue;
@@ -1455,7 +1566,7 @@ function genWorld(seed) {
   // ---------- Outposts ----------
   for (let k = 0; k < 4; k++) {
     let made = 0; tries = 0;
-    while (made < 2 && tries++ < 3000) {
+    while (made < Math.max(1, sc(2)) && tries++ < sc(3000, 2)) {
       const tx = sri(20, WW - 21), ty = sri(20, WH - 21); const i = ty * WW + tx;
       if (W.own[i] !== k || W.bord[i] > 16 || W.bord[i] < 5) continue;
       if (!farDist(tx, ty, ['castle', 'village', 'outpost'], 24)) continue;
@@ -1474,7 +1585,8 @@ function genWorld(seed) {
   }
   // ---------- Ruins ----------
   tries = 0;
-  while (W.places.filter(p => p.type === 'ruin').length < 10 && tries++ < 4000) {
+  const nRuin = sc(10, 1.8);
+  while (W.places.filter(p => p.type === 'ruin').length < nRuin && tries++ < sc(4000, 2)) {
     const tx = sri(18, WW - 19), ty = sri(18, WH - 19);
     if (!farDist(tx, ty, ['castle'], 34) || !farDist(tx, ty, ['village', 'outpost', 'ruin'], 22)) continue;
     if (!landOK(tx, ty, 6)) continue;
@@ -1496,7 +1608,8 @@ function genWorld(seed) {
   }
   // ---------- Bandit camps ----------
   tries = 0; const camps = [];
-  while (camps.length < 18 && tries++ < 8000) {
+  const nCamp = sc(18, 2);
+  while (camps.length < nCamp && tries++ < sc(8000, 2)) {
     const tx = sri(16, WW - 17), ty = sri(16, WH - 17); const t0 = ter[ty * WW + tx];
     let wild = (t0 === T.FOREST || t0 === T.DENSE || t0 === T.HILL || t0 === T.SWAMP);
     if (!wild) { let m = 0; for (let dy = -9; dy <= 9; dy += 3) for (let dx = -9; dx <= 9; dx += 3) if (isMountT(terAt(tx + dx, ty + dy))) m++; wild = m > 2; }
@@ -1610,7 +1723,7 @@ function roadCost(i) {
 }
 function astar(sx, sy, ex, ey) {
   const N = WW * WH;
-  if (!AS) AS = { g: new Float32Array(N), from: new Int32Array(N), stamp: new Int32Array(N), closed: new Int32Array(N), id: 0, heap: [], f: new Float32Array(N) };
+  if (!AS || AS.N !== N) AS = { N, cap: Math.round(250000 * Math.max(1, N / 129600)), g: new Float32Array(N), from: new Int32Array(N), stamp: new Int32Array(N), closed: new Int32Array(N), id: 0, heap: [], f: new Float32Array(N) };
   const S = AS; S.id++;
   const start = sy * WW + sx, goal = ey * WW + ex;
   const heap = S.heap; heap.length = 0;
@@ -1620,7 +1733,7 @@ function astar(sx, sy, ex, ey) {
   S.stamp[start] = S.id; S.g[start] = 0; S.f[start] = hfn(start); S.from[start] = -1; push(start);
   let it = 0;
   const DX = [1, -1, 0, 0, 1, 1, -1, -1], DY = [0, 0, 1, -1, 1, -1, 1, -1];
-  while (heap.length && it++ < 250000) {
+  while (heap.length && it++ < S.cap) {
     const cur = pop(); if (cur === goal) break;
     if (S.closed[cur] === S.id) continue; S.closed[cur] = S.id;
     const cx = cur % WW, cy = (cur - cx) / WW;
@@ -1683,7 +1796,8 @@ function useItem(uid) {
   const it = getItem(uid); if (!it) return; const b = ITEMS[it.id];
   if (b.heal) {
     if (P.hp >= P.maxHp) { toast('You are already at full health.'); return; }
-    P.hp = Math.min(P.maxHp, P.hp + b.heal); SND.play('eat'); addText(P.x, P.y - 30, '+' + b.heal, '#8fe07a', 15); removeItem(uid, 1);
+    const heal = Math.round(b.heal * DIFF().heal);
+    P.hp = Math.min(P.maxHp, P.hp + heal); SND.play('eat'); addText(P.x, P.y - 30, '+' + heal, '#8fe07a', 15); removeItem(uid, 1);
   } else if (b.use === 'kmap') {
     revealKingdom(b.k); removeItem(uid, 1); toast(`The ${KDATA[b.k].full} is now charted on your map.`, 'good');
   } else if (b.use === 'treasure') {
@@ -1763,7 +1877,7 @@ function toggleMount() {
 // Dodging is about timing: a hit in the first 0.2s of the sidestep is avoided entirely, a later one is only softened.
 const DODGE_T = .35, DODGE_PERFECT = .2;
 function tryDodge() {
-  const cost = G.time - (P.lastDodge ?? -9) < 1.5 ? 42 : 28; // rolling again right away costs extra
+  const cost = Math.round((G.time - (P.lastDodge ?? -9) < 1.5 ? 42 : 28) * DIFF().stCost); // rolling again right away costs extra
   if (P.dodge > 0 || P.st < cost || G.state !== 'play') return;
   let mx = (input.keys.KeyD ? 1 : 0) - (input.keys.KeyA ? 1 : 0), my = (input.keys.KeyS ? 1 : 0) - (input.keys.KeyW ? 1 : 0);
   if (!mx && !my) { mx = Math.cos(P.face); my = Math.sin(P.face); }
@@ -1771,7 +1885,7 @@ function tryDodge() {
   SND.play('dodge'); for (let i = 0; i < 6; i++) addPart(P.x, P.y + 8, rand(-40, 40), rand(-30, 0), '#b8a888', .4, 3);
 }
 function startAttack() {
-  const S = P.S; P.swing = P.swingDur = S.swingT; P.hitDone = false; P.atkCd = S.cool + S.swingT; P.st -= S.cost; P.stDelay = .7; P.swingDir *= -1; P.blocking = false;
+  const S = P.S; P.swing = P.swingDur = S.swingT; P.hitDone = false; P.atkCd = S.cool + S.swingT; P.st -= S.cost * DIFF().stCost; P.stDelay = .7; P.swingDir *= -1; P.blocking = false;
   SND.play(S.wk === 'great' || S.wk === 'axe' ? 'swingH' : 'swing');
 }
 function doPlayerHit() {
@@ -1781,7 +1895,7 @@ function doPlayerHit() {
     const host = playerHostileTo(e); if (!host && !input.shift) continue;
     const d = dist(P.x, P.y, e.x, e.y); if (d > reach + e.r) continue;
     const a = Math.atan2(e.y - P.y, e.x - P.x); if (Math.abs(angDiff(P.face, a)) > S.arc / 2 + (d < e.r + 16 ? .9 : .12)) continue;
-    let dmg = S.dmg * rand(.9, 1.1); const crit = Math.random() < .1; if (crit) dmg *= 1.6;
+    let dmg = S.dmg * rand(.9, 1.1) * DIFF().dmgDealt; const crit = Math.random() < .1; if (crit) dmg *= 1.6;
     if (P.mounted) dmg *= 1.1 + (S.horse && S.horse.dmgB ? S.horse.dmgB : 0);
     damage(e, dmg, P, { crit, kb: S.wk === 'great' || S.wk === 'axe' ? 1.6 : S.wk === 'spear' ? 1.2 : 1 }); hits++;
   }
@@ -1809,22 +1923,28 @@ function updatePlayer(dt) {
   const moved = Math.hypot(P.x - ox, P.y - oy);
   if (moved > .1) { P.walk += moved * .09; if (P.mounted) P.hface = turnToward(P.hface, Math.atan2(P.y - oy, P.x - ox), dt * 7); }
   P.stepT -= moved; if (P.stepT < 0) { P.stepT = P.mounted ? 38 : 44; SND.play(P.mounted ? 'hoof' : 'step', P.mounted ? .8 : 1); }
-  if (P.sprinting) { P.st = Math.max(0, P.st - 16 * dt); P.stDelay = .5; }
-  if (P.stDelay > 0) P.stDelay -= dt; else P.st = Math.min(P.maxSt, P.st + (P.blocking ? 6 : P.mounted ? 30 : 26) * dt);
+  if (P.sprinting) { P.st = Math.max(0, P.st - 16 * DIFF().stCost * dt); P.stDelay = .5; }
+  if (P.stDelay > 0) P.stDelay -= dt; else P.st = Math.min(P.maxSt, P.st + (P.blocking ? 6 : P.mounted ? 30 : 26) * DIFF().stRegen * dt);
   if ((input.lmb || input.clicked) && P.atkCd <= 0 && P.dodge <= 0 && P.st >= P.S.cost * .5) startAttack();
   input.clicked = false;
   if (P.swing > 0) { P.swing -= dt; const prog = 1 - P.swing / P.swingDur; if (!P.hitDone && prog >= .42) { P.hitDone = true; doPlayerHit(); } }
   // regen slowly out of combat
-  P.combatT = (P.combatT || 0) - dt; if (P.combatT <= 0 && P.hp < P.maxHp) P.hp = Math.min(P.maxHp, P.hp + dt * .8);
+  P.combatT = (P.combatT || 0) - dt; if (P.combatT <= 0 && P.hp < P.maxHp) P.hp = Math.min(P.maxHp, P.hp + dt * DIFF().regen);
 }
 function playerDie() {
   if (G.state === 'dead') return;
   P.hp = 0; G.state = 'dead'; SND.play('death'); addShake(12);
   for (let i = 0; i < 30; i++) addPart(P.x, P.y, rand(-150, 150), rand(-150, 150), '#8a1a12', rand(.5, 1.2), 3);
-  setTimeout(() => { $('deathSub').textContent = `Slain on day ${dayNum()}. Rise again at your last refuge, losing a quarter of your purse.`; UI.show('deathScreen'); }, 900);
+  const iron = DIFF().ironman;
+  if (iron) { G.ironDead = true; try { localStorage.removeItem(saveKey()); } catch (e) { } }
+  setTimeout(() => {
+    $('deathSub').textContent = iron ? `Slain on day ${dayNum()}. On Forsaken there is no rising again. Your tale ends here, and this save has been erased.` : `Slain on day ${dayNum()}. Rise again at your last refuge, losing ${Math.round(DIFF().goldLoss * 100)}% of your purse.`;
+    $('btnRespawn').classList.toggle('hidden', iron); $('btnLoadSave').classList.toggle('hidden', iron);
+    UI.show('deathScreen');
+  }, 900);
 }
 function respawnPlayer() {
-  const lost = Math.floor(P.gold * .25); P.gold -= lost;
+  const lost = Math.floor(P.gold * DIFF().goldLoss); P.gold -= lost;
   P.x = P.respawn.x; P.y = P.respawn.y; const f = findFree(P.x, P.y); P.x = f.x; P.y = f.y;
   P.hp = Math.round(P.maxHp * .6); P.st = P.maxSt; P.mounted = false; P.kbx = P.kby = 0; P.dodge = 0;
   ents.forEach(e => { e.aggroPlayer = false; if (e.target === P) e.target = null; });
@@ -1843,6 +1963,7 @@ function mkActor(kind, x, y, opt = {}) {
     civ: !!b.civ, animal: !!b.animal, ranged: !!b.ranged, weapon: b.weapon, cloth: pick(CLOTH), skin: pick(SKIN), stuckT: 0
   }, opt);
   if (opt.tier && TIER_MULT[opt.tier]) { const m = TIER_MULT[opt.tier]; e.hp = e.maxHp = Math.round(b.hp * m.hp); e.dmg = b.dmg * m.dmg; e.xp = Math.round(e.xp * (1 + (opt.tier - 1) * .5)); }
+  if (b.faction !== 'civ' && !opt.ally && DIFF().enemyHp !== 1) e.hp = e.maxHp = Math.round(e.maxHp * DIFF().enemyHp);
   if (b.faction === 'k') { e.faction = 'k' + (opt.k ?? 0); e.k = opt.k ?? 0; }
   if (kind === 'leader') e.name = opt.chief ? opt.chief : e.name;
   if (b.important) e.important = true;
@@ -1900,7 +2021,7 @@ function damage(t, amt, src, o = {}) {
   if (t.dead) return 0;
   if (t.isPlayer) {
     if (P.iframes > 0 || G.state !== 'play') return 0;
-    let a = amt;
+    let a = amt * DIFF().dmgTaken;
     P.combatT = 6;
     if (P.dodge > 0) {
       const into = DODGE_T - P.dodge;
@@ -1916,7 +2037,7 @@ function damage(t, amt, src, o = {}) {
     if (P.blocking && src) {
       const ang = Math.atan2(src.y - P.y, src.x - P.x);
       if (Math.abs(angDiff(P.face, ang)) < 1.3) {
-        const b = a * P.S.block; a -= b; P.st -= b * 1.1 + 2; P.stDelay = .5; SND.play('block');
+        const b = a * P.S.block; a -= b; P.st -= (b * 1.1 + 2) * DIFF().stCost; P.stDelay = .5; SND.play('block');
         for (let i = 0; i < 8; i++) addPart(P.x + Math.cos(P.face) * 14, P.y + Math.sin(P.face) * 14, rand(-120, 120), rand(-120, 60), '#ffe8a0', .3, 2);
         if (settings.dmgNums) addText(P.x, P.y - 34, 'Blocked', '#d8d0b8', 12);
         if (src && !src.isPlayer && !o.proj) { const d = Math.hypot(src.x - P.x, src.y - P.y) || 1; src.kbx = (src.x - P.x) / d * 140; src.kby = (src.y - P.y) / d * 140; }
@@ -2168,7 +2289,7 @@ function addShake(v) { if (settings.shake) G.shake = Math.min(18, G.shake + v); 
    SYSTEMS — time, diplomacy, reputation, discovery, spawning, quests,
    world events, interaction, shops
    ===================================================================== */
-const DAYLEN = 480;
+let DAYLEN = 480;
 const dayNum = () => Math.floor(G.time / DAYLEN + .3) + 1;
 const tod = () => (G.time / DAYLEN + .3) % 1;
 function darkness() { const t = tod(); if (t > .27 && t < .73) return 0; const d = t <= .27 ? .27 - t : t - .73; return Math.min(.58, d * 4.2); }
@@ -2282,7 +2403,7 @@ function captureOutpost(a, b) {
 }
 
 /* ---------------- Discovery / fog ---------------- */
-const EC = 4, EW = WW / EC, EH = WH / EC;
+const EC = 4; let EW = WW / EC, EH = WH / EC;
 let EXP = null, fogCv = null, fogCtx = null;
 function newFog() {
   EXP = new Uint8Array(EW * EH);
@@ -2397,9 +2518,9 @@ function updateSpawns(dt) {
   });
   G.wildT -= .5;
   if (G.wildT <= 0) {
-    G.wildT = 4;
+    const WL = WILDS[G.opts ? G.opts.wild : 1]; G.wildT = WL.every;
     const nw = ents.filter(e => e.wild && !e.dead).length;
-    if (nw < 5) trySpawnWild();
+    if (nw < WL.cap) trySpawnWild();
   }
 }
 function trySpawnWild() {
@@ -2774,7 +2895,7 @@ function doInteract() {
   const it = b.it, pl = W.places[it.place];
   if (it.type === 'chest') openChest(it, pl);
   else if (it.type === 'sign') readSign(pl);
-  else if (it.type === 'well') { if ((pl.wellT || -999) > G.time - 60) { toast('You have drunk your fill for now.'); return; } pl.wellT = G.time; P.st = P.maxSt; P.hp = Math.min(P.maxHp, P.hp + 12); SND.play('eat'); toast('The cool water refreshes you. (+12 health, stamina restored)', 'good'); }
+  else if (it.type === 'well') { if ((pl.wellT || -999) > G.time - 60) { toast('You have drunk your fill for now.'); return; } pl.wellT = G.time; P.st = P.maxSt; P.hp = Math.min(P.maxHp, P.hp + Math.round(12 * DIFF().heal)); SND.play('eat'); toast(`The cool water refreshes you. (+${Math.round(12 * DIFF().heal)} health, stamina restored)`, 'good'); }
   else if (it.type === 'shrine') {
     if (pl.blessed) { toast('The stones are silent. Their gift has been given.'); return; }
     pl.blessed = true; SND.play('level');
@@ -4285,7 +4406,7 @@ $('pauseScreen').addEventListener('click', e => {
   else if (a === 'saveQuit') { saveGame(); toMainMenu(); }
   else if (a === 'quitNoSave') toMainMenu();
 });
-function toMainMenu() { UI.closeAll(); closeDialog(); G.state = 'menu'; $('hud').classList.add('off'); refreshMenu(); UI.show('mainMenu'); }
+function toMainMenu() { UI.closeAll(); closeDialog(); G.state = 'menu'; G.shake = 0; $('hud').classList.add('off'); refreshMenu(); UI.show('mainMenu'); }
 const saveKey = (mode = G.mode) => mode === 'story' ? 'fk_story' : 'fk_save';
 function hasSave(mode = G.mode) { try { return !!localStorage.getItem(saveKey(mode)); } catch (e) { return false; } }
 function readSave(mode) { try { return JSON.parse(localStorage.getItem(saveKey(mode)) || 'null'); } catch (e) { return null; } }
@@ -4296,19 +4417,43 @@ function refreshMenu() {
 }
 function saveSummary(d) {
   const day = Math.floor((d.time || 0) / DAYLEN + .3) + 1, when = d.savedAt ? new Date(d.savedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
-  let top = `Day ${day} · Level ${d.P && d.P.lvl || 1}`;
+  const o = normOpts(d.opts); let top = `Day ${day} · Level ${d.P && d.P.lvl || 1} · ${DIFFS[o.diff].name} · ${SIZES[o.size].name}`;
   if (d.story) { const mq = (d.Q.active || []).find(q => q.type === 'story' && q.main); top = (d.story.done ? 'Story complete · free roam' : mq ? esc(mq.title) : 'In progress') + ' · ' + top; }
   return top + (when ? `<div class="mcS">Saved ${esc(when)}</div>` : '');
 }
-$('btnNew').onclick = () => { SND.init(); $('newConfirm').classList.add('hidden'); $('modePick').classList.remove('hidden'); UI.open('mode'); };
+let newOpts = normOpts((() => { try { return JSON.parse(localStorage.getItem('fk_newopts') || 'null'); } catch (e) { return null; } })());
+function showModePick() { $('modeScreen').querySelector('.panel').classList.remove('wide'); ['setupBox', 'newConfirm'].forEach(id => $(id).classList.add('hidden')); $('modePick').classList.remove('hidden'); $('modeTitle').textContent = 'NEW GAME'; }
+function renderSetup() {
+  const o = newOpts, seg = (id, list, key, lab) => { $(id).innerHTML = list.map((x, i) => `<div class="sb ${o[key] === i ? 'on' : ''}" data-i="${i}">${lab ? lab(x, i) : x.name}</div>`).join(''); $(id).querySelectorAll('.sb').forEach(el => el.onclick = () => { o[key] = +el.dataset.i; SND.play('ui'); renderSetup(); }); };
+  $('diffGrid').innerHTML = DIFFS.map((d, i) => `<div class="diffCard ${o.diff === i ? 'on' : ''}${d.ironman ? ' iron' : ''}" data-i="${i}"><div class="dcL">${d.ironman ? 'LEVEL ∞' : 'LEVEL ' + (i + 1)}</div><div class="dcN">${d.name.toUpperCase()}</div></div>`).join('');
+  $('diffGrid').querySelectorAll('.diffCard').forEach(el => el.onclick = () => { o.diff = +el.dataset.i; SND.play('ui'); renderSetup(); });
+  const d = DIFFS[o.diff];
+  $('diffInfo').innerHTML = `<div class="dTag">${d.tag}</div><table>${diffEffects(d).map(([k, v, c]) => `<tr><td>${k}</td><td class="${c}">${v}</td></tr>`).join('')}</table>`;
+  seg('sizeSeg', SIZES, 'size');
+  const sc = sizeCounts(SIZES[o.size].n); $('sizeNote').textContent = `${SIZES[o.size].note} About ${sc.vil} villages and ${sc.camp} bandit camps.`;
+  $('kingSec').classList.toggle('hidden', pendingMode === 'story');
+  seg('kingSeg', KDATA, 'kingdom', k => `<img src="${bannerURL(KDATA.indexOf(k))}" alt="">${k.name}`);
+  const iron = !!DIFFS[o.diff].ironman; if (iron) { o.wild = 2; o.explored = false; }
+  seg('wildSeg', WILDS, 'wild'); seg('daySeg', DAYS, 'day');
+  $('optExplored').checked = !!o.explored; $('optExplored').disabled = iron;
+  ['wildSeg', 'exploredChk'].forEach(id => $(id).classList.toggle('setLocked', iron)); ['wildLock', 'exploredLock'].forEach(id => $(id).classList.toggle('hidden', !iron));
+}
+$('optExplored').onchange = e => { newOpts.explored = e.target.checked; };
+function beginNew() { try { localStorage.setItem('fk_newopts', JSON.stringify(newOpts)); } catch (e) { } UI.closeAll(); startNew(pendingMode, Object.assign({}, newOpts)); }
+$('btnNew').onclick = () => { SND.init(); showModePick(); UI.open('mode'); };
 document.querySelectorAll('#modePick .modeCard').forEach(el => el.addEventListener('click', () => {
   pendingMode = el.dataset.mode; SND.play('ui');
-  if (!hasSave(pendingMode)) { UI.closeAll(); startNew(pendingMode); return; }
-  $('newConfirmText').innerHTML = `You already have a ${pendingMode} game in progress. Starting a new one forges a fresh realm, and your old ${pendingMode} save will be <b>overwritten</b> the next time you save.`;
-  $('modePick').classList.add('hidden'); $('newConfirm').classList.remove('hidden');
+  $('modePick').classList.add('hidden'); $('setupBox').classList.remove('hidden'); $('modeScreen').querySelector('.panel').classList.add('wide');
+  $('modeTitle').textContent = pendingMode === 'story' ? 'NEW STORY' : 'NEW SANDBOX'; renderSetup();
 }));
-$('btnNewYes').onclick = () => { UI.closeAll(); startNew(pendingMode); };
-$('btnNewNo').onclick = () => { $('newConfirm').classList.add('hidden'); $('modePick').classList.remove('hidden'); };
+$('btnSetupBack').onclick = () => { SND.play('ui'); showModePick(); };
+$('btnSetupGo').onclick = () => {
+  SND.play('ui'); if (!hasSave(pendingMode)) { beginNew(); return; }
+  $('newConfirmText').innerHTML = `You already have a ${pendingMode} game in progress. Starting a new one forges a fresh realm, and your old ${pendingMode} save will be <b>overwritten</b> the next time you save.`;
+  $('setupBox').classList.add('hidden'); $('newConfirm').classList.remove('hidden');
+};
+$('btnNewYes').onclick = () => beginNew();
+$('btnNewNo').onclick = () => { $('newConfirm').classList.add('hidden'); $('setupBox').classList.remove('hidden'); };
 $('btnContinue').onclick = () => {
   SND.init(); const sb = readSave('sandbox'), st = readSave('story');
   if (!sb || !st) { continueGame(st ? 'story' : 'sandbox'); return; }
@@ -4325,7 +4470,7 @@ $('btnEndSandbox').onclick = () => { UI.hide('endScreen'); G.state = 'play'; sav
 $('btnEndMenu').onclick = () => { UI.hide('endScreen'); toMainMenu(); };
 
 function withLoading(text, fn) { $('loadText').textContent = text; $('loading').classList.remove('done'); setTimeout(() => { try { fn(); } finally { $('loading').classList.add('done'); } }, 60); }
-function prepareWorld(seed) { genWorld(seed); buildPalette(); buildTreeSprites(); buildMapLayers(); chunkCache.clear(); }
+function prepareWorld(seed, opts = normOpts()) { setWorldSize(SIZES[opts.size].n); genWorld(seed); applyStartKingdom(opts.kingdom); buildPalette(); buildTreeSprites(); buildMapLayers(); chunkCache.clear(); }
 function resetState() {
   ents = []; pickups = []; projs = []; parts = []; texts = []; horseEnt = null; uidCounter = 1; nextEid = 1;
   W.places.forEach(p => { p.disc = false; p.rumor = false; p.spawned = false; p.dead = []; p.cleared = false; p.chestOpened = false; p.clearedAt = 0; p.offers = null; p.request = false; p.blessed = false; p.investigated = false; p.rumorUsed = false; p.backerRevealed = false; p.wellT = -999; if (p.type === 'outpost') p.owner = p.baseOwner; for (const k in p) if (k.startsWith('_shop_')) delete p[k]; });
@@ -4333,32 +4478,40 @@ function resetState() {
   newKingdoms(); newQuests(); newFog();
 }
 function beginPlay() {
-  G.state = 'play'; UI.hide('mainMenu'); UI.hide('endScreen'); UI.closeAll(); $('hud').classList.remove('off');
+  G.state = 'play'; G.ironDead = false; UI.hide('mainMenu'); UI.hide('endScreen'); UI.closeAll(); $('hud').classList.remove('off');
+  $('btnRespawn').classList.remove('hidden'); $('btnLoadSave').classList.remove('hidden');
   cam.x = P.x; cam.y = P.y; updateDiscovery(); updateHUD(true);
 }
-function startNew(mode = 'sandbox') {
+function startNew(mode = 'sandbox', opts) {
   withLoading('FORGING A NEW REALM…', () => {
-    G.mode = mode; STORY = mode === 'story' ? newStory() : null;
-    prepareWorld(Math.floor(Math.random() * 1e9)); resetState(); newPlayer();
-    const s = W.start; s.disc = true; W.places[0].disc = true; revealArea(s.tx, s.ty, 22);
+    opts = normOpts(opts); if (mode === 'story') opts.kingdom = 0; // the story begins in Albion
+    if (DIFFS[opts.diff].ironman) { opts.wild = 2; opts.explored = false; }
+    G.mode = mode; G.opts = opts; DAYLEN = DAYS[opts.day].len; STORY = mode === 'story' ? newStory() : null;
+    prepareWorld(Math.floor(Math.random() * 1e9), opts); resetState(); newPlayer(); applyNewGameOpts();
+    const s = W.start; s.disc = true; W.places[opts.kingdom].disc = true; revealArea(s.tx, s.ty, 22);
     genVillageOffers(s); const easy = makeQuest('camp', s, s.owner); if (easy) s.offers[0] = easy;
     beginPlay();
     if (STORY) { storyBegin(); setTimeout(() => toast('Tip: press <kbd>J</kbd> for your quest journal. Main quests are marked with ✦.', ''), 9000); return; }
-    setTimeout(() => toast(`You arrive in <b>${s.name}</b> with a wooden sword and ${P.gold} gold. Speak to the village elder <kbd>E</kbd> to find work.`, 'gold'), 1200);
+    const wpn = P.eq.weapon ? itemName(getItem(P.eq.weapon)).toLowerCase() : 'nothing but your fists';
+    setTimeout(() => toast(`You arrive in <b>${s.name}</b> with ${/^[aeiou]/.test(wpn) ? 'an' : wpn.startsWith('nothing') ? '' : 'a'} ${wpn} and ${P.gold} gold. Speak to the village elder <kbd>E</kbd> to find work.`, 'gold'), 1200);
     setTimeout(() => toast('Tip: press <kbd>K</kbd> for Diplomacy, <kbd>M</kbd> for the map, <kbd>I</kbd> for your pack.', ''), 5500);
   });
 }
 function continueGame(mode = G.mode) {
   const d = readSave(mode);
   if (!d) { toast('Save data could not be read.', 'bad'); return; }
-  withLoading('RETURNING TO THE REALM…', () => { G.mode = mode; if (!W || W.seed !== d.seed) prepareWorld(d.seed); loadGame(d); beginPlay(); toast(`Welcome back. Day ${dayNum()}.`, 'gold'); });
+  withLoading('RETURNING TO THE REALM…', () => {
+    const o = normOpts(d.opts); G.mode = mode; G.opts = o; DAYLEN = DAYS[o.day].len;
+    if (!W || W.seed !== d.seed || W.size !== SIZES[o.size].n || W.startK !== o.kingdom) prepareWorld(d.seed, o);
+    loadGame(d); beginPlay(); toast(`Welcome back. Day ${dayNum()}.`, 'gold');
+  });
 }
 
 /* ---------------- Save / load ---------------- */
 function packBits(arr) { const out = new Uint8Array(Math.ceil(arr.length / 8)); for (let i = 0; i < arr.length; i++) if (arr[i]) out[i >> 3] |= 1 << (i & 7); let s = ''; for (let i = 0; i < out.length; i++) s += String.fromCharCode(out[i]); return btoa(s); }
 function unpackBits(str, n) { const s = atob(str); const a = new Uint8Array(n); for (let i = 0; i < n; i++) a[i] = (s.charCodeAt(i >> 3) >> (i & 7)) & 1; return a; }
 function saveGame(silent) {
-  if (!P || G.state === 'menu') return;
+  if (!P || G.state === 'menu' || G.ironDead) return;
   const qStrip = q => { const c = Object.assign({}, q); delete c.ent; delete c.foes; return c; };
   const data = {
     v: 1, seed: W.seed, time: G.time, kills: G.kills, uid: uidCounter, waypoint: G.mapWaypoint, savedAt: Date.now(),
@@ -4369,6 +4522,7 @@ function saveGame(silent) {
     places: W.places.map(p => ({ disc: p.disc, rumor: p.rumor, cleared: p.cleared, chestOpened: p.chestOpened, clearedAt: p.clearedAt, dead: p.dead, owner: p.owner, blessed: p.blessed, investigated: p.investigated, rumorUsed: p.rumorUsed, backerRevealed: p.backerRevealed })),
     exp: packBits(EXP), settings,
   };
+  data.opts = G.opts || normOpts();
   if (G.mode === 'story') { data.mode = 'story'; data.story = STORY; }
   try { localStorage.setItem(saveKey(), JSON.stringify(data)); if (!silent) { toast('Game saved.', 'good'); SND.play('pickup'); } else toast('Autosaved.', ''); }
   catch (e) { toast('Could not save: browser storage is unavailable or full.', 'bad'); }
@@ -4407,7 +4561,7 @@ const SF = (k, v) => v === undefined ? STORY.f[k] : (STORY.f[k] = v);
 function deed(t) { STORY.deeds.push({ d: dayNum(), t }); logEvent(t, []); }
 const sT = b => clamp(Math.max(b, Math.ceil(P.lvl / 3)), 1, 4);
 const LS = () => 1 + (P.lvl - 1) * .07;
-function sScale(e, hp, dmg) { e.hp = e.maxHp = Math.round(hp * LS()); if (dmg) e.dmg = dmg * (1 + (P.lvl - 1) * .04); }
+function sScale(e, hp, dmg) { e.hp = e.maxHp = Math.round(hp * LS() * (e.ally ? 1 : DIFF().enemyHp)); if (dmg) e.dmg = dmg * (1 + (P.lvl - 1) * .04); }
 function sSoon(fn) { const s = STORY; const go = () => { if (STORY !== s || G.state === 'menu') return; if (dialogOpen || G.state !== 'play' || UI.stack.length) { setTimeout(go, 400); return; } fn(); }; setTimeout(go, 350); }
 const dirW = dirTo;
 
@@ -5475,7 +5629,7 @@ function frame(now) {
   fpsA = fpsA * .95 + (1 / Math.max(dt, .001)) * .05;
   if (W) {
     if (G.state === 'play' && !paused()) { if (G.hitstop > 0) G.hitstop -= dt; else update(dt); }
-    else { input.clicked = false; if (G.state === 'dead') { updateFX(dt); for (const e of ents) updateActor(e, dt * .3); } }
+    else { input.clicked = false; G.shake *= Math.pow(.004, dt); if (G.state === 'dead') { updateFX(dt); for (const e of ents) updateActor(e, dt * .3); } }
     if (G.state === 'menu') { G.menuCam.a += dt * .015; cam.x = WW * TS / 2 + Math.cos(G.menuCam.a) * WW * TS * .28; cam.y = WH * TS / 2 + Math.sin(G.menuCam.a * 1.3) * WH * TS * .26; }
     else if (P) {
       const lx = clamp((input.mx - VW / 2) * .1, -60, 60), ly = clamp((input.my - VH / 2) * .1, -45, 45);
