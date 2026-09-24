@@ -2084,8 +2084,27 @@ function genWorld(seed) {
       if (roomy && crr() < .08) { solidAt(x, y, 1, 1); addObj({ k: 'well', tx: x, ty: y, tw: 1, th: 1 }); W.interacts.push({ type: 'well', x: (x + .5) * TS, y: (y + 1.8) * TS, place: pl.id }); wells++; continue; }
       if (crr() < .11) addObj({ k: 'decor', x: x * TS + 4, y: y * TS + 6, w: 24, h: 20, kind: ['crates', 'barrels', 'cart', 'bench', 'planter', 'woodpile', 'barrels', 'crates'][Math.floor(crr() * 8)], v: crr() });
     }
-    // pave it: cobbles on streets and squares, packed earth in the alleys and on the tourney field
-    for (let y = y0; y < y0 + BH; y++) for (let x = x0; x < x0 + BW; x++) { const c = get(x, y); if (!c || c === 9) continue; const i = y * WW + x; W.clear[i] = 1; ter[i] = c === 2 || c === 6 ? T.DIRT : T.FLOOR; }
+    // pave it: cobbles on the streets and squares, packed dirt in the alleys and yards between houses. Dirt never
+    // trails off into the fields at the edge of town, and dead-end dirt spurs are trimmed back tip by tip
+    // (the trimmed ends become little grassy yards), so every dirt alley joins the streets.
+    const M = new Uint8Array(BW * BH), mi = (x, y) => (y - y0) * BW + x - x0; // 1 paved, 2 dirt, 3 grass
+    const edge = (x, y) => { for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const nx = x + dx, ny = y + dy; if (!inCity(nx, ny) && !core(nx, ny) && !TINFO[terAt(nx, ny)].block) return true; } return false; };
+    const nearUse = (x, y) => { for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const c = get(x + dx, y + dy); if (c === 1 || c === 3 || c === 4 || c === 5 || c === 6) return true; } return false; };
+    for (let y = y0; y < y0 + BH; y++) for (let x = x0; x < x0 + BW; x++) { const c = get(x, y); M[mi(x, y)] = c === 1 || c === 4 || c === 6 || c === 7 ? 1 : c === 2 ? (edge(x, y) || !nearUse(x, y) ? 3 : 2) : 0; }
+    const walk = (x, y) => { if (core(x, y)) return true; const m = inB(x, y) ? M[mi(x, y)] : 0; return m === 1 || m === 2; };
+    for (let pass = 0, changed = true; changed && pass < 60; pass++) {
+      changed = false;
+      for (let y = y0; y < y0 + BH; y++) for (let x = x0; x < x0 + BW; x++) {
+        if (M[mi(x, y)] !== 2) continue;
+        if ((walk(x + 1, y) ? 1 : 0) + (walk(x - 1, y) ? 1 : 0) + (walk(x, y + 1) ? 1 : 0) + (walk(x, y - 1) ? 1 : 0) <= 1) { M[mi(x, y)] = 3; changed = true; }
+      }
+    }
+    for (let y = y0; y < y0 + BH; y++) for (let x = x0; x < x0 + BW; x++) {
+      const c = get(x, y); if (!c || c === 9) continue; const i = y * WW + x, m = M[mi(x, y)]; W.clear[i] = 1;
+      if (m === 2) ter[i] = T.DIRT;
+      else if (m === 3) { if (ter[i] === T.FARM || ter[i] === T.ROAD || ter[i] === T.DIRT || ter[i] === T.FLOOR) ter[i] = T.GRASS; }
+      else ter[i] = T.FLOOR;
+    }
     for (let y = cy - 10; y <= cy + 9; y++) for (let x = cx - 11; x <= cx + 11; x++) { const i = y * WW + x, t = ter[i]; if (!TINFO[t].block && t !== T.FORD && t !== T.BRIDGE && t !== T.SEA && t !== T.FLOOR) { ter[i] = T.FLOOR; W.clear[i] = 1; } }
     pl.city = city;
   });
