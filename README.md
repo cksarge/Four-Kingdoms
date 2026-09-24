@@ -93,6 +93,11 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
   - Guards who spot you offer three choices: pay the fine, serve a day or more in the cells (losing stolen goods and a little XP), or resist.
   - A thieves' guild recruits in taverns after dark. Its four jobs lead to lockpicks, a guild cloak, a fence for stolen goods, and a heist on the crown's tax wagon, unless you betray the guild to the captain.
 - **Festivals:** a spring fair, a harvest market and a winter solstice fill the royal cities with decorations, stalls and games (an archery contest, pie eating, the strongman bell), with prizes to win.
+- **Roadside encounters:** travelling the roads turns up short events with choices: a wounded knight, a lost child to escort home, a toll gang, a fleeing thief, a broken-down merchant, a pilgrim, a fortune teller and a deserter.
+- **A nemesis:** a rival knight (a Sir or a Dame) ambushes you on the road every few days.
+  - They grow stronger and earn epithets each time they beat you, and they taunt you about where they left you for dead.
+  - After three defeats they demand a final duel, which ends with you killing, sparing or exiling them.
+- **World bosses:** every few weeks the Ashen Wyvern (fire breath) or the Hill Giant (boulders and ground slams) roams from village to village, ravaging them. It is marked on your map, and slaying it wins gold, the thanks of every crown, a legendary weapon and a trophy.
 - Watchtowers guard the roads into each castle and the border crossings. Bowmen on the towers and castle walls shoot at bandits, enemy soldiers and outlaws.
 - Quests, random world events and a day/night cycle.
 - Seasons that change every six days: spring blossom, summer, golden autumn (cheap food) and snowy winter (slower travel off the roads, dear bread).

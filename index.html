@@ -1688,6 +1688,8 @@ const ATYPES = {
   spider: { name: 'Giant Spider', hp: 46, dmg: 9, spd: 130, range: 30, cd: 1.2, wind: .35, faction: 'wild', xp: 16, gold: [0, 0], r: 12, animal: true },
   rimeheart: { name: 'Rimeheart', hp: 950, dmg: 22, spd: 70, range: 62, cd: 1.7, wind: .6, faction: 'hollow', xp: 450, gold: [200, 300], r: 16, weapon: 'great' },
   dummy: { name: 'Training Dummy', hp: 9999, dmg: 0, spd: 0, range: 0, cd: 99, faction: 'civ', xp: 0, gold: [0, 0], r: 12 },
+  wyvern: { name: 'The Ashen Wyvern', hp: 1700, dmg: 24, spd: 112, range: 74, cd: 1.6, wind: .7, faction: 'wild', xp: 900, gold: [300, 500], r: 26, animal: true },
+  hill_giant: { name: 'The Hill Giant', hp: 2300, dmg: 32, spd: 70, range: 84, cd: 2.1, wind: 1, faction: 'wild', xp: 950, gold: [300, 500], r: 26, weapon: 'great' },
   bone_wyrm: { name: 'The Bone Wyrm', hp: 1800, dmg: 26, spd: 88, range: 72, cd: 1.7, wind: .75, faction: 'hollow', xp: 800, gold: [300, 500], r: 26, animal: true },
   camel: { name: 'Camel', hp: 90, dmg: 10, spd: 110, range: 30, cd: 1.6, wind: .4, faction: 'wild', xp: 12, gold: [0, 0], r: 13, animal: true, passive: true },
   horse: { name: 'Horse', hp: 999, dmg: 0, spd: 190, range: 0, cd: 9, faction: 'civ', r: 12, civ: true },
@@ -2643,6 +2645,7 @@ function playerDie() {
   for (let i = 0; i < 30; i++) addPart(P.x, P.y, rand(-150, 150), rand(-150, 150), '#8a1a12', rand(.5, 1.2), 3);
   const iron = DIFF().ironman;
   if (!iron) raiseGrave();
+  if (P.lastBlow && P.lastBlow.src && P.lastBlow.src.nem) nemesisWon();
   if (iron) { G.ironDead = true; try { localStorage.removeItem(saveKey()); } catch (e) { } }
   setTimeout(() => {
     $('deathSub').textContent = iron ? `Slain on day ${dayNum()}. On Forsaken there is no rising again. Your tale ends here, and this save has been erased.` : `Slain on day ${dayNum()}. Rise again at your last refuge, losing ${Math.round(DIFF().goldLoss * 100)}% of your purse.`;
@@ -2803,7 +2806,7 @@ function damage(t, amt, src, o = {}) {
     if (P.mounted) a *= 1 - (SK('riding') >= 4 ? .24 : SK('riding') >= 2 ? .12 : 0);
     a = Math.max(.5, a);
     if (G.tourney && G.tourney.fighting && src && src.tourney && P.hp - a <= 1) { tourneyLose(); return a; }
-    P.lastBlow = { src: src && !src.isPlayer ? { name: src.name, k: src.k, kind: src.kind, boss: !!(src.boss || src.chief || src.named), trap: !!src.isTrap, soldier: !!(src.faction && src.faction[0] === 'k') } : null, dot: o.dot || null };
+    P.lastBlow = { src: src && !src.isPlayer ? { nem: !!src.nemesis, name: src.name, k: src.k, kind: src.kind, boss: !!(src.boss || src.chief || src.named), trap: !!src.isTrap, soldier: !!(src.faction && src.faction[0] === 'k') } : null, dot: o.dot || null };
     P.hp -= a; P.flash = .15; addShake(3 + a * .25); SND.play('hurt');
     if (!settings.noFlash) $('hurtVignette').style.boxShadow = 'inset 0 0 160px rgba(170,0,0,.55)'; setTimeout(() => $('hurtVignette').style.boxShadow = 'inset 0 0 160px rgba(170,0,0,0)', 180);
     if (settings.dmgNums) addText(P.x + rand(-6, 6), P.y - 28, Math.round(a), '#ff6a5a', 15);
@@ -2834,6 +2837,7 @@ function damage(t, amt, src, o = {}) {
     if (src === P) { if (!wasHostile && !o.dot) crime(t); if (t.place != null) alertPlace(t.place, P); }
     if (t.civ) { t.flee = 3; t.fleeFrom = src; }
   }
+  if (t.nemesis && t.hp < t.maxHp * .25 && !t.yielded) { nemesisYield(t); return amt; }
   if (t.tutYield && t.hp < t.maxHp * .3 && G.tut && G.tut.step < 7) { t.hp = t.maxHp * .7; t.say = { text: G.tut.step === 6 ? 'Not yet! Show me a dodge first.' : 'Not yet! Show me a block first.', t: 3 }; return amt; } // no yielding before the lesson gets there
   if (t.tutYield && t.hp < t.maxHp * .3) { Object.assign(t, { tutYield: false, aggroPlayer: false, target: null, faction: 'civ', civ: true, boss: false, stand: true }); t.say = { text: 'I yield! Mercy, sir!', t: 3 }; SND.play('yield'); if (G.tut) G.tut.yielded = true; return amt; }
   if (t.tourney && t.hp < t.maxHp * .15) { t.hp = Math.max(1, t.hp); tourneyYield(t); return amt; } // bouts are to the yield
@@ -2863,6 +2867,7 @@ function kill(t, src) {
   for (let i = 0; i < 14 * QMUL(); i++) addPart(t.x, t.y, rand(-140, 140), rand(-160, 40), '#8a1a12', rand(.4, .9), 3, 260);
   const byP = src === P || (src && src.ally);
   if (t.loot) dropGold(t.x, t.y, t.loot);
+  if (t.wboss) wbossKilled(t);
   if (src === P && !t.criminal && !G.tut) { if (t.civ && t.faction !== 'wild') addBounty(ownerAtPx(t.x, t.y), 120, 'Murder'); else if (t.faction && t.faction[0] === 'k' && !t.aggroPlayer && !t.party) addBounty(t.k, 100, `Killing a soldier of ${KDATA[t.k].name}`); }
   if (byP) { gainXP(t.xp); G.kills++; G.stats.kills[t.kind] = (G.stats.kills[t.kind] || 0) + 1; if (t.lastHitProj) G.stats.bowKills++; if ((t.boss || t.dboss) && t.name && !t.tourney && !t.tut) addTrophy(t.name, t.kind, t.x, t.y); }
   // loot
@@ -2958,6 +2963,15 @@ function updateActor(e, dt) {
   if (e.dead) { e.deadT += dt; return; }
   if (e.downed > 0) { e.downed -= dt; if (e.downed <= 0) { e.hp = Math.round(e.maxHp * .35); e.say = { text: 'Still breathing…', t: 2.5 }; } return; }
   if (e.burn > 0 || e.poison > 0 || e.chill > 0) tickStatus(e, dt);
+  if (e.kind === 'wyvern' && e.target && !e.dead) { // fire breath
+    e.breathT = (e.breathT ?? 3) - dt; const tg = e.target, d = dist(e.x, e.y, tg.x, tg.y);
+    if (e.breathT <= 0 && d < 380) { e.breathT = rand(4, 6); const a0 = Math.atan2(tg.y - e.y, tg.x - e.x); for (let i = -4; i <= 4; i++) { const a = a0 + i * .09; projs.push({ x: e.x + Math.cos(a0) * 46, y: e.y + Math.sin(a0) * 46, vx: Math.cos(a) * 320, vy: Math.sin(a) * 320, dmg: e.dmg * .35, src: e, life: 1.3, fireBreath: true }); } SND.play('roar'); SND.play('fire'); }
+  }
+  if (e.kind === 'hill_giant' && e.target && !e.dead) { // boulders at range, a ground slam up close
+    e.breathT = (e.breathT ?? 4) - dt; const tg = e.target, d = dist(e.x, e.y, tg.x, tg.y);
+    if (e.breathT <= 0 && d > 140 && d < 440) { e.breathT = rand(4, 6); const a = Math.atan2(tg.y - e.y, tg.x - e.x); projs.push({ x: e.x + Math.cos(a) * 30, y: e.y - 20, vx: Math.cos(a) * 260, vy: Math.sin(a) * 260, dmg: e.dmg * .7, src: e, life: 2, rock: true }); SND.play('swingH'); }
+    e.slamT = (e.slamT ?? 6) - dt; if (e.slamT <= 0 && d < 110) { e.slamT = rand(6, 9); addShake(10); SND.play('hit'); for (let i = 0; i < 24 * QMUL(); i++) addPart(e.x + rand(-60, 60), e.y + rand(-30, 30), rand(-80, 80), rand(-120, -20), '#8a7a5a', .6, 3, 200); if (tg === P && d < 110) damage(P, e.dmg * .6, e, { kb: 2 }); }
+  }
   if (e.kind === 'bone_wyrm' && e.target && !e.dead) { // frost breath
     e.breathT = (e.breathT ?? 4) - dt; if (e.breathing > 0) e.breathing -= dt;
     const tg = e.target, d = dist(e.x, e.y, tg.x, tg.y);
@@ -3069,6 +3083,8 @@ function arrowHit(p, t) {
   }
   damage(t, dmg, p.src, { proj: true, crit: p.crit, kb: .5, arrow: p.arrow });
   if (p.breath && t === P) P.chillT = 2;
+  if (p.fireBreath && t.burn !== undefined) t.burn = Math.max(t.burn || 0, 3);
+  if (p.fireBreath && t === P) P.burn = Math.max(P.burn || 0, 3);
   if (t.isPlayer || t.dead || t.important || t.kind === 'horse') return;
   if (p.arrow === 'fire_arrow') { t.burn = 4; t.burnDps = 2 + p.dmg * .12; t.dotSrc = p.src; }
   if (p.arrow === 'venom_arrow') { t.poison = 8; t.poisonDps = 1.5 + p.dmg * .07; t.dotSrc = p.src; }
@@ -3379,7 +3395,7 @@ function placeSpecs(pl) {
   pl._specs = s; return s;
 }
 function mkPerched(x, y, k, elev, o = {}) { return mkActor('bowman', x, y, Object.assign({ k, perch: true, elev, stand: true, range: 390, aggro: 440, leash: 99999, standFace: Math.PI / 2 }, o)); }
-const QUIET_ROLES = { citizen: 1, townsfolk: 1, child: 1, patron: 1, guest: 1, customer: 1, worshipper: 1, choir: 1 }; // no floating name tags for crowds
+const QUIET_ROLES = { encmute: 1, citizen: 1, townsfolk: 1, child: 1, patron: 1, guest: 1, customer: 1, worshipper: 1, choir: 1 }; // no floating name tags for crowds
 const CITY_ROLES = { dicer: 1, cityshop: 1, innkeeper: 1, hotelier: 1, priest: 1, bard: 1, crier: 1, beggar: 1 };
 let _ncT = -1, _ncE = null; // the one tradesperson whose name shows, so a busy market doesn't pile up labels
 function nearCityNpc() { if (_ncT !== G.time) { _ncT = G.time; _ncE = null; let bd = 120; for (const x of ents) if (CITY_ROLES[x.role] && !x.dead) { const d = dist(P.x, P.y, x.x, x.y); if (d < bd) { bd = d; _ncE = x; } } } return _ncE; }
@@ -3879,6 +3895,118 @@ function failQuest(q, why) {
 function abandonQuest(q) { failQuest(q, 'abandoned'); if (q.k != null) addRep(q.k, -2, 'Abandoned a quest', true); if (q.ent && !q.ent.dead) { q.ent.follow = false; q.ent.transient = true; } }
 
 /* ---------------- World events ---------------- */
+/* ---------------- The nemesis: a rival knight who keeps coming back ---------------- */
+const NEM_EPI = ['the Knightslayer', 'the Unbroken', 'Bane of Hedge Knights', 'the Gravemaker', 'the Relentless'];
+const nemName = N => `${N.sex ? 'Dame' : 'Sir'} ${N.first}${N.epi ? ' ' + N.epi : ''}`;
+function nemesisInit() { if (P.nemesis || G.tut) return; const sex = chance(.5) ? 1 : 0, k = randi(0, 3); P.nemesis = { sex, first: pick(NAMES.first), k, weapon: pick(['sword', 'axe', 'spear', 'sword']), lvl: 0, wins: 0, losses: 0, state: 'active', next: dayNum() + randi(1, 2), met: 0 }; }
+function spawnNemesis(duel) {
+  const N = P.nemesis, a = rand(0, TAU), f = findFree(P.x + Math.cos(a) * 300, P.y + Math.sin(a) * 300), lv = P.lvl + N.lvl;
+  const e = mkActor('champion', f.x, f.y, { name: nemName(N), k: N.k, faction: 'bandit', nemesis: true, boss: true, named: true, aggroPlayer: true, aggro: 900, leash: 1400, roam: true, home: { x: f.x, y: f.y }, _look: Object.assign(knightLook(N.k, N.weapon), { cape: '#1a1a1e', plume: '#1a1a1e' }) });
+  e.hp = e.maxHp = Math.round((150 + lv * 34) * DIFF().enemyHp); e.dmg = (9 + lv * 1.8); e.target = P;
+  const lines = N.met === 0 ? [`So you're the hedge knight they sing about. I am ${nemName(N)}. These lands have room for one hero, and it is not you.`] : N.wins && P.grave && /Sir|Dame/.test(P.grave.cause) ? [`You again? I left you for dead ${P.grave.where}!`, 'Back from the grave, are we? Let us fix that.'] : N.losses ? ['You got lucky last time. Luck runs out.', 'I have trained every day since we last met.'] : ['We meet again, hedge knight.'];
+  e.say = { text: duel ? 'No more running. Here and now, we end this.' : pick(lines), t: 5 }; N.met++; N.duel = !!duel;
+  toast(`⚔ <b>${nemName(N)}</b> blocks your path!`, 'war'); SND.play('horn');
+  return e;
+}
+function nemesisYield(e) {
+  const N = P.nemesis; e.yielded = true; N.losses++; N.next = dayNum() + randi(3, 4);
+  if (N.duel) {
+    Object.assign(e, { aggroPlayer: false, target: null, faction: 'civ', civ: true, boss: false, stand: true }); e.say = { text: 'Enough… you have bested me.', t: 4 };
+    openDialog({ name: nemName(N), role: 'Beaten, at last', portrait: e, text: `${nemName(N)} kneels in the dirt, sword cast aside. "Well? Finish it, or don't."`, options: [
+      { t: '<span class="dn">KILL</span>End the feud for good.', fn: () => { N.state = 'dead'; closeDialog(); kill(e, P); addTrophy(`The helm of ${nemName(N)}`, 'champion', e.x, e.y); toast('Your nemesis is dead. The roads feel quieter.', 'gold'); } },
+      { t: '<span class="dn">SPARE</span>Go home. I never want to see you again.', fn: () => { N.state = 'spared'; closeDialog(); e.say = { text: 'I… thank you.', t: 3 }; e.transient = true; e.flee = 20; e.fleeFrom = P; gainXP(300); addTrophy(`The sword of ${nemName(N)}`, 'champion', e.x, e.y); toast('Mercy. Somewhere, the bards are already writing it down.', 'gold'); } },
+      { t: '<span class="dn">EXILE</span>Leave the four kingdoms, or next time I will not be kind.', fn: () => { N.state = 'exiled'; closeDialog(); e.transient = true; e.flee = 20; e.fleeFrom = P; gainXP(250); toast(`${nemName(N)} rides for the border, never to return.`, 'gold'); } },
+    ] });
+    return;
+  }
+  Object.assign(e, { aggroPlayer: false, target: null, faction: 'civ', civ: true, boss: false, flee: 20, fleeFrom: P, transient: true }); e.say = { text: pick(['This isn\'t over!', 'Next time, hedge knight!', 'You will pay for this!']), t: 3 };
+  gainXP(80 + N.lvl * 20); toast(`${nemName(N)} flees! They will be back${N.losses >= 3 ? ', and next time they will want a proper duel' : ''}.`, 'gold');
+  setTimeout(() => removeEnt(e), 6000);
+}
+function nemesisWon() { const N = P.nemesis; if (!N) return; N.wins++; N.lvl++; if (!N.epi || chance(.5)) N.epi = NEM_EPI[Math.min(NEM_EPI.length - 1, N.wins - 1)]; N.next = dayNum() + randi(3, 4); setTimeout(() => toast(`${nemName(N)} boasts of your defeat in every tavern from here to the sea.`, 'bad'), 2500); }
+/* ---------------- Roadside encounters ---------------- */
+const ENC_WHO = { knight: 'the wounded knight', child: 'the lost child', toll: 'the toll keeper', thief: 'the fleeing thief', merchant: 'the stranded merchant', pilgrim: 'the pilgrim', fortune: 'Madame Zora', deserter: 'the deserter' };
+const ENCS = ['knight', 'child', 'toll', 'thief', 'merchant', 'pilgrim', 'fortune', 'deserter'];
+function encounterTick() {
+  if (G.under || G.tut || G.state !== 'play' || G.enc || Q.active.some(q => q.type === 'raid')) { if (G.enc && dist(P.x, P.y, G.enc.x, G.enc.y) > 1600) endEncounter(); return; }
+  const tx = Math.floor(P.x / TS), ty = Math.floor(P.y / TS); let road = false; for (let dy = -2; dy <= 2 && !road; dy++) for (let dx = -2; dx <= 2 && !road; dx++) if (terAt(tx + dx, ty + dy) === T.ROAD || terAt(tx + dx, ty + dy) === T.BRIDGE) road = true;
+  if (!road || W.places.some(p => (p.type === 'village' || p.type === 'castle') && dist(P.x, P.y, p.x, p.y) < 20 * TS)) return;
+  G.encT = (G.encT ?? rand(80, 140)) - 1; if (G.encT > 0) return; G.encT = rand(150, 260);
+  if (dayNum() >= 4) nemesisInit();
+  const N = P.nemesis; if (N && N.state === 'active' && dayNum() >= N.next && !ents.some(e => e.nemesis && !e.dead)) { spawnNemesis(N.losses >= 3); return; }
+  startEncounter(pick(ENCS));
+}
+function endEncounter() { if (!G.enc) return; ents = ents.filter(e => !(e.enc && !e.follow)); G.enc = null; }
+function startEncounter(type) {
+  const k = ownerAtPx(P.x, P.y), a = Math.atan2(P.vy || 0, P.vx || 1), fx = P.x + rand(160, 240) * (chance(.5) ? 1 : -1), fy = P.y + rand(-120, 120), pos = findFree(fx, fy), G2 = G.enc = { type, x: pos.x, y: pos.y, k, ents: [] };
+  const npc = (kind, dx, dy, o) => { const f = findFree(pos.x + dx, pos.y + dy); const e = mkActor(kind, f.x, f.y, Object.assign({ enc: type, k, stand: true, standFace: Math.PI / 2, transient: true }, o)); G2.ents.push(e); return e; };
+  const intro = { knight: 'A wounded knight lies by the road.', child: 'A small child is crying at the roadside.', toll: 'A gang of toughs has set up a "toll" on the road.', thief: 'Shouts ahead: someone is running from the guards!', merchant: 'A merchant\'s cart has broken down on the road.', pilgrim: 'A pilgrim rests on a milestone.', fortune: 'A painted wagon: a fortune teller beckons.', deserter: 'A soldier without a tabard hides in the ditch.' }[type];
+  if (type === 'knight') npc('npc', 0, 0, { role: 'enc', name: 'Wounded knight', hurt: true, _look: Object.assign(knightLook(randi(0, 3), 'sword'), { body: '#8a8e94' }) });
+  if (type === 'child') npc('villager', 0, 0, { role: 'enc', name: 'Lost child', scale: .7 });
+  if (type === 'toll') { npc('villager', 0, 0, { role: 'enc', name: 'The Toll Keeper', _look: { body: '#5a4a3a', head: 'hood', hood: '#3a2a1a', skin: skinTone(), weapon: { wk: 'axe', len: 26, col: '#8a8e94' } } }); npc('villager', -40, 20, { role: 'encmute', name: 'Tough', _look: { body: '#6a4a3a', head: 'hair', hair: '#2a1a10', skin: skinTone(), weapon: { wk: 'sword', len: 24, col: '#8a8e94' } } }); npc('villager', 40, 20, { role: 'encmute', name: 'Tough', _look: { body: '#4a5a3a', head: 'cap', skin: skinTone(), weapon: { wk: 'spear', len: 40, col: '#8a8e94' } } }); }
+  if (type === 'thief') { const th = npc('villager', 0, 0, { role: 'enc', name: 'Fleeing thief', stand: false, _look: { body: '#3a3a44', head: 'hood', hood: '#26262e', skin: skinTone() } }); for (let i = 0; i < 2; i++) npc('guard', 120 + i * 30, 30 * i, { stand: false, home: { x: pos.x, y: pos.y }, wanderR: 60, encmute: true }); }
+  if (type === 'merchant') { npc('npc', 0, 0, { role: 'enc', name: 'Stranded merchant', cart: true, _look: { body: '#7a3a5a', head: 'cap', skin: skinTone(), cape: '#d8a040' } }); }
+  if (type === 'pilgrim') npc('npc', 0, 0, { role: 'enc', name: 'Pilgrim', _look: { body: '#8a7a5a', head: 'hood', hood: '#6a5a3a', skin: skinTone() } });
+  if (type === 'fortune') npc('npc', 0, 0, { role: 'enc', name: 'Madame Zora', cart: true, _look: { body: '#6a2a7a', head: 'hood', hood: '#c83a4a', skin: skinTone(), cape: '#e8c040' } });
+  if (type === 'deserter') npc('villager', 0, 0, { role: 'enc', name: 'Deserter', _look: { body: '#9ba1a8', mail: 1, head: 'hair', hair: '#4a3020', skin: skinTone() } });
+  toast(`<b>On the road:</b> ${intro} (${compass(pos.x - P.x, pos.y - P.y).toLowerCase()})`, 'gold'); SND.play('quest');
+  if (G2.ents[0]) G2.ents[0].say = { text: { knight: 'Help… please…', child: 'I want my mama!', toll: 'Road\'s closed. Unless you pay.', thief: 'Hide me! Please!', merchant: 'Blast this axle!', pilgrim: 'Peace on your road, traveller.', fortune: 'Your future awaits, knight…', deserter: 'Please… don\'t turn me in.' }[type], t: 5 };
+}
+function encDialog(e) {
+  const G2 = G.enc || { k: ownerAtPx(e.x, e.y) }, k = G2.k, type = e.enc, done = msg => { closeDialog(); if (msg) toast(msg, 'gold'); e.role = 'encdone'; };
+  const opt = (t, fn, dis) => ({ t, fn, dis });
+  const O = { name: e.name, role: 'On the road', portrait: e };
+  if (type === 'knight') return openDialog(Object.assign(O, { text: 'Bandits… jumped me on the road. Took my horse. I can\'t stop the bleeding.', options: [
+    opt('<span class="dn">HELP</span>Bind his wounds (a bandage or potion)', () => { const it = P.inv.find(i => i.id === 'bandage') || P.inv.find(i => i.id === 'potion'); removeItem(it.uid, 1); const g0 = randi(40, 90); P.gold += g0; addRep(k, 4, 'Saved a wounded knight'); gainXP(60); if (chance(.35)) addItem(pick(LOOT_TIERS[2].filter(id => ITEMS[id].type === 'weapon')), 2, 1); done(`He presses ${g0} gold into your hand. "The crown will hear of this."`); }, !P.inv.some(i => i.id === 'bandage' || i.id === 'potion')),
+    opt('I cannot help you.', () => { done(); e.say = { text: '…', t: 3 }; setTimeout(() => { if (!e.dead) kill(e); }, 4000); })] }));
+  if (type === 'child') return openDialog(Object.assign(O, { text: 'I got lost picking flowers and now I don\'t know where home is! Will you take me back?', options: [
+    opt('<span class="dn">ESCORT</span>Come on, I\'ll take you home.', () => { const v = nearestPlace(e.x, e.y, p => p.type === 'village' && p.owner === k) || nearestPlace(e.x, e.y, p => p.type === 'village'); closeDialog(); e.role = 'traveler'; Object.assign(e, { follow: true, followDist: 50, stand: false, transient: false, spd: 140 }); const q = { id: Q.next++, type: 'escort', title: 'The Lost Child', desc: `Take the child home to ${v.name}.`, obj: `Take the child home to ${v.name}`, target: v.id, giver: v.id, giverName: 'A lost child', k: v.owner, traveler: 'The child', ent: e, startX: P.x, startY: P.y, total: dist(P.x, P.y, v.x, v.y), ambushed: true, reward: { gold: 45, xp: 60, rep: { [v.owner]: 4 }, rel: [], items: [] }, started: G.time }; e.quest = q.id; Q.active.push(q); Q.tracked = q.id; G.enc = null; toast('<b>New quest:</b> The Lost Child', 'gold'); }),
+    opt('Wait here, someone will come.', () => done())] }));
+  if (type === 'toll') { const fee = 20 + P.lvl * 6, awe = K.rep[k] >= 25 || P.lvl >= 6; return openDialog(Object.assign(O, { text: `This road belongs to us today. ${fee} gold and you can pass. Or we take it off your corpse.`, options: [
+    opt(`<span class="dn">PAY</span>Pay the toll (${fee} gold)`, () => { P.gold -= fee; done('You pay. The toughs laugh and wave you through.'); }, P.gold < fee),
+    opt(`<span class="dn">TALK</span>"Do you know who I am?"${awe ? '' : ' (reputation 25 here, or level 6)'}`, () => { addRep(k, 2, 'Faced down a toll gang'); gainXP(40); done('Their bravado melts. They scatter into the fields.'); G.enc.ents.forEach(x => { x.flee = 10; x.fleeFrom = P; }); }, !awe),
+    opt('<span class="dn">FIGHT</span>Draw your sword', () => { closeDialog(); G.enc.ents.forEach(x => Object.assign(x, { faction: 'bandit', civ: false, criminal: true, role: null, stand: false, aggroPlayer: true, target: P, hp: 70 + P.lvl * 10, maxHp: 70 + P.lvl * 10, dmg: 6 + P.lvl })); e.say = { text: 'Get them!', t: 2 }; })] })); }
+  if (type === 'thief') return openDialog(Object.assign(O, { text: 'I only took a loaf of bread, I swear! The guards will hang me. Please, let me hide behind you!', options: [
+    opt('<span class="dn">SEIZE</span>Hold him for the guards', () => { P.gold += 30; addRep(k, 3, 'Caught a thief'); const me = G.enc; done('The guards drag him off and toss you a reward: 30 gold.'); setTimeout(() => { if (G.enc === me) endEncounter(); }, 3000); }),
+    opt('<span class="dn">HIDE</span>"Get behind the cart. Quickly."', () => { if (chance(.4)) addBounty(k, 30, 'Hiding a fugitive'); addItem('silver_ring', 1, 1, true); done('He slips you a silver ring and melts into the hedgerow.'); e.flee = 20; e.fleeFrom = P; })] }));
+  if (type === 'merchant') return openDialog(Object.assign(O, { text: 'Cracked axle, and me with a full load! If only I had a length of good timber…', options: [
+    opt('<span class="dn">FIX</span>Mend the axle (1 timber)', () => { removeItemById('timber'); gainXP(40); const f2 = { role: 'caravan', place: null, k }; const sh = getShop(f2); sh.name = 'Grateful Merchant'; sh.items.forEach(i => i.disc = true); done('Good as new! Take a look at my wares, friend, at a friend\'s price.'); P.gold += 25; setTimeout(() => openShop(sh, e), 200); }, !countItem('timber')),
+    opt('Give him 10 gold for a cartwright', () => { P.gold -= 10; addRep(k, 2, 'Helped a merchant'); done('"Bless you, knight!"'); }, P.gold < 10),
+    opt('Good luck with that.', () => done())] }));
+  if (type === 'pilgrim') return openDialog(Object.assign(O, { text: 'I walk to the cathedral, as my mother did and hers before her. A coin for the road, and I will pray for you?', options: [
+    opt('<span class="dn">ALMS</span>Give 10 gold', () => { P.gold -= 10; P.blessT = 480; P.hp = P.maxHp; done('<b>Blessed.</b> The pilgrim\'s prayer settles over you like warm sunlight.'); }, P.gold < 10),
+    opt('Any news from the road?', () => { const c = nearestPlace(e.x, e.y, p => (p.type === 'hidden' || p.type === 'dungeon') && !p.disc && !p.rumor); if (c) { c.rumor = true; revealArea(c.tx, c.ty, 4); done(`"They say there is something called ${c.name} ${dirTo(e, c)} of here." It is marked on your map.`); } else done('"Only dust and weather, friend."'); })] }));
+  if (type === 'fortune') return openDialog(Object.assign(O, { text: 'Cross my palm with silver, and I shall read the threads of your fate…', options: [
+    opt('<span class="dn">READ</span>Pay 15 gold', () => { P.gold -= 15; const N = P.nemesis, r2 = Math.random(); if (G.wboss && r2 < .35) done(`"I see wings of ash over ${W.places[G.wboss.target] ? W.places[G.wboss.target].name : 'the hills'}…" (The world boss is marked on your map.)`); else if (N && N.state === 'active' && r2 < .6) done(`"A knight in black. ${nemName(N)}. They are coming for you, and soon."`); else { P.luckT = 600; done('"Fortune smiles on you, knight. Do not waste it." You feel <b>lucky</b>.'); } }, P.gold < 15),
+    opt('I make my own fate.', () => done())] }));
+  if (type === 'deserter') return openDialog(Object.assign(O, { text: `I couldn't do it anymore. The officers sent us to burn a village. I ran. If ${KDATA[k].name} finds me, they'll hang me.`, options: [
+    opt('<span class="dn">TURN IN</span>Deserters hang. That is the law.', () => { addRep(k, 5, 'Turned in a deserter'); P.gold += 25; const me = G.enc; done('A patrol takes him in chains. The captain pays you 25 gold.'); setTimeout(() => { if (G.enc === me) endEncounter(); }, 2000); }),
+    opt('<span class="dn">RECRUIT</span>Ride with me instead.', () => { if (partyNow().length >= hiredCap()) { toast('Your company is full.'); return; } closeDialog(); ents = ents.filter(x => x !== e); spawnPartyMember({ kind: 'soldier', k, name: `${pick(NAMES.first)} the Deserter` }, e.x, e.y); toast('The deserter joins your company, grateful to the bone.', 'gold'); }),
+    opt('<span class="dn">FREE</span>Go. I never saw you.', () => { gainXP(30); done('He clasps your hand and vanishes into the woods.'); e.flee = 20; e.fleeFrom = P; })] }));
+}
+/* ---------------- A roaming world boss ---------------- */
+function wbossTick(dt) {
+  if (G.tut) return; const day = dayNum();
+  if (!G.wboss) { G.wbossNext = G.wbossNext || 12; if (day >= G.wbossNext && !G.under) spawnWorldBoss(); return; }
+  const B = G.wboss, ent = ents.find(e => e.wboss && !e.dead);
+  if (ent) { B.x = ent.x; B.y = ent.y; B.hp = ent.hp; if (!G.under && dist(P.x, P.y, ent.x, ent.y) > 2400) { removeEnt(ent); } return; }
+  const tg = W.places[B.target]; if (!tg) { B.target = pick(W.places.filter(p => p.type === 'village')).id; return; }
+  const d = dist(B.x, B.y, tg.x, tg.y); const step = (B.kind === 'wyvern' ? 22 : 13) * dt;
+  if (d < 3 * TS) { B.ravaged = (B.ravaged || 0) + 1; logEvent(`${B.name} ravaged ${tg.name}.`, [tg.owner]); if (dist(P.x, P.y, tg.x, tg.y) < 5000) toast(`🔥 <b>${B.name}</b> ravages <b>${tg.name}</b>!`, 'war'); if (P.fief && P.fief.v === tg.id) { P.fief.pros = Math.max(0, P.fief.pros - 20); toast('Your fief suffers. (−20 prosperity)', 'bad'); } B.target = pick(W.places.filter(p => p.type === 'village' && p.id !== tg.id)).id; return; }
+  B.x += (tg.x - B.x) / d * step; B.y += (tg.y - B.y) / d * step;
+  if (!G.under && dist(P.x, P.y, B.x, B.y) < 1300) { const f = findFree(B.x, B.y); const e = mkActor(B.kind, f.x, f.y, { wboss: true, boss: true, named: true, name: B.name, aggroPlayer: true, aggro: 520, leash: 99999, roam: true, home: { x: tg.x, y: tg.y } }); e.maxHp = B.maxHp; e.hp = B.hp; if (B.kind === 'hill_giant') e.scale = 2.3; }
+}
+function spawnWorldBoss() {
+  const kind = (G.wbossCount || 0) % 2 ? 'hill_giant' : 'wyvern', far = W.places.filter(p => p.type === 'village' && dist(P.x, P.y, p.x, p.y) > 60 * TS); const from = pick(far.length ? far : W.places.filter(p => p.type === 'village'));
+  const hp = Math.round(ATYPES[kind].hp * DIFF().enemyHp * (1 + P.lvl * .05)); G.wbossCount = (G.wbossCount || 0) + 1;
+  G.wboss = { kind, name: kind === 'wyvern' ? 'The Ashen Wyvern' : 'The Hill Giant', x: from.x + 20 * TS, y: from.y, hp, maxHp: hp, target: from.id, born: dayNum() };
+  toast(`⚠ <b>${G.wboss.name}</b> has been sighted near <b>${from.name}</b>! It is marked on your map.`, 'war'); SND.play('horn'); logEvent(`${G.wboss.name} was sighted near ${from.name}.`, [from.owner]);
+}
+function wbossKilled(t) {
+  G.wboss = null; G.wbossNext = dayNum() + randi(20, 30); P.gold += 600; SND.play('mainquest'); for (let k = 0; k < 4; k++) addRep(k, 5, `Slew ${t.name}`);
+  const leg = pick(LEGENDS); addItem(leg, 3, 1); addTrophy(t.name, t.kind === 'wyvern' ? 'wyvern' : 'giant', t.x, t.y);
+  showAreaTitle('THE REALM REJOICES', `${t.name} is slain`); toast(`🏆 You slew ${t.name}! +600 gold, the thanks of every crown and a legendary ${ITEMS[leg].name}.`, 'gold');
+}
 function worldEvent() {
   const opts = [['raid', 2], ['skirmish', 2.2], ['caravan', 2.5], ['patrol', 2], ['request', 1], ['diplo', 1.4], ['trader', .7], ['wolves', .9]];
   let tot = opts.reduce((s, o) => s + o[1], 0), r = Math.random() * tot, ev = 'caravan';
@@ -4085,7 +4213,7 @@ function interactLabel(b) {
   if (b.e) {
     const e = b.e;
     if (canPickpocket(e)) return '<span style="color:#e8c060">Pick their pocket</span>';
-    if (e.role === 'guild') return 'Speak to the hooded figure'; if (e.role === 'gamesmaster') return `Play the ${FEST[G.festival] ? FEST[G.festival].game : 'festival game'}`;
+    if (e.role === 'guild') return 'Speak to the hooded figure'; if (e.role === 'enc') return `Speak to ${ENC_WHO[e.enc] || e.name}`; if (e.role === 'encmute' || e.role === 'encdone') return `Talk to ${ENC_WHO[e.enc] || 'the ' + e.name.toLowerCase()}`; if (e.role === 'gamesmaster') return `Play the ${FEST[G.festival] ? FEST[G.festival].game : 'festival game'}`;
     switch (e.role) {
       case 'elder': return `Talk to ${e.name}`; case 'merchant': return `Trade with ${e.name}`; case 'ruler': return `Seek an audience with ${e.name}`;
       case 'armorer': return 'Browse the royal armory'; case 'stable': return 'Visit the royal stables'; case 'caravan': return 'Trade with the caravan'; case 'trader': return `Trade with ${e.name}`;
@@ -4945,6 +5073,8 @@ function talkTo(e) {
   const k = e.k != null ? e.k : ownerAtPx(e.x, e.y);
   if (canPickpocket(e)) return pickpocket(e, k);
   if (e.role === 'guild') return guildDialog(e);
+  if (e.role === 'enc') return encDialog(e);
+  if (e.role === 'encdone' || e.role === 'encmute') { e.say = { text: pick(['Safe travels.', 'Hmph.', 'Move along.']), t: 2 }; return; }
   if (e.role === 'gamesmaster') return gamesDialog(e);
   if (e.role === 'taxcart') { e.say = { text: 'Keep your distance!', t: 2 }; return; }
   switch (e.role) {
@@ -6433,6 +6563,7 @@ function lookFor(e) {
   let L;
   const kc = e.k != null ? KDATA[e.k].color : '#777';
   switch (e.kind) {
+    case 'hill_giant': L = { body: '#6a5a3a', head: 'hair', hair: '#3a2a1a', beard: 1, skin: '#b8906a', weapon: { wk: 'great', len: 46, col: '#6a4424', wooden: true } }; break;
     case 'bandit': L = { body: e.cloth, head: 'hood', hood: shade(e.cloth, -.25), skin: e.skin, weapon: { wk: pick(['axe', 'sword', 'sword']), len: 26, col: '#8a8e94' }, shield: e.tier >= 3 && chance(.5) ? { b: ITEMS.round_shield } : null }; break;
     case 'bowman': L = { body: '#7a6a50', mail: 1, head: 'coif', skin: e.skin, tabard: kc, weapon: { wk: 'bow', len: 22, col: '#6a4424' } }; break;
     case 'xbowman': L = { body: e.cloth, head: 'hood', hood: shade(e.cloth, -.3), skin: e.skin, weapon: { wk: 'xbow', len: 18, col: '#5a3a22' } }; break;
@@ -6536,6 +6667,19 @@ function drawHorse(g, x, y, face, hb, walk, rider, allegiance) {
   if (rider) { g.fillStyle = '#6a3a1a'; rrect(g, -7, -8, 12, 16, 3); g.fill(); g.fillStyle = allegiance != null ? KDATA[allegiance].color : '#5a4a3a'; g.fillRect(-9, -9, 3, 18); }
   g.restore();
 }
+function drawWyvern(g, e) {
+  const t = performance.now() / 1000, sc = (e.scale || 1) * 1.5, body = '#7a2e22', belly = '#c88a4a', dark = '#3e1812', flap = Math.sin(t * 5 + e.id) * .5;
+  g.save(); g.translate(e.x, e.y); g.fillStyle = 'rgba(0,0,0,.28)'; ell(g, 6, 16 * sc, 44 * sc, 16 * sc);
+  g.rotate(e.face); g.scale(sc, sc); if (e.flash > 0 && !settings.noFlash) g.filter = 'brightness(2)'; if (e.dead) g.globalAlpha = Math.max(0, 1 - (e.deadT - 7) / 3);
+  [-1, 1].forEach(sd => { g.save(); g.scale(1, sd); g.rotate(-.2 - flap * .6); g.fillStyle = dark; g.beginPath(); g.moveTo(-2, 4); g.lineTo(-18, 46); g.lineTo(-4, 38); g.lineTo(4, 50); g.lineTo(10, 36); g.lineTo(18, 42); g.lineTo(14, 4); g.closePath(); g.fill(); g.strokeStyle = body; g.lineWidth = 2; g.beginPath(); g.moveTo(4, 4); g.lineTo(-18, 46); g.moveTo(4, 4); g.lineTo(4, 50); g.moveTo(8, 4); g.lineTo(18, 42); g.stroke(); g.restore(); });
+  g.strokeStyle = body; g.lineWidth = 7; g.lineCap = 'round'; g.beginPath(); g.moveTo(-10, 0); g.quadraticCurveTo(-30, Math.sin(t * 3) * 8, -46, Math.sin(t * 3 + 1) * 10); g.stroke(); g.lineCap = 'butt';
+  g.fillStyle = dark; g.beginPath(); g.moveTo(-46, Math.sin(t * 3 + 1) * 10 - 6); g.lineTo(-56, Math.sin(t * 3 + 1) * 10); g.lineTo(-46, Math.sin(t * 3 + 1) * 10 + 6); g.fill();
+  g.fillStyle = body; ell(g, 0, 0, 20, 12); g.fillStyle = belly; ell(g, 2, 0, 13, 6);
+  g.fillStyle = body; g.beginPath(); g.moveTo(14, -6); g.quadraticCurveTo(26, -8, 34, -3); g.lineTo(38, 0); g.lineTo(34, 3); g.quadraticCurveTo(26, 8, 14, 6); g.fill();
+  g.fillStyle = '#e8d8b8'; g.beginPath(); g.moveTo(28, -6); g.lineTo(22, -13); g.lineTo(26, -5); g.fill(); g.beginPath(); g.moveTo(28, 6); g.lineTo(22, 13); g.lineTo(26, 5); g.fill();
+  g.fillStyle = '#ffcf3a'; circ(g, 31, -3, 1.6); circ(g, 31, 3, 1.6);
+  g.restore();
+}
 function drawWyrm(g, e) {
   const t = performance.now() / 1000, sc = (e.scale || 1) * 1.6, ivory = '#e4dcc8', dark = '#a89c82', glow = '#8fd8ff';
   g.save(); g.translate(e.x, e.y); g.fillStyle = 'rgba(0,0,0,.3)'; ell(g, 4, 14 * sc, 36 * sc, 14 * sc);
@@ -6624,6 +6768,7 @@ function drawAnimal(g, e) {
   if (e.kind === 'goat') return drawGoat(g, e);
   if (e.kind === 'spider') return drawSpider(g, e);
   if (e.kind === 'bone_wyrm') return drawWyrm(g, e);
+  if (e.kind === 'wyvern') return drawWyvern(g, e);
   const kind = e.kind === 'snow_wolf' ? 'wolf' : e.kind === 'ice_bear' ? 'bear' : e.kind, snowy = kind !== e.kind;
   if (kind === 'wolf' || kind === 'jackal') return drawCanine(g, e, kind, snowy);
   if (kind === 'boar') return drawBoar(g, e);
@@ -6767,6 +6912,7 @@ function drawMinimap() {
   }
   for (const e of ents) { if (e.dead) continue; const [mx, my] = toM(e.x, e.y); if (mx < 0 || my < 0 || mx > S || my > S) continue; if (playerHostileTo(e)) { g.fillStyle = '#ff4a3a'; circ(g, mx, my, 2); } else if (e.ally || e.role === 'traveler') { g.fillStyle = '#6ad0ff'; circ(g, mx, my, 2); } else if (e === horseEnt) { g.fillStyle = '#f5e6bd'; circ(g, mx, my, 2.2); } }
   Q.active.forEach(q => { const tg = questTarget(q); if (!tg) return; let [mx, my] = toM(tg.x, tg.y); const inside = mx > 6 && my > 6 && mx < S - 6 && my < S - 6; const tracked = Q.tracked === q.id; if (!inside) { const a = Math.atan2(my - S / 2, mx - S / 2); mx = S / 2 + Math.cos(a) * (S / 2 - 9); my = S / 2 + Math.sin(a) * (S / 2 - 9); } g.save(); g.translate(mx, my); g.rotate(Math.PI / 4); g.fillStyle = tracked ? '#ffd24a' : '#d8b25a'; g.globalAlpha = tracked ? 1 : .7; g.fillRect(-3.5, -3.5, 7, 7); g.strokeStyle = '#000'; g.strokeRect(-3.5, -3.5, 7, 7); g.restore(); });
+  if (G.wboss) { const [mx, my] = toM(G.wboss.x, G.wboss.y); const cx0 = clamp(mx, 6, S - 6), cy0 = clamp(my, 6, S - 6); g.fillStyle = '#ff4a2a'; g.beginPath(); g.arc(cx0, cy0, 4.5, 0, TAU); g.fill(); g.strokeStyle = '#000'; g.lineWidth = 1; g.stroke(); }
   if (P && P.grave && !G.under) { const [mx, my] = toM(P.grave.x, P.grave.y); if (mx > 4 && my > 4 && mx < S - 4 && my < S - 4) { g.fillStyle = '#c8c4bc'; g.beginPath(); g.moveTo(mx - 2.5, my + 3); g.lineTo(mx - 2.5, my - 1); g.arc(mx, my - 1, 2.5, Math.PI, 0); g.lineTo(mx + 2.5, my + 3); g.closePath(); g.fill(); } }
   if (G.mapWaypoint) { const [mx, my] = toM(G.mapWaypoint.x, G.mapWaypoint.y); g.strokeStyle = '#6ad0ff'; g.lineWidth = 2; g.beginPath(); g.arc(clamp(mx, 6, S - 6), clamp(my, 6, S - 6), 4, 0, TAU); g.stroke(); }
   g.save(); g.translate(S / 2, S / 2); g.rotate(P.face); g.fillStyle = '#fff'; g.strokeStyle = '#000'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(7, 0); g.lineTo(-5, -5); g.lineTo(-2, 0); g.lineTo(-5, 5); g.closePath(); g.fill(); g.stroke(); g.restore();
@@ -6960,6 +7106,7 @@ function drawBigMap() {
   }
   if (MAPF.quests) Q.active.forEach(q => { const t = questTarget(q); if (!t) return; const [sx, sy] = toS(t.x, t.y); if (t.r) { g.strokeStyle = 'rgba(255,210,74,.8)'; g.setLineDash([6 * dpr, 5 * dpr]); g.lineWidth = 2 * dpr; g.beginPath(); g.arc(sx, sy, t.r / TS * z, 0, TAU); g.stroke(); g.setLineDash([]); } g.save(); g.translate(sx, sy); g.rotate(Math.PI / 4); g.fillStyle = Q.tracked === q.id ? '#ffd24a' : '#c8a040'; g.fillRect(-6 * dpr, -6 * dpr, 12 * dpr, 12 * dpr); g.strokeStyle = '#000'; g.lineWidth = 1.5 * dpr; g.strokeRect(-6 * dpr, -6 * dpr, 12 * dpr, 12 * dpr); g.restore(); });
   if (G.mapWaypoint) { const [sx, sy] = toS(G.mapWaypoint.x, G.mapWaypoint.y); g.strokeStyle = '#6ad0ff'; g.lineWidth = 3 * dpr; g.beginPath(); g.arc(sx, sy, 8 * dpr, 0, TAU); g.stroke(); g.beginPath(); g.moveTo(sx, sy - 14 * dpr); g.lineTo(sx, sy + 14 * dpr); g.moveTo(sx - 14 * dpr, sy); g.lineTo(sx + 14 * dpr, sy); g.stroke(); }
+  if (G.wboss) { const [bx, by] = toS(G.wboss.x, G.wboss.y); const pul = 1 + Math.sin(performance.now() / 300) * .15; g.fillStyle = 'rgba(255,60,30,.25)'; circ(g, bx, by, 16 * dpr * pul); g.fillStyle = '#1a0e08'; circ(g, bx, by, 10 * dpr); g.fillStyle = '#ff5a2a'; g.font = `bold ${13 * dpr}px Georgia`; g.textAlign = 'center'; g.fillText(G.wboss.kind === 'wyvern' ? '⚡' : '⛰', bx, by + 5 * dpr); g.font = `italic ${11 * dpr}px 'EB Garamond', Georgia, serif`; g.lineWidth = 3 * dpr; g.strokeStyle = 'rgba(15,10,5,.85)'; g.strokeText(G.wboss.name, bx, by + 24 * dpr); g.fillStyle = '#ffb0a0'; g.fillText(G.wboss.name, bx, by + 24 * dpr); }
   if (P && P.grave && !G.under) { const [gx, gy] = toS(P.grave.x, P.grave.y); g.fillStyle = 'rgba(15,10,5,.8)'; circ(g, gx, gy, 9 * dpr); g.fillStyle = '#b8b4ac'; g.beginPath(); g.moveTo(gx - 4.5 * dpr, gy + 5 * dpr); g.lineTo(gx - 4.5 * dpr, gy - 1.5 * dpr); g.arc(gx, gy - 1.5 * dpr, 4.5 * dpr, Math.PI, 0); g.lineTo(gx + 4.5 * dpr, gy + 5 * dpr); g.closePath(); g.fill(); if (mapView.z >= 2.2) { g.font = `italic ${11 * dpr}px 'EB Garamond', Georgia, serif`; g.textAlign = 'center'; g.lineWidth = 3 * dpr; g.strokeStyle = 'rgba(15,10,5,.85)'; g.strokeText('Your last grave', gx, gy + 20 * dpr); g.fillStyle = '#d8d0c0'; g.fillText('Your last grave', gx, gy + 20 * dpr); } }
   (P.pins || []).forEach(pn => { const [sx, sy] = toS(pn.x, pn.y), [ic, col] = PIN_ICONS[pn.icon]; g.fillStyle = 'rgba(15,10,5,.8)'; circ(g, sx, sy, 11 * dpr); g.fillStyle = col; g.font = `bold ${14 * dpr}px Georgia`; g.fillText(ic, sx, sy + 5 * dpr); if (pn.text && mapView.z >= 2.2) { g.font = `italic ${11 * dpr}px 'EB Garamond', Georgia, serif`; g.lineWidth = 3 * dpr; g.strokeStyle = 'rgba(15,10,5,.85)'; g.strokeText(pn.text, sx, sy + 22 * dpr); g.fillStyle = '#f5e6bd'; g.fillText(pn.text, sx, sy + 22 * dpr); } });
   if (MAPF.player) { const [sx, sy] = toS(P.x, P.y); const pulse = 1 + Math.sin(performance.now() / 250) * .2; g.fillStyle = 'rgba(255,255,255,.25)'; circ(g, sx, sy, 14 * dpr * pulse); g.save(); g.translate(sx, sy); g.rotate(P.face); g.fillStyle = '#fff'; g.strokeStyle = '#000'; g.lineWidth = 2 * dpr; g.beginPath(); g.moveTo(11 * dpr, 0); g.lineTo(-7 * dpr, -7 * dpr); g.lineTo(-3 * dpr, 0); g.lineTo(-7 * dpr, 7 * dpr); g.closePath(); g.fill(); g.stroke(); g.restore(); }
@@ -7345,6 +7492,8 @@ function renderWorld(t) {
   g.lineWidth = 2;
   for (const p of projs) {
     const a = Math.atan2(p.vy, p.vx) || p.a || 0; if (!p.stuck) p.a = a; const aa = p.stuck ? p.a : a, ca = Math.cos(aa), sa = Math.sin(aa);
+    if (p.fireBreath) { g.fillStyle = 'rgba(255,170,60,.85)'; circ(g, p.x, p.y, 5.5); g.fillStyle = 'rgba(255,90,20,.4)'; circ(g, p.x - ca * 8, p.y - sa * 8, 8); continue; }
+    if (p.rock) { g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, p.x + 4, p.y + 14, 9, 4); g.fillStyle = '#7a7268'; circ(g, p.x, p.y, 9); g.fillStyle = '#9a9288'; circ(g, p.x - 3, p.y - 3, 4); continue; }
     if (p.breath) { g.fillStyle = 'rgba(200,240,255,.75)'; circ(g, p.x, p.y, 5); g.fillStyle = 'rgba(140,210,255,.35)'; circ(g, p.x - ca * 8, p.y - sa * 8, 7); continue; }
     if (p.bolt) { g.strokeStyle = '#4a3a2a'; g.lineWidth = 3; g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(p.x - ca * 10, p.y - sa * 10); g.stroke(); g.lineWidth = 2; continue; }
     g.strokeStyle = p.pierce > 0 ? '#e8f4ff' : '#d8c8a0'; g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(p.x - ca * 14, p.y - sa * 14); g.stroke(); g.fillStyle = '#eee'; g.fillRect(p.x - ca * 14 - 1, p.y - sa * 14 - 1, 3, 3);
@@ -7427,7 +7576,7 @@ function updateHUD(force) {
   $('xpFill').style.transform = `scaleX(${P.xp / xpNeed(P.lvl)})`;
   setIf('lvl', P.lvl, v => $('hudLvl').textContent = v);
   setIf('gold', P.gold, v => $('goldText').textContent = fmt(v));
-  if (STORY) {
+  if (true) {
     let boss = null, bd = 760; for (const e of ents) if (e.boss && !e.dead && playerHostileTo(e)) { const d = dist(P.x, P.y, e.x, e.y); if (d < bd) { bd = d; boss = e; } }
     setIf('boss', boss ? boss.id : 0, () => { $('bossBar').classList.toggle('hidden', !boss); if (boss) $('bbN').textContent = boss.name.toUpperCase(); });
     if (boss) $('bbF').style.transform = `scaleX(${clamp(boss.hp / boss.maxHp, 0, 1)})`;
@@ -7810,7 +7959,7 @@ function resetState() {
   ents = []; pickups = []; projs = []; parts = []; texts = []; horseEnt = null; uidCounter = 1; nextEid = 1;
   W.places.forEach(p => { p.disc = false; p.rumor = false; p.spawned = false; p.dead = []; p.cleared = false; p.chestOpened = false; p.clearedAt = 0; p.offers = null; p.request = false; p.blessed = false; p.investigated = false; p.rumorUsed = false; p.backerRevealed = false; p.wellT = -999; p.sboss = null; p.ddead = null; p.dchests = null; p.dcleared = false; p.legendTaken = false; if (p.type === 'outpost') p.owner = p.baseOwner; for (const k in p) if (k.startsWith('_shop_')) delete p[k]; });
   (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false; G.lastPay = null; G.siege = null; G.tourney = null; G.stats = newStats(); G.tut = null;
-  G.bounty = [0, 0, 0, 0]; G.contest = null; G.festival = null;
+  G.bounty = [0, 0, 0, 0]; G.contest = null; G.festival = null; G.wboss = null; G.wbossNext = 0; G.wbossCount = 0; G.enc = null; G.encT = null;
   Object.assign(G, { time: 0, dipT: 0, eventT: 50, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, questT: 0 });
   newKingdoms(); newQuests(); newFog();
 }
@@ -7854,7 +8003,7 @@ function saveGame(silent, quiet) {
   const qStrip = q => { const c = Object.assign({}, q); delete c.ent; delete c.foes; return c; };
   const data = {
     v: 1, seed: W.seed, time: G.time, kills: G.kills, uid: uidCounter, waypoint: G.mapWaypoint, savedAt: Date.now(),
-    P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, skills: P.skills, sp: P.sp, comps: P.comps, houses: P.houses, stash: P.stash, forts: P.forts, fortGuards: P.fortGuards, fief: P.fief || null, pins: P.pins || [], grave: P.grave || null, trophies: P.trophies || [], guild: P.guild || null,
+    P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, skills: P.skills, sp: P.sp, comps: P.comps, houses: P.houses, stash: P.stash, forts: P.forts, fortGuards: P.fortGuards, fief: P.fief || null, pins: P.pins || [], grave: P.grave || null, trophies: P.trophies || [], guild: P.guild || null, nemesis: P.nemesis || null,
       party: partyNow().filter(e => !e.comp || true).map(e => ({ comp: e.comp, kind: e.kind, name: e.name, hp: Math.round(Math.max(1, e.hp)), k: e.k })), mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
     horse: horseEnt ? { x: horseEnt.x, y: horseEnt.y } : null,
     K: { rel: K.rel, aff: K.aff, rep: K.rep, mil: K.mil, reasons: K.reasons, events: K.events, kev: K.kev, repWhy: K.repWhy, gifts: K.gifts, log: K.log, cd: {} },
@@ -7863,7 +8012,7 @@ function saveGame(silent, quiet) {
     exp: packBits(EXP),
   };
   data.opts = G.opts || normOpts(); data.stats = G.stats; data.tut = G.tut && !G.tut.done ? G.tut.step : null;
-  data.mode = G.mode; data.slot = G.slot || 1; data.bounty = G.bounty || [0, 0, 0, 0]; if (G.mode === 'story') data.story = STORY;
+  data.mode = G.mode; data.slot = G.slot || 1; data.bounty = G.bounty || [0, 0, 0, 0]; data.wboss = G.wboss || null; data.wbossNext = G.wbossNext || 0; data.wbossCount = G.wbossCount || 0; if (G.mode === 'story') data.story = STORY;
   if (WIPED) return;
   try { localStorage.setItem(saveKey(), JSON.stringify(data)); if (quiet) { } else if (!silent) { toast(`Game saved to slot ${G.slot || 1}.`, 'good'); SND.play('pickup'); } else toast('Autosaved.', ''); }
   catch (e) { toast('Could not save: browser storage is unavailable or full.', 'bad'); }
@@ -7873,7 +8022,7 @@ function loadGame(d) {
   newPlayer();
   Object.assign(P, d.P); P.inv = d.P.inv; P.eq = d.P.eq; P.mounted = false; uidCounter = d.uid || (Math.max(0, ...P.inv.map(i => i.uid)) + 1);
   recalc();
-  G.bounty = d.bounty || [0, 0, 0, 0]; G.contest = null; G.festival = null;
+  G.bounty = d.bounty || [0, 0, 0, 0]; G.contest = null; G.festival = null; G.wboss = d.wboss || null; G.wbossNext = d.wbossNext || 0; G.wbossCount = d.wbossCount || 0; G.enc = null;
   G.time = d.time || 0; G.kills = d.kills || 0; G.mapWaypoint = d.waypoint || null; G.stats = Object.assign(newStats(), d.stats || {});
   Object.assign(K, d.K); K.cd = {};
   Q.active = d.Q.active || []; Q.done = d.Q.done || []; Q.tracked = d.Q.tracked; Q.next = d.Q.next || 1;
@@ -9473,7 +9622,7 @@ function update(dt) {
   }
   if ((G.dipT += dt) >= 40) { G.dipT = 0; dipTick(); }
   const dnow = dayNum(); if (G.lastPay == null) G.lastPay = dnow; else if (dnow !== G.lastPay) { G.lastPay = dnow; dailyTick(); }
-  if ((G.lawT = (G.lawT || 0) - dt) <= 0) { G.lawT = .25; thiefTick(); if ((G.law2 = (G.law2 || 0) - 1) <= 0) { G.law2 = 4; lawTick(); cityTick(); guildTick(); festivalTick(); if (G.bounty) G.bounty = G.bounty.map(v => v > 1 ? v * Math.pow(.9, 1 / (DAYLEN / 1)) : 0); } }
+  if ((G.lawT = (G.lawT || 0) - dt) <= 0) { G.lawT = .25; thiefTick(); if ((G.law2 = (G.law2 || 0) - 1) <= 0) { G.law2 = 4; lawTick(); cityTick(); guildTick(); festivalTick(); encounterTick(); wbossTick(1); if (G.bounty) G.bounty = G.bounty.map(v => v > 1 ? v * Math.pow(.9, 1 / (DAYLEN / 1)) : 0); } }
   contestTick(dt);
   if ((G.eventT -= dt) <= 0) { G.eventT = rand(60, 115); if (!G.under && !G.tut) worldEvent(); } // no raids or ambushes mid-lesson
   if ((G.autosaveT += dt) >= 180) { G.autosaveT = 0; saveGame(true); }
