@@ -91,6 +91,19 @@ b,strong{font-weight:600}
 .skRank{font-size:12.5px;color:var(--muted);line-height:1.35}.skRank.done{color:var(--ink)}.skRank.next{color:#e7c35a}
 .skCol .btn{margin-top:auto}
 @media (max-width:760px){.skGrid{grid-template-columns:1fr 1fr}}
+#pinEdit{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:260px;padding:10px;display:flex;flex-direction:column;gap:8px;z-index:3}
+#pinEdit.hidden{display:none}
+.pinIcons{display:flex;gap:6px;justify-content:center}.pinIcons span{width:30px;height:30px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;border:1px solid #6b5230;background:rgba(0,0,0,.35)}.pinIcons span.on{border-color:#e7c35a;box-shadow:0 0 8px rgba(231,195,90,.5)}
+#pinText{background:#1a130c;border:1px solid #6b5230;color:var(--ink);padding:6px 8px;border-radius:4px;font:15px 'EB Garamond',Georgia,serif}
+.pinBtns{display:flex;gap:6px;justify-content:center}
+#mapPins div{cursor:pointer}#mapPins div:hover{color:var(--gold-l)}
+.padFocus{outline:2px solid #e7c35a!important;outline-offset:2px}
+.achGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;max-height:calc(80vh/var(--ui-scale) - 150px);overflow-y:auto;padding-right:6px}
+.ach{display:flex;gap:10px;align-items:center;padding:8px;border-radius:6px;background:rgba(0,0,0,.25);border:1px solid rgba(160,122,58,.3)}
+.ach .ai{font-size:22px;width:32px;text-align:center}.ach b{font-family:var(--fh);font-size:12.5px;color:var(--gold-l);display:block}.ach span{font-size:12.5px;color:var(--ink2)}
+.ach.locked{opacity:.45;filter:grayscale(1)}
+.statT{width:100%;border-collapse:collapse;font-size:15px}.statT td{padding:5px 8px;border-bottom:1px solid rgba(160,122,58,.2)}.statT td:last-child{text-align:right;color:var(--gold-l)}
+#achScreen .panel,#statScreen .panel{width:min(760px,94vw)}
 .slot.mounted{border-color:var(--gold);box-shadow:0 0 10px rgba(216,178,90,.35)}
 #hudBR{position:absolute;right:12px;bottom:12px;padding:7px 10px;font-size:11.5px;color:var(--ink2);line-height:1.65;pointer-events:auto}
 #hudBR .hk{display:grid;grid-template-columns:auto auto;gap:0 10px}
@@ -470,6 +483,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
           <button class="btn" id="btnNew">New Game</button>
           <button class="btn" id="btnMenuSettings">Settings</button>
           <button class="btn" id="btnHow">How to Play</button>
+          <button class="btn" id="btnAch">Achievements</button>
         </div>
       </div>
       <div class="credit">Progress saves to this browser</div>
@@ -530,6 +544,9 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <button class="btn" data-act="map">Map</button>
         <button class="btn" data-act="dip">Diplomacy</button>
         <button class="btn" data-act="quests">Quests</button>
+        <button class="btn" data-act="skills">Skills</button>
+        <button class="btn" data-act="stats">Your Journey</button>
+        <button class="btn" data-act="ach">Achievements</button>
         <button class="btn" data-act="settings">Settings</button>
         <button class="btn" data-act="save">Save Game</button>
         <button class="btn red" data-act="main">Main Menu</button>
@@ -577,13 +594,15 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div class="ptitle" style="font-size:26px">MAP OF THE REALMS</div>
       <div class="orn" style="margin-bottom:8px">✦</div>
       <div class="mapBody">
-        <div class="mapWrap"><canvas id="bigMap"></canvas><div id="mapInfo" class="hudbox hidden"></div><div class="mapHint">Drag to pan · Wheel to zoom · Click a place for details · Right-click to set a waypoint</div></div>
+        <div class="mapWrap"><canvas id="bigMap"></canvas><div id="mapInfo" class="hudbox hidden"></div><div id="pinEdit" class="hudbox hidden"><div class="pinIcons" id="pinIcons"></div><input id="pinText" maxlength="60" placeholder="Write a note…" autocomplete="off"><div class="pinBtns"><button class="btn sm gold" id="pinSave">Pin it</button><button class="btn sm red" id="pinDel">Delete</button><button class="btn sm" id="pinCancel">Cancel</button></div></div><div class="mapHint">Drag to pan · Wheel to zoom · Click a place for details · Right-click: waypoint · Shift+right-click: pin a note</div></div>
         <div class="mapSide">
           <h4>LAYERS</h4>
           <div id="mapToggles"></div>
           <button class="btn sm" id="mapCenter" style="margin-top:6px">Center on Me</button>
           <h4 style="margin-top:10px">LEGEND</h4>
           <div class="legend" id="mapLegend"></div>
+          <h4 style="margin-top:10px">YOUR PINS</h4>
+          <div class="legend" id="mapPins"></div>
           <h4 style="margin-top:10px">EXPLORED</h4>
           <div class="legend" id="mapExplored"></div>
         </div>
@@ -668,6 +687,25 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <div class="shopCol"><h3>YOUR GOODS</h3><div class="shopList" id="shopSell"></div></div>
       </div>
       <div class="shopFoot"><span id="shopNote"></span><span class="goldbox" style="padding:0"><span class="coin"></span><span id="shopGold"></span></span></div>
+    </div>
+  </div>
+
+  <!-- ACHIEVEMENTS & STATISTICS -->
+  <div id="achScreen" class="screen">
+    <div class="panel rv">
+      <div class="closeX" data-close>✕</div>
+      <div class="ptitle">ACHIEVEMENTS</div>
+      <div class="orn">✦</div>
+      <div class="psub" id="achSub"></div>
+      <div class="achGrid" id="achBody"></div>
+    </div>
+  </div>
+  <div id="statScreen" class="screen">
+    <div class="panel rv">
+      <div class="closeX" data-close>✕</div>
+      <div class="ptitle">YOUR JOURNEY</div>
+      <div class="orn">✦</div>
+      <div id="statBody"></div>
     </div>
   </div>
 
@@ -2222,7 +2260,7 @@ function loose() {
   const storm = S.ench === 'storm' && d >= 1, pierce = P.pierceNext ? 3 : storm || (SK('archery') >= 4 && d >= 1) ? 2 : 0, v = spd * (storm ? 1.15 : 1); P.pierceNext = false;
   projs.push({ x: P.x + Math.cos(a) * 16, y: P.y + Math.sin(a) * 16, vx: Math.cos(a) * v, vy: Math.sin(a) * v, dmg, crit, src: P, life: S.rng * (.45 + .55 * d) * wxRange() / spd, arrow: id, frost: S.frost, force: input.force, pierce });
   P.atkCd = .2; P.st -= S.shotCost * DIFF().stCost; P.stDelay = .6;
-  SND.play('bowshot'); if (id === 'fire_arrow') SND.play('ignite');
+  SND.play('bowshot'); if (id === 'fire_arrow') SND.play('ignite'); G.stats.arrows++;
 }
 function doPlayerHit() {
   const S = P.S; const reach = S.rng + (P.mounted ? 10 : 0); let hits = 0;
@@ -2239,7 +2277,7 @@ function doPlayerHit() {
 }
 function updatePlayer(dt) {
   P.flash -= dt; P.iframes -= dt; P.atkCd -= dt;
-  P.face = Math.atan2(input.wy - P.y, input.wx - P.x);
+  P.face = PAD.on && PAD.aim != null ? PAD.aim : Math.atan2(input.wy - P.y, input.wx - P.x);
   let mx = (input.keys.KeyD ? 1 : 0) - (input.keys.KeyA ? 1 : 0), my = (input.keys.KeyS ? 1 : 0) - (input.keys.KeyW ? 1 : 0);
   const ml = Math.hypot(mx, my); if (ml) { mx /= ml; my /= ml; }
   const t = terAtPx(P.x, P.y); let spd = 150 * (TINFO[t].spd || 1);
@@ -2264,7 +2302,7 @@ function updatePlayer(dt) {
   if (P.dodge > 0) { P.dodge -= dt; const ds = P.mounted ? 150 : 110; vx = P.dodgeX * ds; vy = P.dodgeY * ds; }
   if (P.kbx || P.kby) { vx += P.kbx; vy += P.kby; P.kbx *= Math.pow(.002, dt); P.kby *= Math.pow(.002, dt); if (Math.abs(P.kbx) + Math.abs(P.kby) < 4) P.kbx = P.kby = 0; }
   const ox = P.x, oy = P.y; moveEnt(P, vx * dt, vy * dt);
-  const moved = Math.hypot(P.x - ox, P.y - oy);
+  const moved = Math.hypot(P.x - ox, P.y - oy); if (G.stats) G.stats.dist += moved;
   if (moved > .1) { P.walk += moved * .09; if (P.mounted) P.hface = turnToward(P.hface, Math.atan2(P.y - oy, P.x - ox), dt * 7); }
   P.stepT -= moved; if (P.stepT < 0) { P.stepT = P.mounted ? 38 : 44; SND.play(P.mounted ? 'hoof' : t === T.TUNDRA ? 'crunch' : 'step', P.mounted ? .8 : 1); }
   if (P.sprinting) { P.st = Math.max(0, P.st - 16 * DIFF().stCost * dt); P.stDelay = .5; }
@@ -2282,7 +2320,7 @@ function updatePlayer(dt) {
 }
 function playerDie() {
   if (G.state === 'dead') return;
-  P.hp = 0; G.state = 'dead'; SND.play('death'); addShake(12);
+  P.hp = 0; G.state = 'dead'; SND.play('death'); addShake(12); G.stats.deaths++;
   for (let i = 0; i < 30; i++) addPart(P.x, P.y, rand(-150, 150), rand(-150, 150), '#8a1a12', rand(.5, 1.2), 3);
   const iron = DIFF().ironman;
   if (iron) { G.ironDead = true; try { localStorage.removeItem(saveKey()); } catch (e) { } }
@@ -2409,6 +2447,7 @@ function damage(t, amt, src, o = {}) {
   }
   if (t.important || t.kind === 'horse') return 0;
   const wasHostile = src === P ? playerHostileTo(t) : true;
+  if (src === P) t.lastHitProj = !!o.proj;
   if (src && src.party) amt *= 1 + .08 * (SK('lead') >= 3 ? 3 : SK('lead') >= 1 ? 1 : 0);
   if (t.guard && src && !o.dot && !o.heavy && !(t.guardBroken > 0) && !(t.stun > 0) && o.arrow !== 'bodkin' && Math.abs(angDiff(t.face, Math.atan2(src.y - t.y, src.x - t.x))) < 1.1) {
     amt *= .3; SND.play('block', .7); if (settings.dmgNums) addText(t.x, t.y - 40, 'Blocked', '#d8d0b8', 12); // hit them from the side, from behind, or with a heavy blow
@@ -2451,7 +2490,7 @@ function kill(t, src) {
   SND.play(t.faction === 'hollow' ? 'bones' : 'death');
   for (let i = 0; i < 14 * QMUL(); i++) addPart(t.x, t.y, rand(-140, 140), rand(-160, 40), '#8a1a12', rand(.4, .9), 3, 260);
   const byP = src === P || (src && src.ally);
-  if (byP) { gainXP(t.xp); G.kills++; }
+  if (byP) { gainXP(t.xp); G.kills++; G.stats.kills[t.kind] = (G.stats.kills[t.kind] || 0) + 1; if (t.lastHitProj) G.stats.bowKills++; }
   // loot
   const b = ATYPES[t.kind];
   if (b && b.gold && b.gold[1] > 0 && !t.civ) { const g = Math.round(randi(b.gold[0], b.gold[1]) * (t.tier ? 1 + (t.tier - 1) * .6 : 1)); dropGold(t.x, t.y, g); }
@@ -2488,7 +2527,7 @@ function checkPlaceCleared(pl) {
   const specs = placeSpecs(pl); if (!specs.length) return;
   if (!specs.every((s, i) => pl.dead[i])) return;
   if (pl.type === 'camp' && !pl.cleared) {
-    pl.cleared = true; pl.clearedAt = G.time; SND.play('quest');
+    pl.cleared = true; pl.clearedAt = G.time; SND.play('quest'); G.stats.camps++;
     toast(`<b>${pl.name} cleared!</b> Search the camp's stash for loot.`, 'gold');
     gainXP(pl.tier * 35);
     addRep(pl.owner, 6 + pl.tier * 2, 'Cleared bandits from their lands');
@@ -3408,7 +3447,7 @@ function openEnchant(mat) {
   }
   const list = P.inv.filter(it => ITEMS[it.id].type === 'weapon' && ITEMS[it.id].wk !== 'bow' && !it.ench && !ITEMS[it.id].ench).sort((a, b) => isEquipped(b.uid) - isEquipped(a.uid)).slice(0, 8);
   openDialog({ name: 'The Royal Forge', role: `Bind the ${ITEMS[mat].name}`, portrait: curShopE || 'sign', text: list.length ? 'Choose the blade.' : 'You have no melee weapon that could hold the enchantment.',
-    options: [...list.map(it => ({ t: `${itemName(it)} <span class="dn">500g</span>`, dis: P.gold < 500, fn: () => { P.gold -= 500; removeItemById(mat, 1); it.ench = MATS[mat]; recalc(); SND.play('shard'); toast(`Your blade is now <b style="color:${itemColor(it)}">${itemName(it)}</b>.`, 'gold'); openCraft(true); } })), { t: 'Back', fn: () => openEnchant() }] });
+    options: [...list.map(it => ({ t: `${itemName(it)} <span class="dn">500g</span>`, dis: P.gold < 500, fn: () => { P.gold -= 500; removeItemById(mat, 1); it.ench = MATS[mat]; recalc(); SND.play('shard'); G.stats.enchants++; toast(`Your blade is now <b style="color:${itemColor(it)}">${itemName(it)}</b>.`, 'gold'); openCraft(true); } })), { t: 'Back', fn: () => openEnchant() }] });
 }
 function getShop(e) {
   if (e.shop && G.time - e.shop.t < 300) return e.shop;
@@ -3816,6 +3855,7 @@ function endSiege(taken) {
   }
   if (taken) { o.owner = S.att; if (o.spawned) despawnPlace(o); K.mil[S.def] -= 150; const txt = `${KDATA[S.att].name} stormed ${o.name} and took it from ${KDATA[S.def].name}!`; pairEvent(S.att, S.def, txt); toast('⚔ ' + txt, 'war', bannerURL(S.att)); }
   else { K.mil[S.att] -= 120; const txt = `${o.name} held against ${KDATA[S.att].name}'s assault.`; pairEvent(S.att, S.def, txt); toast('🛡 ' + txt, 'good', bannerURL(S.def)); }
+  if (S.pk.att + S.pk.def >= 2) G.stats.sieges++;
   if (S.pk.att >= 2) { addRep(S.def, 8, `Defended ${o.name}`); gainXP(60); }
   if (S.pk.def >= 2) { addRep(S.att, 8, `Helped storm ${o.name}`); gainXP(60); }
 }
@@ -3897,7 +3937,7 @@ function reelIn() {
   const F = G.fishing; G.fishing = null; if (!F) return;
   if (F.st !== 'bite') { toast('Too soon! You scared the fish away.'); return; }
   const r = Math.random(), id = r < .02 ? 'golden_carp' : r < .25 ? 'salmon' : 'fish';
-  addItem(id, 1, 1); SND.play('splash'); if (G.stats) G.stats.fish = (G.stats.fish || 0) + 1;
+  addItem(id, 1, 1); SND.play('splash'); G.stats.fish++; if (id === 'golden_carp') G.stats.carp++;
   for (let i = 0; i < 10; i++) addPart(F.bx, F.by, rand(-60, 60), rand(-80, -20), i % 2 ? '#cfe4f4' : '#ffffff', .5, 2.5, 200);
 }
 /* ---------------- Hermits ---------------- */
@@ -5012,13 +5052,13 @@ function drawMinimap() {
    ===================================================================== */
 const UI = {
   stack: [],
-  ids: { skills: 'skillScreen', mode: 'modeScreen', cont: 'contScreen', pause: 'pauseScreen', inv: 'invScreen', map: 'mapScreen', dip: 'dipScreen', quests: 'questScreen', settings: 'settingsScreen', help: 'helpScreen', shop: 'shopScreen' },
+  ids: { ach: 'achScreen', stats: 'statScreen', skills: 'skillScreen', mode: 'modeScreen', cont: 'contScreen', pause: 'pauseScreen', inv: 'invScreen', map: 'mapScreen', dip: 'dipScreen', quests: 'questScreen', settings: 'settingsScreen', help: 'helpScreen', shop: 'shopScreen' },
   open(n) {
     if (dialogOpen) closeDialog();
     if (this.isOpen(n)) return;
     if (n !== 'settings' && n !== 'help') this.closeAll();
     this.stack.push(n); $(this.ids[n]).classList.add('show'); SND.play('open');
-    if (n === 'inv') renderInventory(); else if (n === 'skills') renderSkills(); else if (n === 'map') openMap(); else if (n === 'dip') renderDiplomacy(); else if (n === 'quests') renderQuests(); else if (n === 'settings') renderSettings(); else if (n === 'pause') $('quitConfirm').classList.add('hidden');
+    if (n === 'inv') renderInventory(); else if (n === 'skills') renderSkills(); else if (n === 'ach') renderAch(); else if (n === 'stats') renderStats(); else if (n === 'map') openMap(); else if (n === 'dip') renderDiplomacy(); else if (n === 'quests') renderQuests(); else if (n === 'settings') renderSettings(); else if (n === 'pause') $('quitConfirm').classList.add('hidden');
     tipHide();
   },
   close() { const n = this.stack.pop(); if (n) { $(this.ids[n]).classList.remove('show'); SND.play('close'); } tipHide(); },
@@ -5141,7 +5181,24 @@ function drawDoll() {
 const MAPF = { borders: true, castles: true, villages: true, camps: true, other: true, roads: true, mountains: true, rivers: true, player: true, quests: true };
 const MAPF_N = { borders: 'Kingdom Borders', castles: 'Castles', villages: 'Villages', camps: 'Bandit Camps', other: 'Forts, Ruins & Secrets', roads: 'Roads', mountains: 'Mountains', rivers: 'Rivers & Lakes', player: 'Player Location', quests: 'Quest Markers' };
 const mapView = { cx: 180, cy: 180, z: 2.5, drag: null, sel: null };
+const PIN_ICONS = [['★', '#ffd24a'], ['⚔', '#ff7a5a'], ['✚', '#8fe07a'], ['⌂', '#e8dcb8'], ['⚑', '#6ad0ff'], ['?', '#c890ff']];
+let pinSel = null, pinIcon = 0;
+function renderPinList() {
+  const pins = P.pins || [];
+  $('mapPins').innerHTML = pins.length ? pins.map((pn, i) => `<div data-pin="${i}"><span style="color:${PIN_ICONS[pn.icon][1]}">${PIN_ICONS[pn.icon][0]}</span> ${esc(pn.text || 'Pin')}</div>`).join('') : '<div style="color:var(--muted)">Shift+right-click the map to pin a note.</div>';
+  $('mapPins').querySelectorAll('[data-pin]').forEach(el => el.onclick = () => { const pn = pins[+el.dataset.pin]; mapView.cx = pn.x / TS; mapView.cy = pn.y / TS; });
+}
+function editPin(pin, x, y) {
+  pinSel = pin || { x, y, icon: 0, text: '' }; pinIcon = pinSel.icon;
+  $('pinIcons').innerHTML = PIN_ICONS.map(([c, col], i) => `<span data-pi="${i}" class="${i === pinIcon ? 'on' : ''}" style="color:${col}">${c}</span>`).join('');
+  $('pinIcons').querySelectorAll('[data-pi]').forEach(el => el.onclick = () => { pinIcon = +el.dataset.pi; $('pinIcons').querySelectorAll('span').forEach(x => x.classList.toggle('on', +x.dataset.pi === pinIcon)); });
+  $('pinText').value = pinSel.text; $('pinDel').classList.toggle('hidden', !pin); $('pinEdit').classList.remove('hidden'); setTimeout(() => $('pinText').focus(), 30);
+}
+$('pinSave').onclick = () => { if (!pinSel) return; P.pins = P.pins || []; pinSel.icon = pinIcon; pinSel.text = $('pinText').value.trim(); if (!P.pins.includes(pinSel)) P.pins.push(pinSel); pinSel = null; $('pinEdit').classList.add('hidden'); $('pinText').blur(); renderPinList(); SND.play('pickup'); };
+$('pinDel').onclick = () => { P.pins = (P.pins || []).filter(x => x !== pinSel); pinSel = null; $('pinEdit').classList.add('hidden'); $('pinText').blur(); renderPinList(); };
+$('pinCancel').onclick = () => { pinSel = null; $('pinEdit').classList.add('hidden'); $('pinText').blur(); };
 function openMap() {
+  renderPinList(); $('pinEdit').classList.add('hidden');
   const tg = $('mapToggles');
   tg.innerHTML = Object.keys(MAPF).map(k => `<div class="tog ${MAPF[k] ? 'on' : ''}" data-f="${k}"><span class="box"></span>${MAPF_N[k]}</div>`).join('');
   tg.querySelectorAll('.tog').forEach(el => el.onclick = () => { MAPF[el.dataset.f] = !MAPF[el.dataset.f]; el.classList.toggle('on', MAPF[el.dataset.f]); });
@@ -5176,6 +5233,7 @@ function drawBigMap() {
   }
   if (MAPF.quests) Q.active.forEach(q => { const t = questTarget(q); if (!t) return; const [sx, sy] = toS(t.x, t.y); if (t.r) { g.strokeStyle = 'rgba(255,210,74,.8)'; g.setLineDash([6 * dpr, 5 * dpr]); g.lineWidth = 2 * dpr; g.beginPath(); g.arc(sx, sy, t.r / TS * z, 0, TAU); g.stroke(); g.setLineDash([]); } g.save(); g.translate(sx, sy); g.rotate(Math.PI / 4); g.fillStyle = Q.tracked === q.id ? '#ffd24a' : '#c8a040'; g.fillRect(-6 * dpr, -6 * dpr, 12 * dpr, 12 * dpr); g.strokeStyle = '#000'; g.lineWidth = 1.5 * dpr; g.strokeRect(-6 * dpr, -6 * dpr, 12 * dpr, 12 * dpr); g.restore(); });
   if (G.mapWaypoint) { const [sx, sy] = toS(G.mapWaypoint.x, G.mapWaypoint.y); g.strokeStyle = '#6ad0ff'; g.lineWidth = 3 * dpr; g.beginPath(); g.arc(sx, sy, 8 * dpr, 0, TAU); g.stroke(); g.beginPath(); g.moveTo(sx, sy - 14 * dpr); g.lineTo(sx, sy + 14 * dpr); g.moveTo(sx - 14 * dpr, sy); g.lineTo(sx + 14 * dpr, sy); g.stroke(); }
+  (P.pins || []).forEach(pn => { const [sx, sy] = toS(pn.x, pn.y), [ic, col] = PIN_ICONS[pn.icon]; g.fillStyle = 'rgba(15,10,5,.8)'; circ(g, sx, sy, 11 * dpr); g.fillStyle = col; g.font = `bold ${14 * dpr}px Georgia`; g.fillText(ic, sx, sy + 5 * dpr); if (pn.text && mapView.z >= 2.2) { g.font = `italic ${11 * dpr}px 'EB Garamond', Georgia, serif`; g.lineWidth = 3 * dpr; g.strokeStyle = 'rgba(15,10,5,.85)'; g.strokeText(pn.text, sx, sy + 22 * dpr); g.fillStyle = '#f5e6bd'; g.fillText(pn.text, sx, sy + 22 * dpr); } });
   if (MAPF.player) { const [sx, sy] = toS(P.x, P.y); const pulse = 1 + Math.sin(performance.now() / 250) * .2; g.fillStyle = 'rgba(255,255,255,.25)'; circ(g, sx, sy, 14 * dpr * pulse); g.save(); g.translate(sx, sy); g.rotate(P.face); g.fillStyle = '#fff'; g.strokeStyle = '#000'; g.lineWidth = 2 * dpr; g.beginPath(); g.moveTo(11 * dpr, 0); g.lineTo(-7 * dpr, -7 * dpr); g.lineTo(-3 * dpr, 0); g.lineTo(-7 * dpr, 7 * dpr); g.closePath(); g.fill(); g.stroke(); g.restore(); }
   // compass
   g.save(); g.translate(w - 44 * dpr, 44 * dpr); g.fillStyle = 'rgba(20,14,8,.7)'; circ(g, 0, 0, 30 * dpr); g.fillStyle = '#d8b25a'; g.beginPath(); g.moveTo(0, -24 * dpr); g.lineTo(6 * dpr, 0); g.lineTo(0, 24 * dpr); g.lineTo(-6 * dpr, 0); g.fill(); g.fillStyle = '#f5e6bd'; g.font = `bold ${11 * dpr}px Cinzel,Georgia`; g.fillText('N', 0, -30 * dpr + 2); g.restore();
@@ -5188,6 +5246,9 @@ function drawBigMap() {
     const d = mapView.drag; if (!d) return; mapView.drag = null; c.classList.remove('drag');
     if (moved > 6) return;
     const r = c.getBoundingClientRect(); const tx = mapView.cx + (e.clientX - r.left - r.width / 2) / mapView.z, ty = mapView.cy + (e.clientY - r.top - r.height / 2) / mapView.z;
+    const nearPin = (P.pins || []).find(pn => dist(pn.x / TS, pn.y / TS, tx, ty) < 10 / mapView.z);
+    if (d.b === 2 && (e.shiftKey || nearPin)) { editPin(nearPin, tx * TS, ty * TS); return; }
+    if (d.b === 0 && nearPin) { editPin(nearPin); return; }
     if (d.b === 2) { if (G.mapWaypoint && dist(G.mapWaypoint.x / TS, G.mapWaypoint.y / TS, tx, ty) < 8 / mapView.z * 3) { G.mapWaypoint = null; toast('Waypoint removed.'); } else { G.mapWaypoint = { x: tx * TS, y: ty * TS }; toast('Waypoint set.'); } return; }
     let best = null, bd = 14 / mapView.z; W.places.forEach(p => { if (!p.disc) return; const dd = dist(p.tx, p.ty, tx, ty); if (dd < bd) { bd = dd; best = p; } });
     mapView.sel = best; const mi = $('mapInfo');
@@ -5635,11 +5696,80 @@ function updateHUD(force) {
     if (G.fishing) pr = G.fishing.st === 'bite' ? '<span style="color:#ffe08a">A bite! </span><kbd>E</kbd> Reel in!' : 'Fishing… wait for a bite, then press <kbd>E</kbd>';
     if (input.force) pr = '<span style="color:#ff9a7a">⚠ Holding Q: your attacks will hit friendly and neutral characters</span>' + (pr ? ' &nbsp; ' + pr : '');
   }
+  if (PAD.on) pr = pr.replace(/<kbd>E<\/kbd>/g, '<kbd>X</kbd>').replace(/<kbd>F<\/kbd>/g, '<kbd>B</kbd>');
+  setIf('hk', PAD.on, on => { const el = document.querySelector('#hud .hk'); if (!PAD.hk) PAD.hk = el.innerHTML; el.innerHTML = on ? PAD_HK : PAD.hk; });
   setIf('pr', pr, v => { $('prompt').innerHTML = v; $('prompt').classList.toggle('show', !!v); });
 }
 
+/* ---------------- Statistics and achievements ---------------- */
+const newStats = () => ({ play: 0, dist: 0, kills: {}, arrows: 0, bowKills: 0, maxGold: 0, deaths: 0, dungeons: 0, fish: 0, carp: 0, camps: 0, tourneys: 0, sieges: 0, enchants: 0 });
+const legendsOwned = () => ['oathkeeper', ...LEGENDS].filter(id => countItem(id) || (P.stash || []).some(i => i.id === id)).length;
+const ACH = [
+  ['first_blood', '⚔', 'First Blood', 'Defeat your first foe', () => G.kills >= 1], ['slayer', '⚔', 'Slayer', 'Defeat 100 foes', () => G.kills >= 100], ['legend500', '☠', 'Legend of the Realm', 'Defeat 500 foes', () => G.kills >= 500],
+  ['camp1', '⛺', 'Brigand Breaker', 'Clear a bandit camp', () => G.stats.camps >= 1], ['camps10', '⛺', 'Scourge of Bandits', 'Clear 10 bandit camps', () => G.stats.camps >= 10],
+  ['hidden_all', '✦', 'Seeker of Secrets', 'Find every hidden location in a world', () => W.places.filter(p => p.type === 'hidden').every(p => p.disc)],
+  ['explorer', '🗺', 'Cartographer', 'Chart three quarters of the realms', () => !G.under && exploredPct() >= 75], ['lvl10', '★', 'Veteran', 'Reach level 10', () => P.lvl >= 10], ['lvl20', '★', 'Living Legend', 'Reach level 20', () => P.lvl >= 20],
+  ['bowkill', '🏹', "Fletcher's Pride", 'Slay a foe with an arrow', () => G.stats.bowKills >= 1], ['bow100', '🏹', 'Deadeye', 'Slay 100 foes with arrows', () => G.stats.bowKills >= 100],
+  ['fish1', '🎣', 'Patient Angler', 'Catch a fish', () => G.stats.fish >= 1], ['carp', '🐟', 'Golden Catch', 'Catch a golden carp', () => G.stats.carp >= 1],
+  ['dungeon1', '🕯', 'Delver', 'Clear a dungeon', () => G.stats.dungeons >= 1], ['dungeon_all', '🕯', 'Master of the Deep', 'Clear every dungeon in a world', () => W.places.filter(p => p.type === 'dungeon').every(p => p.dcleared)],
+  ['legend', '⚜', 'Legendary', 'Own a legendary weapon', () => legendsOwned() >= 1], ['legend_all', '⚜', 'The Armory of Legends', 'Own all six legendary weapons', () => legendsOwned() >= 6],
+  ['tourney', '🏆', 'Champion of the Lists', 'Win a tourney', () => G.stats.tourneys >= 1], ['siege', '🛡', 'Hold the Line', 'Fight a siege to its end', () => G.stats.sieges >= 1],
+  ['fief', '♛', 'Warden', 'Be granted a fief', () => !!P.fief], ['house', '⌂', 'Hearth and Home', 'Buy a house', () => (P.houses || []).length >= 1], ['fort', '♜', 'Castellan', 'Restore a ruined fort', () => (P.forts || []).length >= 1],
+  ['fellowship', '☗', 'Fellowship', 'Travel with all four companions', () => (P.comps || []).length >= 4], ['masterwork', '⚒', 'Masterwork', 'Own a masterwork weapon or armor', () => P.inv.some(i => i.q === 3 && ['weapon', 'shield', 'armor'].includes(ITEMS[i.id].type))],
+  ['enchant', '✧', 'Runesmith', 'Enchant a weapon at a royal forge', () => G.stats.enchants >= 1], ['sworn', '⚑', 'Sworn Sword', 'Swear allegiance to a crown', () => P.allegiance != null],
+  ['rich', '💰', 'Coffers Overflowing', 'Hold 10,000 gold at once', () => P.gold >= 10000], ['winter', '❄', 'Survived the Winter', 'Live to see a second spring', () => dayNum() > SEASON_DAYS * 4],
+  ['forsaken', '☠', 'Forsaken', 'Reach level 10 on Forsaken difficulty', () => DIFF().ironman && P.lvl >= 10],
+  ['endings5', '📜', 'Many Roads', 'Discover 5 story endings', () => endingsSeen() >= 5], ['endings_all', '📜', 'Every Ending', 'Discover all 15 story endings', () => endingsSeen() >= 15],
+];
+function endingsSeen() { try { return JSON.parse(localStorage.getItem('fk_endings') || '[]').length; } catch (e) { return 0; } }
+let ACHS = {}; try { ACHS = JSON.parse(localStorage.getItem('fk_ach') || '{}'); } catch (e) { }
+function checkAch() {
+  for (const [id, ic, n, , fn] of ACH) { if (ACHS[id]) continue; let ok = false; try { ok = fn(); } catch (e) { } if (!ok) continue; ACHS[id] = Date.now(); try { localStorage.setItem('fk_ach', JSON.stringify(ACHS)); } catch (e) { } toast(`${ic} <b>Achievement unlocked:</b> ${n}`, 'gold'); SND.play('level'); }
+}
+function renderAch() {
+  const n = ACH.filter(a => ACHS[a[0]]).length; $('achSub').textContent = `${n} of ${ACH.length} unlocked · shared by all your games in this browser`;
+  $('achBody').innerHTML = ACH.map(([id, ic, nm, desc]) => `<div class="ach ${ACHS[id] ? '' : 'locked'}"><div class="ai">${ic}</div><div><b>${nm}</b><span>${desc}</span></div></div>`).join('');
+}
+function statsRows() {
+  const S2 = G.stats, h = Math.floor(S2.play / 3600), m = Math.floor(S2.play / 60) % 60, kills = Object.entries(S2.kills).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, v]) => `${v} ${(ATYPES[k] ? ATYPES[k].name : k).toLowerCase()}${v > 1 ? 's' : ''}`).join(', ');
+  return [['Time on the road', `${h}h ${m}m`], ['Days survived', dayNum()], ['Distance travelled', `${fmt(Math.round(S2.dist / TS / 10))} leagues`], ['Foes slain', `${fmt(G.kills)}${kills ? ` (${kills})` : ''}`], ['Arrows loosed', fmt(S2.arrows)], ['Slain by arrow', fmt(S2.bowKills)], ['Times you fell', S2.deaths], ['Bandit camps cleared', S2.camps], ['Dungeons cleared', S2.dungeons], ['Sieges fought', S2.sieges], ['Tourneys won', S2.tourneys], ['Fish caught', S2.fish], ['Most gold held', fmt(Math.max(S2.maxGold, P.gold))], ['Level', P.lvl]];
+}
+function renderStats() { $('statBody').innerHTML = `<table class="statT">${statsRows().map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>`; }
+/* ---------------- Controller (standard gamepad mapping) ---------------- */
+const PAD = { on: false, prev: [], held: {}, aim: null, hk: null };
+const PAD_HK = '<span><kbd>LS</kbd>Move</span><span><kbd>RS</kbd>Aim</span><span><kbd>RT</kbd>Attack / draw</span><span><kbd>LT</kbd>Block</span><span><kbd>A</kbd>Dodge</span><span><kbd>X</kbd>Interact</span><span><kbd>B</kbd>Horse</span><span><kbd>Y</kbd>Swap weapon</span><span><kbd>LB</kbd>Arrows</span><span><kbd>RB</kbd>Sprint</span><span><kbd>RS</kbd>Click: special</span><span><kbd>LS</kbd>Click: companions</span><span><kbd>Back</kbd>Map</span><span><kbd>Start</kbd>Pause</span>';
+function padKey(code, on) { if (on) { input.keys[code] = true; PAD.held[code] = true; } else if (PAD.held[code]) { input.keys[code] = false; PAD.held[code] = false; } }
+function padRoot() { return dialogOpen ? $('dialog') : UI.stack.length ? $(UI.ids[UI.stack[UI.stack.length - 1]]) : document.querySelector('.screen.show') || $('mainMenu'); }
+function padNav(dir) {
+  const els = [...padRoot().querySelectorAll('button, .tab, .tog, .icard, .dOpt')].filter(el => !el.disabled && el.offsetParent !== null); if (!els.length) return;
+  const cur = document.querySelector('.padFocus'); let i = els.indexOf(cur); if (cur) cur.classList.remove('padFocus');
+  i = i < 0 ? 0 : (i + dir + els.length) % els.length; els[i].classList.add('padFocus'); els[i].scrollIntoView({ block: 'nearest' });
+}
+function pollPad() {
+  const pads = navigator.getGamepads ? navigator.getGamepads() : [], gp = [...pads].find(x => x && x.connected);
+  if (!gp) { if (PAD.on) { PAD.on = false; PAD.aim = null; Object.keys(PAD.held).forEach(k => padKey(k, false)); } return; }
+  const b = i => !!(gp.buttons[i] && gp.buttons[i].pressed), press = i => b(i) && !PAD.prev[i], dz = v => Math.abs(v) < .22 ? 0 : v;
+  const lx = dz(gp.axes[0] || 0), ly = dz(gp.axes[1] || 0), rx = dz(gp.axes[2] || 0), ry = dz(gp.axes[3] || 0);
+  if (!PAD.on && (lx || ly || rx || ry || gp.buttons.some(x => x.pressed))) { PAD.on = true; toast('🎮 Controller connected.'); }
+  if (!PAD.on) return;
+  const menu = dialogOpen || UI.stack.length || G.state !== 'play';
+  if (menu) {
+    ['KeyA', 'KeyD', 'KeyW', 'KeyS', 'ShiftLeft'].forEach(k => padKey(k, false)); input.lmb = input.rmb = false;
+    if (press(12) || (ly < -.6 && !PAD.prevUp)) padNav(-1); if (press(13) || (ly > .6 && !PAD.prevDn)) padNav(1);
+    if (press(0)) { const f = document.querySelector('.padFocus'); if (f && padRoot().contains(f)) f.click(); else padNav(0); }
+    if (press(1) || press(9)) { if (dialogOpen) closeDialog(); else if (UI.stack.length) UI.close(); }
+  } else {
+    padKey('KeyA', lx < -.3 || b(14)); padKey('KeyD', lx > .3 || b(15)); padKey('KeyW', ly < -.3 || b(12)); padKey('KeyS', ly > .3 || b(13)); padKey('ShiftLeft', b(5));
+    if (rx || ry) PAD.aim = Math.atan2(ry, rx); else if (lx || ly) PAD.aim = Math.atan2(ly, lx);
+    input.lmb = b(7); input.rmb = b(6);
+    if (press(0)) tryDodge(); if (press(2)) doInteract(); if (press(1)) toggleMount(); if (press(3)) swapWeapons(); if (press(4)) cycleAmmo();
+    if (press(11)) useSpecial(); if (press(10)) toggleParty(); if (press(8)) UI.toggle('map'); if (press(9)) UI.open('pause');
+  }
+  PAD.prevUp = ly < -.6; PAD.prevDn = ly > .6; PAD.prev = gp.buttons.map(x => x.pressed);
+}
 /* ---------------- Input ---------------- */
 addEventListener('keydown', e => {
+  if (document.activeElement && document.activeElement.id === 'pinText') { if (e.code === 'Enter') $('pinSave').click(); else if (e.code === 'Escape') $('pinCancel').click(); return; } // typing a pin note
   input.keys[e.code] = true; input.force = !!input.keys.KeyQ;
   if (e.code === 'Space' || e.code === 'Tab') { e.preventDefault(); if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }
   if (G.state === 'menu') { if (e.code === 'Escape' && UI.stack.length) UI.close(); return; }
@@ -5666,7 +5796,7 @@ addEventListener('keyup', e => { input.keys[e.code] = false; input.force = !!inp
 $('pauseScreen').addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if (!b) return; const a = b.dataset.act;
   if (a === 'resume') UI.close();
-  else if (['inv', 'map', 'dip', 'quests'].includes(a)) UI.open(a);
+  else if (['inv', 'map', 'dip', 'quests', 'skills', 'stats', 'ach'].includes(a)) UI.open(a);
   else if (a === 'settings') UI.open('settings');
   else if (a === 'save') { saveGame(); }
   else if (a === 'main') $('quitConfirm').classList.remove('hidden');
@@ -5731,6 +5861,7 @@ $('btnContinue').onclick = () => {
 };
 $('btnMenuSettings').onclick = () => { SND.init(); UI.open('settings'); };
 $('btnHow').onclick = () => UI.open('help');
+$('btnAch').onclick = () => UI.open('ach');
 $('btnRespawn').onclick = () => respawnPlayer();
 $('btnLoadSave').onclick = () => { UI.hide('deathScreen'); if (hasSave()) continueGame(); else { toast('No save found — rising again instead.', 'bad'); respawnPlayer(); } };
 $('btnDeathMenu').onclick = () => { UI.hide('deathScreen'); toMainMenu(); };
@@ -5743,7 +5874,7 @@ function resetState() {
   G.under = null; G.over = null;
   ents = []; pickups = []; projs = []; parts = []; texts = []; horseEnt = null; uidCounter = 1; nextEid = 1;
   W.places.forEach(p => { p.disc = false; p.rumor = false; p.spawned = false; p.dead = []; p.cleared = false; p.chestOpened = false; p.clearedAt = 0; p.offers = null; p.request = false; p.blessed = false; p.investigated = false; p.rumorUsed = false; p.backerRevealed = false; p.wellT = -999; p.ddead = null; p.dchests = null; p.dcleared = false; p.legendTaken = false; if (p.type === 'outpost') p.owner = p.baseOwner; for (const k in p) if (k.startsWith('_shop_')) delete p[k]; });
-  (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false; G.lastPay = null; G.siege = null; G.tourney = null;
+  (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false; G.lastPay = null; G.siege = null; G.tourney = null; G.stats = newStats();
   Object.assign(G, { time: 0, dipT: 0, eventT: 50, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, questT: 0 });
   newKingdoms(); newQuests(); newFog();
 }
@@ -5785,7 +5916,7 @@ function saveGame(silent) {
   const qStrip = q => { const c = Object.assign({}, q); delete c.ent; delete c.foes; return c; };
   const data = {
     v: 1, seed: W.seed, time: G.time, kills: G.kills, uid: uidCounter, waypoint: G.mapWaypoint, savedAt: Date.now(),
-    P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, skills: P.skills, sp: P.sp, comps: P.comps, houses: P.houses, stash: P.stash, forts: P.forts, fortGuards: P.fortGuards, fief: P.fief || null,
+    P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, skills: P.skills, sp: P.sp, comps: P.comps, houses: P.houses, stash: P.stash, forts: P.forts, fortGuards: P.fortGuards, fief: P.fief || null, pins: P.pins || [],
       party: partyNow().filter(e => !e.comp || true).map(e => ({ comp: e.comp, kind: e.kind, name: e.name, hp: Math.round(Math.max(1, e.hp)), k: e.k })), mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
     horse: horseEnt ? { x: horseEnt.x, y: horseEnt.y } : null,
     K: { rel: K.rel, aff: K.aff, rep: K.rep, mil: K.mil, reasons: K.reasons, events: K.events, kev: K.kev, repWhy: K.repWhy, gifts: K.gifts, log: K.log, cd: {} },
@@ -5793,7 +5924,7 @@ function saveGame(silent) {
     places: W.places.map(p => ({ disc: p.disc, rumor: p.rumor, cleared: p.cleared, chestOpened: p.chestOpened, clearedAt: p.clearedAt, dead: p.dead, owner: p.owner, blessed: p.blessed, investigated: p.investigated, rumorUsed: p.rumorUsed, backerRevealed: p.backerRevealed, ddead: p.ddead, dchests: p.dchests, dcleared: p.dcleared, legendTaken: p.legendTaken })),
     exp: packBits(EXP), settings,
   };
-  data.opts = G.opts || normOpts();
+  data.opts = G.opts || normOpts(); data.stats = G.stats;
   if (G.mode === 'story') { data.mode = 'story'; data.story = STORY; }
   try { localStorage.setItem(saveKey(), JSON.stringify(data)); if (!silent) { toast('Game saved.', 'good'); SND.play('pickup'); } else toast('Autosaved.', ''); }
   catch (e) { toast('Could not save: browser storage is unavailable or full.', 'bad'); }
@@ -5803,7 +5934,7 @@ function loadGame(d) {
   newPlayer();
   Object.assign(P, d.P); P.inv = d.P.inv; P.eq = d.P.eq; P.mounted = false; uidCounter = d.uid || (Math.max(0, ...P.inv.map(i => i.uid)) + 1);
   recalc();
-  G.time = d.time || 0; G.kills = d.kills || 0; G.mapWaypoint = d.waypoint || null;
+  G.time = d.time || 0; G.kills = d.kills || 0; G.mapWaypoint = d.waypoint || null; G.stats = Object.assign(newStats(), d.stats || {});
   Object.assign(K, d.K); K.cd = {};
   Q.active = d.Q.active || []; Q.done = d.Q.done || []; Q.tracked = d.Q.tracked; Q.next = d.Q.next || 1;
   (d.places || []).forEach((s, i) => { const p = W.places[i]; if (p) Object.assign(p, s, { dead: s.dead || [] }); });
@@ -6858,7 +6989,8 @@ function storyEnding() {
   $('endTitle').textContent = E.t.toUpperCase();
   $('endBody').innerHTML = E.p().map(t => `<p>${t}</p>`).join('') + raid
     + `<h4>THE FOUR KINGDOMS</h4>${[0, 1, 2, 3].map(k => `<p style="margin-bottom:5px">${sRealmLine(k)}</p>`).join('')}`
-    + `<h4>YOUR DEEDS</h4><ul>${STORY.deeds.slice(-14).map(d => `<li>${esc(d.t)}</li>`).join('')}</ul>`;
+    + `<h4>YOUR DEEDS</h4><ul>${STORY.deeds.slice(-14).map(d => `<li>${esc(d.t)}</li>`).join('')}</ul>`
+    + `<h4>YOUR JOURNEY</h4><table class="statT">${statsRows().map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>`;
   $('endStats').textContent = `Day ${dayNum()} · Level ${P.lvl} · ${fmt(G.kills)} foes slain · ${STORY.qdone.length} story quests completed`;
   $('endPips').innerHTML = Object.keys(ENDINGS).map(k => `<span class="${seen.includes(k) ? 'on' : ''}" data-tip="${seen.includes(k) ? esc(ENDINGS[k].t) : 'Undiscovered ending'}"></span>`).join('') + `<em>${seen.length} / ${Object.keys(ENDINGS).length} endings discovered</em>`;
   G.state = 'ending'; closeDialog(); UI.closeAll(); UI.show('endScreen'); SND.play('ending');
@@ -6876,6 +7008,7 @@ function storyBegin() {
 let last = performance.now(), mmT = 0, ambT = 0, fpsA = 0;
 function update(dt) {
   G.time += dt; if (!G.under) updateWeather(dt);
+  G.stats.play += dt; if (P.gold > G.stats.maxGold) G.stats.maxGold = P.gold; if ((G.achT = (G.achT || 0) - dt) <= 0) { G.achT = 2; checkAch(); }
   input.wx = cam.x + (input.mx - VW / 2) / ZOOM; input.wy = cam.y + (input.my - VH / 2) / ZOOM;
   updatePlayer(dt);
   if (STORY && !G.under) storyTick(dt);
@@ -6907,6 +7040,7 @@ function update(dt) {
 }
 function frame(now) {
   const dt = Math.min(.05, (now - last) / 1000); last = now; const t = now / 1000;
+  pollPad();
   fpsA = fpsA * .95 + (1 / Math.max(dt, .001)) * .05;
   if (W) {
     if (seasonOf() !== curSeason) { applySeason(G.state === 'play' && G.seasonInit); } if (G.state === 'play') G.seasonInit = true;

@@ -49,6 +49,10 @@ Before a new game you can set:
 | P | Skills |
 | Esc | Pause |
 
+On the world map: right-click sets a waypoint, Shift+right-click pins a note (click a pin to edit it).
+
+**Controller:** left stick moves, right stick aims, RT attacks or draws a bow, LT blocks, A dodges, X interacts, B mounts, Y swaps weapons, LB switches arrows, RB sprints, clicking the right stick uses your special, clicking the left stick commands companions, Back opens the map and Start pauses. In menus, the D-pad moves between buttons, A selects and B goes back.
+
 ## Features
 
 - A new map is generated for each game, with castles, villages, rivers, mountain passes, ruins, bandit camps and hidden locations to discover.
@@ -74,6 +78,10 @@ Before a new game you can set:
 - Crafting: fletch every arrow type at market benches, and at the royal forges improve gear up to Masterwork or bind a dungeon relic into a blade to enchant it.
 - Fishing at little jetties on rivers, lakes and the coast (buy a rod at a village market), and hermits in the wilds who sell tonics, training and secrets.
 - About 45 music tracks, all generated in code: rotating day and night overworld songs, combat and boss themes, a village, castle and fort theme for each kingdom, and story-mode themes. The music changes with where you are and what you're doing.
+
+## Achievements and statistics
+
+31 achievements are shared by every game in your browser (see the main menu or pause menu). The pause menu's *Your Journey* page tracks time played, distance, kills, arrows, dungeons, sieges, tourneys and more, and the story's closing screen shows it too.
 
 ## License
 
