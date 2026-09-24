@@ -69,6 +69,12 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 - Bows, from the Short Bow to the Yew War Bow. Draw longer for more range and damage. Six arrow types: standard, broadhead (strong against beasts and bandits), bodkin (strong against armor), fire (burns), venom (poisons and slows) and frost (chills). The frost villages of Draven's snowfields make rimewood bows and frost arrows. Missed arrows can sometimes be picked back up (more often on easier difficulties); arrows that hit are lost. The Recurve Bow is built for horse archery.
 - Tougher bandits: crossbowmen, and shieldbearers who block blows from the front (flank them, use a heavy blow or bodkin arrows).
 - Legendary enchanted weapons, including a burning sword, a venom blade, a frost longsword, a life-draining axe and a lightning bow.
+- Each castle sits at the heart of a busy royal city. It has cobbled streets and dirt alleys packed with townhouses, a market plaza with a fountain, the founder's statue and a row of stalls, a tourney field, and a great cathedral.
+  - **Shops:** there are shops for every trade: a baker, butcher, fruit seller, fishmonger, cheesemonger, flower seller, apothecary, tailor, jeweller, bowyer, vintner and spice merchant.
+  - **Taverns:** every city has a tavern with meals, rumours, rounds for the house and a dice table.
+  - **Inns:** every city also has an inn. Its rooms range from a common-room bunk to a royal suite that leaves you rested, blessed and lucky, and the inn becomes your respawn point.
+  - **People:** crowds of townsfolk, children, nobles and patrolling guards fill the streets, along with a bard, a town crier, a beggar and the cathedral's priest.
+  - **Things to do:** you can knock on doors, toss a coin in the fountain for luck, read the statue's plaque, and pray or give alms at the cathedral.
 - Watchtowers guard the roads into each castle and the border crossings. Bowmen on the towers and castle walls shoot at bandits, enemy soldiers and outlaws.
 - Quests, random world events and a day/night cycle.
 - Seasons that change every six days: spring blossom, summer, golden autumn (cheap food) and snowy winter (slower travel off the roads, dear bread).
