@@ -425,7 +425,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <span><kbd>WASD</kbd>Move</span><span><kbd>LMB</kbd>Attack</span>
         <span><kbd>RMB</kbd>Block</span><span><kbd>Space</kbd>Dodge</span>
         <span><kbd>E</kbd>Interact</span><span><kbd>F</kbd>Horse</span>
-        <span><kbd>Shift</kbd>+Click Hit friendlies</span><span><kbd>Q</kbd>Sprint</span><span><kbd>J</kbd>Quests</span>
+        <span><kbd>Q</kbd>+Click Hit friendlies</span><span><kbd>Shift</kbd>Sprint</span><span><kbd>J</kbd>Quests</span>
       </div>
       <div class="hudbtns">
         <button class="hbtn" data-open="inv" title="Inventory (I)">I · Pack</button>
@@ -626,7 +626,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <div><kbd>W A S D</kbd> Move</div><div><kbd>Mouse</kbd> Aim</div>
         <div><kbd>LMB</kbd> Attack (hold to chain)</div><div><kbd>RMB</kbd> Block with shield</div>
         <div><kbd>Space</kbd> Dodge: time it just as a blow lands to take no damage</div><div><kbd>E</kbd> Talk / loot / interact</div>
-        <div><kbd>F</kbd> Mount, dismount, call horse</div><div><kbd>Q</kbd> Sprint (hold; drains stamina)</div><div><kbd>Shift</kbd>+<kbd>LMB</kbd> Hit friendly or neutral characters (villagers, guards, animals). Hurting people is a crime</div>
+        <div><kbd>F</kbd> Mount, dismount, call horse</div><div><kbd>Shift</kbd> Sprint (hold; drains stamina)</div><div><kbd>Q</kbd>+<kbd>LMB</kbd> Hit friendly or neutral characters (villagers, guards, animals). Hurting people is a crime</div>
         <div><kbd>I</kbd> Inventory</div><div><kbd>M</kbd> Map</div>
         <div><kbd>K</kbd> Diplomacy (kingdoms)</div><div><kbd>J</kbd> Quest journal</div>
         <div><kbd>1</kbd>–<kbd>3</kbd> Eat food / drink potion</div><div><kbd>Esc</kbd> Pause / close</div>
@@ -1136,7 +1136,7 @@ function resize() {
 }
 addEventListener('resize', resize);
 
-const input = { keys: {}, mx: 0, my: 0, wx: 0, wy: 0, lmb: false, rmb: false, shift: false, clicked: false };
+const input = { keys: {}, mx: 0, my: 0, wx: 0, wy: 0, lmb: false, rmb: false, force: false, clicked: false };
 cv.addEventListener('mousemove', e => { input.mx = e.clientX; input.my = e.clientY; });
 cv.addEventListener('mousedown', e => {
   SND.init();
@@ -1145,7 +1145,7 @@ cv.addEventListener('mousedown', e => {
 });
 addEventListener('mouseup', e => { if (e.button === 0) input.lmb = false; if (e.button === 2) input.rmb = false; });
 addEventListener('contextmenu', e => e.preventDefault());
-addEventListener('blur', () => { input.keys = {}; input.lmb = input.rmb = false; });
+addEventListener('blur', () => { input.keys = {}; input.lmb = input.rmb = input.force = false; });
 /* =====================================================================
    DATA — kingdoms, items, actors, names
    ===================================================================== */
@@ -1890,7 +1890,7 @@ function doPlayerHit() {
   const S = P.S; const reach = S.rng + (P.mounted ? 10 : 0); let hits = 0;
   for (const e of ents) {
     if (e.dead || e.kind === 'horse' || e.important) continue;
-    const host = playerHostileTo(e); if (!host && !input.shift) continue;
+    const host = playerHostileTo(e); if (!host && !input.force) continue;
     const d = dist(P.x, P.y, e.x, e.y); if (d > reach + e.r) continue;
     const a = Math.atan2(e.y - P.y, e.x - P.x); if (Math.abs(angDiff(P.face, a)) > S.arc / 2 + (d < e.r + 16 ? .9 : .12)) continue;
     let dmg = S.dmg * rand(.9, 1.1) * DIFF().dmgDealt; const crit = Math.random() < .1; if (crit) dmg *= 1.6;
@@ -1910,8 +1910,9 @@ function updatePlayer(dt) {
   if (countItem('supplies')) spd *= .9;
   P.blocking = input.rmb && P.S.block > 0 && !P.mounted && P.st > 1 && P.dodge <= 0 && P.swing <= 0;
   if (P.blocking) spd *= .45;
-  if (!input.keys.KeyQ) P.winded = false; else if (P.st <= 0) P.winded = true;
-  P.sprinting = !!input.keys.KeyQ && ml > 0 && !P.winded && !P.blocking && P.dodge <= 0 && P.swing <= 0 && P.st > 0 && (P.st > 20 || P.sprinting);
+  const sprintKey = input.keys.ShiftLeft || input.keys.ShiftRight;
+  if (!sprintKey) P.winded = false; else if (P.st <= 0) P.winded = true;
+  P.sprinting = !!sprintKey && ml > 0 && !P.winded && !P.blocking && P.dodge <= 0 && P.swing <= 0 && P.st > 0 && (P.st > 20 || P.sprinting);
   if (P.sprinting) spd *= P.mounted ? 1.2 : 1.35;
   if (P.swing > 0) spd *= P.mounted ? .9 : .65;
   let vx = mx * spd, vy = my * spd;
@@ -4367,14 +4368,14 @@ function updateHUD(force) {
   if (G.state === 'play' && !paused()) {
     const b = findInteract(); if (b) pr = `<kbd>E</kbd> ${interactLabel(b)}`;
     if (!P.mounted && horseEnt && dist(P.x, P.y, horseEnt.x, horseEnt.y) < 70) pr += (pr ? ' &nbsp; ' : '') + '<kbd>F</kbd> Mount horse';
-    if (input.shift) pr = '<span style="color:#ff9a7a">⚠ Holding Shift: your attacks will hit friendly and neutral characters</span>' + (pr ? ' &nbsp; ' + pr : '');
+    if (input.force) pr = '<span style="color:#ff9a7a">⚠ Holding Q: your attacks will hit friendly and neutral characters</span>' + (pr ? ' &nbsp; ' + pr : '');
   }
   setIf('pr', pr, v => { $('prompt').innerHTML = v; $('prompt').classList.toggle('show', !!v); });
 }
 
 /* ---------------- Input ---------------- */
 addEventListener('keydown', e => {
-  input.keys[e.code] = true; input.shift = e.shiftKey;
+  input.keys[e.code] = true; input.force = !!input.keys.KeyQ;
   if (e.code === 'Space' || e.code === 'Tab') { e.preventDefault(); if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }
   if (G.state === 'menu') { if (e.code === 'Escape' && UI.stack.length) UI.close(); return; }
   if (e.code === 'Escape') { if (dialogOpen) closeDialog(); else if (UI.stack.length) UI.close(); else if (G.state === 'play') UI.open('pause'); return; }
@@ -4390,7 +4391,7 @@ addEventListener('keydown', e => {
   else if (e.code === 'Digit2') quickUse('potion');
   else if (e.code === 'Digit3') quickUse('band');
 });
-addEventListener('keyup', e => { input.keys[e.code] = false; input.shift = e.shiftKey; });
+addEventListener('keyup', e => { input.keys[e.code] = false; input.force = !!input.keys.KeyQ; });
 
 /* ---------------- Pause / menus ---------------- */
 $('pauseScreen').addEventListener('click', e => {
