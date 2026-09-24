@@ -165,6 +165,20 @@ body.touch #helpTouch{display:block}
 .ach.locked{opacity:.45;filter:grayscale(1)}
 .statT{width:100%;border-collapse:collapse;font-size:15px}.statT td{padding:5px 8px;border-bottom:1px solid rgba(160,122,58,.2)}.statT td:last-child{text-align:right;color:var(--gold-l)}
 #achScreen .panel,#statScreen .panel{width:min(760px,94vw)}
+#journalScreen .panel{width:min(920px,calc(96vw/var(--ui-scale)));height:min(640px,calc(92vh/var(--ui-scale)));display:flex;flex-direction:column}
+.bGrid{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:6px;align-content:start}
+.bCard{position:relative;border-radius:5px;border:1px solid rgba(154,117,54,.35);background:rgba(0,0,0,.28);cursor:pointer;padding:2px;transition:border-color .13s}
+.bCard:hover{border-color:var(--gold)}.bCard.sel{border-color:#fff0b8;background:rgba(216,178,90,.12)}
+.bCard canvas{width:100%;display:block;border-radius:3px}
+.bKills{position:absolute;right:4px;bottom:3px;font-size:10px;font-weight:700;color:#f3e3b8;text-shadow:0 1px 2px #000}
+.bCat{grid-column:1/-1;font-family:var(--fh);font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--gold);margin:6px 0 0}
+.bCat:first-child{margin-top:0}
+.jPort{float:left;width:128px;height:128px;margin:0 16px 8px 0;border-radius:6px;border:1px solid rgba(154,117,54,.5)}
+.jH{font-family:var(--fh);font-size:19px;font-weight:700;color:var(--gold-l)}
+.jS{font-size:12px;color:var(--ink2);margin:2px 0 10px;letter-spacing:.04em}
+.jRow{font-size:13.5px;margin:6px 0;line-height:1.45}.jRow b{color:var(--gold)}
+.loreText{clear:both;font-family:Georgia,serif;font-size:15px;line-height:1.6;color:#f3e6c8;font-style:italic;margin-top:6px}
+.qItem.unfound .qt1{color:var(--ink2);font-style:italic}
 .slot.mounted{border-color:var(--gold);box-shadow:0 0 10px rgba(216,178,90,.35)}
 #hudBR{position:absolute;right:12px;bottom:12px;padding:7px 10px;font-size:11.5px;color:var(--ink2);line-height:1.65;pointer-events:auto}
 #hudBR .hk{display:grid;grid-template-columns:auto auto;gap:0 10px}
@@ -434,7 +448,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .pauseResume{width:100%;padding:12px;font-size:16px;display:flex;justify-content:center;align-items:center;gap:10px}
 .pk{font-family:var(--fh);font-size:10px;font-weight:700;color:var(--muted);border:1px solid rgba(160,122,58,.45);border-radius:3px;padding:0 5px;line-height:15px;letter-spacing:0}
 .pauseResume .pk{color:#3a2a14;border-color:rgba(58,42,20,.5)}
-.pauseGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.pauseGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
 .ptile{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:84px;padding:10px 4px 8px;border-radius:7px;border:1px solid rgba(160,122,58,.45);background:linear-gradient(180deg,rgba(255,236,190,.07),rgba(0,0,0,.28));color:var(--ink);cursor:pointer;font-family:var(--fh);font-weight:700;font-size:11.5px;letter-spacing:.05em;transition:transform .12s,border-color .12s,box-shadow .12s}
 .ptile:hover{transform:translateY(-2px);border-color:var(--gold);box-shadow:0 5px 14px rgba(0,0,0,.55),0 0 12px rgba(216,178,90,.25);color:var(--gold-l)}
 .ptile img{width:38px;height:38px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.6))}.ptile .pg{font-size:30px;line-height:38px;color:#d8c8a0}
@@ -670,6 +684,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <button class="ptile" data-act="skills"><img data-icon="relic" alt=""><span>Skills</span><span class="pk">P</span><b class="pb hidden" id="pauseSp"></b></button>
         <button class="ptile" data-act="stats"><img data-icon="treasure_map" alt=""><span>Your Journey</span></button>
         <button class="ptile" data-act="ach"><img data-icon="shard_0" alt=""><span>Achievements</span></button>
+        <button class="ptile" data-act="journal"><span class="pg">📜</span><span>Journal</span><span class="pk">L</span></button>
         <button class="ptile" data-act="settings"><span class="pg">⚙</span><span>Settings</span></button>
       </div>
       <div class="pauseRow"><button class="btn" data-act="save">Save Game</button><button class="btn" data-act="download" title="Download this save as a file">⬇ Download Save</button><button class="btn red" data-act="main">Main Menu</button></div>
@@ -756,6 +771,15 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   </div>
 
   <!-- QUESTS -->
+  <div id="journalScreen" class="screen">
+    <div class="panel rv">
+      <div class="closeX" data-close>✕</div>
+      <div class="ptitle">JOURNAL</div>
+      <div class="orn">✦</div>
+      <div class="tabs" id="jTabs"></div>
+      <div class="qBody"><div class="qList" id="jList"></div><div class="qDetail" id="jDetail"></div></div>
+    </div>
+  </div>
   <div id="questScreen" class="screen">
     <div class="panel rv">
       <div class="closeX" data-close>✕</div>
@@ -792,7 +816,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <div><kbd data-k="KeyF">F</kbd> Mount, dismount, call horse</div><div><kbd data-k="ShiftLeft">Shift</kbd> Sprint (hold; drains stamina)</div><div><kbd data-k="KeyQ">Q</kbd>+<kbd>LMB</kbd> Hit friendly or neutral characters (villagers, guards, animals). Hurting people is a crime</div>
         <div><kbd data-k="KeyP">P</kbd> Skills (one point per level)</div><div><kbd data-k="KeyG">G</kbd> Companions: follow or hold position</div>
         <div><kbd data-k="KeyI">I</kbd> Inventory</div><div><kbd data-k="KeyM">M</kbd> Map</div>
-        <div><kbd data-k="KeyK">K</kbd> Diplomacy (kingdoms)</div><div><kbd data-k="KeyJ">J</kbd> Quest journal</div>
+        <div><kbd data-k="KeyK">K</kbd> Diplomacy (kingdoms)</div><div><kbd data-k="KeyJ">J</kbd> Quest journal</div><div><kbd data-k="KeyL">L</kbd> Journal: bestiary and lore</div>
         <div><kbd>1</kbd>–<kbd>3</kbd> Eat food / drink potion</div><div><kbd>Esc</kbd> Pause / close</div>
       </div>
       <div id="helpTouch" style="margin-top:12px;padding:10px 12px;border:1px solid rgba(154,117,54,.4);border-radius:6px;background:rgba(0,0,0,.25)"><b style="font-family:var(--fh);color:var(--gold-l)">ON A PHONE OR TABLET</b><br>Drag anywhere on the left of the screen to move. <b>⚔</b> attacks (hold it to draw a bow, release to shoot), <b>🛡</b> blocks, <b>↻</b> dodges, <b>✦</b> is your special move and <b>✋</b> talks and interacts (or tap the prompt). Attacks and arrows aim at the nearest foe by themselves. The small buttons sprint, mount, swap weapons, switch arrows, eat, drink a potion, call your companions and go fullscreen. On the map, drag to pan, pinch to zoom, tap a place for details and press and hold to set a waypoint.</div>
@@ -2275,6 +2299,22 @@ function genWorld(seed) {
     W.harbors.push({ place: pl.id, x: best.x * TS + 16 - best.sx * 30, y: best.y * TS + 16 - best.sy * 30 });
     for (let yy = best.y - 1; yy <= best.y + 1; yy++) for (let xx = best.x - 1; xx <= best.x + 1; xx++) W.clear[yy * WW + xx] = 1;
   });
+  // ---------- Lore scrolls ----------
+  // Weathered scrolls at ruins, hidden places, camps and outposts. Own random stream; objects and interactions only.
+  const lrr = mulberry32(seed * 173 + 29), spots = W.places.filter(p => p.type === 'ruin' || p.type === 'hidden' || p.type === 'camp' || p.type === 'outpost');
+  for (let i = spots.length - 1; i > 0; i--) { const j = Math.floor(lrr() * (i + 1)); [spots[i], spots[j]] = [spots[j], spots[i]]; }
+  LORE.forEach((L, id) => {
+    if (L.src !== 'world') return; const pl = spots.shift();
+    for (let a = 0; a < 300; a++) {
+      const cx = pl ? pl.tx + Math.round((lrr() - .5) * 12) : 4 + Math.floor(lrr() * (WW - 8)), cy = pl ? pl.ty + Math.round((lrr() - .5) * 12) : 4 + Math.floor(lrr() * (WH - 8));
+      if (cx < 3 || cy < 3 || cx >= WW - 3 || cy >= WH - 3 || !landT(cx, cy) || !landT(cx, cy + 1)) continue;
+      if (!pl && W.places.some(p => Math.hypot(p.tx - cx, p.ty - cy) < 14)) continue;
+      addObj({ k: 'lorescroll', x: cx * TS + 6, y: cy * TS + 8, w: 20, h: 16, sy: cy * TS + 24, lore: id });
+      W.interacts.push({ type: 'lore', x: cx * TS + 16, y: cy * TS + 22, lore: id });
+      for (let yy = cy - 1; yy <= cy + 1; yy++) for (let xx = cx - 1; xx <= cx + 1; xx++) W.clear[yy * WW + xx] = 1;
+      break;
+    }
+  });
   // ---------- Trees ----------
   for (let i = 0; i < CW * CHH; i++) { W.chunkTrees.push([]); W.chunkObjs.push([]); }
   for (let ty = 1; ty < WH - 1; ty++) for (let tx = 1; tx < WW - 1; tx++) {
@@ -2680,7 +2720,7 @@ function playerDie() {
   if (G.state === 'dead') return;
   P.hp = 0; G.state = 'dead'; SND.play('death'); addShake(12); G.stats.deaths++;
   for (let i = 0; i < 30; i++) addPart(P.x, P.y, rand(-150, 150), rand(-150, 150), '#8a1a12', rand(.5, 1.2), 3);
-  const iron = DIFF().ironman;
+  const iron = !!DIFF().ironman; // a real boolean: classList.toggle(c, undefined) flips instead of forcing
   if (!iron) raiseGrave();
   if (P.lastBlow && P.lastBlow.src && P.lastBlow.src.nem) nemesisWon();
   if (iron) { G.ironDead = true; try { localStorage.removeItem(saveKey()); } catch (e) { } }
@@ -2936,7 +2976,7 @@ function kill(t, src) {
   if (t === horseEnt) horseEnt = null;
   if (t.hired) toast(`${t.name} has fallen.`, 'bad');
   if (G.siege && t.siege && src === P) G.siege.pk[t.siege]++;
-  if (t.dspec != null && G.under) { const pl = G.under; (pl.ddead || (pl.ddead = [])).push(t.dspec); if (t.dboss) { pl.dcleared = true; SND.play('quest'); gainXP(120 + (pl.tier || 1) * 40); toast(`<b>${pl.name} cleared!</b> The guardian's hoard is unsealed.`, 'gold'); } }
+  if (t.dspec != null && G.under) { const pl = G.under; (pl.ddead || (pl.ddead = [])).push(t.dspec); if (t.dboss) { pl.dcleared = true; SND.play('quest'); gainXP(120 + (pl.tier || 1) * 40); toast(`<b>${pl.name} cleared!</b> The guardian's hoard is unsealed.`, 'gold'); const own = { cave: 4, spider: 5, crypt: 6, mine: 7, ice: 7 }[pl.theme], dl = own != null && !(P.lore || []).includes(own) ? own : LORE.findIndex((L, i) => L.src === 'deep' && !(P.lore || []).includes(i)); if (dl >= 0) setTimeout(() => { if (addLore(dl)) toast(`📜 Among the hoard you find a scroll: <b>${LORE[dl].t}</b>. Read it in your journal (${keyName('KeyL')}).`, 'gold'); }, 1800); } }
   questOnKill(t);
 }
 function checkPlaceCleared(pl) {
@@ -3616,7 +3656,7 @@ function endContest() {
   if (C.kind === 'archery') { C.tg.forEach(x => removeEnt(x)); if (C.loan) { unequip('weapon'); removeItem(C.loan, 1); } if (C.prevW && P.eq.weapon !== C.prevW && getItem(C.prevW)) equip(C.prevW, true); prize = C.hits >= 8 ? 150 : C.hits >= 5 ? 70 : C.hits >= 2 ? 20 : 0; if (C.hits >= 8) item = 'garland'; msg = `${C.hits} hits!`; }
   if (C.kind === 'pie') { const best = Math.max(...C.rivals); const win = C.n > best; prize = win ? 120 : C.n > Math.min(...C.rivals) ? 30 : 0; if (win) item = 'harvest_charm'; else addItem('pie', 1, 1, true); msg = `You ate ${C.n} pies; the champions managed ${C.rivals.join(' and ')}.${win ? ' You win!' : ''}`; }
   if (C.kind === 'bell') { prize = C.best >= 95 ? 150 : C.best >= 80 ? 60 : 10; if (C.best >= 95) item = 'solstice_lantern'; msg = `Best strike: ${C.best}.`; }
-  if (prize) { P.gold += prize; SND.play('coin'); } if (item) addItem(item, 1, 1, true);
+  if (prize) { P.gold += prize; SND.play('coin'); } if (item) { addItem(item, 1, 1, true); G.stats.festWins++; }
   toast(`🎉 ${msg} ${prize ? `You win ${prize} gold` : 'No prize this time'}${item ? ` and the ${ITEMS[item].name}` : ''}!`, prize ? 'gold' : '');
 }
 function spawnPlace(pl) {
@@ -4043,7 +4083,7 @@ function spawnWorldBoss() {
   toast(`⚠ <b>${G.wboss.name}</b> has been sighted near <b>${from.name}</b>! It is marked on your map.`, 'war'); SND.play('horn'); logEvent(`${G.wboss.name} was sighted near ${from.name}.`, [from.owner]);
 }
 function wbossKilled(t) {
-  G.wboss = null; G.wbossNext = dayNum() + randi(20, 30); P.gold += 600; SND.play('mainquest'); for (let k = 0; k < 4; k++) addRep(k, 5, `Slew ${t.name}`);
+  G.wboss = null; G.wbossNext = dayNum() + randi(20, 30); P.gold += 600; G.stats.wbosses++; SND.play('mainquest'); for (let k = 0; k < 4; k++) addRep(k, 5, `Slew ${t.name}`);
   const leg = pick(LEGENDS); addItem(leg, 3, 1); addTrophy(t.name, t.kind === 'wyvern' ? 'wyvern' : 'giant', t.x, t.y);
   showAreaTitle('THE REALM REJOICES', `${t.name} is slain`); toast(`🏆 You slew ${t.name}! +600 gold, the thanks of every crown and a legendary ${ITEMS[leg].name}.`, 'gold');
 }
@@ -4265,7 +4305,7 @@ function interactLabel(b) {
   const it = b.it, pl = W.places[it.place];
   switch (it.type) {
     case 'chest': return pl.chestOpened ? 'Empty stash' : pl.type === 'camp' ? (pl.cleared ? 'Loot the bandit stash' : 'Bandit stash (guarded)') : 'Search the chest';
-    case 'door': return 'Knock on the door'; case 'enter': return (!cityOpen() && it.shop.kind !== 'tavern' && it.shop.kind !== 'inn' ? 'Locked: ' : 'Enter ') + it.shop.name; case 'iexit': return 'Go back outside'; case 'ibed': return G.under && G.under.kind === 'house' ? 'Sleep until morning' : 'Bed'; case 'istash': return 'Open your stash'; case 'irooms': return 'Go up to the rooms'; case 'ibox': return 'Offerings box'; case 'istrong': return 'Force the strongbox'; case 'ferry': return 'Take the ferry across (3 gold)'; case 'harbor': return `Board a ship at ${pl.name}`; case 'itrophy': { const tr = (P.trophies || [])[it.idx]; return tr ? `Trophy: ${tr.n}` : 'An empty pedestal'; } case 'fountain': return 'Toss a coin into the fountain'; case 'statue': return 'Read the inscription'; case 'cathedral': return `Enter the ${pl.city && pl.city.cath ? pl.city.cath.name : 'cathedral'}`;
+    case 'door': return 'Knock on the door'; case 'enter': return (!cityOpen() && it.shop.kind !== 'tavern' && it.shop.kind !== 'inn' ? 'Locked: ' : 'Enter ') + it.shop.name; case 'iexit': return 'Go back outside'; case 'ibed': return G.under && G.under.kind === 'house' ? 'Sleep until morning' : 'Bed'; case 'istash': return 'Open your stash'; case 'irooms': return 'Go up to the rooms'; case 'ibox': return 'Offerings box'; case 'istrong': return 'Force the strongbox'; case 'lore': return (P.lore || []).includes(it.lore) ? `Reread: ${LORE[it.lore].t}` : 'Read the weathered scroll'; case 'ilore': return 'Browse the cathedral library'; case 'ferry': return 'Take the ferry across (3 gold)'; case 'harbor': return `Board a ship at ${pl.name}`; case 'itrophy': { const tr = (P.trophies || [])[it.idx]; return tr ? `Trophy: ${tr.n}` : 'An empty pedestal'; } case 'fountain': return 'Toss a coin into the fountain'; case 'statue': return 'Read the inscription'; case 'cathedral': return `Enter the ${pl.city && pl.city.cath ? pl.city.cath.name : 'cathedral'}`;
     case 'sign': return 'Signpost, bounty board and carriages'; case 'well': return 'Drink from the well'; case 'fish': return G.fishing ? 'Reel in' : 'Fish here';
     case 'dungeon': return `Enter ${pl.name}${pl.dcleared ? ' (cleared)' : ''}`; case 'home': return 'Enter your house'; case 'fort': return pl.playerFort ? `Your fort: ${pl.name}` : `Look over the ruined fort`; case 'dexit': return 'Climb back outside';
     case 'dchest': return G.under && (G.under.dchests || []).includes(it.idx) ? 'Empty chest' : it.boss ? 'Open the guardian\'s hoard' : 'Open the chest';
@@ -4301,6 +4341,8 @@ function doInteract() {
   else if (it.type === 'ibox') { const cp = W.places[G.under.place]; priestDialog(ents.find(e => e.role === 'priest') || null, cp); }
   else if (it.type === 'itrophy') readTrophy(it.idx);
   else if (it.type === 'ferry') ferryDialog(it);
+  else if (it.type === 'lore') readLore(it.lore);
+  else if (it.type === 'ilore') readLore(G.under.owner);
   else if (it.type === 'harbor') harborDialog(pl);
   else if (it.type === 'istrong') { W.interacts = W.interacts.filter(x => x !== it); const g0 = randi(30, 90); P.gold += g0; let msg = `${g0} gold`; if (P.guild && P.guild.stage === 3 && !countItem('merchant_ledger')) { addItem('merchant_ledger', 1, 1, true); msg += ' and the merchant\'s ledger'; } else if (chance(.5)) { const id = pick(['silver_ring', 'gold_locket', 'jeweled_brooch']); addItem(id, 1, 1, true); msg += ` and a ${ITEMS[id].name}`; } SND.play('chest'); toast(`You force the strongbox: ${msg}.`, 'gold'); }
   else if (it.type === 'well') { if ((pl.wellT || -999) > G.time - 60) { toast('You have drunk your fill for now.'); return; } pl.wellT = G.time; P.st = P.maxSt; P.hp = Math.min(P.maxHp, P.hp + Math.round(12 * DIFF().heal)); SND.play('eat'); toast(`The cool water refreshes you. (+${Math.round(12 * DIFF().heal)} health, stamina restored)`, 'good'); }
@@ -4499,6 +4541,7 @@ function genInterior(b) {
     for (let ty = 4.6; ty < rh - 2.4; ty += 2) { obj('f_pew', .9, ty, 4 * TS, 20, {}, true); obj('f_pew', 7.1, ty, 4 * TS, 20, {}, true); if (r() < .35) patron(1.6 + r() * 2.6, ty - .35, -Math.PI / 2, { role: 'worshipper' }); if (r() < .35) patron(7.8 + r() * 2.6, ty - .35, -Math.PI / 2, { role: 'worshipper' }); }
     obj('statue', .2, 1.6, 32, 32, {}, true); obj('statue', 11, 1.6, 32, 32, {}, true);
     obj('f_box', 9.6, rh - 1.7, 26, 24, {}, true); ints.push({ type: 'ibox', x: X(10.1), y: Y(rh - .7) });
+    obj('f_shelf', .5, rh - 2.05, 64, 28, { v: 'books', sy: Y(rh - 1.2) }, true); ints.push({ type: 'ilore', x: X(1.5), y: Y(rh - .7) });
   } else if (b.kind === 'shop') {
     const goods = { baker: 'bread', apothecary: 'potions', jeweler: 'gems' }[b.shopKind] || 'bottles';
     obj('f_shelf', .8, -1.05, 90, 28, { v: goods }); obj('f_shelf', 3.8, -1.05, 90, 28, { v: goods }); obj('f_shelf', 6.8, -1.05, 90, 28, { v: goods });
@@ -4544,7 +4587,7 @@ function harborDialog(pl) {
 }
 function voyage(o, days) {
   withLoading(`Sailing for ${o.p.name}…`, () => {
-    G.time += days * DAYLEN * .6; if (P.mounted) dismount(); const f = findFree(o.h.x, o.h.y); P.x = f.x; P.y = f.y; cam.x = P.x; cam.y = P.y; o.p.disc = true;
+    G.time += days * DAYLEN * .6; G.stats.voyages++; if (P.mounted) dismount(); const f = findFree(o.h.x, o.h.y); P.x = f.x; P.y = f.y; cam.x = P.x; cam.y = P.y; o.p.disc = true;
     if (horseEnt) { horseEnt.x = P.x + 30; horseEnt.y = P.y; } ents.filter(e => e.follow && e.ally).forEach(e => { const f2 = findFree(P.x + rand(-30, 30), P.y + rand(-30, 30)); e.x = f2.x; e.y = f2.y; });
     const r = Math.random();
     if (r < .08) { const food = P.inv.filter(i => ITEMS[i.id].food || ITEMS[i.id].good); if (food.length) { const it = pick(food); removeItem(it.uid, Math.max(1, Math.ceil((it.n || 1) / 2))); } setTimeout(() => toast('⛈ A storm battered the ship! Some of your supplies were washed overboard.', 'bad'), 400); }
@@ -4552,6 +4595,117 @@ function voyage(o, days) {
     else setTimeout(() => toast(`Fair winds carried you to <b>${o.p.name}</b>.`, 'good'), 400);
   });
 }
+/* ---------------- Journal: bestiary and lore ---------------- */
+const BEASTS = [
+  ['wolf', 'Beasts of the Wilds', 'Forests and grasslands in every kingdom', 'Hunts in packs and circles its prey. Fast but thin-skinned: a broadhead arrow or a heavy blow drops it.', 'Furs, sometimes'],
+  ['snow_wolf', 'Beasts of the Wilds', "The snowfields of Draven's high country and the ice caves", 'Bigger and hardier than its lowland cousin, with a pelt prized by every furrier.', 'Furs, often'],
+  ['jackal', 'Beasts of the Wilds', "Valoria's deserts", 'A skulking scavenger that darts in and out. Weak alone; a nuisance in threes.', 'Furs, rarely'],
+  ['boar', 'Beasts of the Wilds', 'Woods and thickets', 'Charges headlong when roused. Sidestep the rush and strike its flank.', 'Meat or furs'],
+  ['bear', 'Beasts of the Wilds', 'Deep forests', 'Slow to anger and terrible once angered. Keep moving rather than trusting your shield.', 'Furs and meat'],
+  ['ice_bear', 'Beasts of the Wilds', 'The frozen north and its ice caves', 'The largest beast in the four kingdoms. Fire arrows and patience are your friends.', 'Two furs and meat'],
+  ['goat', 'Beasts of the Wilds', 'Mountain passes', 'Sure-footed and ill-tempered. Its horns hurt more than you would expect.', 'Meat, sometimes furs'],
+  ['camel', 'Beasts of the Wilds', "Valoria's desert oases", 'Peaceful unless provoked, and then it kicks like a mule.', 'Meat'],
+  ['scorpion', 'Beasts of the Wilds', 'Desert sands', 'Its sting carries venom. Strike from range, or finish it quickly.', 'Nothing of worth'],
+  ['spider', 'Beasts of the Wilds', 'Spider caves and dark woods', 'Spits webs that slow you. Fletchers pay well for its venom.', 'Venom vials, sometimes'],
+  ['bandit', 'Outlaws', 'Camps and roadsides everywhere', 'Cutthroats who prey on travellers. The deeper into the wilds, the better their steel.', 'Coin, food, now and then gear'],
+  ['archer', 'Outlaws', 'Bandit camps', 'Keeps its distance and looses arrows. Close in fast or put a tree between you.', 'Arrows and coin'],
+  ['xbowman', 'Outlaws', 'Bandit camps', 'Slow to reload and brutal when a bolt lands. Rush it between shots.', 'Bodkin arrows and coin'],
+  ['shieldbearer', 'Outlaws', 'Bandit camps', 'Blocks blows from the front. Flank it, break its guard with a heavy blow, or use bodkin arrows.', 'Coin'],
+  ['leader', 'Outlaws', 'The heart of a bandit camp', 'A seasoned chief with a fat purse. Some say a few carry legendary blades.', 'Gear, coin, and rarely a legendary weapon'],
+  ['soldier', 'Soldiers of the Crowns', 'Castles, forts and war camps', 'Disciplined spearmen of the four crowns. They fight you only if their kingdom does.', 'Coin, rarely gear'],
+  ['bowman', 'Soldiers of the Crowns', 'Castle walls and watchtowers', 'Crown archers who guard the roads against outlaws.', 'Arrows'],
+  ['guard', 'Soldiers of the Crowns', 'The royal cities', 'The city watch. Break the law in front of one and you will soon meet the rest.', 'Coin'],
+  ['knight', 'Soldiers of the Crowns', 'Castles and battlefields', 'Heavily armoured and dangerous. Bodkin arrows pierce plate.', 'Gear, often'],
+  ['cultist', 'The Circle and the Dead', 'Wherever the Ashen Circle gathers', 'Robed zealots of the Ashen Circle, who serve something older than the crowns.', 'Coin'],
+  ['assassin', 'The Circle and the Dead', 'Wherever the Circle wants someone dead', 'Quick, silent killers. Keep your shield up and your back to a wall.', 'Coin and gear'],
+  ['wight', 'The Circle and the Dead', 'Barrows and haunted crypts', 'The restless dead, still wearing the armour they fell in.', 'Old gear'],
+  ['hollow_archer', 'The Circle and the Dead', 'Barrows and haunted crypts', 'Dead bowmen whose aim death has not spoiled.', 'Arrows'],
+  ['hknight', 'The Circle and the Dead', 'The deepest crypts', 'A knight of an old host, bound to guard its master past death.', 'Old gear'],
+  ['rimeheart', 'Legends', 'The heart of an ice cave', 'A giant of living frost in armour of ice, guarding the deepest caves of the north.', 'Its hoard'],
+  ['bone_wyrm', 'Legends', 'Beneath a haunted barrow', 'The bones of a dragon, stitched together by old magic. Its breath chills the blood.', 'Its hoard'],
+  ['hollow_king', 'Legends', 'Unknown', 'Songs speak of a king beneath the barrows. Pray they are only songs.', 'Unknown'],
+  ['wyvern', 'Legends', 'Roams from village to village', 'The Ashen Wyvern swoops from the sky and breathes fire. Every crown pays well for its head.', 'A legendary weapon and gold'],
+  ['hill_giant', 'Legends', 'Roams from village to village', 'Hurls boulders from afar and shakes the ground up close. Dodge the slam, then strike.', 'A legendary weapon and gold'],
+];
+const BEAST_I = {}; BEASTS.forEach((b, i) => BEAST_I[b[0]] = i);
+const BEAST_Z = { wolf: 1.15, snow_wolf: 1.05, jackal: 1.25, boar: 1.15, bear: .85, ice_bear: .72, goat: 1.2, camel: .85, scorpion: 1.3, spider: 1.25, leader: 1.6, knight: 1.6, hknight: 1.6, rimeheart: 1.3, hollow_king: 1.5, bone_wyrm: .4, wyvern: .36, hill_giant: .58 };
+const LORE = [
+  { src: 'kingdom', cat: 'Albion', t: 'The Chronicle of Aldhaven', x: 'When the crown was broken, Aldric the First took his shard west to a burned hill above the Greywater and swore he would not sleep until walls stood around it. The masons say he kept his word for a year and a day. Albion has kept his motto ever since: Honor Above All. Its knights are sworn to it at twelve, and the iron of its hills goes into every blade they carry.' },
+  { src: 'kingdom', cat: 'Valoria', t: 'The Vine Road', x: 'Solenne of the Dawn crossed the mountains with a cart of vine cuttings wrapped in wet linen, and a sword she never drew. Where others built walls she planted terraces, and traded the wine for everything the walls would have cost. Solmont Palace was built with that wine. Valorians still toast her name at the first pressing.' },
+  { src: 'kingdom', cat: 'Draven', t: 'The Battle on the Ice', x: 'In the first winter after the breaking, a host of the dead came down out of the north. Morgath Ironhand met them on a frozen lake with three hundred spears and broke the ice beneath them. Ravens followed his banner home, and have nested on Ravenspire ever since. Draven kneels to no one, the saying goes, and it has never forgotten who stood on the ice when nobody else would.' },
+  { src: 'kingdom', cat: 'Eldoria', t: 'The Song of the Thornwood', x: 'Nobody remembers the Green Lady\'s name, only her song. The Eldorians say she sang the first trees of the Thornwood out of bare earth, and that each High Lady since has learned one verse of it. Walk softly beneath the boughs, the children are told, and the forest will keep you. Walk otherwise, and it will keep you all the same.' },
+  { src: 'deep', cat: 'The Depths', t: "A Smuggler's Tally", x: 'Twelve casks Valorian red, eight bales of Eldorian pepper, one crate of "iron" (it is not iron). Paid the ferryman double to forget our faces. Paid the watch triple. If the old tunnels keep flooding we move the lot to the grotto by the cliffs. Note: something is living in the lower passage. Stop sending the new lads down there.' },
+  { src: 'deep', cat: 'The Depths', t: 'Notes on the Silkfang', x: 'The great spiders do not hunt; they wait. A web across a cave mouth will hold a deer, and the venom will keep it fresh for weeks. The alchemists of Solmont pay a silver a vial for it. I have gathered eleven vials and lost two fingers. I intend to stop at twelve.' },
+  { src: 'deep', cat: 'The Depths', t: 'The Grey Kings', x: 'Before the crown there were petty kings in these hills, and they were buried with their spears and their dogs and sometimes their servants. The priests of Saint Oswin sealed the barrows with salt and prayer. The seals are old now. When the lamps gutter in the crypts, the grey kings dream of the days when the land was theirs.' },
+  { src: 'deep', cat: 'The Depths', t: 'A Miner\'s Last Page', x: 'We dug deeper than the charter allowed because the vein ran true. Then the cold came up through the rock, a cold with no wind in it, and the lamps burned blue. Tomas says he saw a man made of ice walking in the lower galleries. Tomas drinks. But I have heard its footsteps now, slow and heavy, and I am writing this by the ladder.' },
+  { src: 'world', cat: 'The First King', t: 'Aurek the First', x: 'Four hundred years ago one king ruled every land from the Greywater to the Thornwood. Aurek wore a crown that glowed like a coal and never cooled, and the chroniclers could not agree whether he was the greatest king who ever lived or the worst. They agree only that when he died, nobody wept at the graveside, and everybody came to watch.' },
+  { src: 'world', cat: 'The First King', t: 'The Breaking of the Crown', x: 'Four of Aurek\'s captains stood by his tomb with a smith\'s hammer. The Ember Crown took four blows, and on the fourth it broke into four shards, each still warm. Each captain carried one home and founded a kingdom around it. The shards have been kept in the four royal treasuries ever since, and they are warm to the touch still.' },
+  { src: 'world', cat: 'The First King', t: 'The Four Oaths', x: 'Albion swore to guard, Valoria to prosper, Draven to endure and Eldoria to remember. It was said that as long as the four oaths held, the old king would sleep. It was not said what would happen if they broke. The founders thought, perhaps, that nobody would be foolish enough to find out.' },
+  { src: 'world', cat: 'The Saints', t: 'Saint Oswin of the Barrows', x: 'Oswin was a gravedigger who became a priest because nobody else would bury the plague dead. He walked the barrows with a lamp and a spade and a bag of salt, and the dead lay quiet where he passed. When he died, the villages he had served buried him in a crypt of his own, and swore they could hear him humming.' },
+  { src: 'world', cat: 'The Saints', t: 'The Vigil of Saint Aldric', x: 'Once a year the knights of Albion keep a night-long vigil in the cathedral, kneeling in their armour until dawn. A knight who falls asleep must pay for the candles. A knight who falls asleep twice is not invited back. Most years the candles cost the treasury very little; the year of the great harvest feast, the treasury nearly ran dry.' },
+  { src: 'world', cat: 'The Saints', t: 'The Iron Saints', x: 'Draven honours no gentle saints. Its cathedral holds the helms of the three hundred who stood on the ice, hung in rows from the rafters, each with a name scratched inside. When a Draven warrior dies well, a new helm is added. The rafters have been extended four times.' },
+  { src: 'world', cat: 'The Wilds', t: 'A Hunter\'s Almanac', x: 'Wolves in spring, boar in autumn, and leave the bears alone unless you are hungry or foolish. In the deserts the jackals follow the camels and the scorpions follow the shade. In the snowfields everything is bigger, meaner and hungrier than it has any right to be. Carry broadheads for beasts and bodkins for men. Carry bandages for yourself.' },
+  { src: 'world', cat: 'The Circle', t: 'On the Ashen Circle', x: 'They meet at night, they wear grey, and they burn their letters. The priests call them a heresy; the watch calls them a nuisance. I have found their mark, a broken ring, scratched on the doorposts of three villages this month. Whatever they want, they are patient about it, and I do not like patient people who wear grey.' },
+  { src: 'world', cat: 'The Circle', t: 'The Hollow Dead', x: 'My grandmother said the dead from the battle on the ice never truly drowned. They sank, she said, and they are walking still, slowly, along the bottom of the world, looking for the king who called them. She said it to make us eat our supper. It worked. I still do not like frozen lakes.' },
+  { src: 'world', cat: 'Chivalry', t: 'A Primer on the Joust', x: 'Couch the lance late, lad. A squire who lowers his lance at the start of the lists will have a tired arm and a sore pride by the time he meets his man. Strike the shield and you score; strike the helm and you are remembered; unhorse him and you are sung about. Miss entirely and you are sung about as well, but not kindly.' },
+  { src: 'world', cat: 'The Wilds', t: 'The Ferryman\'s Song', x: 'Three coppers for the crossing, one for the pole and one for the boat and one for the river, so she does not take you. The ferrymen sing it as they push off. Ask one what happens if you only pay two, and he will smile and tell you that nobody has ever tried.' },
+  { src: 'world', cat: 'Legends', t: 'Of Wyverns', x: 'The wyvern is not a dragon, whatever the villagers say. It is smaller, stupider and far more real. It nests in high places and hunts by fire, driving flocks and herds before it. When one grows old it grows bold, and a bold wyvern will burn a village for a single goat. Every crown in the realm keeps a bounty on its head.' },
+  { src: 'world', cat: 'Legends', t: 'The Hill Giants', x: 'There were once many giants in the hills, and they built nothing, planted nothing and remembered everything. Now there are very few, and they wander, and they are angry. A giant can throw a boulder farther than a man can shoot a bow. The trick, say the few who have fought one and lived, is to be very close or very far, and never in between.' },
+  { src: 'world', cat: 'The Roads', t: 'A Bandit\'s Confession', x: 'I was a farmer until the tax man came twice in one year. Then I was a poacher, and then I was a bandit, and now I am a bandit with a price on my head. I am writing this so somebody knows I was not always like this. If you find it, tell my sister in the village by the ford that I am sorry about the goat.' },
+  { src: 'world', cat: 'The Roads', t: 'The Hermits of the Wild', x: 'Some men leave the towns to find God, some to find peace, and some because the towns have asked them to leave. The hermits of the wilds are all three. They brew strange tonics and know strange things, and one of them, a Brother Caddock, is said to know more of the First King than any scholar in the four capitals.' },
+  { src: 'world', cat: 'The Roads', t: 'A Letter Never Sent', x: 'My love, the road is longer than I thought, and the inns are worse. I have seen the sea, and a castle with blue roofs, and a man who ate eleven pies at the harvest fair and lost to a woman who ate twelve. I will be home before the snow. Keep the fire in, and the dog off my chair.' },
+];
+function seeTick() {
+  if (G.state !== 'play') return; G.seen = G.seen || {};
+  for (const e of ents) if (!e.dead && BEAST_I[e.kind] != null && !G.seen[e.kind] && !e.tut && dist(e.x, e.y, P.x, P.y) < 420) { G.seen[e.kind] = dayNum(); if (!G.tut) toast(`📖 New bestiary entry: <b>${ATYPES[e.kind].name.replace(/^The /, '')}</b>`, ''); }
+}
+function beastPortrait(cv, kind, known) {
+  const g = cv.getContext('2d'), S = cv.width; g.clearRect(0, 0, S, S);
+  const bg = g.createRadialGradient(S / 2, S * .45, 2, S / 2, S / 2, S * .72); bg.addColorStop(0, known ? '#4e3d27' : '#2a2016'); bg.addColorStop(1, '#120c07'); g.fillStyle = bg; g.fillRect(0, 0, S, S);
+  const oc = document.createElement('canvas'); oc.width = oc.height = S; const o = oc.getContext('2d');
+  const e = mkActor(kind, 0, 0, { k: 0, face: .35 }); removeEnt(e); e.walk = 0; e.wind = 0; e.swing = 0; e.flash = 0; e.face = kind === 'bone_wyrm' || kind === 'wyvern' ? Math.PI / 2 : .35; if (kind === 'hill_giant') e.scale = 2.3;
+  const z = (BEAST_Z[kind] || 1.75) * S / 64; o.save(); o.translate(S / 2, S * .56); o.scale(z, z); try { drawEntity(o, e, 0); } catch (err) { } o.restore();
+  if (!known) { o.globalCompositeOperation = 'source-in'; o.fillStyle = '#050302'; o.fillRect(0, 0, S, S); }
+  g.globalAlpha = known ? 1 : .8; g.drawImage(oc, 0, 0); g.globalAlpha = 1;
+  if (!known) { g.fillStyle = 'rgba(230,200,140,.55)'; g.font = `bold ${Math.round(S * .3)}px Cinzel, Georgia`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('?', S / 2, S / 2); }
+}
+function addLore(id) { P.lore = P.lore || []; if (P.lore.includes(id)) return false; P.lore.push(id); gainXP(20); SND.play('pickup'); checkAch(); return true; }
+function readLore(id) {
+  const L = LORE[id], first = addLore(id);
+  openDialog({ name: L.t, role: first ? `${L.cat} · a new page in your journal` : L.cat, portrait: 'scroll', text: `<i>${L.x}</i>`, options: [{ t: 'Roll up the scroll', fn: closeDialog }] });
+  if (first) toast(`📜 <b>${L.t}</b> added to your journal (${keyName('KeyL')}).`, 'gold');
+}
+function loreHint(L, id) { return L.src === 'kingdom' ? `Kept in the cathedral library of ${KDATA[id].castle}` : L.src === 'deep' ? "Guarded in a dungeon guardian's hoard" : 'Lost somewhere in the wilds, near ruins, camps and hidden places'; }
+let jTab = 'beasts', jSel = null;
+function renderJournal() {
+  if (!P) return; G.seen = G.seen || {}; const lore = P.lore || [], nSeen = BEASTS.filter(b => G.seen[b[0]]).length;
+  $('jTabs').innerHTML = [['beasts', `Bestiary (${nSeen}/${BEASTS.length})`], ['lore', `Lore (${lore.length}/${LORE.length})`]].map(([k, n]) => `<div class="tab ${jTab === k ? 'on' : ''}" data-jt="${k}">${n}</div>`).join('');
+  const list = $('jList'), det = $('jDetail');
+  if (jTab === 'beasts') {
+    if (jSel == null || BEAST_I[jSel] == null) jSel = (BEASTS.find(b => G.seen[b[0]]) || BEASTS[0])[0];
+    let cat = ''; const cells = [];
+    BEASTS.forEach(([kind, c]) => { if (c !== cat) { cat = c; cells.push(`<div class="bCat">${c.toUpperCase()}</div>`); } const k = G.stats.kills[kind] || 0; cells.push(`<div class="bCard ${jSel === kind ? 'sel' : ''}" data-b="${kind}" title="${G.seen[kind] ? ATYPES[kind].name : 'Unknown'}"><canvas width="72" height="72" data-bp="${kind}"></canvas>${k ? `<span class="bKills">${k}</span>` : ''}</div>`); });
+    list.className = 'qList bGrid'; list.innerHTML = cells.join('');
+    list.querySelectorAll('canvas[data-bp]').forEach(cv => beastPortrait(cv, cv.dataset.bp, !!G.seen[cv.dataset.bp]));
+    const [kind, c, hab, note, drops] = BEASTS[BEAST_I[jSel]], known = !!G.seen[kind], k = G.stats.kills[kind] || 0;
+    det.innerHTML = `<canvas class="jPort" width="128" height="128" id="jPortC"></canvas><div class="jH">${known ? ATYPES[kind].name : 'Unknown creature'}</div><div class="jS">${c}</div>` +
+      (known ? `<div class="jRow"><b>Found:</b> ${hab}</div><div class="jRow"><b>Drops:</b> ${drops}</div><div class="jRow"><b>Slain by you:</b> ${k}</div><div class="jRow"><b>First seen:</b> day ${G.seen[kind]}</div><div class="loreText">${note}</div>`
+        : `<div class="jRow"><b>Said to be found:</b> ${hab}</div><div class="loreText">You have not yet laid eyes on this creature. Keep exploring.</div>`);
+    beastPortrait($('jPortC'), kind, known);
+  } else {
+    if (jSel == null || typeof jSel !== 'number') jSel = lore.length ? lore[0] : 0;
+    list.className = 'qList';
+    list.innerHTML = LORE.map((L, i) => { const f = lore.includes(i); return `<div class="qItem ${f ? '' : 'unfound'} ${jSel === i ? 'sel' : ''}" data-l="${i}"><div class="qt1">${f ? L.t : 'An unfound scroll'}</div><div class="qt2">${f ? L.cat : L.src === 'kingdom' ? KDATA[i].name : L.src === 'deep' ? 'The Depths' : 'The wilds'}</div></div>`; }).join('');
+    const L = LORE[jSel], f = lore.includes(jSel);
+    det.innerHTML = `<canvas class="jPort" width="128" height="128" id="jPortC"></canvas><div class="jH">${f ? L.t : 'An unfound scroll'}</div><div class="jS">${f ? L.cat : 'Not yet found'}</div>` + (f ? `<div class="loreText">${L.x}</div>` : `<div class="jRow"><b>Where:</b> ${loreHint(L, jSel)}</div>`);
+    drawPortrait($('jPortC'), 'scroll'); if (!f) { const g = $('jPortC').getContext('2d'); g.fillStyle = 'rgba(10,6,3,.72)'; g.fillRect(0, 0, 128, 128); }
+  }
+}
+$('journalScreen').addEventListener('click', e => {
+  const t = e.target.closest('[data-jt]'); if (t) { if (jTab !== t.dataset.jt) { jTab = t.dataset.jt; jSel = null; renderJournal(); } return; }
+  const b = e.target.closest('[data-b]'); if (b) { jSel = b.dataset.b; renderJournal(); return; }
+  const l = e.target.closest('[data-l]'); if (l) { jSel = +l.dataset.l; renderJournal(); }
+});
 function enterInterior(b) {
   if (G.under) return;
   if (ents.some(e => !e.dead && playerHostileTo(e) && dist(e.x, e.y, P.x, P.y) < 260)) { toast('Not with enemies at your back!', 'bad'); return; }
@@ -4930,7 +5084,7 @@ function joustTick(dt) {
       const say = ['Missed!', 'Shield strike! (1)', 'Helm strike! (2)', 'UNHORSED! (3)'][pts];
       toast(`Pass ${J.pass}: you — ${say}; ${o.name.split(' ')[1]} — ${['a miss', 'a shield strike', 'a helm strike'][opts]}.`, pts > opts ? 'good' : pts < opts ? 'bad' : '');
       if (opts) { P.hp = Math.max(1, P.hp - [0, 8, 16][opts] * DIFF().dmgTaken); P.flash = .2; }
-      if (pts === 3) return endJoust(true), true;
+      if (pts === 3) { G.stats.unhorsed++; return endJoust(true), true; }
       if (J.pass >= 3 && J.ps !== J.os) return endJoust(J.ps > J.os), true;
       J.phase = 'ready'; J.t = 2.2; // riders wheel back to their ends for the next pass
     }
@@ -4976,7 +5130,7 @@ function endRace(place) {
   const R2 = G.race; G.race = null; Q.active = Q.active.filter(q => q.type !== 'race'); setTimeout(() => R2.riders.forEach(e => removeEnt(e)), 5000);
   if (!place) { toast('The race is over. You did not finish.', 'bad'); return; }
   const prize = [0, 250, 100, 40, 0][place], to = W.places[R2.to]; if (prize) { P.gold += prize; SND.play('coin'); }
-  if (place === 1) { addRep(to.owner, 5, 'Won a horse race'); addTrophy(`The race cup of ${to.name}`, 'tourney', P.x, P.y); SND.play('mainquest'); }
+  if (place === 1) { G.stats.races++; addRep(to.owner, 5, 'Won a horse race'); addTrophy(`The race cup of ${to.name}`, 'tourney', P.x, P.y); SND.play('mainquest'); }
   showAreaTitle(['', 'FIRST PLACE!', 'SECOND PLACE', 'THIRD PLACE', 'LAST PLACE'][place], `The Race to ${to.name}`); toast(`You finish ${['', 'first', 'second', 'third', 'last'][place]}!${prize ? ` +${prize} gold.` : ''}`, place === 1 ? 'gold' : '');
 }
 function tourneyYield(e) {
@@ -6034,6 +6188,10 @@ function drawStruct(g, o, t) {
       break;
     }
     case 'wtower': drawWatchtower(g, o, t, k, kd, towerPart(o)); break;
+    case 'lorescroll': { const read = (P.lore || []).includes(o.lore); g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, x + w / 2 + 1, y + h + 1, 12, 4); g.fillStyle = '#8a8478'; ell(g, x + w / 2, y + h - 3, 11, 5.5); g.fillStyle = '#6e695e'; ell(g, x + w / 2, y + h - 1, 11, 3);
+      g.fillStyle = '#eadfbe'; g.fillRect(x + 3, y + h - 13, w - 6, 8); g.fillStyle = '#c8b888'; circ(g, x + 3, y + h - 9, 4); circ(g, x + w - 3, y + h - 9, 4); g.fillStyle = '#a02a20'; g.fillRect(x + w / 2 - 1.5, y + h - 13, 3, 8);
+      if (!read) { const a = .45 + Math.sin(t * 3 + o.lore) * .3; g.fillStyle = `rgba(255,228,150,${a})`; circ(g, x + w / 2 + Math.sin(t * 1.3) * 6, y + h - 19 + Math.sin(t * 2.1) * 3, 1.8); circ(g, x + w / 2 - 5 + Math.cos(t * 1.7) * 4, y + h - 15 + Math.cos(t * 2.4) * 2, 1.3); }
+      break; }
     case 'ferryboat': { const bob = Math.sin(t * 1.6 + o.v * 9) * 1.2; g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, x + w / 2 + 2, y + h / 2 + 5, w / 2, h / 3); g.fillStyle = '#6a4424'; g.beginPath(); g.moveTo(x, y + 6 + bob); g.lineTo(x + w, y + 6 + bob); g.lineTo(x + w - 4, y + h + bob); g.lineTo(x + 4, y + h + bob); g.closePath(); g.fill(); g.fillStyle = '#8a6036'; g.fillRect(x + 2, y + 6 + bob, w - 4, 4); g.strokeStyle = '#4a2f18'; g.lineWidth = 2; g.beginPath(); g.moveTo(x + w - 6, y - 8 + bob); g.lineTo(x + w - 10, y + h + bob); g.stroke(); break; }
     case 'ship': { const bob = Math.sin(t * 1.2 + o.v * 9) * 1.5; g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, x + w / 2 + 3, y + h - 4, w / 2, 8); g.fillStyle = '#5a3a1e'; g.beginPath(); g.moveTo(x, y + 18 + bob); g.lineTo(x + w, y + 18 + bob); g.lineTo(x + w - 8, y + h + bob); g.lineTo(x + 6, y + h + bob); g.closePath(); g.fill(); g.fillStyle = '#7a5030'; g.fillRect(x + 2, y + 18 + bob, w - 4, 5); g.fillStyle = '#3a2412'; g.fillRect(x + w / 2 - 1.5, y - 30 + bob, 3, 50); g.fillStyle = '#efe6d0'; g.beginPath(); g.moveTo(x + w / 2 + 2, y - 28 + bob); g.quadraticCurveTo(x + w / 2 + 26 + Math.sin(t) * 2, y - 8 + bob, x + w / 2 + 2, y + 12 + bob); g.closePath(); g.fill(); g.fillStyle = kd.color; g.fillRect(x + w / 2 + 4, y - 16 + bob, 10, 8); g.fillStyle = kd.color; g.beginPath(); g.moveTo(x + w / 2, y - 32 + bob); g.lineTo(x + w / 2 + 12, y - 29 + bob); g.lineTo(x + w / 2, y - 26 + bob); g.fill(); break; }
     case 'cathedral': drawCathedral(g, o, t, k, kd); break;
@@ -6365,6 +6523,7 @@ function drawFurniture(g, o, t, kd) {
         case 'bread': g.fillStyle = '#c8883a'; ell(g, ix + 3, iy - 3, 5, 3); break;
         case 'potions': { g.fillStyle = ['#5ab870', '#c85a6a', '#6a8ae8'][i % 3]; circ(g, ix + 3, iy - 4, 3.5); g.fillStyle = '#d8e8e0'; g.fillRect(ix + 2, iy - 10, 2, 3); break; }
         case 'gems': g.fillStyle = ['#e84a5a', '#4aa0f0', '#5ad07a', '#e8c040'][i % 4]; g.beginPath(); g.moveTo(ix + 3, iy - 8); g.lineTo(ix + 6, iy - 4); g.lineTo(ix + 3, iy); g.lineTo(ix, iy - 4); g.fill(); break;
+        case 'books': g.fillStyle = ['#7a2a22', '#2a4a6a', '#3a5a2a', '#6a4a1a', '#4a2a5a'][i % 5]; g.fillRect(ix - 1, iy - 10 + (i % 3), 5, 10 - (i % 3)); g.fillStyle = 'rgba(230,200,120,.6)'; g.fillRect(ix - 1, iy - 7, 5, 1); break;
         case 'keys': g.strokeStyle = '#c8a040'; g.lineWidth = 1.2; g.beginPath(); g.arc(ix + 3, iy - 7, 2, 0, TAU); g.moveTo(ix + 3, iy - 5); g.lineTo(ix + 3, iy); g.stroke(); break;
       } };
       for (let i = 0; i < Math.floor((w - 10) / 9); i++) { item(x + 6 + i * 9, y + h - 2, i); item(x + 6 + i * 9, y + 10 + 0, i + 2); }
@@ -6980,6 +7139,7 @@ function drawPortrait(cv2, e) {
   const bg = g.createRadialGradient(W2 / 2, W2 * .4, 5, W2 / 2, W2 / 2, W2 * .7); bg.addColorStop(0, k != null ? shade(KDATA[k].color, -.3) : '#4a3a28'); bg.addColorStop(1, '#120c07'); g.fillStyle = bg; g.fillRect(0, 0, W2, W2);
   if (e === 'ember') { g.save(); g.scale(W2 / 128, W2 / 128); g.translate(64, 70); g.shadowColor = '#ff9a3a'; g.shadowBlur = 26; g.fillStyle = '#f0b040'; g.beginPath(); g.moveTo(-40, 18); g.lineTo(-44, -18); g.lineTo(-22, 0); g.lineTo(0, -36); g.lineTo(22, 0); g.lineTo(44, -18); g.lineTo(40, 18); g.closePath(); g.fill(); g.shadowBlur = 0; g.fillStyle = '#c0302a'; circ(g, 0, 2, 6); g.fillStyle = '#8a5a14'; g.fillRect(-40, 18, 80, 9); g.restore(); return; }
   if (e === 'grave') { g.save(); g.scale(W2 / 128, W2 / 128); g.translate(64, 98); g.fillStyle = '#4a3a22'; ell(g, 0, 8, 46, 12); g.fillStyle = '#6a6660'; g.beginPath(); g.moveTo(-30, 6); g.lineTo(-30, -44); g.arc(0, -44, 30, Math.PI, 0); g.lineTo(30, 6); g.closePath(); g.fill(); g.fillStyle = '#9a968e'; g.beginPath(); g.moveTo(-26, 4); g.lineTo(-26, -44); g.arc(0, -44, 26, Math.PI, 0); g.lineTo(26, 4); g.closePath(); g.fill(); g.strokeStyle = '#4a4640'; g.lineWidth = 5; g.beginPath(); g.moveTo(0, -58); g.lineTo(0, -18); g.moveTo(-13, -46); g.lineTo(13, -46); g.stroke(); g.fillStyle = '#5a8a3a'; circ(g, -24, 4, 7); circ(g, 22, 6, 6); g.fillStyle = '#e8e0c0'; circ(g, 30, 4, 3.5); g.restore(); return; }
+  if (e === 'scroll') { g.save(); g.translate(W2 / 2, W2 / 2); g.scale(W2 / 128, W2 / 128); g.fillStyle = '#eadfbe'; g.fillRect(-32, -38, 64, 76); g.fillStyle = '#c8b888'; ell(g, 0, -38, 38, 8); ell(g, 0, 38, 38, 8); g.strokeStyle = 'rgba(90,60,30,.55)'; g.lineWidth = 2; for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(-22, -24 + i * 9); g.lineTo(22 - (i % 3) * 7, -24 + i * 9); g.stroke(); } g.fillStyle = '#a02a20'; circ(g, 0, 30, 7); g.restore(); return; }
   if (e === 'sign') { g.save(); g.translate(W2 / 2, W2 / 2); g.fillStyle = '#4a3018'; g.fillRect(-4, -10, 8, 60); g.fillStyle = '#8a6030'; g.beginPath(); g.moveTo(-40, -30); g.lineTo(30, -30); g.lineTo(42, -18); g.lineTo(30, -6); g.lineTo(-40, -6); g.fill(); g.fillStyle = '#8a6030'; g.beginPath(); g.moveTo(40, 4); g.lineTo(-30, 4); g.lineTo(-42, 16); g.lineTo(-30, 28); g.lineTo(40, 28); g.fill(); g.restore(); return; }
   const L = e && e.kind ? lookFor(e) : { body: KDATA[k || 0].color, head: 'crown', hair: KDATA[k || 0].rulerHair || '#8a7a6a', fem: KDATA[k || 0].fem, skin: '#e8c49a', cape: '#f0ece0', ermine: 1 };
   const s = W2 / 128; g.save(); g.scale(s, s);
@@ -7066,14 +7226,14 @@ function drawMinimap() {
    ===================================================================== */
 const UI = {
   stack: [],
-  ids: { act: 'actScreen', ach: 'achScreen', stats: 'statScreen', skills: 'skillScreen', mode: 'modeScreen', cont: 'contScreen', pause: 'pauseScreen', inv: 'invScreen', map: 'mapScreen', dip: 'dipScreen', quests: 'questScreen', settings: 'settingsScreen', help: 'helpScreen', shop: 'shopScreen' },
+  ids: { act: 'actScreen', ach: 'achScreen', stats: 'statScreen', skills: 'skillScreen', mode: 'modeScreen', cont: 'contScreen', pause: 'pauseScreen', inv: 'invScreen', map: 'mapScreen', dip: 'dipScreen', quests: 'questScreen', journal: 'journalScreen', settings: 'settingsScreen', help: 'helpScreen', shop: 'shopScreen' },
   open(n) {
     if (n === 'map' && G.under && !G.under.interior) { toast('Your map is no use down here. Find your way back to the ladder.'); return; }
     if (dialogOpen) closeDialog();
     if (this.isOpen(n)) return;
     if (n !== 'settings' && n !== 'help') this.closeAll();
     this.stack.push(n); $(this.ids[n]).classList.add('show'); SND.play('open'); if (G.tut) (G.tut.opened || (G.tut.opened = {}))[n] = true;
-    if (n === 'inv') renderInventory(); else if (n === 'skills') renderSkills(); else if (n === 'ach') renderAch(); else if (n === 'stats') withOverworld(renderStats); else if (n === 'map') withOverworld(openMap); else if (n === 'dip') withOverworld(renderDiplomacy); else if (n === 'quests') withOverworld(renderQuests); else if (n === 'settings') renderSettings(); else if (n === 'pause') withOverworld(renderPause);
+    if (n === 'inv') renderInventory(); else if (n === 'skills') renderSkills(); else if (n === 'ach') renderAch(); else if (n === 'stats') withOverworld(renderStats); else if (n === 'map') withOverworld(openMap); else if (n === 'dip') withOverworld(renderDiplomacy); else if (n === 'quests') withOverworld(renderQuests); else if (n === 'journal') renderJournal(); else if (n === 'settings') renderSettings(); else if (n === 'pause') withOverworld(renderPause);
     tipHide();
   },
   close() { const n = this.stack.pop(); if (n) { $(this.ids[n]).classList.remove('show'); SND.play('close'); } tipHide(); if (n === 'act') actFinish(); },
@@ -7781,7 +7941,7 @@ function updateHUD(force) {
 }
 
 /* ---------------- Statistics and achievements ---------------- */
-const newStats = () => ({ play: 0, dist: 0, kills: {}, arrows: 0, bowKills: 0, maxGold: 0, deaths: 0, dungeons: 0, fish: 0, carp: 0, camps: 0, tourneys: 0, sieges: 0, enchants: 0 });
+const newStats = () => ({ play: 0, dist: 0, kills: {}, arrows: 0, bowKills: 0, maxGold: 0, deaths: 0, dungeons: 0, fish: 0, carp: 0, camps: 0, tourneys: 0, sieges: 0, enchants: 0, unhorsed: 0, races: 0, voyages: 0, festWins: 0, wbosses: 0 });
 const legendsOwned = () => ['oathkeeper', ...LEGENDS].filter(id => countItem(id) || (P.stash || []).some(i => i.id === id)).length;
 const ACH = [
   ['first_blood', '⚔', 'First Blood', 'Defeat your first foe', () => G.kills >= 1], ['slayer', '⚔', 'Slayer', 'Defeat 100 foes', () => G.kills >= 100], ['legend500', '☠', 'Legend of the Realm', 'Defeat 500 foes', () => G.kills >= 500],
@@ -7798,6 +7958,12 @@ const ACH = [
   ['enchant', '✧', 'Runesmith', 'Enchant a weapon at a royal forge', () => G.stats.enchants >= 1], ['sworn', '⚑', 'Sworn Sword', 'Swear allegiance to a crown', () => P.allegiance != null],
   ['rich', '💰', 'Coffers Overflowing', 'Hold 10,000 gold at once', () => P.gold >= 10000], ['winter', '❄', 'Survived the Winter', 'Live to see a second spring', () => dayNum() > SEASON_DAYS * ((4 - seasonStart()) % 4 || 4)],
   ['forsaken', '☠', 'Forsaken', 'Reach level 10 on Forsaken difficulty', () => DIFF().ironman && P.lvl >= 10],
+  ['naturalist', '📖', 'Naturalist', 'Record 15 creatures in your bestiary', () => Object.keys(G.seen || {}).length >= 15], ['beasts_all', '🐺', 'Master of Beasts', 'Record every beast of the wilds', () => BEASTS.filter(b => b[1] === 'Beasts of the Wilds').every(b => (G.seen || {})[b[0]])],
+  ['lore8', '📜', 'Scholar', 'Read 8 lore scrolls', () => (P.lore || []).length >= 8], ['lore_all', '📜', 'Loremaster', `Read all ${LORE.length} lore scrolls`, () => (P.lore || []).length >= LORE.length],
+  ['unhorse', '🐎', 'Unhorsed!', 'Unhorse a rival in the joust', () => G.stats.unhorsed >= 1], ['race', '🏁', 'First Past the Post', 'Win a horse race', () => G.stats.races >= 1],
+  ['voyage', '⚓', 'Sea Legs', 'Sail to another harbour', () => G.stats.voyages >= 1], ['festival', '🎉', 'Fairground Hero', 'Win the top prize in a festival game', () => G.stats.festWins >= 1],
+  ['feud', '⚔', "Feud's End", 'Settle the feud with your nemesis', () => !!P.nemesis && ['dead', 'spared', 'exiled'].includes(P.nemesis.state)], ['wboss', '🐉', 'Giant Killer', 'Slay a roaming world boss', () => G.stats.wbosses >= 1],
+  ['guild', '🗝', 'Honour Among Thieves', "See the thieves' guild's work through, one way or another", () => !!P.guild && P.guild.stage >= 5], ['trophies5', '🏆', 'Hall of Glory', 'Fill your trophy room with 5 trophies', () => (P.trophies || []).length >= 5],
   ['endings5', '📜', 'Many Roads', 'Discover 5 story endings', () => endingsSeen() >= 5], ['endings_all', '📜', 'Every Ending', 'Discover all 15 story endings', () => endingsSeen() >= 15],
 ];
 function endingsSeen() { try { return JSON.parse(localStorage.getItem('fk_endings') || '[]').length; } catch (e) { return 0; } }
@@ -7975,7 +8141,7 @@ addEventListener('pagehide', quietSave);
 $('pauseScreen').addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if (!b) return; const a = b.dataset.act;
   if (a === 'resume') UI.close();
-  else if (['inv', 'map', 'dip', 'quests', 'skills', 'stats', 'ach'].includes(a)) UI.open(a);
+  else if (['inv', 'map', 'dip', 'quests', 'skills', 'stats', 'ach', 'journal'].includes(a)) UI.open(a);
   else if (a === 'settings') UI.open('settings');
   else if (a === 'save') { saveGame(); }
   else if (a === 'download') { saveGame(true, true); downloadSave(readSlot(G.slot)); }
@@ -8111,7 +8277,7 @@ function resetState() {
   ents = []; pickups = []; projs = []; parts = []; texts = []; horseEnt = null; uidCounter = 1; nextEid = 1;
   W.places.forEach(p => { p.disc = false; p.rumor = false; p.spawned = false; p.dead = []; p.cleared = false; p.chestOpened = false; p.clearedAt = 0; p.offers = null; p.request = false; p.blessed = false; p.investigated = false; p.rumorUsed = false; p.backerRevealed = false; p.wellT = -999; p.sboss = null; p.ddead = null; p.dchests = null; p.dcleared = false; p.legendTaken = false; if (p.type === 'outpost') p.owner = p.baseOwner; for (const k in p) if (k.startsWith('_shop_')) delete p[k]; });
   (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false; G.lastPay = null; G.siege = null; G.tourney = null; G.stats = newStats(); G.tut = null;
-  G.bounty = [0, 0, 0, 0]; G.contest = null; G.festival = null; G.wboss = null; G.wbossNext = 0; G.wbossCount = 0; G.enc = null; G.encT = null; G.race = null; G.joust = null;
+  G.bounty = [0, 0, 0, 0]; G.contest = null; G.festival = null; G.wboss = null; G.wbossNext = 0; G.wbossCount = 0; G.enc = null; G.encT = null; G.race = null; G.joust = null; G.seen = {};
   Object.assign(G, { time: 0, dipT: 0, eventT: 50, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, questT: 0 });
   newKingdoms(); newQuests(); newFog();
 }
@@ -8155,7 +8321,7 @@ function saveGame(silent, quiet) {
   const qStrip = q => { const c = Object.assign({}, q); delete c.ent; delete c.foes; return c; };
   const data = {
     v: 1, seed: W.seed, time: G.time, kills: G.kills, uid: uidCounter, waypoint: G.mapWaypoint, savedAt: Date.now(),
-    P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, skills: P.skills, sp: P.sp, comps: P.comps, houses: P.houses, stash: P.stash, forts: P.forts, fortGuards: P.fortGuards, fief: P.fief || null, pins: P.pins || [], grave: P.grave || null, trophies: P.trophies || [], guild: P.guild || null, nemesis: P.nemesis || null,
+    P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, skills: P.skills, sp: P.sp, comps: P.comps, houses: P.houses, stash: P.stash, forts: P.forts, fortGuards: P.fortGuards, fief: P.fief || null, pins: P.pins || [], grave: P.grave || null, trophies: P.trophies || [], guild: P.guild || null, nemesis: P.nemesis || null, lore: P.lore || [],
       party: partyNow().filter(e => !e.comp || true).map(e => ({ comp: e.comp, kind: e.kind, name: e.name, hp: Math.round(Math.max(1, e.hp)), k: e.k })), mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
     horse: horseEnt ? { x: horseEnt.x, y: horseEnt.y } : null,
     K: { rel: K.rel, aff: K.aff, rep: K.rep, mil: K.mil, reasons: K.reasons, events: K.events, kev: K.kev, repWhy: K.repWhy, gifts: K.gifts, log: K.log, cd: {} },
@@ -8164,7 +8330,7 @@ function saveGame(silent, quiet) {
     exp: packBits(EXP),
   };
   data.opts = G.opts || normOpts(); data.stats = G.stats; data.tut = G.tut && !G.tut.done ? G.tut.step : null;
-  data.mode = G.mode; data.slot = G.slot || 1; data.bounty = G.bounty || [0, 0, 0, 0]; data.wboss = G.wboss || null; data.wbossNext = G.wbossNext || 0; data.wbossCount = G.wbossCount || 0; if (G.mode === 'story') data.story = STORY;
+  data.mode = G.mode; data.slot = G.slot || 1; data.bounty = G.bounty || [0, 0, 0, 0]; data.wboss = G.wboss || null; data.wbossNext = G.wbossNext || 0; data.wbossCount = G.wbossCount || 0; data.seen = G.seen || {}; if (G.mode === 'story') data.story = STORY;
   if (WIPED) return;
   try { localStorage.setItem(saveKey(), JSON.stringify(data)); if (quiet) { } else if (!silent) { toast(`Game saved to slot ${G.slot || 1}.`, 'good'); SND.play('pickup'); } else toast('Autosaved.', ''); }
   catch (e) { toast('Could not save: browser storage is unavailable or full.', 'bad'); }
@@ -8175,7 +8341,7 @@ function loadGame(d) {
   Object.assign(P, d.P); P.inv = d.P.inv; P.eq = d.P.eq; P.mounted = false; uidCounter = d.uid || (Math.max(0, ...P.inv.map(i => i.uid)) + 1);
   recalc();
   G.bounty = d.bounty || [0, 0, 0, 0]; G.contest = null; G.festival = null; G.wboss = d.wboss || null; G.wbossNext = d.wbossNext || 0; G.wbossCount = d.wbossCount || 0; G.enc = null; G.race = null; G.joust = null;
-  G.time = d.time || 0; G.kills = d.kills || 0; G.mapWaypoint = d.waypoint || null; G.stats = Object.assign(newStats(), d.stats || {});
+  G.time = d.time || 0; G.kills = d.kills || 0; G.mapWaypoint = d.waypoint || null; G.stats = Object.assign(newStats(), d.stats || {}); G.seen = d.seen || {}; P.lore = d.P.lore || []; Object.keys(G.stats.kills).forEach(k => { if (BEAST_I[k] != null && !G.seen[k]) G.seen[k] = 1; });
   Object.assign(K, d.K); K.cd = {};
   Q.active = d.Q.active || []; Q.done = d.Q.done || []; Q.tracked = d.Q.tracked; Q.next = d.Q.next || 1;
   (d.places || []).forEach((s, i) => { const p = W.places[i]; if (p) Object.assign(p, s, { dead: s.dead || [] }); });
@@ -9774,7 +9940,7 @@ function update(dt) {
   }
   if ((G.dipT += dt) >= 40) { G.dipT = 0; dipTick(); }
   const dnow = dayNum(); if (G.lastPay == null) G.lastPay = dnow; else if (dnow !== G.lastPay) { G.lastPay = dnow; dailyTick(); }
-  if ((G.lawT = (G.lawT || 0) - dt) <= 0) { G.lawT = .25; thiefTick(); if ((G.law2 = (G.law2 || 0) - 1) <= 0) { G.law2 = 4; lawTick(); cityTick(); guildTick(); festivalTick(); encounterTick(); wbossTick(1); if (G.bounty) G.bounty = G.bounty.map(v => v > 1 ? v * Math.pow(.9, 1 / (DAYLEN / 1)) : 0); } }
+  if ((G.lawT = (G.lawT || 0) - dt) <= 0) { G.lawT = .25; thiefTick(); if ((G.law2 = (G.law2 || 0) - 1) <= 0) { G.law2 = 4; lawTick(); cityTick(); guildTick(); festivalTick(); encounterTick(); wbossTick(1); seeTick(); if (G.bounty) G.bounty = G.bounty.map(v => v > 1 ? v * Math.pow(.9, 1 / (DAYLEN / 1)) : 0); } }
   contestTick(dt); raceTick(dt);
   if ((G.eventT -= dt) <= 0) { G.eventT = rand(60, 115); if (!G.under && !G.tut) worldEvent(); } // no raids or ambushes mid-lesson
   if ((G.autosaveT += dt) >= 180) { G.autosaveT = 0; saveGame(true); }
