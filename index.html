@@ -246,7 +246,8 @@ kbd{display:inline-block;min-width:18px;padding:0 4px;height:17px;line-height:15
 .mapHint{position:absolute;right:10px;bottom:8px;font-size:11.5px;color:var(--ink2);text-shadow:0 1px 2px #000}
 
 /* diplomacy */
-#dipScreen .panel{width:min(1380px,calc(98vw/var(--ui-scale)));max-height:calc(96vh/var(--ui-scale));overflow:auto;padding:16px 20px}
+#dipScreen .panel{width:min(1380px,calc(98vw/var(--ui-scale)));padding:16px 20px}
+#dipScroll{max-height:calc(96vh/var(--ui-scale) - 110px);overflow-y:auto;overflow-x:hidden;padding-right:8px;margin-right:-8px}
 .dipGrid{display:grid;grid-template-columns:1fr 450px 1fr;gap:14px;align-items:start}
 .dipCol{display:flex;flex-direction:column;gap:12px}
 .kcard{--kc:#888;position:relative;padding:11px 13px 10px;border-radius:6px;cursor:pointer;background:linear-gradient(135deg,color-mix(in srgb,var(--kc) 14%,transparent),rgba(0,0,0,.35) 60%);border:1px solid rgba(154,117,54,.45);border-top:3px solid var(--kc);transition:all .18s;animation:fadeUp .4s ease both}
@@ -359,6 +360,23 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .help{max-width:680px;font-size:15px;line-height:1.5}
 .help .cols{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px}
 .help p{margin:6px 0}
+#pauseScreen .pausePanel{width:min(580px,calc(94vw/var(--ui-scale)))}
+.pauseHero{display:flex;gap:14px;align-items:center;padding:10px 12px;margin:2px 0 12px;border:1px solid rgba(160,122,58,.35);border-radius:8px;background:linear-gradient(90deg,rgba(0,0,0,.35),rgba(0,0,0,.12))}
+.pauseHero canvas{width:68px;height:68px;border-radius:6px;border:1px solid #8a6a32;flex:none;box-shadow:0 2px 8px rgba(0,0,0,.6)}
+.ph1{font-family:var(--fh);font-weight:700;color:var(--gold-l);font-size:15px;letter-spacing:.05em;line-height:1.3}
+.ph2{color:var(--ink2);font-size:14px;margin-top:1px}
+.phChips{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.phChips span{font-size:12.5px;padding:2px 9px;border-radius:10px;background:rgba(0,0,0,.4);border:1px solid rgba(160,122,58,.3);color:var(--ink)}
+.pauseResume{width:100%;padding:12px;font-size:16px;display:flex;justify-content:center;align-items:center;gap:10px}
+.pk{font-family:var(--fh);font-size:10px;font-weight:700;color:var(--muted);border:1px solid rgba(160,122,58,.45);border-radius:3px;padding:0 5px;line-height:15px;letter-spacing:0}
+.pauseResume .pk{color:#3a2a14;border-color:rgba(58,42,20,.5)}
+.pauseGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.ptile{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:84px;padding:10px 4px 8px;border-radius:7px;border:1px solid rgba(160,122,58,.45);background:linear-gradient(180deg,rgba(255,236,190,.07),rgba(0,0,0,.28));color:var(--ink);cursor:pointer;font-family:var(--fh);font-weight:700;font-size:11.5px;letter-spacing:.05em;transition:transform .12s,border-color .12s,box-shadow .12s}
+.ptile:hover{transform:translateY(-2px);border-color:var(--gold);box-shadow:0 5px 14px rgba(0,0,0,.55),0 0 12px rgba(216,178,90,.25);color:var(--gold-l)}
+.ptile img{width:38px;height:38px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.6))}.ptile .pg{font-size:30px;line-height:38px;color:#d8c8a0}
+.ptile .pk{position:absolute;top:5px;right:5px}
+.ptile .pb{position:absolute;top:-7px;left:-7px;min-width:19px;height:19px;border-radius:10px;background:#e7c35a;color:#1b140d;font:700 11px var(--fh);display:flex;align-items:center;justify-content:center;padding:0 4px;box-shadow:0 0 8px rgba(231,195,90,.6)}
+.pauseRow{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pauseRow .btn{padding:10px}
+@media (max-width:560px){.pauseGrid{grid-template-columns:repeat(2,1fr)}}
 .confirmBox{margin-top:14px;padding:12px;border:1px solid #9a4a3a;border-radius:6px;background:rgba(80,20,10,.25);text-align:center}
 #modeScreen .panel,#contScreen .panel{width:min(420px,calc(94vw/var(--ui-scale)))}
 #modeScreen .panel.wide{width:min(820px,calc(96vw/var(--ui-scale)))}
@@ -535,22 +553,22 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 
   <!-- PAUSE -->
   <div id="pauseScreen" class="screen">
-    <div class="panel rv" style="width:340px">
+    <div class="panel rv pausePanel">
       <div class="ptitle" style="font-size:28px">PAUSED</div>
       <div class="orn">✦</div>
-      <div class="menuList">
-        <button class="btn gold" data-act="resume">Resume</button>
-        <button class="btn" data-act="inv">Inventory</button>
-        <button class="btn" data-act="map">Map</button>
-        <button class="btn" data-act="dip">Diplomacy</button>
-        <button class="btn" data-act="quests">Quests</button>
-        <button class="btn" data-act="skills">Skills</button>
-        <button class="btn" data-act="stats">Your Journey</button>
-        <button class="btn" data-act="ach">Achievements</button>
-        <button class="btn" data-act="settings">Settings</button>
-        <button class="btn" data-act="save">Save Game</button>
-        <button class="btn red" data-act="main">Main Menu</button>
+      <div class="pauseHero" id="pauseHero"></div>
+      <button class="btn gold pauseResume" data-act="resume">Resume <span class="pk">Esc</span></button>
+      <div class="pauseGrid">
+        <button class="ptile" data-act="inv"><img data-icon="leather" alt=""><span>Inventory</span><span class="pk">I</span></button>
+        <button class="ptile" data-act="map"><img data-icon="map_0" alt=""><span>Map</span><span class="pk">M</span></button>
+        <button class="ptile" data-act="dip"><img data-icon="banner" alt=""><span>Diplomacy</span><span class="pk">K</span></button>
+        <button class="ptile" data-act="quests"><img data-icon="letter" alt=""><span>Quests</span><span class="pk">J</span></button>
+        <button class="ptile" data-act="skills"><img data-icon="relic" alt=""><span>Skills</span><span class="pk">P</span><b class="pb hidden" id="pauseSp"></b></button>
+        <button class="ptile" data-act="stats"><img data-icon="treasure_map" alt=""><span>Your Journey</span></button>
+        <button class="ptile" data-act="ach"><img data-icon="shard_0" alt=""><span>Achievements</span></button>
+        <button class="ptile" data-act="settings"><span class="pg">⚙</span><span>Settings</span></button>
       </div>
+      <div class="pauseRow"><button class="btn" data-act="save">Save Game</button><button class="btn red" data-act="main">Main Menu</button></div>
       <div id="quitConfirm" class="confirmBox hidden">
         <div style="margin-bottom:8px">Return to the main menu?</div>
         <button class="btn gold sm" data-act="saveQuit">Save &amp; Quit</button>
@@ -616,6 +634,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div class="closeX" data-close>✕</div>
       <div class="ptitle">DIPLOMACY</div>
       <div class="orn">✦ The Council of Four Crowns ✦</div>
+      <div id="dipScroll">
       <div class="dipTop" id="dipTop"></div>
       <div class="dipGrid">
         <div class="dipCol" id="dipColL"></div>
@@ -627,6 +646,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
           <div class="actPanel" id="actPanel"></div>
         </div>
         <div class="dipCol" id="dipColR"></div>
+      </div>
       </div>
     </div>
   </div>
@@ -5060,7 +5080,7 @@ const UI = {
     if (this.isOpen(n)) return;
     if (n !== 'settings' && n !== 'help') this.closeAll();
     this.stack.push(n); $(this.ids[n]).classList.add('show'); SND.play('open');
-    if (n === 'inv') renderInventory(); else if (n === 'skills') renderSkills(); else if (n === 'ach') renderAch(); else if (n === 'stats') renderStats(); else if (n === 'map') openMap(); else if (n === 'dip') renderDiplomacy(); else if (n === 'quests') renderQuests(); else if (n === 'settings') renderSettings(); else if (n === 'pause') $('quitConfirm').classList.add('hidden');
+    if (n === 'inv') renderInventory(); else if (n === 'skills') renderSkills(); else if (n === 'ach') renderAch(); else if (n === 'stats') renderStats(); else if (n === 'map') openMap(); else if (n === 'dip') renderDiplomacy(); else if (n === 'quests') renderQuests(); else if (n === 'settings') renderSettings(); else if (n === 'pause') renderPause();
     tipHide();
   },
   close() { const n = this.stack.pop(); if (n) { $(this.ids[n]).classList.remove('show'); SND.play('close'); } tipHide(); },
@@ -5735,6 +5755,16 @@ function renderAch() {
 function statsRows() {
   const S2 = G.stats, h = Math.floor(S2.play / 3600), m = Math.floor(S2.play / 60) % 60, kills = Object.entries(S2.kills).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, v]) => `${v} ${(ATYPES[k] ? ATYPES[k].name : k).toLowerCase()}${v > 1 ? 's' : ''}`).join(', ');
   return [['Time on the road', `${h}h ${m}m`], ['Days survived', dayNum()], ['Distance travelled', `${fmt(Math.round(S2.dist / TS / 10))} leagues`], ['Foes slain', `${fmt(G.kills)}${kills ? ` (${kills})` : ''}`], ['Arrows loosed', fmt(S2.arrows)], ['Slain by arrow', fmt(S2.bowKills)], ['Times you fell', S2.deaths], ['Bandit camps cleared', S2.camps], ['Dungeons cleared', S2.dungeons], ['Sieges fought', S2.sieges], ['Tourneys won', S2.tourneys], ['Fish caught', S2.fish], ['Most gold held', fmt(Math.max(S2.maxGold, P.gold))], ['Level', P.lvl]];
+}
+function renderPause() {
+  $('quitConfirm').classList.add('hidden');
+  const k = ownerAtPx(P.x, P.y), al = P.allegiance != null ? `${repTitle(P.allegiance)} of ${KDATA[P.allegiance].name}` : 'Wandering knight';
+  const pl = !G.under && nearestPlace(P.x, P.y, p => p.disc && (p.type === 'village' || p.type === 'castle' || p.type === 'outpost'));
+  const where = G.under ? `${G.under.name}, underground` : pl && dist(P.x, P.y, pl.x, pl.y) < 14 * TS ? `${pl.name}, ${KDATA[k].full}` : `The wilds of ${KDATA[k].name}`;
+  $('pauseHero').innerHTML = `<canvas id="pausePort" width="128" height="128"></canvas><div style="flex:1;min-width:0"><div class="ph1">Level ${P.lvl} · ${al}${P.fief ? ` · Warden of ${W.places[P.fief.v].name}` : ''}</div><div class="ph2">${where}</div><div class="ph2">${SEASONS[curSeason]}, day ${dayNum()} · ${G.mode === 'story' ? 'Story' : 'Sandbox'} · ${DIFF().name}</div><div class="phChips"><span>${fmt(P.gold)} gold</span><span>${Math.ceil(P.hp)} / ${P.maxHp} health</span><span>${fmt(G.kills)} foes slain</span><span>${Object.keys(ACHS).length} / ${ACH.length} achievements</span></div></div>`;
+  drawPortrait($('pausePort'), P);
+  document.querySelectorAll('#pauseScreen [data-icon]').forEach(img => { const id = img.dataset.icon; img.src = id === 'banner' ? bannerURL(P.allegiance ?? k) : itemIcon(id); });
+  $('pauseSp').textContent = P.sp || ''; $('pauseSp').classList.toggle('hidden', !P.sp);
 }
 function renderStats() { $('statBody').innerHTML = `<table class="statT">${statsRows().map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>`; }
 /* ---------------- Controller (standard gamepad mapping) ---------------- */
