@@ -1997,7 +1997,9 @@ function astar(sx, sy, ex, ey) {
 /* =====================================================================
    GAME STATE, PLAYER, ENTITIES, COMBAT, AI
    ===================================================================== */
-const G = { state: 'menu', mode: 'sandbox', time: 0, dipT: 0, eventT: 60, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, lastPlace: -1, questT: 0, menuCam: { x: 0, y: 0, a: 0 } };
+const G = { state: 'menu', mode: 'sandbox', time: 0, dipT: 0, eventT: 60, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, lastPlace: -1, questT: 0, menuCam: null };
+// the main menu drifts over the world along a random path, different every time the menu opens
+function newMenuCam() { const sg = Math.random() < .5 ? -1 : 1; G.menuCam = { a: 0, cx: rand(.4, .6), cy: rand(.4, .6), ax: rand(.16, .3), ay: rand(.14, .28), fx: rand(.8, 1.2) * sg, fy: rand(.6, 1.7) * (Math.random() < .5 ? -1 : 1), px: rand(0, TAU), py: rand(0, TAU), sp: rand(.012, .02) }; }
 let ents = [], pickups = [], projs = [], parts = [], texts = [];
 let P = null, horseEnt = null, nextEid = 1;
 const cam = { x: 0, y: 0, sx: 0, sy: 0 };
@@ -5804,7 +5806,7 @@ $('pauseScreen').addEventListener('click', e => {
   else if (a === 'saveQuit') { saveGame(); toMainMenu(); }
   else if (a === 'quitNoSave') toMainMenu();
 });
-function toMainMenu() { if (G.under) leaveDungeon(true); UI.closeAll(); closeDialog(); G.state = 'menu'; G.shake = 0; $('hud').classList.add('off'); refreshMenu(); UI.show('mainMenu'); }
+function toMainMenu() { if (G.under) leaveDungeon(true); newMenuCam(); UI.closeAll(); closeDialog(); G.state = 'menu'; G.shake = 0; $('hud').classList.add('off'); refreshMenu(); UI.show('mainMenu'); }
 const saveKey = (mode = G.mode) => mode === 'story' ? 'fk_story' : 'fk_save';
 function hasSave(mode = G.mode) { try { return !!localStorage.getItem(saveKey(mode)); } catch (e) { return false; } }
 function readSave(mode) { try { return JSON.parse(localStorage.getItem(saveKey(mode)) || 'null'); } catch (e) { return null; } }
@@ -7046,7 +7048,7 @@ function frame(now) {
     if (seasonOf() !== curSeason) { applySeason(G.state === 'play' && G.seasonInit); } if (G.state === 'play') G.seasonInit = true;
     if (G.state === 'play' && !paused()) { if (G.hitstop > 0) G.hitstop -= dt; else update(dt); }
     else { input.clicked = false; G.shake *= Math.pow(.004, dt); if (G.state === 'dead') { updateFX(dt); for (const e of ents) updateActor(e, dt * .3); } }
-    if (G.state === 'menu') { G.menuCam.a += dt * .015; cam.x = WW * TS / 2 + Math.cos(G.menuCam.a) * WW * TS * .28; cam.y = WH * TS / 2 + Math.sin(G.menuCam.a * 1.3) * WH * TS * .26; }
+    if (G.state === 'menu') { const M = G.menuCam || (newMenuCam(), G.menuCam); M.a += dt * M.sp; cam.x = WW * TS * (M.cx + Math.cos(M.a * M.fx + M.px) * M.ax); cam.y = WH * TS * (M.cy + Math.sin(M.a * M.fy + M.py) * M.ay); }
     else if (P) {
       const lx = clamp((input.mx - VW / 2) * .1, -60, 60), ly = clamp((input.my - VH / 2) * .1, -45, 45);
       const k = 1 - Math.pow(.0005, dt); cam.x += (P.x + (G.state === 'play' && !paused() ? lx : 0) - cam.x) * k; cam.y += (P.y + (G.state === 'play' && !paused() ? ly : 0) - cam.y) * k;
