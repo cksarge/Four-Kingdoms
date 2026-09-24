@@ -415,6 +415,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .modeCard .mcT{font-family:var(--fh);font-weight:900;letter-spacing:.12em;color:var(--gold-l);font-size:14px}
 .modeCard .mcD{font-size:14px;color:var(--ink2);line-height:1.3;margin-top:3px}
 .modeCard.story .mcT::before{content:'✦ ';color:#ffcf4a}
+.modeCard.tut .mcT::before{content:'⚑ ';color:#8fd0ff}
 #endScreen{background:radial-gradient(ellipse at center,rgba(40,26,8,.55),rgba(0,0,0,.93))}
 #endScreen .panel{width:min(760px,calc(94vw/var(--ui-scale)));text-align:center}
 #endScreen .endBody{max-height:calc(92vh/var(--ui-scale) - 290px);overflow-y:auto;overflow-x:hidden;padding-right:8px}
@@ -517,6 +518,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div id="modePick" class="modeBox">
         <div class="modeCard story" data-mode="story"><div class="mcT">STORY MODE</div><div class="mcD">Follow a hedge knight's tale across the four kingdoms. Your choices shape the realm and decide one of many endings.</div></div>
         <div class="modeCard" data-mode="sandbox"><div class="mcT">SANDBOX</div><div class="mcD">The open realm with no story. Explore, fight, trade and meddle in diplomacy for as long as you like.</div></div>
+        <div class="modeCard tut" data-mode="tutorial"><div class="mcT">TUTORIAL</div><div class="mcD">A quick lesson in the training yard: moving, fighting, archery, riding and the menus. Afterwards, keep playing the same world as an endless sandbox.</div><div class="mcS">About five minutes · Knight difficulty · Medium world · uses your sandbox save</div></div>
       </div>
       <div id="setupBox" class="hidden">
         <div class="setH">DIFFICULTY</div>
@@ -1516,6 +1518,7 @@ const ATYPES = {
   goat: { name: 'Mountain Goat', hp: 40, dmg: 9, spd: 140, range: 26, cd: 1.3, wind: .3, faction: 'wild', xp: 8, gold: [0, 0], r: 10, animal: true, passive: true },
   spider: { name: 'Giant Spider', hp: 46, dmg: 9, spd: 130, range: 30, cd: 1.2, wind: .35, faction: 'wild', xp: 16, gold: [0, 0], r: 12, animal: true },
   rimeheart: { name: 'Rimeheart', hp: 950, dmg: 22, spd: 70, range: 62, cd: 1.7, wind: .6, faction: 'hollow', xp: 450, gold: [200, 300], r: 16, weapon: 'great' },
+  dummy: { name: 'Training Dummy', hp: 9999, dmg: 0, spd: 0, range: 0, cd: 99, faction: 'civ', xp: 0, gold: [0, 0], r: 12 },
   camel: { name: 'Camel', hp: 90, dmg: 10, spd: 110, range: 30, cd: 1.6, wind: .4, faction: 'wild', xp: 12, gold: [0, 0], r: 13, animal: true, passive: true },
   horse: { name: 'Horse', hp: 999, dmg: 0, spd: 190, range: 0, cd: 9, faction: 'civ', r: 12, civ: true },
   // story mode
@@ -2196,6 +2199,7 @@ function useSpecial() {
   const cdm = k === 'bash' || k === 'bow' ? 1 : 1 - .06 * SK('sword'); P.st -= cost; P.stDelay = .9; P[cdKey] = sp.cd * cdm; if (k !== 'bash') P.specMax = sp.cd * cdm;
   if (k === 'bash') { doBash(); return; }
   if (k === 'bow') { P.pierceNext = true; addText(P.x, P.y - 34, 'Piercing shot ready', '#bfe0ff', 12); SND.play('bowfull'); return; }
+  if (G.tut) G.tut.special = true;
   P.spec = { k, t: 0, hit: false, dur: k === 'sword' ? .42 : k === 'spear' ? .32 : .72 };
   P.blocking = false; P.drawing = false; P.swing = 0;
   if (k === 'sword') { P.swing = P.swingDur = .42; P.swingArc = TAU; P.hitDone = true; }
@@ -2396,6 +2400,7 @@ function turnToward(a, b, s) { const d = angDiff(a, b); return a + clamp(d, -s, 
 
 function playerHostileTo(e) {
   if (e.dead || e.isPlayer) return false;
+  if (e.dummy) return true;
   if (e.kind === 'horse' || e.important) return false;
   if (e.faction === 'civ') return !!e.aggroPlayer && !e.civ;
   if (e.ally || e.follower) return false;
@@ -2410,6 +2415,8 @@ function playerHostileTo(e) {
 }
 function hostile(a, b) {
   if (a === b || a.dead || b.dead || a.downed > 0 || b.downed > 0) return false;
+  if (a.dummy) return false; // straw never fights back
+  if (b.dummy) return !!a.isPlayer; // only you train on the dummies
   if (a.isPlayer) return playerHostileTo(b);
   if (b.isPlayer) return playerHostileTo(a);
   if (a.kind === 'horse' || b.kind === 'horse') return false;
@@ -2434,6 +2441,7 @@ function damage(t, amt, src, o = {}) {
     let a = amt * DIFF().dmgTaken;
     P.combatT = 6;
     if (P.dodge > 0) {
+      if (G.tut && src && src.tutYield) G.tut.dodged = true;
       const into = DODGE_T - P.dodge;
       if (into < DODGE_PERFECT) {
         P.st = Math.min(P.maxSt, P.st + 8); SND.play('perfect');
@@ -2452,6 +2460,7 @@ function damage(t, amt, src, o = {}) {
         if (settings.dmgNums) addText(P.x, P.y - 34, 'Blocked', '#d8d0b8', 12);
         if (src && !src.isPlayer && !o.proj) { const d = Math.hypot(src.x - P.x, src.y - P.y) || 1; src.kbx = (src.x - P.x) / d * 140; src.kby = (src.y - P.y) / d * 140; }
         if (P.st <= 0) { P.st = 0; a += b * .5; toast('Guard broken!', 'bad'); P.stDelay = 1.2; }
+        if (G.tut && src.tutYield) G.tut.blocked = true;
       }
     }
     let def = P.S.def; a *= 100 / (100 + def * 6.5);
@@ -2468,6 +2477,7 @@ function damage(t, amt, src, o = {}) {
     return a;
   }
   if (t.important || t.kind === 'horse') return 0;
+  if (t.dummy) { if (settings.dmgNums) addText(t.x + rand(-8, 8), t.y - 30, Math.round(amt) + (o.crit ? '!' : ''), o.crit ? '#ffd24a' : '#fff4e0', o.crit ? 19 : 14); t.flash = .15; SND.play('hit', .7); for (let i = 0; i < 5; i++) addPart(t.x, t.y - 12, rand(-70, 70), rand(-90, 10), '#d8b050', .4, 2.5, 200); if (G.tut && src === P) { if (o.proj && t.isTarget) G.tut.arrows++; else if (!o.proj && !t.isTarget) G.tut.hits++; } return amt; } // straw never dies
   const wasHostile = src === P ? playerHostileTo(t) : true;
   if (src === P) t.lastHitProj = !!o.proj;
   if (src && src.party) amt *= 1 + .08 * (SK('lead') >= 3 ? 3 : SK('lead') >= 1 ? 1 : 0);
@@ -2487,6 +2497,7 @@ function damage(t, amt, src, o = {}) {
     if (src === P) { if (!wasHostile && !o.dot) crime(t); if (t.place != null) alertPlace(t.place, P); }
     if (t.civ) { t.flee = 3; t.fleeFrom = src; }
   }
+  if (t.tutYield && t.hp < t.maxHp * .3) { Object.assign(t, { tutYield: false, aggroPlayer: false, target: null, faction: 'civ', civ: true, boss: false, stand: true }); t.say = { text: 'I yield! Mercy, sir!', t: 3 }; SND.play('yield'); if (G.tut) G.tut.yielded = true; return amt; }
   if (t.tourney && t.hp < t.maxHp * .15) { t.hp = Math.max(1, t.hp); tourneyYield(t); return amt; } // bouts are to the yield
   if (t.hp <= 0 && t.comp) { t.hp = 1; t.downed = 15; t.target = null; t.wind = 0; toast(`${t.name} is down!`, 'bad'); return amt; }
   if (t.hp <= 0) kill(t, src);
@@ -3225,6 +3236,7 @@ function questTarget(q) {
     case 'find': return q.stage === 0 ? { x: q.spot.x, y: q.spot.y, r: 5 * TS } : { x: W.places[q.giver].x, y: W.places[q.giver].y };
     case 'escort': case 'supplies': case 'deliver': case 'message': { const p = W.places[q.target]; return { x: p.x, y: p.y }; }
     case 'assist': case 'raid': return q.loc;
+    case 'tut': return tutTarget(q);
     case 'bounty': if (q.bk === 'captain') { const p = W.places[q.place]; return { x: p.x, y: p.y }; } return { x: q.loc.x, y: q.loc.y, r: 6 * TS };
     case 'story': return storyTarget(q);
   }
@@ -3501,7 +3513,7 @@ function interactLabel(b) {
       case 'elder': return `Talk to ${e.name}`; case 'merchant': return `Trade with ${e.name}`; case 'ruler': return `Seek an audience with ${e.name}`;
       case 'armorer': return 'Browse the royal armory'; case 'stable': return 'Visit the royal stables'; case 'caravan': return 'Trade with the caravan'; case 'trader': return `Trade with ${e.name}`;
       case 'traveler': return `Talk to ${e.name}`;
-      case 'coach': return 'Hire a carriage'; case 'hermit': return `Speak with ${e.name}`; case 'captain': return 'Hire soldiers'; case 'herald': return 'Speak with the herald'; case 'companion': return `Talk to ${e.name}`;
+      case 'coach': return 'Hire a carriage'; case 'hermit': return `Speak with ${e.name}`; case 'captain': return 'Hire soldiers'; case 'instructor': return 'Talk to Sergeant Mara'; case 'herald': return 'Speak with the herald'; case 'companion': return `Talk to ${e.name}`;
     }
     return `Talk to ${e.name.toLowerCase().includes('soldier') || e.name === 'Guard' || e.name === 'Knight' ? KDATA[e.k] ? KDATA[e.k].name + ' ' + e.name.toLowerCase() : e.name : e.name}`;
   }
@@ -3939,6 +3951,104 @@ function fiefDialog(e, pl) {
     options: [...TAXES.map((t, i) => ({ t: `Set taxes: ${t}${F.tax === i ? ' (current)' : ''}`, dis: F.tax === i, fn: () => { F.tax = i; fiefDialog(e, pl); } })),
       { t: 'Hold a feast for the village <span class="dn">150g · +15 loyalty</span>', dis: P.gold < 150, fn: () => { P.gold -= 150; F.loyal = clamp(F.loyal + 15, 0, 100); SND.play('crowd'); fiefDialog(e, pl); } }, { t: 'That is all', fn: closeDialog }] });
 }
+/* ---------------- Tutorial ----------------
+   A drill sergeant walks you through the controls in a training yard beside the first village,
+   then the world simply carries on as a sandbox game. */
+const TUT = [
+  { t: 'Walk to Sergeant Mara using W A S D', at: 'mara', done: T => dist(P.x, P.y, T.m.x, T.m.y) < 80 },
+  { t: 'Hold Shift while moving to sprint', done: T => T.sprint > .6 },
+  { t: 'Talk to Sergeant Mara: walk up and press E', at: 'mara', done: T => T.talked },
+  { t: 'Attack the training dummy with left click (3 hits)', at: 'dummy', done: T => T.hits >= 3 },
+  { t: 'Use your special move on the dummy: press C', at: 'dummy', done: T => T.special },
+  { t: 'Block a strike from the recruit: hold right click while facing them', at: 'recruit', enter: () => tutRecruit(), done: T => T.blocked },
+  { t: 'Dodge a strike: press Space just as the blow lands', at: 'recruit', done: T => T.dodged },
+  { t: 'Beat the recruit until they yield', at: 'recruit', done: T => T.yielded },
+  { t: 'Press Tab to swap to the bow Mara gave you', enter: () => { const b = addItem('short_bow', 1, 1, true); addItem('arrow', 1, 25, true); equip(b.uid, true, 'weapon2'); toast('Mara hands you a <b>Short Bow</b> and 25 arrows.', 'gold'); }, done: () => P.S.bow },
+  { t: 'Hold left click to draw, release to shoot the archery target (2 hits)', at: 'target', done: T => T.arrows >= 2 },
+  { t: 'Press I to open your inventory', done: T => T.opened && T.opened.inv },
+  { t: 'Press M to open the map', done: T => T.opened && T.opened.map },
+  { t: 'Close the map (Esc), then press F to mount your horse', enter: () => { if (!P.eq.horse) { const h = addItem('old_horse', 1, 1, true); equip(h.uid, true); toast('Mara gives you an <b>Old Horse</b>. It is slow, but it is yours.', 'gold'); } }, done: () => P.mounted },
+  { t: 'Press J to open your quest journal', done: T => T.opened && T.opened.quests },
+  { t: 'Return to Sergeant Mara', at: 'mara', done: T => T.graduated },
+];
+const MARA_SAY = ['Over here, recruit!', 'Stretch those legs. Hold Shift!', 'Come here and talk to me. Press E.', 'Hit the dummy. It will not hit back.', 'Now show me something fancy. Press C.', 'Shield up! Hold right click and face the blow.', 'Now dodge. Space, right as the blow lands!', 'Finish it. Make them yield.', 'Tab swaps to your bow.', 'Draw fully for a strong shot. Aim at the target.', 'Check your pack. Press I.', 'Every road is on your map. Press M.', 'A knight needs a horse. Press F.', 'Your quests live in the journal. Press J.', 'Come back to me, recruit.'];
+function tutSpot() { // an open patch near the first village with no trees or buildings, wide enough for the yard
+  const treesNear = (x, y) => { let n = 0; const cx = Math.floor(x / (CH * TS)), cy = Math.floor(y / (CH * TS)); for (let j = cy - 1; j <= cy + 1; j++) for (let i = cx - 1; i <= cx + 1; i++) { const ch = W.chunkTrees[j * CW + i]; if (ch) ch.forEach(t => { if (t.x > x - 3 * TS && t.x < x + 12 * TS && t.y > y - 3 * TS && t.y < y + 5 * TS) n++; }); } return n; };
+  let best = null, bs = 1e9;
+  for (let r = 5; r <= 22 && bs > 0; r += 1.5) for (let a = 0; a < TAU; a += .35) {
+    const x = W.start.x + Math.cos(a) * r * TS, y = W.start.y + Math.sin(a) * r * TS; let bad = 0;
+    for (let dy = -1; dy <= 2; dy++) for (let dx = -1; dx <= 10; dx++) { const tt = terAtPx(x + dx * TS, y + dy * TS); if (blockedPx(x + dx * TS, y + dy * TS) || tt === T.WATER || tt === T.FORD) bad += 5; }
+    const sc2 = bad + treesNear(x, y) * 2 + r * .05; if (sc2 < bs) { bs = sc2; best = { x, y }; }
+  }
+  return findFree(best.x, best.y);
+}
+function tutBegin(step) {
+  const sp = tutSpot();
+  G.tut = { step: -1, m: sp, sprint: 0, hits: 0, arrows: 0 };
+  const e = (kind, dx, dy, o) => { const f = findFree(sp.x + dx * TS, sp.y + dy * TS); return mkActor(kind, f.x, f.y, Object.assign({ tut: true, persistent: true, stand: true, standFace: Math.PI / 2 }, o)); };
+  G.tut.mara = e('npc', 0, 0, { role: 'instructor', name: 'Sergeant Mara', _look: { body: '#9c3b2c', mail: 1, head: 'hair', hair: '#6a3a1a', skin: '#e0b48a', cape: '#6e1a12', tabard: '#c23a2c', weapon: { wk: 'spear', len: 46, col: '#9ba1a8' } } });
+  G.tut.dummy = e('dummy', 3, 0, { dummy: true, name: 'Training Dummy', atkCd: 1e9, aggro: 0 });
+  G.tut.target = e('dummy', 9, -1, { dummy: true, isTarget: true, name: 'Archery Target', atkCd: 1e9, aggro: 0 });
+  Q.active = Q.active.filter(q => q.type !== 'tut'); G.tut.q = { id: Q.next++, type: 'tut', title: 'The Training Yard', obj: '', desc: 'Sergeant Mara is teaching you the basics. Follow her instructions.', giverName: 'Sergeant Mara', reward: { gold: 50, xp: 60, rep: {}, rel: [], items: [] }, started: G.time };
+  Q.active.unshift(G.tut.q); Q.tracked = G.tut.q.id;
+  tutGo(step || 0);
+  if (step >= 6 && step <= 7) tutRecruit();
+  if (!step) sSoon(() => openDialog({ name: 'Sergeant Mara', role: 'Drill sergeant of the Albion levy', portrait: G.tut.mara, text: 'So you want to be a knight? Everyone does, until the first arrow. I am Sergeant Mara, and before you ride out I will teach you to walk, fight, shoot and ride. Follow the instructions at the top left of your screen. It will not take long.', options: [{ t: 'Ready, Sergeant.', fn: closeDialog }, { t: 'Skip the tutorial and start playing', fn: () => { closeDialog(); tutEnd(true); } }] }));
+}
+function tutRecruit() { const T = G.tut; if (T.recruit && !T.recruit.dead && !T.recruit.civ) return; const f = findFree(T.dummy.x + 30, T.dummy.y + 70); T.recruit = mkActor('champion', f.x, f.y, { tut: true, tutYield: true, name: 'Sparring Recruit', aggroPlayer: true, persistent: true, home: { x: f.x, y: f.y }, leash: 400, aggro: 400, _look: { body: '#b9a17b', head: 'hair', hair: '#4a3020', skin: '#d8a878', weapon: { wk: 'sword', len: 22, col: '#b08050', wooden: true }, shield: { b: ITEMS.wooden_shield } } }); T.recruit.hp = T.recruit.maxHp = 110; T.recruit.dmg = 4; T.recruit.cd = 1.8; T.recruit.windT = .75; T.recruit.target = P; }
+function tutGo(i) {
+  const T = G.tut; T.step = i; const st = TUT[i]; if (!st) return tutEnd();
+  if (st.enter) st.enter(); T.opened = {};
+  T.q.obj = `${st.t}  (${i + 1}/${TUT.length})`; SND.play('story'); updateHUD(true);
+  if (T.mara) T.mara.say = { text: MARA_SAY[i], t: 4.5 };
+}
+function tutTick(dt) {
+  const T = G.tut; if (!T || T.done) return;
+  if (P.sprinting) T.sprint += dt;
+  if (T.recruit && T.step >= 5 && T.step <= 7 && T.recruit.dead) { T.recruit = null; tutRecruit(); }
+  const st = TUT[T.step]; if (st && st.done(T)) { if (T.step === 7 || T.step === 2) T.q.obj = ''; tutGo(T.step + 1); }
+}
+function tutTarget(q) { const T = G.tut; if (!T) return null; const st = TUT[T.step]; const e = st && st.at && T[st.at === 'mara' ? 'mara' : st.at]; return e && !e.dead ? { x: e.x, y: e.y } : null; }
+function tutTalk(e) {
+  const T = G.tut;
+  if (!T || T.done) { e.say = { text: 'Go on, knight. The realm is waiting.', t: 3 }; return; }
+  if (T.step === 2) { openDialog({ name: e.name, role: 'Drill sergeant', portrait: e, text: 'Good. You can walk and talk at the same time. Most people you meet can be spoken to like this: elders, merchants, rulers. Now, weapons. See that straw fellow? Hit him.', options: [{ t: 'Yes, Sergeant.', fn: () => { T.talked = true; closeDialog(); } }, { t: 'Skip the rest of the training', fn: () => { closeDialog(); tutEnd(true); } }] }); return; }
+  if (T.step === TUT.length - 1) {
+    openDialog({ name: e.name, role: 'Drill sergeant', portrait: e, text: 'Not bad, recruit. Not bad at all. One more thing: every village elder has work for a sword, and the signposts carry bounties and carriages. Press P when you level up to learn skills. Now go. The realm is yours.', options: [{ t: 'Thank you, Sergeant.', fn: () => { T.graduated = true; closeDialog(); } }] });
+    return;
+  }
+  openDialog({ name: e.name, role: 'Drill sergeant', portrait: e, text: TUT[T.step].t + '.', options: [{ t: 'Understood.', fn: closeDialog }, { t: 'Skip the rest of the training', fn: () => { closeDialog(); tutEnd(true); } }] });
+}
+function tutEnd(skipped) {
+  const T = G.tut; if (!T) return; T.done = true;
+  const q = T.q; if (Q.active.includes(q)) { if (skipped) { Q.active = Q.active.filter(x => x !== q); Q.tracked = Q.active[0] ? Q.active[0].id : null; } else completeQuest(q); }
+  if (!P.eq.horse) { const h = addItem('old_horse', 1, 1, true); equip(h.uid, true); }
+  ents = ents.filter(e => !(e.tut && e.kind === 'dummy')); ents.forEach(e => { if (e.tut && e !== T.mara) { e.persistent = false; e.transient = true; e.tutYield = false; } });
+  if (T.mara) { T.mara.persistent = false; T.mara.transient = true; }
+  G.tut = null;
+  showAreaTitle(skipped ? 'THE REALM AWAITS' : 'TRAINING COMPLETE', 'An endless sandbox · explore, fight, trade and rise');
+  setTimeout(() => toast(`Speak to the elder of <b>${W.start.name}</b> <kbd>E</kbd> to find work, or head down the road and see what you find.`, 'gold'), 1600);
+  setTimeout(() => toast('Tip: press <kbd>K</kbd> for Diplomacy, <kbd>M</kbd> for the map, <kbd>I</kbd> for your pack, <kbd>P</kbd> for skills.', ''), 6000);
+  saveGame(true);
+}
+function drawDummy(g, e) {
+  g.save(); g.translate(e.x, e.y);
+  g.fillStyle = 'rgba(0,0,0,.28)'; ell(g, 3, 10, 13, 5);
+  if (e.isTarget) {
+    g.fillStyle = '#5a3a1e'; g.fillRect(-2, -4, 4, 14); g.fillRect(-9, 6, 18, 3);
+    [['#f0e6cc', 13], ['#c23a2c', 10.5], ['#f0e6cc', 8], ['#c23a2c', 5.5], ['#ffd24a', 3]].forEach(([c, r]) => { g.fillStyle = c; circ(g, 0, -14, r); });
+    g.strokeStyle = '#6a4424'; g.lineWidth = 1.5; g.beginPath(); g.arc(0, -14, 13, 0, TAU); g.stroke();
+  } else {
+    const wob = e.flash > 0 ? Math.sin(performance.now() / 30) * 2 : 0;
+    g.rotate(wob * .03);
+    g.fillStyle = '#5a3a1e'; g.fillRect(-2, -6, 4, 16); g.fillRect(-12, -14, 24, 3);
+    g.fillStyle = '#d8b050'; ell(g, 0, -12, 7, 10); g.strokeStyle = '#a8842a'; g.lineWidth = 1; for (let i = -6; i <= 6; i += 3) { g.beginPath(); g.moveTo(i, -20); g.lineTo(i * .8, -3); g.stroke(); }
+    g.fillStyle = '#8a6a3a'; g.fillRect(-7, -12, 14, 3);
+    g.fillStyle = '#e0c060'; circ(g, 0, -24, 5.5); g.fillStyle = '#6a4424'; circ(g, -1.8, -25, .9); circ(g, 1.8, -25, .9);
+    [[-12, -13], [12, -13]].forEach(([hx, hy]) => { g.fillStyle = '#d8b050'; circ(g, hx, hy, 2.8); });
+  }
+  g.restore();
+}
 /* ---------------- Fishing ---------------- */
 function startFishing(it) {
   if (!countItem('fishing_rod')) { toast('You need a fishing rod. Village markets sell them.'); return; }
@@ -4042,6 +4152,7 @@ function talkTo(e) {
     case 'coach': return openTravel(W.places[e.place], e.name, e);
     case 'hermit': return hermitDialog(e);
     case 'captain': return captainDialog(e);
+    case 'instructor': return tutTalk(e);
     case 'herald': return heraldDialog(e);
     case 'companion': return compDialog(e);
     case 'citizen': e.say = { text: pick(BARKS.citizen), t: 3 }; return;
@@ -5131,7 +5242,7 @@ const UI = {
     if (dialogOpen) closeDialog();
     if (this.isOpen(n)) return;
     if (n !== 'settings' && n !== 'help') this.closeAll();
-    this.stack.push(n); $(this.ids[n]).classList.add('show'); SND.play('open');
+    this.stack.push(n); $(this.ids[n]).classList.add('show'); SND.play('open'); if (G.tut) (G.tut.opened || (G.tut.opened = {}))[n] = true;
     if (n === 'inv') renderInventory(); else if (n === 'skills') renderSkills(); else if (n === 'ach') renderAch(); else if (n === 'stats') renderStats(); else if (n === 'map') openMap(); else if (n === 'dip') renderDiplomacy(); else if (n === 'quests') renderQuests(); else if (n === 'settings') renderSettings(); else if (n === 'pause') renderPause();
     tipHide();
   },
@@ -5535,6 +5646,7 @@ function drawEntity(g, e, t) {
   drawEntityBody(g, e, t);
 }
 function drawEntityBody(g, e, t) {
+  if (e.kind === 'dummy') { drawDummy(g, e); return; }
   if (e.downed > 0) { drawCorpse(g, Object.assign({}, e, { deadT: 0 })); return; }
   if (e.kind === 'horse') { drawHorse(g, e.x, e.y, e.face, ITEMS[e.hid], e.walk, true, P.allegiance); return; }
   if (e.wind > 0 && !e.ranged && playerHostileTo(e) && dist(e.x, e.y, P.x, P.y) < 300) {
@@ -5921,10 +6033,14 @@ function renderSetup() {
   ['wildSeg', 'exploredChk'].forEach(id => $(id).classList.toggle('setLocked', iron)); ['wildLock', 'exploredLock'].forEach(id => $(id).classList.toggle('hidden', !iron));
 }
 $('optExplored').onchange = e => { newOpts.explored = e.target.checked; };
-function beginNew() { try { localStorage.setItem('fk_newopts', JSON.stringify(newOpts)); } catch (e) { } UI.closeAll(); startNew(pendingMode, Object.assign({}, newOpts)); }
+function beginNew() { if (pendingMode === 'tutorial') { UI.closeAll(); G.tutPending = true; startNew('sandbox', {}); return; } try { localStorage.setItem('fk_newopts', JSON.stringify(newOpts)); } catch (e) { } UI.closeAll(); startNew(pendingMode, Object.assign({}, newOpts)); }
 $('btnNew').onclick = () => { SND.init(); showModePick(); UI.open('mode'); };
 document.querySelectorAll('#modePick .modeCard').forEach(el => el.addEventListener('click', () => {
   pendingMode = el.dataset.mode; SND.play('ui');
+  if (pendingMode === 'tutorial') { // fixed settings, so straight to the lesson (confirming first if it would replace a sandbox save)
+    if (!hasSave('sandbox')) { beginNew(); return; }
+    $('modePick').classList.add('hidden'); $('newConfirmText').innerHTML = 'The tutorial continues as a sandbox game, so it uses your sandbox save slot. Your current sandbox game will be <b>overwritten</b> the next time you save.'; $('newConfirm').classList.remove('hidden'); return;
+  }
   $('modePick').classList.add('hidden'); $('setupBox').classList.remove('hidden'); $('modeScreen').querySelector('.panel').classList.add('wide');
   $('modeTitle').textContent = pendingMode === 'story' ? 'NEW STORY' : 'NEW SANDBOX'; renderSetup();
 }));
@@ -5935,7 +6051,7 @@ $('btnSetupGo').onclick = () => {
   $('setupBox').classList.add('hidden'); $('newConfirm').classList.remove('hidden');
 };
 $('btnNewYes').onclick = () => beginNew();
-$('btnNewNo').onclick = () => { $('newConfirm').classList.add('hidden'); $('setupBox').classList.remove('hidden'); };
+$('btnNewNo').onclick = () => { if (pendingMode === 'tutorial') { showModePick(); return; } $('newConfirm').classList.add('hidden'); $('setupBox').classList.remove('hidden'); };
 $('btnContinue').onclick = () => {
   SND.init(); const sb = readSave('sandbox'), st = readSave('story');
   if (!sb || !st) { continueGame(st ? 'story' : 'sandbox'); return; }
@@ -5958,7 +6074,7 @@ function resetState() {
   G.under = null; G.over = null;
   ents = []; pickups = []; projs = []; parts = []; texts = []; horseEnt = null; uidCounter = 1; nextEid = 1;
   W.places.forEach(p => { p.disc = false; p.rumor = false; p.spawned = false; p.dead = []; p.cleared = false; p.chestOpened = false; p.clearedAt = 0; p.offers = null; p.request = false; p.blessed = false; p.investigated = false; p.rumorUsed = false; p.backerRevealed = false; p.wellT = -999; p.ddead = null; p.dchests = null; p.dcleared = false; p.legendTaken = false; if (p.type === 'outpost') p.owner = p.baseOwner; for (const k in p) if (k.startsWith('_shop_')) delete p[k]; });
-  (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false; G.lastPay = null; G.siege = null; G.tourney = null; G.stats = newStats();
+  (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false; G.lastPay = null; G.siege = null; G.tourney = null; G.stats = newStats(); G.tut = null;
   Object.assign(G, { time: 0, dipT: 0, eventT: 50, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, questT: 0 });
   newKingdoms(); newQuests(); newFog();
 }
@@ -5976,6 +6092,7 @@ function startNew(mode = 'sandbox', opts) {
     const s = W.start; s.disc = true; W.places[opts.kingdom].disc = true; revealArea(s.tx, s.ty, 22);
     genVillageOffers(s); const easy = makeQuest('camp', s, s.owner); if (easy) s.offers[0] = easy;
     beginPlay();
+    if (G.tutPending) { G.tutPending = false; tutBegin(0); return; }
     if (STORY) { storyBegin(); setTimeout(() => toast('Tip: press <kbd>J</kbd> for your quest journal. Main quests are marked with ✦.', ''), 9000); return; }
     const wpn = P.eq.weapon ? itemName(getItem(P.eq.weapon)).toLowerCase() : 'nothing but your fists';
     setTimeout(() => toast(`You arrive in <b>${s.name}</b> with ${/^[aeiou]/.test(wpn) ? 'an' : wpn.startsWith('nothing') ? '' : 'a'} ${wpn} and ${P.gold} gold. Speak to the village elder <kbd>E</kbd> to find work.`, 'gold'), 1200);
@@ -6004,11 +6121,11 @@ function saveGame(silent) {
       party: partyNow().filter(e => !e.comp || true).map(e => ({ comp: e.comp, kind: e.kind, name: e.name, hp: Math.round(Math.max(1, e.hp)), k: e.k })), mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
     horse: horseEnt ? { x: horseEnt.x, y: horseEnt.y } : null,
     K: { rel: K.rel, aff: K.aff, rep: K.rep, mil: K.mil, reasons: K.reasons, events: K.events, kev: K.kev, repWhy: K.repWhy, gifts: K.gifts, log: K.log, cd: {} },
-    Q: { active: Q.active.filter(q => q.type !== 'raid' && q.sid !== 'hraid').map(qStrip), done: Q.done.map(qStrip), tracked: Q.tracked, next: Q.next },
+    Q: { active: Q.active.filter(q => q.type !== 'raid' && q.type !== 'tut' && q.sid !== 'hraid').map(qStrip), done: Q.done.map(qStrip), tracked: Q.tracked, next: Q.next },
     places: W.places.map(p => ({ disc: p.disc, rumor: p.rumor, cleared: p.cleared, chestOpened: p.chestOpened, clearedAt: p.clearedAt, dead: p.dead, owner: p.owner, blessed: p.blessed, investigated: p.investigated, rumorUsed: p.rumorUsed, backerRevealed: p.backerRevealed, ddead: p.ddead, dchests: p.dchests, dcleared: p.dcleared, legendTaken: p.legendTaken })),
     exp: packBits(EXP), settings,
   };
-  data.opts = G.opts || normOpts(); data.stats = G.stats;
+  data.opts = G.opts || normOpts(); data.stats = G.stats; data.tut = G.tut && !G.tut.done ? G.tut.step : null;
   if (G.mode === 'story') { data.mode = 'story'; data.story = STORY; }
   try { localStorage.setItem(saveKey(), JSON.stringify(data)); if (!silent) { toast('Game saved.', 'good'); SND.play('pickup'); } else toast('Autosaved.', ''); }
   catch (e) { toast('Could not save: browser storage is unavailable or full.', 'bad'); }
@@ -6027,6 +6144,7 @@ function loadGame(d) {
   if (!d.P.skills) { P.skills = {}; P.sp = Math.max(0, P.lvl - 1); } // older saves: grant the points for levels already earned
   ['comps', 'houses', 'stash', 'forts'].forEach(k => { if (!Array.isArray(P[k])) P[k] = []; }); if (!P.fortGuards) P.fortGuards = {};
   (d.P.party || []).forEach(m => spawnPartyMember(m)); delete P.party; recalc();
+  if (d.tut != null) setTimeout(() => { if (G.state === 'play' && !G.tut) tutBegin(d.tut); }, 400); // resume the lesson
   Q.active.forEach(q => {
     if (q.type === 'find' && q.stage === 0) pickups.push({ x: q.spot.x, y: q.spot.y, vx: 0, vy: 0, type: 'qitem', id: 'heirloom', q: 1, t: 1, qid: q.id });
     if (q.type === 'escort') spawnTraveler(q);
@@ -7097,6 +7215,7 @@ function update(dt) {
   updatePlayer(dt);
   if (STORY && !G.under) storyTick(dt);
   if (G.under) updateTraps(dt);
+  if (G.tut) tutTick(dt);
   if (G.siege && !G.under) updateSiege(dt);
   for (const e of ents) { if (Math.abs(e.x - P.x) > 2600 || Math.abs(e.y - P.y) > 2600) { if (!e.follow) continue; } updateActor(e, dt); }
   separate(); updateProjs(dt); updatePickups(dt); updateFX(dt); updateSpawns(dt);
