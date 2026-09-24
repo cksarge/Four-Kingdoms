@@ -83,6 +83,8 @@ body.touch #prompt kbd{font-size:15px}
 .slotList{display:flex;flex-direction:column;gap:8px;max-height:calc(70vh/var(--ui-scale));overflow-y:auto}
 .slotCard{position:relative}.slotCard.empty{opacity:.7;border-style:dashed}
 .slotActs{display:flex;gap:6px;margin-top:6px}
+.modeCard.fromstory{border-color:#5fb8a6;box-shadow:inset 0 0 0 1px rgba(95,184,166,.35)}
+.wasStory{margin-left:6px;padding:1px 6px;border-radius:3px;font-size:10px;letter-spacing:.08em;color:#1b1209;background:linear-gradient(#f0d38a,#b88c3a)}
 #dialog,#toasts,#questTracker,#prompt,#tip{zoom:var(--text-scale,1)}
 body.touch #toasts{zoom:calc(var(--ui-scale) * var(--text-scale,1))}
 #setBody{max-height:calc(76vh/var(--ui-scale) - 90px);overflow-y:auto;padding-right:8px}
@@ -165,7 +167,6 @@ body.touch #helpTouch{display:block}
 .ach.locked{opacity:.45;filter:grayscale(1)}
 .statT{width:100%;border-collapse:collapse;font-size:15px}.statT td{padding:5px 8px;border-bottom:1px solid rgba(160,122,58,.2)}.statT td:last-child{text-align:right;color:var(--gold-l)}
 #achScreen .panel,#statScreen .panel{width:min(760px,94vw)}
-#journalScreen .panel{width:min(920px,calc(96vw/var(--ui-scale)));height:min(640px,calc(92vh/var(--ui-scale)));display:flex;flex-direction:column}
 .bGrid{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:6px;align-content:start}
 .bCard{position:relative;border-radius:5px;border:1px solid rgba(154,117,54,.35);background:rgba(0,0,0,.28);cursor:pointer;padding:2px;transition:border-color .13s}
 .bCard:hover{border-color:var(--gold)}.bCard.sel{border-color:#fff0b8;background:rgba(216,178,90,.12)}
@@ -588,7 +589,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <button class="hbtn" data-open="inv" title="Inventory (I)">I · Pack</button>
         <button class="hbtn" data-open="map" title="Map (M)">M · Map</button>
         <button class="hbtn" data-open="dip" title="Diplomacy (K)">K · Realms</button>
-        <button class="hbtn" data-open="quests" title="Quests (J)">J · Quests</button>
+        <button class="hbtn" data-open="quests" title="Journal (J)">J · Journal</button>
         <button class="hbtn" data-open="pause" title="Menu (Esc)">Esc</button>
       </div>
     </div>
@@ -680,11 +681,11 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <button class="ptile" data-act="inv"><img data-icon="leather" alt=""><span>Inventory</span><span class="pk">I</span></button>
         <button class="ptile" data-act="map"><img data-icon="map_0" alt=""><span>Map</span><span class="pk">M</span></button>
         <button class="ptile" data-act="dip"><img data-icon="banner" alt=""><span>Diplomacy</span><span class="pk">K</span></button>
-        <button class="ptile" data-act="quests"><img data-icon="letter" alt=""><span>Quests</span><span class="pk">J</span></button>
+        <button class="ptile" data-act="quests"><img data-icon="letter" alt=""><span>Journal</span><span class="pk">J</span></button>
         <button class="ptile" data-act="skills"><img data-icon="relic" alt=""><span>Skills</span><span class="pk">P</span><b class="pb hidden" id="pauseSp"></b></button>
         <button class="ptile" data-act="stats"><img data-icon="treasure_map" alt=""><span>Your Journey</span></button>
         <button class="ptile" data-act="ach"><img data-icon="shard_0" alt=""><span>Achievements</span></button>
-        <button class="ptile" data-act="journal"><span class="pg">📜</span><span>Journal</span><span class="pk">L</span></button>
+        <button class="ptile" data-act="slots"><span class="pg">💾</span><span>Save Slots</span></button>
         <button class="ptile" data-act="settings"><span class="pg">⚙</span><span>Settings</span></button>
       </div>
       <div class="pauseRow"><button class="btn" data-act="save">Save Game</button><button class="btn" data-act="download" title="Download this save as a file">⬇ Download Save</button><button class="btn red" data-act="main">Main Menu</button></div>
@@ -771,19 +772,10 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   </div>
 
   <!-- QUESTS -->
-  <div id="journalScreen" class="screen">
-    <div class="panel rv">
-      <div class="closeX" data-close>✕</div>
-      <div class="ptitle">JOURNAL</div>
-      <div class="orn">✦</div>
-      <div class="tabs" id="jTabs"></div>
-      <div class="qBody"><div class="qList" id="jList"></div><div class="qDetail" id="jDetail"></div></div>
-    </div>
-  </div>
   <div id="questScreen" class="screen">
     <div class="panel rv">
       <div class="closeX" data-close>✕</div>
-      <div class="ptitle">QUEST JOURNAL</div>
+      <div class="ptitle">JOURNAL</div>
       <div class="orn">✦</div>
       <div class="tabs" id="qTabs"></div>
       <div class="qBody"><div class="qList" id="qList"></div><div class="qDetail" id="qDetail"></div></div>
@@ -816,7 +808,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <div><kbd data-k="KeyF">F</kbd> Mount, dismount, call horse</div><div><kbd data-k="ShiftLeft">Shift</kbd> Sprint (hold; drains stamina)</div><div><kbd data-k="KeyQ">Q</kbd>+<kbd>LMB</kbd> Hit friendly or neutral characters (villagers, guards, animals). Hurting people is a crime</div>
         <div><kbd data-k="KeyP">P</kbd> Skills (one point per level)</div><div><kbd data-k="KeyG">G</kbd> Companions: follow or hold position</div>
         <div><kbd data-k="KeyI">I</kbd> Inventory</div><div><kbd data-k="KeyM">M</kbd> Map</div>
-        <div><kbd data-k="KeyK">K</kbd> Diplomacy (kingdoms)</div><div><kbd data-k="KeyJ">J</kbd> Quest journal</div><div><kbd data-k="KeyL">L</kbd> Journal: bestiary and lore</div>
+        <div><kbd data-k="KeyK">K</kbd> Diplomacy (kingdoms)</div><div><kbd data-k="KeyJ">J</kbd> Journal: quests and chronicle</div><div><kbd data-k="KeyL">L</kbd> Journal: bestiary and lore</div>
         <div><kbd>1</kbd>–<kbd>3</kbd> Eat food / drink potion</div><div><kbd>Esc</kbd> Pause / close</div>
       </div>
       <div id="helpTouch" style="margin-top:12px;padding:10px 12px;border:1px solid rgba(154,117,54,.4);border-radius:6px;background:rgba(0,0,0,.25)"><b style="font-family:var(--fh);color:var(--gold-l)">ON A PHONE OR TABLET</b><br>Drag anywhere on the left of the screen to move. <b>⚔</b> attacks (hold it to draw a bow, release to shoot), <b>🛡</b> blocks, <b>↻</b> dodges, <b>✦</b> is your special move and <b>✋</b> talks and interacts (or tap the prompt). Attacks and arrows aim at the nearest foe by themselves. The small buttons sprint, mount, swap weapons, switch arrows, eat, drink a potion, call your companions and go fullscreen. On the map, drag to pan, pinch to zoom, tap a place for details and press and hold to set a waypoint.</div>
@@ -870,6 +862,14 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   </div>
 
   <!-- DEATH -->
+  <div id="confirmScreen" class="screen" style="z-index:58">
+    <div class="panel rv" style="width:min(480px,92vw);text-align:center">
+      <div class="ptitle" id="cfT" style="font-size:24px"></div>
+      <div class="orn">✦</div>
+      <p id="cfX" style="margin:6px 4px 16px;line-height:1.5"></p>
+      <div style="display:flex;gap:10px;justify-content:center"><button class="btn red" id="cfYes"></button><button class="btn" id="cfNo">Cancel</button></div>
+    </div>
+  </div>
   <div id="deathScreen" class="screen">
     <div style="text-align:center" class="scal">
       <div class="dt">YOU HAVE FALLEN</div>
@@ -965,10 +965,10 @@ function mix(h1, h2, t) {
 function compass(dx, dy) { const a = Math.atan2(dy, dx); const dirs = ['East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest', 'North', 'Northeast']; return dirs[(Math.round(a / (Math.PI / 4)) + 8) % 8]; }
 
 /* ---------------- Settings ---------------- */
-const DEFAULT_SETTINGS = { music: 0.45, sound: 0.7, effects: 0.6, shake: true, dmgNums: true, minimap: true, uiScale: 1, quality: 'high', battery: false, voices: true, noFlash: false, cb: false, textScale: 1, keys: {} };
+const DEFAULT_SETTINGS = { music: 0.45, sound: 0.7, effects: 0.6, shake: true, dmgNums: true, minimap: true, uiScale: 1, quality: 'high', battery: false, voices: true, voiceVol: .8, noFlash: false, cb: false, textScale: 1, keys: {} };
 let settings = loadSettings();
 /* Key bindings: every action keeps its default code inside the game; settings.keys maps it to the physical key. */
-const KEY_ACTIONS = [['KeyW', 'Move up'], ['KeyS', 'Move down'], ['KeyA', 'Move left'], ['KeyD', 'Move right'], ['ShiftLeft', 'Sprint'], ['Space', 'Dodge'], ['KeyE', 'Interact'], ['KeyF', 'Horse'], ['KeyQ', 'Hit friendlies (hold)'], ['KeyR', 'Switch arrows'], ['Tab', 'Swap weapon'], ['KeyC', 'Special move'], ['KeyG', 'Companions'], ['KeyI', 'Inventory'], ['KeyM', 'Map'], ['KeyK', 'Diplomacy'], ['KeyJ', 'Quests'], ['KeyP', 'Skills'], ['KeyL', 'Journal'], ['Digit1', 'Eat food'], ['Digit2', 'Drink potion'], ['Digit3', 'Use bandage']];
+const KEY_ACTIONS = [['KeyW', 'Move up'], ['KeyS', 'Move down'], ['KeyA', 'Move left'], ['KeyD', 'Move right'], ['ShiftLeft', 'Sprint'], ['Space', 'Dodge'], ['KeyE', 'Interact'], ['KeyF', 'Horse'], ['KeyQ', 'Hit friendlies (hold)'], ['KeyR', 'Switch arrows'], ['Tab', 'Swap weapon'], ['KeyC', 'Special move'], ['KeyG', 'Companions'], ['KeyI', 'Inventory'], ['KeyM', 'Map'], ['KeyK', 'Diplomacy'], ['KeyJ', 'Journal: quests'], ['KeyP', 'Skills'], ['KeyL', 'Journal: bestiary'], ['Digit1', 'Eat food'], ['Digit2', 'Drink potion'], ['Digit3', 'Use bandage']];
 const KEY_LOGICAL = new Set(KEY_ACTIONS.map(a => a[0]));
 let keyRev = {};
 function keyOf(code) { return (settings.keys && settings.keys[code]) || code; }
@@ -1026,7 +1026,7 @@ const SND = {
     if (who && who.scale && who.scale < .9) base *= 1.75;
     if (who && who.role === 'ruler') { base *= .72; rate *= 1.25; }
     if (who && who._look && who._look.fem) base *= 1.3;
-    const type = ['square', 'triangle', 'sawtooth'][(h >> 4) % 3], vol = type === 'sawtooth' ? .03 : .045;
+    const type = ['square', 'triangle', 'sawtooth'][(h >> 4) % 3], vol = (type === 'sawtooth' ? .03 : .045) * (settings.voiceVol ?? .8) * 1.25;
     for (let i = 0; i < n; i++) { const f = base * (1 + ((((h >> (i % 20)) & 7) - 3) * .07)) * (1 + (Math.random() - .5) * .14); this.tone(f, rate * (.7 + Math.random() * .5), type, vol, 'fx', i * rate * 1.08, 1 + (Math.random() - .5) * .35, .004); }
   },
   play(n, v = 1) {
@@ -1558,10 +1558,11 @@ const ITEMS = {
   jeweled_brooch: { name: 'Jeweled Brooch', type: 'misc', val: 120, stolen: 1, desc: 'A noble\'s brooch. Only a fence will buy it.' },
   merchant_ledger: { name: "Merchant's Ledger", type: 'misc', val: 0, stolen: 1, desc: 'Columns of numbers that someone would kill to keep secret.' },
   contraband: { name: 'Sealed Crate', type: 'misc', val: 0, stolen: 1, desc: 'Heavy, and something inside clinks. Do not open it.' },
-  shadow_cloak: { name: 'Guild Cloak', type: 'misc', val: 60, desc: 'The thieves\' guild\'s grey cloak. While you carry it, pockets are easier to pick.' },
-  garland: { name: 'Spring Garland', type: 'misc', val: 25, desc: 'A crown of spring flowers from the fair. It never seems to wilt.' },
-  harvest_charm: { name: 'Harvest Charm', type: 'misc', val: 25, desc: 'Wheat braided into a knot, for luck in the lean months.' },
-  solstice_lantern: { name: 'Solstice Lantern', type: 'misc', val: 30, desc: 'A paper lantern from the longest night. It glows faintly in the dark.' },
+  shadow_cloak: { name: 'Guild Cloak', type: 'misc', val: 60, wear: 'back', desc: 'The thieves\' guild\'s grey cloak. While you carry it, pockets are easier to pick. Wear it from your pack.' },
+  garland: { name: 'Spring Garland', type: 'misc', val: 25, wear: 'head', desc: 'A crown of spring flowers from the fair. It never seems to wilt. Wear it from your pack.' },
+  harvest_charm: { name: 'Harvest Charm', type: 'misc', val: 25, wear: 'belt', desc: 'Wheat braided into a knot, for luck in the lean months. Wear it at your belt.' },
+  solstice_lantern: { name: 'Solstice Lantern', type: 'misc', val: 30, wear: 'hand', desc: 'A paper lantern from the longest night. Carry it and it lights your way after dark.' },
+  wool_scarf: { name: 'Wool Scarf', type: 'misc', val: 30, wear: 'neck', desc: 'A long red scarf knitted for the solstice, the prize of the snowball toss. Warm, and very festive. Wear it from your pack.' },
   cider: { name: 'Mulled Cider', type: 'misc', heal: 14, st: 50, val: 4, stack: 1, food: 1, desc: 'Hot, spiced and sweet. Restores 14 health and 50 stamina. [1]' },
   bandage: { name: 'Bandage', type: 'misc', heal: 15, val: 6, stack: 1, band: 1, desc: 'Restores 15 health. [3]' },
   iron: { name: 'Iron Ingots', type: 'misc', good: 1, val: 30, stack: 1, desc: 'Trade good. Albion mines it; Eldoria pays well.' },
@@ -2707,6 +2708,7 @@ function updatePlayer(dt) {
   if (P.stDelay > 0) P.stDelay -= dt; else P.st = Math.min(P.maxSt, P.st + (P.blocking ? 6 : P.mounted ? 30 : 26) * DIFF().stRegen * (P.restT > 0 ? 1.3 : 1) * dt);
   updateSpecial(dt);
   if (P.spec) { }
+  else if (G.contest && G.contest.kind === 'snow') { if ((input.lmb || input.clicked) && G.contest.cd <= 0) throwSnowball(); }
   else if (P.S.bow) updateBow(dt);
   else if ((input.lmb || input.clicked) && P.atkCd <= 0 && P.dodge <= 0 && P.st >= P.S.cost * .5) startAttack();
   input.clicked = false;
@@ -2893,7 +2895,7 @@ function damage(t, amt, src, o = {}) {
     return a;
   }
   if (t.important || t.kind === 'horse') return 0;
-  if (t.dummy && t.fest && G.contest && G.contest.kind === 'archery' && o.proj && src === P) { G.contest.hits++; toast(`Hit! (${G.contest.hits})`, 'good'); }
+  if (t.dummy && t.fest && G.contest && (G.contest.kind === 'archery' || G.contest.kind === 'snow') && o.proj && src === P) { G.contest.hits++; if (G.contest.kind === 'snow') { t.popT = 0; toast(`Splat! (${G.contest.hits})`, 'good'); return 0; } toast(`Hit! (${G.contest.hits})`, 'good'); }
   if (t.dummy) { if (settings.dmgNums) addText(t.x + rand(-8, 8), t.y - 30, Math.round(amt) + (o.crit ? '!' : ''), o.crit ? '#ffd24a' : '#fff4e0', o.crit ? 19 : 14); t.flash = .15; SND.play('hit', .7); for (let i = 0; i < 5; i++) addPart(t.x, t.y - 12, rand(-70, 70), rand(-90, 10), '#d8b050', .4, 2.5, 200); if (G.tut && src === P) { if (o.proj && t.isTarget) G.tut.arrows++; else if (!o.proj && !t.isTarget) G.tut.hits++; } return amt; } // straw never dies
   const wasHostile = src === P ? playerHostileTo(t) : true;
   if (src === P) t.lastHitProj = !!o.proj;
@@ -3180,6 +3182,7 @@ function updateProjs(dt) {
     }
     if (p.stuck) { if (p.life <= 0) projs.splice(i, 1); else if (p.arrow === 'fire_arrow' && p.life > 1 && Math.random() < .25) addPart(p.x, p.y - 2, rand(-6, 6), rand(-30, -12), Math.random() < .5 ? '#ffb040' : '#ff6a1a', .35, 2.2); continue; }
     p.x += p.vx * dt; p.y += p.vy * dt; if (p.lob > 0) p.lob -= dt;
+    if (p.snow && (p.life <= 0 || blockedPx(p.x, p.y))) { for (let k = 0; k < 6; k++) addPart(p.x, p.y, rand(-50, 50), rand(-50, 20), '#f4f8ff', .35, 2); projs.splice(i, 1); continue; }
     if (p.arrow === 'fire_arrow' && Math.random() < .7 * QMUL()) addPart(p.x, p.y, rand(-15, 15), rand(-25, 5), Math.random() < .5 ? '#ffb040' : '#ff6a1a', .28, 2.5);
     else if ((p.arrow === 'frost_arrow' || p.frost) && Math.random() < .5 * QMUL()) addPart(p.x, p.y, rand(-10, 10), rand(-10, 10), '#cfeeff', .3, 1.8);
     else if (p.arrow === 'venom_arrow' && Math.random() < .35 * QMUL()) addPart(p.x, p.y, rand(-6, 6), rand(0, 20), '#6ad04a', .35, 1.8);
@@ -3269,19 +3272,19 @@ const wxMove = () => 1 - .15 * (wxOf('sand') + wxOf('blizzard'));
 const wxAggro = () => 1 - .35 * wxOf('fog') - .2 * wxOf('blizzard') - .1 * wxOf('rain');
 const wxRange = () => 1 - .25 * wxOf('fog') - .4 * wxOf('sand') - .2 * wxOf('blizzard');
 function drawWeather(c, VW, VH, vx, vy, t) {
-  const md = (a, m) => ((a % m) + m) % m, hq = settings.quality !== 'low';
+  const md = (a, m) => ((a % m) + m) % m, hq = settings.quality !== 'low', wd = settings.battery ? .5 : 1;
   const rain = wxOf('rain'), fog = wxOf('fog'), sand = wxOf('sand'), bliz = wxOf('blizzard'), snow = Math.min(1.8, (G.snowAmt || 0) * .8 + wxOf('snow') + bliz * 1.6);
   if (rain > .01) {
     c.fillStyle = `rgba(20,30,50,${.2 * rain})`; c.fillRect(0, 0, VW, VH);
-    if (hq) { c.strokeStyle = `rgba(185,205,235,${.45 * rain})`; c.lineWidth = 1; c.beginPath(); const n = Math.round(170 * rain); for (let i = 0; i < n; i++) { const z = .6 + hash2(i, 21) * .8, x = md(hash2(i, 23) * 3000 - vx * z + t * 60 * z, VW + 40) - 20, y = md(hash2(i, 29) * 3000 - vy * z + t * 900 * z, VH + 40) - 20; c.moveTo(x, y); c.lineTo(x - 3 * z, y + 14 * z); } c.stroke(); }
+    if (hq) { c.strokeStyle = `rgba(185,205,235,${.45 * rain})`; c.lineWidth = 1; c.beginPath(); const n = Math.round(170 * rain * wd); for (let i = 0; i < n; i++) { const z = .6 + hash2(i, 21) * .8, x = md(hash2(i, 23) * 3000 - vx * z + t * 60 * z, VW + 40) - 20, y = md(hash2(i, 29) * 3000 - vy * z + t * 900 * z, VH + 40) - 20; c.moveTo(x, y); c.lineTo(x - 3 * z, y + 14 * z); } c.stroke(); }
   }
   if (snow > .02) {
     c.fillStyle = `rgba(225,236,250,${.07 * Math.min(1, snow) + .14 * bliz})`; c.fillRect(0, 0, VW, VH);
-    if (hq) { const n = Math.round(110 * snow); c.fillStyle = '#fff'; for (let i = 0; i < n; i++) { const z = .5 + hash2(i, 11) * .9, x = md(hash2(i, 3) * 2000 - vx * z * .6 + Math.sin(t * .9 + i) * 14 + t * (16 + 260 * bliz) * z, VW + 20) - 10, y = md(hash2(i, 5) * 2000 - vy * z * .6 + t * (42 + 60 * bliz) * z, VH + 20) - 10; c.globalAlpha = Math.min(1, (.45 + .45 * z) * Math.min(1, snow)); c.fillRect(x, y, 1.2 * z + .6, 1.2 * z + .6); } c.globalAlpha = 1; }
+    if (hq) { const n = Math.round(110 * snow * wd); c.fillStyle = '#fff'; for (let i = 0; i < n; i++) { const z = .5 + hash2(i, 11) * .9, x = md(hash2(i, 3) * 2000 - vx * z * .6 + Math.sin(t * .9 + i) * 14 + t * (16 + 260 * bliz) * z, VW + 20) - 10, y = md(hash2(i, 5) * 2000 - vy * z * .6 + t * (42 + 60 * bliz) * z, VH + 20) - 10; c.globalAlpha = Math.min(1, (.45 + .45 * z) * Math.min(1, snow)); c.fillRect(x, y, 1.2 * z + .6, 1.2 * z + .6); } c.globalAlpha = 1; }
   }
   if (sand > .01) {
     c.fillStyle = `rgba(196,150,86,${.3 * sand})`; c.fillRect(0, 0, VW, VH);
-    if (hq) { c.strokeStyle = `rgba(236,206,150,${.55 * sand})`; c.lineWidth = 1.2; c.beginPath(); const n = Math.round(90 * sand); for (let i = 0; i < n; i++) { const z = .5 + hash2(i, 41) * .9, x = md(hash2(i, 43) * 3000 - vx * z + t * 520 * z, VW + 60) - 30, y = md(hash2(i, 47) * 3000 - vy * z + Math.sin(t * 2 + i) * 10, VH + 20) - 10; c.moveTo(x, y); c.lineTo(x - 18 * z, y + 2); } c.stroke(); }
+    if (hq) { c.strokeStyle = `rgba(236,206,150,${.55 * sand})`; c.lineWidth = 1.2; c.beginPath(); const n = Math.round(90 * sand * wd); for (let i = 0; i < n; i++) { const z = .5 + hash2(i, 41) * .9, x = md(hash2(i, 43) * 3000 - vx * z + t * 520 * z, VW + 60) - 30, y = md(hash2(i, 47) * 3000 - vy * z + Math.sin(t * 2 + i) * 10, VH + 20) - 10; c.moveTo(x, y); c.lineTo(x - 18 * z, y + 2); } c.stroke(); }
   }
   if (fog > .01) {
     const gr = c.createRadialGradient(VW / 2, VH / 2, 70, VW / 2, VH / 2, Math.max(VW, VH) * .62); gr.addColorStop(0, `rgba(205,210,215,${.1 * fog})`); gr.addColorStop(1, `rgba(205,210,215,${.75 * fog})`); c.fillStyle = gr; c.fillRect(0, 0, VW, VH);
@@ -3489,6 +3492,7 @@ function spawnCity(pl) {
     npc(C.cath.x - 60, C.cath.y + 22, { role: 'beggar', name: 'A beggar', standFace: -Math.PI / 2, _look: { body: '#6a5a48', head: 'hood', hood: '#5a4a38', skin: skinTone() } });
   }
   if (open) npc(C.plaza.x - 100, C.plaza.y + 36, { role: 'bard', name: `${pick(NAMES.first)} the Bard`, stand: false, wanderR: 60, home: { x: C.plaza.x - 100, y: C.plaza.y + 36 }, _look: { body: pick(['#c83a4a', '#3a6ac8', '#e8a030', '#5a9a4a']), head: 'cap', skin: skinTone(), cape: pick(['#e8c040', '#7a2a8a']), plume: '#f4f0e0', lute: 1 } });
+  if (open) npc(C.plaza.x + 124, C.plaza.y + 74, { role: 'scribe', name: `${pick(NAMES.first)} the Scribe`, standFace: Math.PI / 2, _look: { body: '#4a3a5a', head: 'cap', skin: skinTone(), tabard: '#d8c8a0' } });
   if (open) npc(C.plaza.x + 124, C.plaza.y - 14, { role: 'crier', name: 'The Town Crier', _look: { body: kc, head: 'cap', skin: skinTone(), cape: KDATA[k].accent, tabard: KDATA[k].accent } });
   const walk = (kind, o) => { const s = pick(C.streets); if (!s) return; const f = findFree(s.x, s.y); return mkActor(kind, f.x, f.y, Object.assign({ place: pl.id, k, home: { x: s.x, y: s.y }, wanderR: 260, cityNpc: true }, o)); };
   if (open) {
@@ -3543,7 +3547,7 @@ function goToJail(k, days) {
 }
 function canPickpocket(e) { if (!['townsfolk', 'patron', 'guest', 'customer', 'worshipper'].includes(e.role) || e.robbed) return false; const a = Math.atan2(P.y - e.y, P.x - e.x); return Math.abs(angDiff(e.face, a)) > 1.9; }
 function pickpocket(e, k) {
-  e.robbed = true; const ch = .5 + (isNight() ? .15 : 0) + (countItem('shadow_cloak') ? .15 : 0) - (e.noble ? .1 : 0);
+  e.robbed = true; const ch = .5 + (isNight() ? .15 : 0) + (countItem('shadow_cloak') ? .15 : 0) - (e.noble ? .1 : 0) + Math.min(.15, (G.stats.picks || 0) * .01); // practice makes nimble fingers
   if (Math.random() < ch) {
     const gold = e.noble ? randi(25, 70) : randi(4, 20); P.gold += gold; SND.play('coin'); let extra = '';
     if (chance(e.noble ? .45 : .2)) { const id = pick(e.noble ? ['gold_locket', 'jeweled_brooch', 'silver_ring'] : ['silver_ring', 'silver_ring', 'gold_locket']); addItem(id, 1, 1, true); extra = ` and a <b>${ITEMS[id].name}</b>`; }
@@ -3628,15 +3632,18 @@ function drawFestDeco(g, d, t) {
 function gamesDialog(e) {
   const f = G.festival; if (!f) { e.say = { text: 'The games are over until next season!', t: 3 }; return; }
   const txt = { spring: 'Step up, step up! Three targets, thirty seconds. Hit as many as you can! Eight or more wins the garland. No bow? I will lend you one.', harvest: 'The pie-eating contest! Eight seconds, as many pies as you can stuff in. Beat both our champions to win the harvest charm! (Mash interact.)', solstice: 'Ring the bell! Strike when the bar is full. Three tries. A perfect ring wins the solstice lantern!' }[f];
-  openDialog({ name: e.name, role: FEST[f].n, portrait: e, text: txt, options: [{ t: `<span class="dn">PLAY</span>Enter the ${FEST[f].game} (5 gold)`, dis: P.gold < 5 || !!G.contest, fn: () => { P.gold -= 5; closeDialog(); startContest(f, e); } }, { t: 'Maybe later', fn: closeDialog }] });
+  const games = f === 'solstice' ? [['bell', 'strongman bell'], ['snow', 'snowball toss']] : [[null, FEST[f].game]];
+  openDialog({ name: e.name, role: FEST[f].n, portrait: e, text: txt + (f === 'solstice' ? '<br><br>Or try the <b>snowball toss</b>: snowmen pop up around the square for thirty seconds. Click to throw. Knock down ten to win a wool scarf!' : ''), options: [...games.map(([kind, n]) => ({ t: `<span class="dn">PLAY</span>Enter the ${n} (5 gold)`, dis: P.gold < 5 || !!G.contest, fn: () => { P.gold -= 5; closeDialog(); startContest(f, e, kind); } })), { t: 'Maybe later', fn: closeDialog }] });
 }
-function startContest(f, e) {
+function throwSnowball() { const C = G.contest, a = P.face, v = 560; C.cd = .3; projs.push({ x: P.x + Math.cos(a) * 14, y: P.y + Math.sin(a) * 14 - 4, vx: Math.cos(a) * v, vy: Math.sin(a) * v, dmg: 1, src: P, life: .7, snow: true }); SND.play('swing', .5); }
+function startContest(f, e, kind) {
   if (f === 'spring') {
     let loan = null; const prevW = P.eq.weapon; if (!P.S.bow) { const b = P.inv.find(i => ITEMS[i.id].wk === 'bow'); if (b) equip(b.uid, true); else { loan = addItem('short_bow', 1, 1, true); equip(loan.uid, true); } }
     if (!P.inv.some(i => ITEMS[i.id].type === 'ammo')) addItem('arrow', 1, 20, true);
     const tg = []; for (let i = 0; i < 3; i++) { const f2 = findFree(e.x - 140 + i * 140, e.y + 220 + (i % 2) * 40); tg.push(mkActor('dummy', f2.x, f2.y, { dummy: true, isTarget: true, fest: true, name: 'Festival Target', atkCd: 1e9, aggro: 0, stand: true })); }
     G.contest = { kind: 'archery', t: 30, hits: 0, tg, loan: loan && loan.uid, prevW }; toast('Go! Hit the targets!', 'gold');
   } else if (f === 'harvest') G.contest = { kind: 'pie', t: 8, n: 0, rivals: [randi(16, 24), randi(14, 26)] };
+  else if (kind === 'snow') { G.contest = { kind: 'snow', t: 30, hits: 0, tg: [], cd: 0, spawnT: .4, ex: e.x, ey: e.y }; toast('Go! Knock down the snowmen! (click to throw)', 'gold'); }
   else G.contest = { kind: 'bell', ph: 0, tries: 3, best: 0 };
   SND.play('quest');
 }
@@ -3649,12 +3656,18 @@ function contestPress() { // interact during a contest
 function contestTick(dt) {
   const C = G.contest; if (!C) return;
   if (C.kind === 'bell') { C.ph += dt * 4.2; return; }
+  if (C.kind === 'snow') {
+    C.cd -= dt; C.spawnT -= dt;
+    C.tg = C.tg.filter(sm => { sm.popT -= dt; if (sm.popT > 0) return true; for (let i = 0; i < 10; i++) addPart(sm.x, sm.y - 12, rand(-70, 70), rand(-80, 10), '#f4f8ff', .45, 2.6); removeEnt(sm); return false; });
+    if (C.spawnT <= 0 && C.tg.length < 3) { C.spawnT = rand(.45, 1); const a = rand(0, TAU), r = rand(110, 230), f = findFree(C.ex + Math.cos(a) * r, C.ey + 150 + Math.sin(a) * r * .55), life = rand(2, 3.1); C.tg.push(mkActor('dummy', f.x, f.y, { dummy: true, isTarget: true, fest: true, snowman: true, name: 'Snowman', atkCd: 1e9, aggro: 0, stand: true, popT: life, pop0: life })); }
+  }
   C.t -= dt; if (C.t <= 0) endContest();
 }
 function endContest() {
   const C = G.contest; G.contest = null; let prize = 0, item = null, msg = '';
   if (C.kind === 'archery') { C.tg.forEach(x => removeEnt(x)); if (C.loan) { unequip('weapon'); removeItem(C.loan, 1); } if (C.prevW && P.eq.weapon !== C.prevW && getItem(C.prevW)) equip(C.prevW, true); prize = C.hits >= 8 ? 150 : C.hits >= 5 ? 70 : C.hits >= 2 ? 20 : 0; if (C.hits >= 8) item = 'garland'; msg = `${C.hits} hits!`; }
   if (C.kind === 'pie') { const best = Math.max(...C.rivals); const win = C.n > best; prize = win ? 120 : C.n > Math.min(...C.rivals) ? 30 : 0; if (win) item = 'harvest_charm'; else addItem('pie', 1, 1, true); msg = `You ate ${C.n} pies; the champions managed ${C.rivals.join(' and ')}.${win ? ' You win!' : ''}`; }
+  if (C.kind === 'snow') { C.tg.forEach(x => removeEnt(x)); prize = C.hits >= 10 ? 150 : C.hits >= 6 ? 70 : C.hits >= 3 ? 20 : 0; if (C.hits >= 10) item = 'wool_scarf'; msg = `You knocked down ${C.hits} snowm${C.hits === 1 ? 'a' : 'e'}n.`; }
   if (C.kind === 'bell') { prize = C.best >= 95 ? 150 : C.best >= 80 ? 60 : 10; if (C.best >= 95) item = 'solstice_lantern'; msg = `Best strike: ${C.best}.`; }
   if (prize) { P.gold += prize; SND.play('coin'); } if (item) { addItem(item, 1, 1, true); G.stats.festWins++; }
   toast(`🎉 ${msg} ${prize ? `You win ${prize} gold` : 'No prize this time'}${item ? ` and the ${ITEMS[item].name}` : ''}!`, prize ? 'gold' : '');
@@ -3994,7 +4007,7 @@ function nemesisYield(e) {
     Object.assign(e, { aggroPlayer: false, target: null, faction: 'civ', civ: true, boss: false, stand: true }); e.say = { text: 'Enough… you have bested me.', t: 4 };
     openDialog({ name: nemName(N), role: 'Beaten, at last', portrait: e, text: `${nemName(N)} kneels in the dirt, sword cast aside. "Well? Finish it, or don't."`, options: [
       { t: '<span class="dn">KILL</span>End the feud for good.', fn: () => { N.state = 'dead'; closeDialog(); kill(e, P); addTrophy(`The helm of ${nemName(N)}`, 'champion', e.x, e.y); toast('Your nemesis is dead. The roads feel quieter.', 'gold'); } },
-      { t: '<span class="dn">SPARE</span>Go home. I never want to see you again.', fn: () => { N.state = 'spared'; closeDialog(); e.say = { text: 'I… thank you.', t: 3 }; e.transient = true; e.flee = 20; e.fleeFrom = P; gainXP(300); addTrophy(`The sword of ${nemName(N)}`, 'champion', e.x, e.y); toast('Mercy. Somewhere, the bards are already writing it down.', 'gold'); } },
+      { t: '<span class="dn">SPARE</span>Go home. I never want to see you again.', fn: () => { N.state = 'spared'; N.next = dayNum() + randi(3, 5); N.visits = 0; closeDialog(); e.say = { text: 'I… thank you.', t: 3 }; e.transient = true; e.flee = 20; e.fleeFrom = P; gainXP(300); addTrophy(`The sword of ${nemName(N)}`, 'champion', e.x, e.y); toast('Mercy. Somewhere, the bards are already writing it down.', 'gold'); } },
       { t: '<span class="dn">EXILE</span>Leave the four kingdoms, or next time I will not be kind.', fn: () => { N.state = 'exiled'; closeDialog(); e.transient = true; e.flee = 20; e.fleeFrom = P; gainXP(250); toast(`${nemName(N)} rides for the border, never to return.`, 'gold'); } },
     ] });
     return;
@@ -4002,6 +4015,25 @@ function nemesisYield(e) {
   Object.assign(e, { aggroPlayer: false, target: null, faction: 'civ', civ: true, boss: false, flee: 20, fleeFrom: P, transient: true }); e.say = { text: pick(['This isn\'t over!', 'Next time, hedge knight!', 'You will pay for this!']), t: 3 };
   gainXP(80 + N.lvl * 20); toast(`${nemName(N)} flees! They will be back${N.losses >= 3 ? ', and next time they will want a proper duel' : ''}.`, 'gold');
   setTimeout(() => removeEnt(e), 6000);
+}
+function nemesisVisit() {
+  const N = P.nemesis, a = rand(0, TAU), f = findFree(P.x + Math.cos(a) * 220, P.y + Math.sin(a) * 220), lv = P.lvl + N.lvl; N.next = dayNum() + randi(5, 8); N.visits = (N.visits || 0) + 1;
+  const e = mkActor('champion', f.x, f.y, { name: nemName(N), k: N.k, role: 'nemfriend', nemFriend: true, named: true, stand: true, transient: true, faction: 'civ', civ: true, _look: knightLook(N.k, N.weapon) });
+  e.hp = e.maxHp = Math.round(150 + lv * 34); e.dmg = 9 + lv * 1.8;
+  e.say = { text: pick(['Peace, friend! It is only me.', 'Well met, the one who spared me!', 'I hoped I would find you on this road.']), t: 4 };
+  toast(`⚔ <b>${nemName(N)}</b>, the rival you spared, rides up to greet you.`, 'good');
+}
+function nemFriendDialog(e) {
+  const N = P.nemesis; if (!N) return;
+  const lines = N.visits <= 1 ? '"I have thought a great deal about the day you let me live. I was a fool, and a jealous one. Let me make some small amends."' : pick(['"The roads are kinder with you on them. Mostly."', '"I told a tavern the truth about our feud last week. They did not believe me either."', '"Still alive, I see. Good. I would hate for anyone else to beat you."']);
+  openDialog({ name: nemName(N), role: 'Once your nemesis, now a friend', portrait: e, text: lines, options: [
+    ...(!e.gave ? [{ t: '<span class="dn">GIFT</span>Accept a token of thanks', fn: () => { e.gave = true; const r = Math.random(); if (r < .4) { const g0 = randi(60, 140) + P.lvl * 10; P.gold += g0; SND.play('coin'); toast(`${nemName(N)} presses <b>${g0} gold</b> into your hand.`, 'gold'); } else if (r < .75) { addItem('potion', 1, 2); toast('Two healing potions, "for the next fool who tries to kill you."', 'good'); } else { const id = pick(LOOT_TIERS[Math.min(4, 1 + Math.floor(P.lvl / 4))].filter(i => ['weapon', 'shield', 'armor'].includes(ITEMS[i].type))); addItem(id, 2, 1); toast(`${nemName(N)} gives you a fine <b>${ITEMS[id].name}</b>.`, 'gold'); } nemFriendDialog(e); } }] : []),
+    { t: '<span class="dn">RIDE</span>Ride with me a while', dis: !!e.ally, fn: () => { closeDialog(); Object.assign(e, { ally: true, civ: false, follow: true, followDist: 70, fox: rand(-40, 40), foy: rand(-40, 40), stand: false, aggro: 360, leash: 99999, expire: G.time + DAYLEN * .5, transient: false }); e.say = { text: 'Lead on. My sword is yours until nightfall.', t: 3 }; } },
+    { t: '<span class="dn">NEWS</span>Heard anything on the road?', fn: () => { const c = W.places.filter(p => !p.disc && ['camp', 'dungeon', 'hidden', 'ruin'].includes(p.type)).sort((a, b) => dist(P.x, P.y, a.x, a.y) - dist(P.x, P.y, b.x, b.y))[0]; closeDialog();
+      if (G.wboss && chance(.4) && W.places[G.wboss.target]) toast(`"${G.wboss.name} is heading for ${W.places[G.wboss.target].name}. I would not go alone."`, 'war');
+      else if (c) { c.disc = true; G.mapWaypoint = { x: c.x, y: c.y }; toast(`"There is ${{ camp: 'a bandit camp', dungeon: 'a dungeon', hidden: 'something hidden', ruin: 'an old ruin' }[c.type]} ${leagues(dist(P.x, P.y, c.x, c.y))} leagues ${compass(c.x - P.x, c.y - P.y).toLowerCase()} of here." It is marked on your map.`, 'gold'); }
+      else toast('"Nothing you do not know already. You get around."'); } },
+    { t: 'Farewell, friend', fn: () => { closeDialog(); if (!e.ally) { e.say = { text: 'Until the next road!', t: 3 }; e.flee = 4; e.fleeFrom = P; setTimeout(() => removeEnt(e), 5000); } } }] });
 }
 function nemesisWon() { const N = P.nemesis; if (!N) return; N.wins++; N.lvl++; if (!N.epi || chance(.5)) N.epi = NEM_EPI[Math.min(NEM_EPI.length - 1, N.wins - 1)]; N.next = dayNum() + randi(3, 4); setTimeout(() => toast(`${nemName(N)} boasts of your defeat in every tavern from here to the sea.`, 'bad'), 2500); }
 /* ---------------- Roadside encounters ---------------- */
@@ -4014,6 +4046,7 @@ function encounterTick() {
   G.encT = (G.encT ?? rand(80, 140)) - 1; if (G.encT > 0) return; G.encT = rand(150, 260);
   if (dayNum() >= 4) nemesisInit();
   const N = P.nemesis; if (N && N.state === 'active' && dayNum() >= N.next && !ents.some(e => e.nemesis && !e.dead)) { spawnNemesis(N.losses >= 3); return; }
+  if (N && N.state === 'spared' && dayNum() >= (N.next || 0) && !ents.some(e => e.nemFriend && !e.dead)) { nemesisVisit(); return; }
   startEncounter(pick(ENCS));
 }
 function endEncounter() { if (!G.enc) return; ents = ents.filter(e => !(e.enc && !e.follow)); G.enc = null; }
@@ -4413,7 +4446,7 @@ function bardDialog(e) {
 }
 function crierDialog(e, k) {
   const ev = (K.log || []).slice(0, 3), wars = PAIRS.filter(([a, b]) => relStatus(a, b).n === 'At War').map(([a, b]) => `${KDATA[a].name} and ${KDATA[b].name}`);
-  const lines = [`Hear ye, hear ye! By order of ${KDATA[k].ruler}!`, ...(G.festival ? [`The ${FEST[G.festival].n} is upon us! Games and prizes in the plaza!`] : []), ...(ev.length ? ev.map(x => esc(x.t)) : ['All is well in the realm!']), wars.length ? `War rages between ${wars.join('; ')}!` : 'The four crowns are at peace, the saints be thanked!'];
+  const lines = [`Hear ye, hear ye! By order of ${KDATA[k].ruler}!`, ...(G.festival ? [`The ${FEST[G.festival].n} is upon us! Games and prizes in the plaza!`] : []), ...(G.wboss && W.places[G.wboss.target] ? [`Beware! ${G.wboss.name} has been seen near ${W.places[G.wboss.target].name}. Every crown pays handsomely for its head!`] : []), ...(G.tourney && !G.tourney.done && W.places[G.tourney.castle] ? [`A tourney is proclaimed at ${W.places[G.tourney.castle].name}! Knights of every crown, to the lists!`] : []), ...(ev.length ? ev.map(x => esc(x.t)) : ['All is well in the realm!']), wars.length ? `War rages between ${wars.join('; ')}!` : 'The four crowns are at peace, the saints be thanked!'];
   e.say = { text: 'Hear ye! Hear ye!', t: 3 };
   openDialog({ name: e.name, role: `Voice of ${KDATA[k].name}`, portrait: e, text: lines.map(t => `<p style="margin:0 0 6px">${t}</p>`).join(''), options: [{ t: 'Thank you', fn: closeDialog }] });
 }
@@ -4573,22 +4606,49 @@ function breakInDialog(it, pl) {
     { t: 'Leave it', fn: closeDialog }] });
 }
 /* ---------------- Ferries and ships ---------------- */
-function ferryDialog(it) {
-  if (P.gold < 3) { toast('The ferryman wants 3 gold.'); return; }
-  if (ents.some(e => !e.dead && playerHostileTo(e) && dist(e.x, e.y, P.x, P.y) < 300)) { toast('Not with enemies at your back!', 'bad'); return; }
-  P.gold -= 3; SND.play('coin'); withLoading('The ferryman poles you across…', () => { G.time += 20; const f = findFree(it.to.x, it.to.y); P.x = f.x; P.y = f.y; cam.x = P.x; cam.y = P.y; if (horseEnt) { horseEnt.x = P.x + 30; horseEnt.y = P.y; } ents.filter(e => e.follow && e.ally).forEach(e => { const f2 = findFree(P.x + rand(-30, 30), P.y + rand(-30, 30)); e.x = f2.x; e.y = f2.y; }); });
+function travelBlocked(r) {
+  if (ents.some(e => !e.dead && playerHostileTo(e) && dist(e.x, e.y, P.x, P.y) < r)) { toast('Not with enemies about!', 'bad'); return true; }
+  if (Q.active.some(q => q.type === 'escort')) { toast('No boat will take your travelling companion. Finish the escort on foot.', 'bad'); return true; }
+  if (G.race) { toast('Not in the middle of a race!', 'bad'); return true; }
+  return false;
 }
-function harborDialog(pl) {
-  const here = W.harbors.find(h => h.place === pl.id), others = W.harbors.filter(h => h.place !== pl.id).map(h => ({ h, p: W.places[h.place], d: dist(here.x, here.y, h.x, h.y) })).sort((a, b) => a.d - b.d).slice(0, 6);
-  if (!others.length) { toast('No ships sail from here today.'); return; }
-  openDialog({ name: `The ${pick(['Gull', 'Swan', 'Seawolf', 'Kestrel', 'Maiden'])}`, role: `A merchant ship at ${pl.name}`, portrait: 'sign', text: 'The captain leans on the rail. "Where to? Coin up front, and pray for a fair wind."', options: [
-    ...others.map(o => { const cost = Math.round(20 + o.d / TS * .15), days = Math.max(1, Math.round(o.d / TS / 120)); return { t: `Sail to <b>${o.p.name}</b> <span class="dn">${cost}g · ${days} day${days > 1 ? 's' : ''}</span>`, dis: P.gold < cost, fn: () => { closeDialog(); P.gold -= cost; SND.play('coin'); voyage(o, days); } }; }),
+function bringParty() { // your horse and followers come along, as they do on the carriages
+  if (horseEnt) { const h = findFree(P.x + 34, P.y + 10); horseEnt.x = h.x; horseEnt.y = h.y; horseEnt.called = false; }
+  ents.forEach(e => { if (e.follow && !e.caravan && (!e.followE || e.followE === P)) { const g2 = findFree(P.x + rand(-50, 50), P.y + rand(-50, 50)); e.x = g2.x; e.y = g2.y; } });
+  projs = []; cam.x = P.x; cam.y = P.y; G.fishing = null; P.kbx = P.kby = 0;
+}
+function ferryDialog(it, who) {
+  if (!it) return;
+  openDialog({ name: who ? who.name : 'The ferry', role: 'Ferry across the river', portrait: who || 'sign', text: who ? pick(['"Three coppers for the crossing: one for the pole, one for the boat and one for the river, so she does not take you."', '"Across? Mind your feet, and do not rock the boat."', '"The bridge is a day\'s ride that way. Or three coins, and you are over by supper."']) : 'A flat ferry boat is tied to the jetty. A painted board reads: <i>3 gold. Ring for the ferryman.</i>', options: [
+    { t: '<span class="dn">CROSS</span>Cross the river <span class="dn">3g</span>', dis: P.gold < 3, fn: () => { closeDialog(); if (travelBlocked(300)) return; P.gold -= 3; SND.play('coin'); withLoading('The ferryman poles you across…', () => { G.time += 20; const f = findFree(it.to.x, it.to.y); P.x = f.x; P.y = f.y; bringParty(); G.stats.ferries = (G.stats.ferries || 0) + 1; }); } },
+    { t: 'Not today', fn: closeDialog }] });
+}
+const SHIP_NAMES = ['Gull', 'Swan', 'Seawolf', 'Kestrel', 'Maiden', 'Heron', 'Saint Oswin', 'Silver Wake', 'Lady Solenne', 'Grey Goose'];
+function harborDialog(pl, who) {
+  const here = W.harbors.find(h => h.place === pl.id); if (!here) return;
+  const ship = SHIP_NAMES[strHash(pl.name) % SHIP_NAMES.length], others = W.harbors.filter(h => h.place !== pl.id).map(h => ({ h, p: W.places[h.place], d: dist(here.x, here.y, h.x, h.y) })).sort((a, b) => a.d - b.d).slice(0, 6);
+  openDialog({ name: who ? who.name : `The ${ship}`, role: `Captain of the ${ship}, moored at ${pl.name}`, portrait: who || 'sign',
+    text: others.length ? '"Where to? Coin up front, and pray for a fair wind. Storms are rare this time of year, and pirates rarer. Mostly."' : '"No other harbour on this coast will take us. Try the ferries on the rivers."', options: [
+    ...others.map(o => { const cost = Math.round(20 + o.d / TS * .15), days = Math.max(1, Math.round(o.d / TS / 120)); return { t: `${o.p.name} <span class="dn">${KDATA[o.p.owner].name} · ${leagues(o.d)} lg · ${days} day${days > 1 ? 's' : ''} · ${cost}g</span>`, dis: P.gold < cost, fn: () => { closeDialog(); if (travelBlocked(520)) return; P.gold -= cost; SND.play('coin'); voyage(o, days); } }; }),
     { t: 'Stay ashore', fn: closeDialog }] });
+}
+function dockTick() { // ferrymen at the landings, a captain and a deckhand at each harbour
+  if (G.under || !W.ferries) return;
+  const near = (x, y, r) => Math.abs(x - P.x) < r && Math.abs(y - P.y) < r, nm = key => NAMES.first[strHash(key + W.seed) % NAMES.first.length];
+  const keep = (key, x, y, make) => { const e = ents.find(x2 => x2.dockKey === key); if (near(x, y, 900)) { if (!e) make(); } else if (e && !near(x, y, 1500)) removeEnt(e); };
+  W.ferries.forEach((f, i) => [[f.a, f.b], [f.b, f.a]].forEach(([s0, s1], j) => {
+    const key = `f${i}${j}`, dx = s1.x - s0.x, dy = s1.y - s0.y, dl = Math.hypot(dx, dy) || 1;
+    keep(key, s0.x, s0.y, () => { const it = W.interacts.find(x2 => x2.type === 'ferry' && dist(x2.x, x2.y, s0.x, s0.y) < 40); if (!it) return; const fp = findFree(s0.x - dy / dl * 28, s0.y + dx / dl * 28);
+      mkActor('npc', fp.x, fp.y, { role: 'ferryman', dockKey: key, ferryIt: it, stand: true, standFace: Math.atan2(dy, dx), name: `${nm(key)} the Ferryman`, _look: { body: '#5a4a36', head: 'cap', skin: '#c8986a', tabard: '#3a2a1a' } }); });
+  }));
+  W.harbors.forEach((h, i) => {
+    keep(`h${i}`, h.x, h.y, () => { const fp = findFree(h.x + 26, h.y); mkActor('npc', fp.x, fp.y, { role: 'captain', place: h.place, dockKey: `h${i}`, stand: true, name: `Captain ${nm('h' + i)}`, _look: { body: '#2a3a5a', head: 'hair', hair: '#3a2a1a', beard: 1, skin: '#c8986a', cape: '#1a2238', tabard: '#d8c8a0' } }); });
+    keep(`s${i}`, h.x, h.y, () => { const fp = findFree(h.x - 40, h.y + 20); mkActor('villager', fp.x, fp.y, { role: 'sailor', dockKey: `s${i}`, wanderR: 70, home: { x: fp.x, y: fp.y }, name: 'A deckhand', _look: { body: '#e8e0cc', head: 'hair', hair: '#6a4a2a', skin: '#a8744a', tabard: '#2a4a8a' } }); });
+  });
 }
 function voyage(o, days) {
   withLoading(`Sailing for ${o.p.name}…`, () => {
-    G.time += days * DAYLEN * .6; G.stats.voyages++; if (P.mounted) dismount(); const f = findFree(o.h.x, o.h.y); P.x = f.x; P.y = f.y; cam.x = P.x; cam.y = P.y; o.p.disc = true;
-    if (horseEnt) { horseEnt.x = P.x + 30; horseEnt.y = P.y; } ents.filter(e => e.follow && e.ally).forEach(e => { const f2 = findFree(P.x + rand(-30, 30), P.y + rand(-30, 30)); e.x = f2.x; e.y = f2.y; });
+    G.time += days * DAYLEN * .6; G.stats.voyages++; const f = findFree(o.h.x, o.h.y); P.x = f.x; P.y = f.y; o.p.disc = true; bringParty();
     const r = Math.random();
     if (r < .08) { const food = P.inv.filter(i => ITEMS[i.id].food || ITEMS[i.id].good); if (food.length) { const it = pick(food); removeItem(it.uid, Math.max(1, Math.ceil((it.n || 1) / 2))); } setTimeout(() => toast('⛈ A storm battered the ship! Some of your supplies were washed overboard.', 'bad'), 400); }
     else if (r < .15) { setTimeout(() => { toast('☠ Pirates were waiting at the docks!', 'war'); for (let i = 0; i < 3 + Math.floor(P.lvl / 3); i++) { const f2 = findFree(P.x + rand(-120, 120), P.y + rand(-120, 120)); const e = mkActor('bandit', f2.x, f2.y, { name: 'Pirate', tier: Math.min(3, 1 + Math.floor(P.lvl / 3)), aggroPlayer: true, transient: true }); e.target = P; } SND.play('horn'); }, 600); }
@@ -4654,6 +4714,14 @@ const LORE = [
   { src: 'world', cat: 'The Roads', t: 'A Bandit\'s Confession', x: 'I was a farmer until the tax man came twice in one year. Then I was a poacher, and then I was a bandit, and now I am a bandit with a price on my head. I am writing this so somebody knows I was not always like this. If you find it, tell my sister in the village by the ford that I am sorry about the goat.' },
   { src: 'world', cat: 'The Roads', t: 'The Hermits of the Wild', x: 'Some men leave the towns to find God, some to find peace, and some because the towns have asked them to leave. The hermits of the wilds are all three. They brew strange tonics and know strange things, and one of them, a Brother Caddock, is said to know more of the First King than any scholar in the four capitals.' },
   { src: 'world', cat: 'The Roads', t: 'A Letter Never Sent', x: 'My love, the road is longer than I thought, and the inns are worse. I have seen the sea, and a castle with blue roofs, and a man who ate eleven pies at the harvest fair and lost to a woman who ate twelve. I will be home before the snow. Keep the fire in, and the dog off my chair.' },
+  { src: 'scribe', cat: 'Statecraft', t: 'The Treaty of the Four Crowns', x: 'Signed at the Greywater ford in the first spring after the breaking, and broken, by one party or another, eleven times since. The treaty sets the borders, fixes the tolls on the old roads and forbids any crown to raise the High Throne again. The clerks of all four capitals keep a copy. The copies do not agree on where the borders are.' },
+  { src: 'scribe', cat: 'Heraldry', t: "A Herald's Guide to Arms", x: 'Albion bears a golden crown on red, for the shard it guards. Valoria bears the rising sun on blue, for Solenne of the Dawn. Draven bears a raven on purple, for the birds that followed Morgath home from the ice. Eldoria bears a tree on green, for the Thornwood. A knight sworn to a crown may wear its colours on tabard and cape. A knight sworn to none wears whatever he can afford.' },
+  { src: 'scribe', cat: 'Trade', t: 'The Price of Bread', x: 'Albion digs iron and wants spices. Valoria presses wine and wants furs. Draven traps furs and wants wine. Eldoria grows spices and wants iron. A clever merchant who understood this could grow rich in a single season, which is why the crowns tax every cart that crosses a border, and why bread costs double in winter.' },
+  { src: 'scribe', cat: 'Chivalry', t: 'On the Keeping of Horses', x: 'An old horse will carry you home; a riding horse will carry you far; a courser will carry you fast, until the woods thicken; a destrier will carry you into battle and out again. Whatever you ride, water it before yourself, feed it before yourself, and never name it after anyone you are courting.' },
+  { src: 'world', cat: 'The Roads', t: 'Orders for the Watchtowers', x: 'Each tower to keep two bowmen and a horn. Loose on bandits, beasts, outlaws and soldiers of any crown at war with ours. Do not loose on knights errant, however ragged they look. Last month the tower at the crossroads shot a baron. The baron has recovered. The tower has been reminded.' },
+  { src: 'world', cat: 'The Wilds', t: 'The Golden Carp', x: 'Every fisherman on every jetty in the four kingdoms has seen the golden carp, and none of them has caught it. It is as long as your arm, they say, and it winks. My father fished for it forty years. On the day he finally hooked it, he looked it in the eye, laughed, and let it go. He never told me why.' },
+  { src: 'world', cat: 'The Year', t: 'The Turning of the Year', x: 'In spring the fairs come, with garlands and archery at the butts. Summer is for war and hard work. In autumn the markets fill with pies and pumpkins, and every village holds a contest nobody will admit to losing. At midwinter the cities hang paper lanterns for the longest night, the strongest ring the bell for luck, and the children build snowmen purely so the grown-ups can knock them down.' },
+  { src: 'world', cat: 'The Roads', t: 'Graves by the Road', x: 'You will see them on every road: a cairn, a sword driven into the earth, a name scratched on a stone. Knights who fall far from home are buried where they fell, and travellers leave a coin or a flower. Some say the fallen rise again at the nearest shelter, poorer but no wiser. Some say that is only a story told to young knights. Both are true.' },
 ];
 function seeTick() {
   if (G.state !== 'play') return; G.seen = G.seen || {};
@@ -4675,13 +4743,11 @@ function readLore(id) {
   openDialog({ name: L.t, role: first ? `${L.cat} · a new page in your journal` : L.cat, portrait: 'scroll', text: `<i>${L.x}</i>`, options: [{ t: 'Roll up the scroll', fn: closeDialog }] });
   if (first) toast(`📜 <b>${L.t}</b> added to your journal (${keyName('KeyL')}).`, 'gold');
 }
-function loreHint(L, id) { return L.src === 'kingdom' ? `Kept in the cathedral library of ${KDATA[id].castle}` : L.src === 'deep' ? "Guarded in a dungeon guardian's hoard" : 'Lost somewhere in the wilds, near ruins, camps and hidden places'; }
-let jTab = 'beasts', jSel = null;
-function renderJournal() {
-  if (!P) return; G.seen = G.seen || {}; const lore = P.lore || [], nSeen = BEASTS.filter(b => G.seen[b[0]]).length;
-  $('jTabs').innerHTML = [['beasts', `Bestiary (${nSeen}/${BEASTS.length})`], ['lore', `Lore (${lore.length}/${LORE.length})`]].map(([k, n]) => `<div class="tab ${jTab === k ? 'on' : ''}" data-jt="${k}">${n}</div>`).join('');
-  const list = $('jList'), det = $('jDetail');
-  if (jTab === 'beasts') {
+function loreHint(L, id) { return L.src === 'kingdom' ? `Kept in the cathedral library of ${KDATA[id].castle}` : L.src === 'deep' ? "Guarded in a dungeon guardian's hoard" : L.src === 'scribe' ? 'Copied by the royal scribes in the city plazas, for 40 gold' : 'Lost somewhere in the wilds, near ruins, camps and hidden places. A royal scribe can point the way.'; }
+let jSel = null;
+function renderJournal() { // the bestiary and lore tabs of the journal
+  if (!P) return; G.seen = G.seen || {}; const lore = P.lore || [], list = $('qList'), det = $('qDetail');
+  if (qTab === 'beasts') {
     if (jSel == null || BEAST_I[jSel] == null) jSel = (BEASTS.find(b => G.seen[b[0]]) || BEASTS[0])[0];
     let cat = ''; const cells = [];
     BEASTS.forEach(([kind, c]) => { if (c !== cat) { cat = c; cells.push(`<div class="bCat">${c.toUpperCase()}</div>`); } const k = G.stats.kills[kind] || 0; cells.push(`<div class="bCard ${jSel === kind ? 'sel' : ''}" data-b="${kind}" title="${G.seen[kind] ? ATYPES[kind].name : 'Unknown'}"><canvas width="72" height="72" data-bp="${kind}"></canvas>${k ? `<span class="bKills">${k}</span>` : ''}</div>`); });
@@ -4695,17 +4761,33 @@ function renderJournal() {
   } else {
     if (jSel == null || typeof jSel !== 'number') jSel = lore.length ? lore[0] : 0;
     list.className = 'qList';
-    list.innerHTML = LORE.map((L, i) => { const f = lore.includes(i); return `<div class="qItem ${f ? '' : 'unfound'} ${jSel === i ? 'sel' : ''}" data-l="${i}"><div class="qt1">${f ? L.t : 'An unfound scroll'}</div><div class="qt2">${f ? L.cat : L.src === 'kingdom' ? KDATA[i].name : L.src === 'deep' ? 'The Depths' : 'The wilds'}</div></div>`; }).join('');
+    list.innerHTML = LORE.map((L, i) => { const f = lore.includes(i); return `<div class="qItem ${f ? '' : 'unfound'} ${jSel === i ? 'sel' : ''}" data-l="${i}"><div class="qt1">${f ? L.t : 'An unfound scroll'}</div><div class="qt2">${f ? L.cat : L.src === 'kingdom' ? KDATA[i].name : L.src === 'deep' ? 'The Depths' : L.src === 'scribe' ? 'The royal scribes' : 'The wilds'}</div></div>`; }).join('');
     const L = LORE[jSel], f = lore.includes(jSel);
     det.innerHTML = `<canvas class="jPort" width="128" height="128" id="jPortC"></canvas><div class="jH">${f ? L.t : 'An unfound scroll'}</div><div class="jS">${f ? L.cat : 'Not yet found'}</div>` + (f ? `<div class="loreText">${L.x}</div>` : `<div class="jRow"><b>Where:</b> ${loreHint(L, jSel)}</div>`);
     drawPortrait($('jPortC'), 'scroll'); if (!f) { const g = $('jPortC').getContext('2d'); g.fillStyle = 'rgba(10,6,3,.72)'; g.fillRect(0, 0, 128, 128); }
   }
 }
-$('journalScreen').addEventListener('click', e => {
-  const t = e.target.closest('[data-jt]'); if (t) { if (jTab !== t.dataset.jt) { jTab = t.dataset.jt; jSel = null; renderJournal(); } return; }
+$('qList').addEventListener('click', e => {
+  if (qTab !== 'beasts' && qTab !== 'lore') return;
   const b = e.target.closest('[data-b]'); if (b) { jSel = b.dataset.b; renderJournal(); return; }
   const l = e.target.closest('[data-l]'); if (l) { jSel = +l.dataset.l; renderJournal(); }
 });
+/* ---------------- The royal scribe: copies of rare texts, and rumours of lost scrolls ---------------- */
+function scribeDialog(e, k) {
+  const own = P.lore || [], forSale = LORE.map((L, i) => [L, i]).filter(([L, i]) => L.src === 'scribe' && !own.includes(i));
+  const unfound = LORE.some((L, i) => L.src !== 'scribe' && !own.includes(i));
+  openDialog({ name: e.name, role: `Royal scribe of ${KDATA[k].name}`, portrait: e, text: `Ink-stained fingers, a squint, and a desk buried in parchment. "Fair copies of the rare texts, forty gold apiece. Or, for a small fee, I can tell you where the lost scrolls are said to lie. You have gathered ${own.length} of the ${LORE.length} I know of."`, options: [
+    ...forSale.map(([L, i]) => ({ t: `<span class="dn">BUY</span>A copy of <i>${L.t}</i> <span class="dn">40g</span>`, dis: P.gold < 40, fn: () => { P.gold -= 40; SND.play('coin'); closeDialog(); readLore(i); } })),
+    ...(unfound ? [{ t: '<span class="dn">ASK</span>Where might I find a lost scroll? <span class="dn">15g</span>', dis: P.gold < 15, fn: () => { P.gold -= 15; SND.play('coin'); closeDialog(); loreRumor(); } }] : []),
+    { t: 'Farewell', fn: closeDialog }] });
+}
+function loreRumor() {
+  const own = P.lore || [], world = W.interacts.filter(it => it.type === 'lore' && !own.includes(it.lore)).sort((a, b) => dist(P.x, P.y, a.x, a.y) - dist(P.x, P.y, b.x, b.y));
+  if (world.length) { const it = world[0]; G.mapWaypoint = { x: it.x, y: it.y }; toast(`📜 "A scroll lies ${leagues(dist(P.x, P.y, it.x, it.y))} leagues ${compass(it.x - P.x, it.y - P.y).toLowerCase()} of here, or so the pilgrims say." It is marked on your map.`, 'gold'); return; }
+  const ki = LORE.findIndex((L, i) => L.src === 'kingdom' && !own.includes(i));
+  if (ki >= 0) { toast(`📜 "The cathedral library of ${KDATA[ki].castle} keeps a chronicle you have not read."`, 'gold'); return; }
+  toast('📜 "The last of them lie in the hoards of dungeon guardians. Bring a torch, and a friend."', 'gold');
+}
 function enterInterior(b) {
   if (G.under) return;
   if (ents.some(e => !e.dead && playerHostileTo(e) && dist(e.x, e.y, P.x, P.y) < 260)) { toast('Not with enemies at your back!', 'bad'); return; }
@@ -5061,9 +5143,15 @@ function tourneyRound(r) {
 }
 /* Jousting: the second bout is a mounted charge. Hold attack to lower the lance and let go as you meet:
    early is a safe shield strike, late a helm strike, and a perfect strike unhorses your opponent. */
+function joustBar(J) { // where the rival is, and where to let go
+  const gap = Math.max(0, J.opp.x - P.x), BW = 190, px = v => Math.round(Math.min(1, v / 320) * BW), zone = (a, b, c) => `<span style="position:absolute;left:${px(a)}px;width:${px(b) - px(a)}px;top:0;bottom:0;background:${c}"></span>`;
+  const bar = `<span style="position:relative;display:inline-block;width:${BW}px;height:12px;vertical-align:middle;background:#2a1a10;border:1px solid #d8b25a;border-radius:3px;overflow:hidden">${zone(30, 50, '#d8432f')}${zone(50, 95, '#e8c040')}${zone(95, 150, '#4a7ac8')}<span style="position:absolute;left:${Math.max(0, px(gap) - 1)}px;width:3px;top:0;bottom:0;background:#fff;box-shadow:0 0 5px #fff"></span></span>`;
+  const st = J.rel != null ? '<b>Lance away!</b>' : J.lance > .3 ? 'Lance <b>lowered</b>: let go in a zone!' : 'Hold attack to lower your lance';
+  return `🐎 ${st} ${bar} <span style="font-size:.85em;opacity:.85"><b style="color:#7aa2ec">shield</b> · <b style="color:#e8c040">helm</b> · <b style="color:#ef6a55">unhorse</b></span>`;
+}
 function startJoust(T, c) {
   const k = pick([0, 1, 2, 3].filter(j => j !== c.owner)), ly = T.ring.y, lx0 = T.ring.x - 8 * TS, lx1 = T.ring.x + 8 * TS;
-  const opp = mkActor('champion', lx1, ly, { name: `${pick(['Sir', 'Dame'])} ${pick(NAMES.first)} ${pick(T_EPI)}`, k, _look: Object.assign(knightLook(k, 'spear'), {}), stand: true, faction: 'civ', civ: true, jouster: true, horse: pick(['riding_horse', 'fast_horse', 'old_horse']), transient: true, tourney: false });
+  const opp = mkActor('champion', lx1, ly, { name: `${pick(['Sir', 'Dame'])} ${pick(NAMES.first)} ${pick(T_EPI)}`, k, _look: Object.assign(knightLook(k, 'spear'), { weapon: null, shield: { b: ITEMS.knight_shield, col: KDATA[k].color } }), stand: true, faction: 'civ', civ: true, jouster: true, horse: pick(['riding_horse', 'fast_horse', 'old_horse']), transient: true, tourney: false });
   G.joust = { T, opp, lx0, lx1, y: ly, pass: 0, ps: 0, os: 0, phase: 'ready', t: 1.8, rel: null, holding: false, lance: 0 };
   if (P.mounted) dismount(); P.x = lx0; P.y = ly; cam.x = T.ring.x; cam.y = ly;
   showAreaTitle('BOUT II · THE JOUST', opp.name); SND.play('crowd');
@@ -5110,7 +5198,7 @@ function startRace(from, to) {
   const start = { x: pts[0][0], y: pts[0][1] }; const f = findFree(start.x, start.y); P.x = f.x; P.y = f.y; cam.x = P.x; cam.y = P.y; if (!P.mounted) mount();
   const riders = [0, 1, 2].map(i => { const f2 = findFree(start.x + (i - 1) * 40, start.y + 30); const e = mkActor('npc', f2.x, f2.y, { name: `${pick(NAMES.first)} ${pick(['the Swift', 'of the Downs', 'Fleetfoot', 'the Bold'])}`, racer: true, horse: pick(['riding_horse', 'fast_horse', 'war_horse']), stand: true, transient: true, k: randi(0, 3), spd0: 0 }); e.spd0 = 150 * ITEMS[e.horse].hspd * rand(.9, 1.02); e.pi = 0; return e; });
   G.race = { pts, cps, ci: 0, riders, to: to.id, t: -3, done: [], started: false, sx: P.x, sy: P.y };
-  const q = { id: Q.next++, type: 'race', title: `The Race to ${to.name}`, desc: 'Ride through every checkpoint flag to the finish.', obj: `Checkpoint 1 of ${cps.length}`, giverName: 'The stablemaster', reward: { gold: 0, xp: 0, rep: {}, rel: [], items: [] }, started: G.time }; Q.active.push(q); Q.tracked = q.id;
+  const q = { id: Q.next++, type: 'race', title: `The Race to ${to.name}`, desc: 'Ride through every checkpoint flag, in order, to the finish. Skip a flag or leave the course and you are disqualified.', obj: `Checkpoint 1 of ${cps.length}`, giverName: 'The stablemaster', reward: { gold: 0, xp: 0, rep: {}, rel: [], items: [] }, started: G.time }; Q.active.push(q); Q.tracked = q.id;
   showAreaTitle('THE RACE', `To ${to.name}`); SND.play('horn');
 }
 function raceTick(dt) {
@@ -5122,12 +5210,16 @@ function raceTick(dt) {
     if (d < 20) { e.pi++; if (e.pi >= R2.pts.length) { e.fin = true; R2.done.push(e.name); e.say = { text: 'Ha! Finished!', t: 3 }; } continue; }
     e.x += (tg[0] - e.x) / d * v * dt; e.y += (tg[1] - e.y) / d * v * dt; e.face = Math.atan2(tg[1] - e.y, tg[0] - e.x); e.walk = (e.walk || 0) + dt * 12;
   }
-  const cp = R2.cps[R2.ci]; if (dist(P.x, P.y, cp[0], cp[1]) < 110) { R2.ci++; SND.play('ui'); if (R2.ci >= R2.cps.length) { const place = R2.done.length + 1; endRace(place); return; } toast(`Checkpoint ${R2.ci} of ${R2.cps.length}!`, 'good'); }
+  const cp = R2.cps[R2.ci], nx = R2.cps[R2.ci + 1];
+  if (nx && dist(P.x, P.y, nx[0], nx[1]) < 110 && dist(P.x, P.y, cp[0], cp[1]) >= 110) { endRace(-1); return; }
+  if (dist(P.x, P.y, cp[0], cp[1]) > 80 * TS) { endRace(-2); return; }
+  if (dist(P.x, P.y, cp[0], cp[1]) < 110) { R2.ci++; SND.play('ui'); if (R2.ci >= R2.cps.length) { const place = R2.done.length + 1; endRace(place); return; } toast(`Checkpoint ${R2.ci} of ${R2.cps.length}!`, 'good'); }
   if (q) q.obj = `Checkpoint ${R2.ci + 1} of ${R2.cps.length} · ${R2.done.length ? R2.done.length + ' rider' + (R2.done.length > 1 ? 's' : '') + ' finished' : 'ride!'}`;
   if (R2.t > 480) endRace(0);
 }
 function endRace(place) {
   const R2 = G.race; G.race = null; Q.active = Q.active.filter(q => q.type !== 'race'); setTimeout(() => R2.riders.forEach(e => removeEnt(e)), 5000);
+  if (place < 0) { toast(place === -1 ? `🚩 Disqualified! You rode past flag ${R2.ci + 1}. Every flag counts.` : '🚩 Disqualified! You strayed too far from the course.', 'bad'); SND.play('fail'); return; }
   if (!place) { toast('The race is over. You did not finish.', 'bad'); return; }
   const prize = [0, 250, 100, 40, 0][place], to = W.places[R2.to]; if (prize) { P.gold += prize; SND.play('coin'); }
   if (place === 1) { G.stats.races++; addRep(to.owner, 5, 'Won a horse race'); addTrophy(`The race cup of ${to.name}`, 'tourney', P.x, P.y); SND.play('mainquest'); }
@@ -5184,7 +5276,7 @@ const TUT = [
   { t: 'Press I to open your inventory', done: T => T.opened && T.opened.inv },
   { t: 'Press M to open the map', done: T => T.opened && T.opened.map },
   { t: 'Press F to mount your horse', enter: () => { if (!P.eq.horse) { const h = addItem('old_horse', 1, 1, true); equip(h.uid, true); toast('Mara gives you an <b>Old Horse</b>. It is slow, but it is yours.', 'gold'); } }, done: () => P.mounted },
-  { t: 'Press J to open your quest journal', done: T => T.opened && T.opened.quests },
+  { t: 'Press J to open your journal', done: T => T.opened && T.opened.quests },
   { t: 'Return to Sergeant Mara', at: 'mara', done: T => T.graduated },
 ];
 const MARA_SAY = ['Over here, recruit!', 'Stretch those legs. Hold Shift!', 'Come here and talk to me. Press E.', 'Hit the dummy. It will not hit back.', 'Now show me something fancy. Press C.', 'Shield up! Hold right click and face the blow.', 'Now dodge. Space, right as the blow lands!', 'Finish it. Make them yield.', 'Tab swaps to your bow.', 'Draw fully for a strong shot. Aim at the target.', 'Check your pack. Press I.', 'Every road is on your map. Press M.', 'A knight needs a horse. Press F.', 'Your quests live in the journal. Press J.', 'Come back to me, recruit.'];
@@ -5213,7 +5305,7 @@ function tutBegin(step) {
   if (!step) sSoon(() => openDialog({ name: 'Sergeant Mara', role: 'Drill sergeant of the Albion levy', portrait: G.tut.mara, text: 'So you want to be a knight? Everyone does, until the first arrow. I am Sergeant Mara, and before you ride out I will teach you to walk, fight, shoot and ride. Follow the instructions at the top left of your screen. It will not take long.', options: [{ t: 'Ready, Sergeant.', fn: closeDialog }, { t: 'Skip the tutorial and start playing', fn: () => { closeDialog(); tutEnd(true); } }] }));
 }
 function tutRecruit() { const T = G.tut; if (T.recruit && !T.recruit.dead && !T.recruit.civ) return; const f = findFree(T.dummy.x + 30, T.dummy.y + 70); T.recruit = mkActor('champion', f.x, f.y, { tut: true, tutYield: true, name: 'Sparring Recruit', aggroPlayer: true, persistent: true, home: { x: f.x, y: f.y }, leash: 400, aggro: 400, _look: { body: '#b9a17b', head: 'hair', hair: '#4a3020', skin: '#d8a878', weapon: { wk: 'sword', len: 22, col: '#b08050', wooden: true }, shield: { b: ITEMS.wooden_shield } } }); T.recruit.hp = T.recruit.maxHp = 110; T.recruit.dmg = 4; T.recruit.cd = 1.8; T.recruit.windT = .75; T.recruit.target = P; }
-const TUT_TOUCH = ['Drag on the left of the screen to walk to Sergeant Mara', 'Tap » SPRINT, then move, to run', 'Walk up to Sergeant Mara and tap ✋ USE', 'Hit the training dummy with ⚔ ATTACK (3 hits)', 'Use your special move on the dummy: tap ✦', 'Block a strike from the recruit: hold 🛡 BLOCK while facing them', 'Dodge a strike: tap ↻ DODGE just as the blow lands', 'Beat the recruit until they yield', 'Tap ⇄ SWAP to change to the bow Mara gave you', 'Hold ⚔ to draw and let go to shoot the archery target (2 hits)', 'Tap the Pack button at the top to open your inventory', 'Tap the Map button to open the map', 'Close the map, then tap 🐎 to mount your horse', 'Tap the Quests button to open your journal', 'Return to Sergeant Mara'];
+const TUT_TOUCH = ['Drag on the left of the screen to walk to Sergeant Mara', 'Tap » SPRINT, then move, to run', 'Walk up to Sergeant Mara and tap ✋ USE', 'Hit the training dummy with ⚔ ATTACK (3 hits)', 'Use your special move on the dummy: tap ✦', 'Block a strike from the recruit: hold 🛡 BLOCK while facing them', 'Dodge a strike: tap ↻ DODGE just as the blow lands', 'Beat the recruit until they yield', 'Tap ⇄ SWAP to change to the bow Mara gave you', 'Hold ⚔ to draw and let go to shoot the archery target (2 hits)', 'Tap the Pack button at the top to open your inventory', 'Tap the Map button to open the map', 'Close the map, then tap 🐎 to mount your horse', 'Tap the Journal button to open your journal', 'Return to Sergeant Mara'];
 const tutText = i => TOUCH.on && TUT_TOUCH[i] ? TUT_TOUCH[i] : TUT[i].t;
 function tutGo(i) {
   const T = G.tut; T.step = i; const st = TUT[i]; if (!st) return tutEnd();
@@ -5255,7 +5347,14 @@ function tutEnd(skipped) {
 function drawDummy(g, e) {
   g.save(); g.translate(e.x, e.y);
   g.fillStyle = 'rgba(0,0,0,.28)'; ell(g, 3, 10, 13, 5);
-  if (e.isTarget) {
+  if (e.snowman) {
+    const sc = Math.min(1, (e.pop0 - e.popT) * 6) * (e.popT < .15 ? e.popT / .15 : 1); g.scale(sc || .01, sc || .01);
+    g.fillStyle = '#f4f8ff'; circ(g, 0, -3, 9.5); circ(g, 0, -17, 6.8); g.fillStyle = '#d8e4f4'; circ(g, 2.5, -1, 5);
+    g.fillStyle = '#1a1a1a'; circ(g, -2.3, -18.6, 1.1); circ(g, 2.3, -18.6, 1.1); circ(g, 0, -7, 1); circ(g, 0, -2, 1);
+    g.fillStyle = '#e8782a'; g.beginPath(); g.moveTo(-1, -16.5); g.lineTo(6.5, -15.6); g.lineTo(-1, -14.8); g.fill();
+    g.fillStyle = '#c83a3a'; g.fillRect(-6.5, -12.2, 13, 2.6); g.fillRect(3, -12, 2.6, 6);
+    g.fillStyle = '#2a2020'; g.fillRect(-6, -24.5, 12, 2.4); g.fillRect(-4, -31, 8, 6.8);
+  } else if (e.isTarget) {
     g.fillStyle = '#5a3a1e'; g.fillRect(-2, -4, 4, 14); g.fillRect(-9, 6, 18, 3);
     [['#f0e6cc', 13], ['#c23a2c', 10.5], ['#f0e6cc', 8], ['#c23a2c', 5.5], ['#ffd24a', 3]].forEach(([c, r]) => { g.fillStyle = c; circ(g, 0, -14, r); });
     g.strokeStyle = '#6a4424'; g.lineWidth = 1.5; g.beginPath(); g.arc(0, -14, 13, 0, TAU); g.stroke();
@@ -5368,6 +5467,11 @@ function talkTo(e) {
   if (canPickpocket(e)) return pickpocket(e, k);
   if (e.role === 'guild') return guildDialog(e);
   if (e.role === 'enc') return encDialog(e);
+  if (e.role === 'ferryman') return ferryDialog(e.ferryIt, e);
+  if (e.role === 'captain' && W.places[e.place]) return harborDialog(W.places[e.place], e);
+  if (e.role === 'sailor') { e.say = { text: pick(['Heave!', 'Fair winds to you.', 'Mind the ropes, sir knight.', 'The captain pays on landing, not before.', 'Smell that? Rain by nightfall.']), t: 3 }; return; }
+  if (e.role === 'nemfriend') return nemFriendDialog(e);
+  if (e.role === 'scribe') return scribeDialog(e, k);
   if (e.role === 'stable' && W.places[e.place] && W.places[e.place].type === 'castle') return raceOffer(e);
   if (e.role === 'encdone' || e.role === 'encmute') { e.say = { text: pick(['Safe travels.', 'Hmph.', 'Move along.']), t: 2 }; return; }
   if (e.role === 'gamesmaster') return gamesDialog(e);
@@ -6853,7 +6957,19 @@ const ARMOR_LOOK = {
   padded: { body: '#b9a17b', head: 'hair' }, leather: { body: '#7a5230', head: 'cap' }, chainmail: { body: '#9ba1a8', head: 'coif', mail: 1 },
   scale: { body: '#8e8464', head: 'helm', pauld: 1 }, plate: { body: '#d2d8de', head: 'great', pauld: 1, shiny: 1 },
 };
-function lookFor(e) {
+function lookFor(e) { const L = lookFor0(e); return e.isPlayer ? wornLook(L) : L; }
+function wornLook(L) { // festival finery and the guild cloak, worn from the pack
+  const w = (P.worn || []).filter(id => countItem(id)); if (!w.length) return L; L = Object.assign({}, L);
+  if (w.includes('garland')) L.garland = 1; if (w.includes('wool_scarf')) L.scarf = '#c83a3a'; if (w.includes('solstice_lantern')) L.lantern = 1; if (w.includes('harvest_charm')) L.charm = 1; if (w.includes('shadow_cloak')) L.cape = '#4a4a52';
+  return L;
+}
+function toggleWear(id) {
+  P.worn = P.worn || []; const b = ITEMS[id];
+  if (P.worn.includes(id)) { P.worn = P.worn.filter(x => x !== id); toast(`You take off the <b>${b.name}</b>.`); }
+  else { P.worn = P.worn.filter(x => ITEMS[x].wear !== b.wear); P.worn.push(id); toast(`You wear the <b>${b.name}</b>.`, 'good'); }
+  SND.play('ui');
+}
+function lookFor0(e) {
   if (e.isPlayer) {
     const S = P.S; const al = ARMOR_LOOK[S.aid] || { body: '#8a7a5a', head: 'hair' };
     const kc = P.allegiance != null ? KDATA[P.allegiance].color : null;
@@ -6909,6 +7025,7 @@ function drawHuman(g, x, y, face, L, o) {
   g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 1; g.stroke();
   if (L.mail) { g.fillStyle = 'rgba(0,0,0,.18)'; for (let i = -8; i <= 8; i += 3) circ(g, -2 + (i % 2), i, .7); }
   if (L.tabard) { g.fillStyle = L.tabard; rrect(g, -5.5, -4.5, 11, 9, 2); g.fill(); }
+  if (L.lantern) { g.strokeStyle = '#4a2f18'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(5, -9); g.lineTo(5, -12); g.stroke(); const gl = .75 + Math.sin(performance.now() / 320) * .15; g.fillStyle = `rgba(255,196,90,${gl})`; ell(g, 5, -15.5, 3.6, 4.4); g.fillStyle = '#c83a2a'; g.fillRect(2.6, -19.8, 4.8, 1.3); g.fillRect(2.6, -12, 4.8, 1.3); }
   if (L.torch) { g.fillStyle = '#4a2f18'; g.fillRect(4, -12, 2.5, 9); const f = Math.sin(performance.now() / 70) * 1; g.fillStyle = '#ff8a2a'; ell(g, 5 + f * .3, -14, 3, 4.5); g.fillStyle = '#ffe080'; ell(g, 5 + f * .3, -13.5, 1.6, 2.4); }
   if (L.apron) { g.fillStyle = L.apron; rrect(g, -1, -6.5, 8.5, 13, 2.5); g.fill(); g.strokeStyle = 'rgba(0,0,0,.18)'; g.lineWidth = .8; g.stroke(); }
   if (L.lute) { g.fillStyle = '#b8783a'; ell(g, 5, 6.5, 4.8, 3.4); g.fillStyle = '#3a2410'; circ(g, 5, 6.5, 1.2); g.fillStyle = '#6a4422'; g.fillRect(8, 5.8, 9, 1.5); }
@@ -6930,6 +7047,7 @@ function drawHuman(g, x, y, face, L, o) {
   if (L.shield && o.blocking) drawShieldTop(g, 11, -1, L.shield, true);
   // head
   const hc = 1;
+  if (L.scarf) { g.fillStyle = L.scarf; ell(g, hc - 3.5, 0, 3.4, 7.4); g.fillRect(-10 - Math.sin(o.walk || 0) * 1.4, 2.4, 8, 2.8); g.fillStyle = 'rgba(255,255,255,.4)'; g.fillRect(-8.5, 2.4, 1.2, 2.8); g.fillRect(-5.5, 2.4, 1.2, 2.8); }
   switch (L.head) {
     case 'hood': g.fillStyle = L.hood || '#4a3a2a'; circ(g, hc - 1, 0, 7); g.fillStyle = L.skin; ell(g, hc + 3.5, 0, 2.6, 3.6); break;
     case 'cap': g.fillStyle = L.skin; circ(g, hc, 0, 6); g.fillStyle = L.hair && L.head === 'cap' ? '#6a4a2a' : '#6a4a2a'; ell(g, hc - 1.5, 0, 5.2, 6); break;
@@ -6939,6 +7057,8 @@ function drawHuman(g, x, y, face, L, o) {
     case 'crown': g.fillStyle = L.hair; if (L.fem) ell(g, hc - 4.5, 0, 5.5, 6.8); circ(g, hc, 0, 6.5); g.fillStyle = '#f0c840'; g.beginPath(); for (let i = 0; i < 10; i++) { const a = i / 10 * TAU, r = i % 2 ? 5 : 8; g.lineTo(hc + Math.cos(a) * r, Math.sin(a) * r); } g.closePath(); g.fill(); g.fillStyle = L.hair; circ(g, hc, 0, 4); g.fillStyle = '#c02030'; circ(g, hc + 5, 0, 1.4); break;
     default: g.fillStyle = L.skin; circ(g, hc, 0, 6.2); g.fillStyle = L.hair || '#4a3020'; ell(g, hc - 2, 0, 5, 6); if (L.beard) { g.fillStyle = '#e0e0d8'; ell(g, hc + 5, 0, 2.5, 3.5); }
   }
+  if (L.garland) { const cs = ['#f08ab0', '#ffe070', '#ffffff', '#b890f0']; g.strokeStyle = '#4a8a3a'; g.lineWidth = 1.5; g.beginPath(); g.arc(hc - .5, 0, 6.4, 0, TAU); g.stroke(); for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; g.fillStyle = cs[i % 4]; circ(g, hc - .5 + Math.cos(a) * 6.4, Math.sin(a) * 6.4, 1.7); } }
+  if (L.charm) { g.strokeStyle = '#a8842a'; g.lineWidth = 1; g.fillStyle = '#e0bc5a'; ell(g, -3, 9.5, 2.2, 1.6); g.beginPath(); g.moveTo(-3, 11); g.lineTo(-4.5, 14); g.moveTo(-3, 11); g.lineTo(-1.5, 14); g.stroke(); }
   g.restore();
   if (o.swing && o.trail && L.weapon && L.weapon.wk !== 'spear' && L.weapon.wk !== 'bow') {
     const p = o.swing.p; const a0 = face + o.swing.dir * o.swing.arc / 2 + .1, a1 = face + o.swing.dir * (o.swing.arc / 2) * (1 - 2 * p) + .1;
@@ -7177,7 +7297,7 @@ function buildMapLayers() {
     if (t === T.ROAD || t === T.BRIDGE) put(imgs.roads, i, TINFO[t].mm);
     if (t !== T.SEA) {
       const edge = (x + 1 < WW && W.own[i + 1] !== k && W.ter[i + 1] !== T.SEA) || (y + 1 < WH && W.own[i + WW] !== k && W.ter[i + WW] !== T.SEA) || (x > 0 && W.own[i - 1] !== k && W.ter[i - 1] !== T.SEA) || (y > 0 && W.own[i - WW] !== k && W.ter[i - WW] !== T.SEA);
-      put(imgs.borders, i, kcol(k), edge ? 230 : 38);
+      put(imgs.borders, i, kcol(k), edge ? 230 : settings.cb && [(x + y) % 5 === 0, x % 3 === 0 && y % 3 === 0, (x + y) % 6 === 0 || (x - y + 6000) % 6 === 0, y % 4 === 0][k] ? 150 : 38); // colourblind mode: a pattern per kingdom
     }
   }
   for (const k in imgs) if (k !== 'full') L[k].getContext('2d').putImageData(imgs[k], 0, 0);
@@ -7226,14 +7346,15 @@ function drawMinimap() {
    ===================================================================== */
 const UI = {
   stack: [],
-  ids: { act: 'actScreen', ach: 'achScreen', stats: 'statScreen', skills: 'skillScreen', mode: 'modeScreen', cont: 'contScreen', pause: 'pauseScreen', inv: 'invScreen', map: 'mapScreen', dip: 'dipScreen', quests: 'questScreen', journal: 'journalScreen', settings: 'settingsScreen', help: 'helpScreen', shop: 'shopScreen' },
+  ids: { act: 'actScreen', ach: 'achScreen', stats: 'statScreen', skills: 'skillScreen', mode: 'modeScreen', cont: 'contScreen', pause: 'pauseScreen', inv: 'invScreen', map: 'mapScreen', dip: 'dipScreen', quests: 'questScreen', settings: 'settingsScreen', help: 'helpScreen', shop: 'shopScreen' },
   open(n) {
+    if (n === 'journal') { qTab = 'beasts'; jSel = null; n = 'quests'; if (this.isOpen('quests')) { withOverworld(renderQuests); return; } }
     if (n === 'map' && G.under && !G.under.interior) { toast('Your map is no use down here. Find your way back to the ladder.'); return; }
     if (dialogOpen) closeDialog();
     if (this.isOpen(n)) return;
     if (n !== 'settings' && n !== 'help') this.closeAll();
     this.stack.push(n); $(this.ids[n]).classList.add('show'); SND.play('open'); if (G.tut) (G.tut.opened || (G.tut.opened = {}))[n] = true;
-    if (n === 'inv') renderInventory(); else if (n === 'skills') renderSkills(); else if (n === 'ach') renderAch(); else if (n === 'stats') withOverworld(renderStats); else if (n === 'map') withOverworld(openMap); else if (n === 'dip') withOverworld(renderDiplomacy); else if (n === 'quests') withOverworld(renderQuests); else if (n === 'journal') renderJournal(); else if (n === 'settings') renderSettings(); else if (n === 'pause') withOverworld(renderPause);
+    if (n === 'inv') renderInventory(); else if (n === 'skills') renderSkills(); else if (n === 'ach') renderAch(); else if (n === 'stats') withOverworld(renderStats); else if (n === 'map') withOverworld(openMap); else if (n === 'dip') withOverworld(renderDiplomacy); else if (n === 'quests') withOverworld(renderQuests); else if (n === 'settings') renderSettings(); else if (n === 'pause') withOverworld(renderPause);
     tipHide();
   },
   close() { const n = this.stack.pop(); if (n) { $(this.ids[n]).classList.remove('show'); SND.play('close'); } tipHide(); if (n === 'act') actFinish(); },
@@ -7337,11 +7458,13 @@ function renderInventory() {
   if (slot) acts.push(`<button class="btn sm gold" id="actEq">${eq ? 'Unequip' : 'Equip'}</button>`);
   if (b.type === 'weapon' && P.eq.weapon2 !== it.uid) acts.push(`<button class="btn sm" id="actSide">Set as sidearm</button>`);
   if (b.heal || b.use) acts.push(`<button class="btn sm gold" id="actUse">${b.heal ? 'Consume' : b.use === 'nock' ? (P.ammo === it.id ? 'Nocked' : 'Nock') : 'Read'}</button>`);
+  if (b.wear) acts.push(`<button class="btn sm gold" id="actWear">${(P.worn || []).includes(it.id) ? 'Take off' : 'Wear'}</button>`);
   if (b.type !== 'quest' && !eq) acts.push(`<button class="btn sm red" id="actDrop">${discardArm === it.uid ? 'Click again to discard' : 'Discard'}</button>`);
   det.innerHTML = `<img src="${itemIcon(it.id)}" alt=""><div style="flex:1"><h3 style="color:${itemColor(it)}">${itemName(it)}${it.n > 1 ? ' ×' + it.n : ''}${eq ? ' <span class="chip" style="color:#e7c35a">EQUIPPED</span>' : ''}</h3><div class="desc">${b.desc || ''}</div><div class="statline">${st}</div><div class="iacts">${acts.join('')}</div></div>`;
   const ae = $('actEq'); if (ae) ae.onclick = () => { eq ? unequip(P.eq.weapon2 === it.uid ? 'weapon2' : slot) : equip(it.uid); renderInventory(); };
   const as2 = $('actSide'); if (as2) as2.onclick = () => { equip(it.uid, false, 'weapon2'); renderInventory(); };
   const au = $('actUse'); if (au) au.onclick = () => { useItem(it.uid); if (!getItem(it.uid)) invSel = null; renderInventory(); };
+  const aw = $('actWear'); if (aw) aw.onclick = () => { toggleWear(it.id); renderInventory(); };
   const ad = $('actDrop'); if (ad) ad.onclick = () => { if (discardArm === it.uid) { removeItem(it.uid, it.n); invSel = null; discardArm = null; toast(`Discarded ${itemName(it)}.`); } else discardArm = it.uid; renderInventory(); };
 }
 function drawDoll() {
@@ -7562,9 +7685,11 @@ function renderDiplomacy() {
 /* ---------------- Quests ---------------- */
 let qTab = 'active', qSel = null;
 function renderQuests() {
-  $('qTabs').innerHTML = [['active', `Active (${Q.active.length})`], ['done', `Completed (${Q.done.length})`], ['chron', 'Chronicle']].map(([k, n]) => `<div class="tab ${qTab === k ? 'on' : ''}" data-t="${k}">${n}</div>`).join('');
-  $('qTabs').querySelectorAll('.tab').forEach(el => el.onclick = () => { qTab = el.dataset.t; qSel = null; renderQuests(); });
-  const list = $('qList'), det = $('qDetail');
+  const nSeen = BEASTS.filter(b => (G.seen || {})[b[0]]).length;
+  $('qTabs').innerHTML = [['active', `Active (${Q.active.length})`], ['done', `Completed (${Q.done.length})`], ['chron', 'Chronicle'], ['beasts', `Bestiary (${nSeen}/${BEASTS.length})`], ['lore', `Lore (${(P.lore || []).length}/${LORE.length})`]].map(([k, n]) => `<div class="tab ${qTab === k ? 'on' : ''}" data-t="${k}">${n}</div>`).join('');
+  $('qTabs').querySelectorAll('.tab').forEach(el => el.onclick = () => { qTab = el.dataset.t; qSel = null; jSel = null; renderQuests(); });
+  const list = $('qList'), det = $('qDetail'); list.className = 'qList';
+  if (qTab === 'beasts' || qTab === 'lore') return renderJournal();
   if (qTab === 'chron') {
     list.innerHTML = `<div class="qItem sel"><div class="qt1">Chronicle of the Realms</div><div class="qt2">${K.log.length} entries</div></div>`;
     det.innerHTML = `<h2>Chronicle of the Realms</h2><div class="chron">${K.log.length ? K.log.map(e => `<div><span class="d">DAY ${e.d}</span>${esc(e.t)}</div>`).join('') : '<i>Nothing of note has happened yet.</i>'}</div>`; return;
@@ -7595,14 +7720,11 @@ function renderSettings() {
   const seg = (key, label, opts) => `<div class="setRow"><label>${label}</label><div class="seg">${opts.map(([v, n]) => `<button class="${settings[key] === v ? 'on' : ''}" data-k="${key}" data-v="${v}">${n}</button>`).join('')}</div></div>`;
   b.innerHTML = slider('music', 'Music Volume') + slider('sound', 'Sound Volume') + slider('effects', 'Effects Volume') + sw('shake', 'Screen Shake') + sw('dmgNums', 'Damage Numbers') + sw('minimap', 'Minimap') +
     seg('uiScale', 'UI Scale', [[.85, '85%'], [1, '100%'], [1.15, '115%'], [1.3, '130%']]) + seg('quality', 'Graphics Quality', [['low', 'Low'], ['medium', 'Medium'], ['high', 'High']])
-    + sw('battery', 'Battery Saver <small>30 frames a second and fewer particles</small>') + sw('voices', 'NPC Voices')
+    + sw('battery', 'Battery Saver <small>30 frames a second and fewer particles</small>') + sw('voices', 'NPC Voices') + slider('voiceVol', 'Voice Volume')
     + `<div class="setH" style="margin-top:14px">ACCESSIBILITY</div>` + seg('textScale', 'Text Size', [[1, 'Normal'], [1.2, 'Large'], [1.45, 'Huge']]) + sw('noFlash', 'Reduce Flashing &amp; Motion') + sw('cb', 'Colourblind-Friendly Colours')
     + `<div class="setH" style="margin-top:14px">KEYS <button class="btn sm" id="keysReset" style="float:right">Reset to defaults</button></div><div class="keyGrid">${KEY_ACTIONS.map(([c, n]) => `<div class="setRow"><label>${n}</label><button class="btn sm keyBtn${rebinding === c ? ' gold' : ''}" data-key="${c}">${rebinding === c ? 'Press a key…' : keyName(c)}</button></div>`).join('')}</div>`
-    + `<div class="wipeBox" id="wipeBox"><div class="setRow" style="border:0"><label>Save Data<small>Story and sandbox saves, endings, achievements and settings</small></label><button class="btn red sm" id="wipeAsk">Delete All Save Data</button></div>
-      <div class="wipeConfirm hidden" id="wipeConfirm"><b>Delete everything?</b> Both saved games, every ending and achievement you have discovered, and your settings will be erased from this browser. This cannot be undone.<div class="wipeBtns"><button class="btn red" id="wipeYes">Delete Everything</button><button class="btn" id="wipeNo">Cancel</button></div></div></div>`;
-  $('wipeAsk').onclick = () => { $('wipeConfirm').classList.remove('hidden'); $('wipeAsk').disabled = true; SND.play('ui'); };
-  $('wipeNo').onclick = () => { $('wipeConfirm').classList.add('hidden'); $('wipeAsk').disabled = false; SND.play('ui'); };
-  $('wipeYes').onclick = wipeAllData;
+    + `<div class="wipeBox" id="wipeBox"><div class="setRow" style="border:0"><label>Save Data<small>Every save slot, endings, achievements and settings</small></label><button class="btn red sm" id="wipeAsk">Delete All Save Data</button></div></div>`;
+  $('wipeAsk').onclick = () => askConfirm('DELETE ALL SAVE DATA?', `Every saved game in all ${SLOTS} slots, every ending and achievement you have discovered, and your settings will be erased from this browser.${G.state !== 'menu' ? ' <b>Your current game will end and you will return to the main menu.</b>' : ''}<br><br>This cannot be undone.`, 'Delete Everything', wipeAllData);
   b.querySelectorAll('.keyBtn').forEach(el => el.onclick = () => { rebinding = el.dataset.key; renderSettings(); });
   $('keysReset').onclick = () => { settings.keys = {}; saveSettings(); applySettings(); renderSettings(); };
   b.querySelectorAll('input[type=range]').forEach(el => el.oninput = () => { settings[el.dataset.k] = el.value / 100; el.style.setProperty('--p', el.value + '%'); el.nextElementSibling.textContent = el.value; saveSettings(); SND.init(); SND.apply(); });
@@ -7610,10 +7732,18 @@ function renderSettings() {
   b.querySelectorAll('.seg button').forEach(el => el.onclick = () => { const k = el.dataset.k; settings[k] = k === 'uiScale' || k === 'textScale' ? +el.dataset.v : el.dataset.v; saveSettings(); if (k === 'quality') chunkCache.clear(); applySettings(); renderSettings(); });
 }
 
-function wipeAllData() {
+function wipeAllData() { // done in place: a page reload can leave some browsers (and editor previews) on a black screen
   WIPED = true;
   try { Object.keys(localStorage).filter(k => k.startsWith('fk_')).forEach(k => localStorage.removeItem(k)); } catch (e) { }
-  location.reload();
+  ACHS = {}; settings = Object.assign({}, DEFAULT_SETTINGS, { keys: {} }); rebinding = null; applySettings(); buildKeyMap(); refreshKeyHints();
+  G.ironDead = false; G.slot = 0; ['deathScreen', 'endScreen', 'confirmScreen'].forEach(id => UI.hide(id));
+  if (G.state !== 'menu') toMainMenu(); else { UI.closeAll(); refreshMenu(); }
+  setTimeout(() => { WIPED = false; toast('All save data has been deleted.', 'good'); }, 400);
+}
+function askConfirm(title, html, yes, fn) {
+  $('cfT').textContent = title; $('cfX').innerHTML = html; $('cfYes').textContent = yes;
+  $('cfYes').onclick = () => { UI.hide('confirmScreen'); fn(); }; $('cfNo').onclick = () => { UI.hide('confirmScreen'); SND.play('close'); };
+  UI.show('confirmScreen'); SND.play('open');
 }
 
 /* ---------------- Shop ---------------- */
@@ -7671,7 +7801,7 @@ function drawEntity(g, e, t) {
     if (P.dodge > 0) g.globalAlpha = .75;
     if (P.mounted || G.joust) drawHorse(g, P.x, P.y + 2, G.joust ? 0 : P.hface, P.S.horse || ITEMS.riding_horse, P.walk, true, P.allegiance);
     if (G.joust) drawLance(g, P.x, P.y - 6, 0, G.joust.lance);
-    drawHuman(g, P.x, P.y - (P.mounted || G.joust ? 3 : 0), P.face, lookFor(P), { walk: P.walk, mounted: P.mounted || !!G.joust, flash: P.flash, blocking: P.blocking, draw: P.S.bow ? (P.drawing ? P.draw : 0) : undefined, arrowCol: P.S.bow && curAmmo() ? ITEMS[curAmmo()].col : null, swing: P.swing > 0 ? { p: 1 - P.swing / P.swingDur, dir: P.swingDir, arc: P.swingArc || P.S.arc } : null, trail: true, trailR: P.S.rng * .72 });
+    drawHuman(g, P.x, P.y - (P.mounted || G.joust ? 3 : 0), P.face, G.joust ? Object.assign({}, lookFor(P), { weapon: null }) : lookFor(P), { walk: P.walk, mounted: P.mounted || !!G.joust, flash: P.flash, blocking: P.blocking, draw: P.S.bow ? (P.drawing ? P.draw : 0) : undefined, arrowCol: P.S.bow && curAmmo() ? ITEMS[curAmmo()].col : null, swing: P.swing > 0 ? { p: 1 - P.swing / P.swingDur, dir: P.swingDir, arc: P.swingArc || P.S.arc } : null, trail: true, trailR: P.S.rng * .72 });
     g.globalAlpha = 1;
     if (P.chillT > 0) { g.strokeStyle = 'rgba(200,240,255,.7)'; g.lineWidth = 2; g.beginPath(); g.arc(P.x, P.y, 15, 0, TAU); g.stroke(); }
     if (P.webbed > 0) { g.strokeStyle = 'rgba(230,230,225,.5)'; g.lineWidth = 1; for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; g.beginPath(); g.moveTo(P.x, P.y); g.lineTo(P.x + Math.cos(a) * 16, P.y + Math.sin(a) * 16); g.stroke(); } }
@@ -7804,6 +7934,7 @@ function renderWorld(t) {
   for (const p of projs) {
     const a = Math.atan2(p.vy, p.vx) || p.a || 0; if (!p.stuck) p.a = a; const aa = p.stuck ? p.a : a, ca = Math.cos(aa), sa = Math.sin(aa);
     if (p.fireBreath) { g.fillStyle = 'rgba(255,170,60,.85)'; circ(g, p.x, p.y, 5.5); g.fillStyle = 'rgba(255,90,20,.4)'; circ(g, p.x - ca * 8, p.y - sa * 8, 8); continue; }
+    if (p.snow) { g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, p.x + 3, p.y + 10, 4, 2); g.fillStyle = '#f4f8ff'; circ(g, p.x, p.y, 4); g.fillStyle = '#d8e4f4'; circ(g, p.x + 1.2, p.y + 1.2, 2); continue; }
     if (p.rock) { g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, p.x + 4, p.y + 14, 9, 4); g.fillStyle = '#7a7268'; circ(g, p.x, p.y, 9); g.fillStyle = '#9a9288'; circ(g, p.x - 3, p.y - 3, 4); continue; }
     if (p.breath) { g.fillStyle = 'rgba(200,240,255,.75)'; circ(g, p.x, p.y, 5); g.fillStyle = 'rgba(140,210,255,.35)'; circ(g, p.x - ca * 8, p.y - sa * 8, 7); continue; }
     if (p.bolt) { g.strokeStyle = '#4a3a2a'; g.lineWidth = 3; g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(p.x - ca * 10, p.y - sa * 10); g.stroke(); g.lineWidth = 2; continue; }
@@ -7836,6 +7967,7 @@ function renderWorld(t) {
       lc.globalCompositeOperation = 'destination-out';
       const light = (x, y, r, i) => { const sx = (x - vx) * s, sy = (y - vy) * s, rr = r * s; if (sx < -rr || sy < -rr || sx > lw + rr || sy > lh + rr) return; const gr = lc.createRadialGradient(sx, sy, 0, sx, sy, rr); gr.addColorStop(0, `rgba(0,0,0,${i})`); gr.addColorStop(1, 'rgba(0,0,0,0)'); lc.fillStyle = gr; lc.fillRect(sx - rr, sy - rr, rr * 2, rr * 2); };
       if (playing) light(P.x, P.y, 190, .85);
+      if (playing && (P.worn || []).includes('solstice_lantern') && countItem('solstice_lantern')) light(P.x, P.y - 12, 320, 1);
       for (const e of ents) if (e.torch && !e.dead) light(e.x, e.y - 8, 170, .85);
       for (const it of list) { const d = it.fd; if (!d) continue; if (d.k === 'bonfire') light(d.x, d.y - 10, 260, 1); else if (d.k === 'lanternpost') light(d.x, d.y - 33, 120, .8); else if (d.k === 'bunting' && G.festival === 'solstice') light(d.x + d.w / 2, d.y + 20, 240, .5); }
       for (const e of ents) if (e.burn > 0 && !e.dead) light(e.x, e.y, 110, .8);
@@ -7931,8 +8063,8 @@ function updateHUD(force) {
     if (G.fishing) pr = G.fishing.st === 'bite' ? '<span style="color:#ffe08a">A bite! </span><kbd>E</kbd> Reel in!' : 'Fishing… wait for a bite, then press <kbd>E</kbd>';
     if (input.force) pr = '<span style="color:#ff9a7a">⚠ Holding Q: your attacks will hit friendly and neutral characters</span>' + (pr ? ' &nbsp; ' + pr : '');
   }
-  if (G.joust) { const J = G.joust; pr = J.phase === 'ready' ? `🐎 Pass ${J.pass + 1} of 3 · You ${J.ps} – ${J.os} ${J.opp.name.split(' ')[1]} · Ready…` : `🐎 Hold attack to lower your lance, let go as you meet! <span style="display:inline-block;width:90px;height:8px;background:#2a1a10;border:1px solid #d8b25a;vertical-align:middle"><span style="display:block;height:100%;width:${Math.round(J.lance * 100)}%;background:#e8c060"></span></span>`; }
-  else if (G.contest) { const C = G.contest; pr = C.kind === 'archery' ? `🎯 Archery contest · ${C.hits} hits · ${Math.ceil(C.t)}s` : C.kind === 'pie' ? `🥧 EAT! Mash <kbd>E</kbd> · ${C.n} pies · ${Math.ceil(C.t)}s` : `🔔 Strike with <kbd>E</kbd> when full: <span style="display:inline-block;width:120px;height:10px;background:#2a1a10;border:1px solid #d8b25a;vertical-align:middle"><span style="display:block;height:100%;width:${Math.round((Math.sin(C.ph) + 1) * 50)}%;background:linear-gradient(90deg,#d8b25a,#ff5a3a)"></span></span> · ${C.tries} left`; }
+  if (G.joust) { const J = G.joust; pr = J.phase === 'ready' ? `🐎 Pass ${J.pass + 1} of 3 · You ${J.ps} – ${J.os} ${J.opp.name.split(' ')[1]} · Ready…` : joustBar(J); }
+  else if (G.contest) { const C = G.contest; pr = C.kind === 'archery' ? `🎯 Archery contest · ${C.hits} hits · ${Math.ceil(C.t)}s` : C.kind === 'snow' ? `☃ Snowball toss · click to throw · ${C.hits} down · ${Math.ceil(C.t)}s` : C.kind === 'pie' ? `🥧 EAT! Mash <kbd>E</kbd> · ${C.n} pies · ${Math.ceil(C.t)}s` : `🔔 Strike with <kbd>E</kbd> when full: <span style="display:inline-block;width:120px;height:10px;background:#2a1a10;border:1px solid #d8b25a;vertical-align:middle"><span style="display:block;height:100%;width:${Math.round((Math.sin(C.ph) + 1) * 50)}%;background:linear-gradient(90deg,#d8b25a,#ff5a3a)"></span></span> · ${C.tries} left`; }
   if (PAD.on) pr = pr.replace(/<kbd>E<\/kbd>/g, '<kbd>X</kbd>').replace(/<kbd>F<\/kbd>/g, '<kbd>B</kbd>');
   else if (TOUCH.on) pr = pr.replace(/press <kbd>E<\/kbd>/g, 'tap ✋').replace(/<kbd>E<\/kbd>/g, '<kbd>✋</kbd>');
   else if (keyOf('KeyE') !== 'KeyE') pr = pr.replace(/<kbd>E<\/kbd>/g, `<kbd>${keyName('KeyE')}</kbd>`);
@@ -7984,7 +8116,7 @@ function renderPause() {
   const k = ownerAtPx(P.x, P.y), al = P.allegiance != null ? `${repTitle(P.allegiance)} of ${KDATA[P.allegiance].name}` : 'Wandering knight';
   const pl = !G.under && nearestPlace(P.x, P.y, p => p.disc && (p.type === 'village' || p.type === 'castle' || p.type === 'outpost'));
   const where = G.under ? `${G.under.name}${G.under.interior ? '' : ', underground'}` : pl && dist(P.x, P.y, pl.x, pl.y) < 14 * TS ? `${pl.name}, ${KDATA[k].full}` : `The wilds of ${KDATA[k].name}`;
-  $('pauseHero').innerHTML = `<canvas id="pausePort" width="128" height="128"></canvas><div style="flex:1;min-width:0"><div class="ph1">Level ${P.lvl} · ${al}${P.fief ? ` · Warden of ${W.places[P.fief.v].name}` : ''}</div><div class="ph2">${where}</div><div class="ph2">${SEASONS[curSeason]}, day ${dayNum()} · ${G.mode === 'story' ? (STORY && !STORY.done ? `Story · Act ${ROMAN[storyAct()]}` : 'Story') : 'Sandbox'} · ${DIFF().name}</div><div class="phChips"><span>${fmt(P.gold)} gold</span><span>${Math.ceil(P.hp)} / ${P.maxHp} health</span><span>${fmt(G.kills)} foes slain</span><span>${Object.keys(ACHS).length} / ${ACH.length} achievements</span></div></div>`;
+  $('pauseHero').innerHTML = `<canvas id="pausePort" width="128" height="128"></canvas><div style="flex:1;min-width:0"><div class="ph1">Level ${P.lvl} · ${al}${P.fief ? ` · Warden of ${W.places[P.fief.v].name}` : ''}</div><div class="ph2">${where}</div><div class="ph2">${SEASONS[curSeason]}, day ${dayNum()} · ${G.mode === 'story' ? (STORY && !STORY.done ? `Story · Act ${ROMAN[storyAct()]}` : 'Story') : G.fromStory ? 'Sandbox · story complete' : 'Sandbox'} · ${DIFF().name}</div><div class="phChips"><span>${fmt(P.gold)} gold</span><span>${Math.ceil(P.hp)} / ${P.maxHp} health</span><span>${fmt(G.kills)} foes slain</span><span>${Object.keys(ACHS).length} / ${ACH.length} achievements</span></div></div>`;
   drawPortrait($('pausePort'), P);
   document.querySelectorAll('#pauseScreen [data-icon]').forEach(img => { const id = img.dataset.icon; img.src = id === 'banner' ? bannerURL(P.allegiance ?? k) : itemIcon(id); });
   $('pauseSp').textContent = P.sp || ''; $('pauseSp').classList.toggle('hidden', !P.sp);
@@ -7993,7 +8125,7 @@ function renderStats() { $('statBody').innerHTML = `<table class="statT">${stats
 /* ---------------- Controller (standard gamepad mapping) ---------------- */
 function hkHTML() {
   const mv = ['KeyW', 'KeyA', 'KeyS', 'KeyD'].every(c => keyOf(c) === c) ? 'WASD' : ['KeyW', 'KeyA', 'KeyS', 'KeyD'].map(keyName).join('');
-  return [[mv, 'Move'], ['LMB', 'Attack'], ['RMB', 'Block'], [keyName('Space'), 'Dodge'], [keyName('KeyE'), 'Interact'], [keyName('KeyF'), 'Horse'], [keyName('KeyQ'), '+Click Hit friendlies'], [keyName('ShiftLeft'), 'Sprint'], [keyName('KeyR'), 'Arrows'], [keyName('Tab'), 'Swap weapon'], [keyName('KeyC'), 'Special'], [keyName('KeyG'), 'Companions'], [keyName('KeyP'), 'Skills<b id="spBadge" style="color:#e7c35a"></b>'], [keyName('KeyJ'), 'Quests']].map(([k, t]) => `<span><kbd>${k}</kbd>${t}</span>`).join('');
+  return [[mv, 'Move'], ['LMB', 'Attack'], ['RMB', 'Block'], [keyName('Space'), 'Dodge'], [keyName('KeyE'), 'Interact'], [keyName('KeyF'), 'Horse'], [keyName('KeyQ'), '+Click Hit friendlies'], [keyName('ShiftLeft'), 'Sprint'], [keyName('KeyR'), 'Arrows'], [keyName('Tab'), 'Swap weapon'], [keyName('KeyC'), 'Special'], [keyName('KeyG'), 'Companions'], [keyName('KeyP'), 'Skills<b id="spBadge" style="color:#e7c35a"></b>'], [keyName('KeyJ'), 'Journal']].map(([k, t]) => `<span><kbd>${k}</kbd>${t}</span>`).join('');
 }
 function refreshKeyHints() {
   const el = document.querySelector('#hud .hk'); if (el) { PAD.hk = hkHTML(); el.innerHTML = PAD.on ? PAD_HK : PAD.hk; }
@@ -8112,12 +8244,14 @@ addEventListener('keydown', ev => {
   if (document.activeElement && document.activeElement.id === 'pinText') { if (e.code === 'Enter') $('pinSave').click(); else if (e.code === 'Escape') $('pinCancel').click(); return; } // typing a pin note
   input.keys[e.code] = true; input.force = !!input.keys.KeyQ;
   if (e.code === 'Space' || e.code === 'Tab') { e.preventDefault(); if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }
-  if (G.state === 'menu') { if (e.code === 'Escape' && UI.stack.length) UI.close(); return; }
+  if (G.state === 'menu') { if (e.code === 'Escape' && $('confirmScreen').classList.contains('show')) { $('cfNo').click(); return; } if (e.code === 'Escape' && UI.stack.length) UI.close(); return; }
+  if (e.code === 'Escape' && $('confirmScreen').classList.contains('show')) { $('cfNo').click(); return; }
   if (e.code === 'Escape') { if (dialogOpen) closeDialog(); else if (UI.stack.length) UI.close(); else if (G.state === 'play') UI.open('pause'); return; }
   if (UI.isOpen('act') && (e.code === 'Enter' || e.code === 'Space')) { e.preventDefault(); UI.close(); return; }
   if (dialogOpen) { const n = parseInt(e.key); if (n >= 1) { const b = $('dOpts').children[n - 1]; if (b && !b.disabled) b.click(); } return; }
   if (G.state !== 'play' || e.repeat) return;
-  const tog = { KeyI: 'inv', KeyM: 'map', KeyK: 'dip', KeyJ: 'quests', KeyP: 'skills', KeyL: 'journal' }[e.code]; if (tog === 'journal' && !UI.ids.journal) return;
+  const tog = { KeyI: 'inv', KeyM: 'map', KeyK: 'dip', KeyJ: 'quests', KeyP: 'skills', KeyL: 'journal' }[e.code]; if (tog === 'journal') { if (UI.isOpen('quests') && (qTab === 'beasts' || qTab === 'lore')) UI.close(); else UI.open('journal'); return; }
+  if (tog === 'quests' && !UI.isOpen('quests') && (qTab === 'beasts' || qTab === 'lore')) qTab = 'active';
   if (tog) { if (tog === 'map' && G.under && !G.under.interior) { toast('Your map is no use down here. Find your way back to the ladder.'); return; } UI.toggle(tog); return; }
   if (UI.stack.length) return;
   if (e.code === 'Space') tryDodge();
@@ -8142,6 +8276,7 @@ $('pauseScreen').addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if (!b) return; const a = b.dataset.act;
   if (a === 'resume') UI.close();
   else if (['inv', 'map', 'dip', 'quests', 'skills', 'stats', 'ach', 'journal'].includes(a)) UI.open(a);
+  else if (a === 'slots') { saveGame(true, true); contMode = 'play'; UI.open('cont'); renderCont(); }
   else if (a === 'settings') UI.open('settings');
   else if (a === 'save') { saveGame(); }
   else if (a === 'download') { saveGame(true, true); downloadSave(readSlot(G.slot)); }
@@ -8162,9 +8297,10 @@ function migrateSaves() { // saves from before slots move into the first free sl
   ['fk_story', 'fk_save'].forEach(old => { let v = null; try { v = localStorage.getItem(old); } catch (e) { } if (!v) return; const n = firstFreeSlot(); if (!n) return; try { const d = JSON.parse(v); if (old === 'fk_story') d.mode = 'story'; else d.mode = d.mode || 'sandbox'; localStorage.setItem(slotKey(n), JSON.stringify(d)); localStorage.removeItem(old); } catch (e) { } });
 }
 const modeOf = d => d && d.mode === 'story' ? 'story' : 'sandbox';
+const wasStory = d => !!d && (!!d.fromStory || (d.mode === 'story' && !!d.story && !!d.story.done));
 function slotCard(n, d, acts) {
-  const m = modeOf(d);
-  return `<div class="modeCard slotCard${d ? (m === 'story' ? ' story' : '') : ' empty'}" data-n="${n}"><div class="mcT">SLOT ${n}${d ? ` · ${m === 'story' ? 'STORY' : d.tutDone === false ? 'TUTORIAL' : 'SANDBOX'}` : ''}</div><div class="mcD">${d ? saveSummary(d) : '<i>Empty</i>'}</div>${acts && d ? `<div class="slotActs"><button class="btn sm" data-dl="${n}" title="Download this save">⬇ Download</button><button class="btn sm red" data-del="${n}">Delete</button></div>` : ''}</div>`;
+  const fs = wasStory(d), m = fs ? 'sandbox' : modeOf(d);
+  return `<div class="modeCard slotCard${d ? (fs ? ' fromstory' : m === 'story' ? ' story' : '') : ' empty'}" data-n="${n}"><div class="mcT">SLOT ${n}${d ? ` · ${fs ? 'SANDBOX <span class="wasStory">✦ FORMERLY STORY</span>' : m === 'story' ? 'STORY' : d.tutDone === false ? 'TUTORIAL' : 'SANDBOX'}` : ''}</div><div class="mcD">${d ? saveSummary(d) : '<i>Empty</i>'}</div>${acts && d ? `<div class="slotActs"><button class="btn sm" data-dl="${n}" title="Download this save">⬇ Download</button><button class="btn sm red" data-del="${n}">Delete</button></div>` : ''}</div>`;
 }
 function downloadSave(d) {
   if (!d) return; const day = Math.floor((d.time || 0) / DAYLEN + .3) + 1;
@@ -8184,14 +8320,15 @@ function renderCont() {
     });
     return;
   }
-  const used = slotsUsed().sort((a, b) => (b.d.savedAt || 0) - (a.d.savedAt || 0));
-  $('contTitle').textContent = 'CONTINUE'; $('contNote').textContent = used.length ? '' : 'No saved games yet.';
+  const used = slotsUsed().sort((a, b) => (b.d.savedAt || 0) - (a.d.savedAt || 0)), ing = G.state !== 'menu' && !!P;
+  $('contTitle').textContent = ing ? 'SAVE SLOTS' : 'CONTINUE'; $('contNote').textContent = used.length ? (ing ? 'Your current game is saved before you switch to another.' : '') : 'No saved games yet.';
   list.innerHTML = used.map(({ n, d }) => slotCard(n, d, true)).join('');
+  if (ing) { const cur = list.querySelector(`.slotCard[data-n="${G.slot || 1}"]`); if (cur) { const dd = cur.querySelector('[data-del]'); if (dd) dd.remove(); cur.querySelector('.mcT').insertAdjacentHTML('beforeend', ' · <span style="color:#8fe07a">PLAYING NOW</span>'); } }
   list.querySelectorAll('.slotCard').forEach(el => el.onclick = e => {
     const n = +el.dataset.n, dl = e.target.closest('[data-dl]'), del = e.target.closest('[data-del]');
     if (dl) { e.stopPropagation(); downloadSave(readSlot(n)); return; }
-    if (del) { e.stopPropagation(); if (del.dataset.sure !== '1') { del.dataset.sure = '1'; del.textContent = 'Really delete?'; return; } try { localStorage.removeItem(slotKey(n)); } catch (err) { } SND.play('close'); refreshMenu(); renderCont(); return; }
-    SND.play('ui'); UI.closeAll(); continueGame(n);
+    if (del) { e.stopPropagation(); const dd = readSlot(n); askConfirm(`DELETE SLOT ${n}?`, `This ${wasStory(dd) ? 'sandbox' : modeOf(dd)} game (${saveSummary(dd).replace(/<div[^>]*>.*<\/div>/, '')}) will be erased from this browser. Download it first if you might want it back.`, 'Delete Game', () => { try { localStorage.removeItem(slotKey(n)); } catch (err) { } SND.play('close'); refreshMenu(); renderCont(); }); return; }
+    SND.play('ui'); if (ing && n === (G.slot || 1)) { UI.closeAll(); return; } if (ing) { saveGame(true, true); if (G.under) leaveDungeon(true); } UI.closeAll(); continueGame(n);
   });
 }
 let pendingSlot = 0;
@@ -8213,7 +8350,8 @@ function refreshMenu() {
 function saveSummary(d) {
   const day = Math.floor((d.time || 0) / DAYLEN + .3) + 1, when = d.savedAt ? new Date(d.savedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
   const o = normOpts(d.opts); let top = `Day ${day} · Level ${d.P && d.P.lvl || 1} · ${DIFFS[o.diff].name} · ${SIZES[o.size].name}`;
-  if (d.story) { const mq = (d.Q.active || []).find(q => q.type === 'story' && q.main); top = (d.story.done ? 'Story complete · free roam' : mq ? esc(mq.title) : 'In progress') + ' · ' + top; }
+  if (wasStory(d)) { const en = d.story && d.story.ending && ENDINGS[d.story.ending]; top = `Story finished${en ? `: <i>${esc(en.t)}</i>` : ''} · now free roam · ` + top; }
+  else if (d.story) { const mq = (d.Q.active || []).find(q => q.type === 'story' && q.main); top = (mq ? esc(mq.title) : 'In progress') + ' · ' + top; }
   return top + (when ? `<div class="mcS">Saved ${esc(when)}</div>` : '');
 }
 let newOpts = normOpts((() => { try { return JSON.parse(localStorage.getItem('fk_newopts') || 'null'); } catch (e) { return null; } })());
@@ -8267,7 +8405,8 @@ $('btnAch').onclick = () => UI.open('ach');
 $('btnRespawn').onclick = () => respawnPlayer();
 $('btnLoadSave').onclick = () => { UI.hide('deathScreen'); if (hasSave()) continueGame(G.slot); else { toast('No save found — rising again instead.', 'bad'); respawnPlayer(); } };
 $('btnDeathMenu').onclick = () => { UI.hide('deathScreen'); toMainMenu(); };
-$('btnEndSandbox').onclick = () => { UI.hide('endScreen'); G.state = 'play'; saveGame(true); toast('The tale is told, but the realm endures. The world is yours to roam.', 'gold'); };
+$('btnEndSandbox').onclick = () => { UI.hide('endScreen'); G.state = 'play'; storyToSandbox(); saveGame(true); toast(`The tale is told, but the realm endures. Slot ${G.slot || 1} is now a <b>sandbox</b> game: tourneys, free roaming and everything else the realm offers.`, 'gold'); };
+function storyToSandbox() { if (G.mode !== 'story') return; G.mode = 'sandbox'; G.fromStory = { ending: STORY && STORY.ending, day: dayNum() }; }
 $('btnEndMenu').onclick = () => { UI.hide('endScreen'); toMainMenu(); };
 
 function withLoading(text, fn) { $('loadText').textContent = text; $('loading').classList.remove('done'); setTimeout(() => { try { fn(); } finally { $('loading').classList.add('done'); } }, 60); }
@@ -8277,7 +8416,7 @@ function resetState() {
   ents = []; pickups = []; projs = []; parts = []; texts = []; horseEnt = null; uidCounter = 1; nextEid = 1;
   W.places.forEach(p => { p.disc = false; p.rumor = false; p.spawned = false; p.dead = []; p.cleared = false; p.chestOpened = false; p.clearedAt = 0; p.offers = null; p.request = false; p.blessed = false; p.investigated = false; p.rumorUsed = false; p.backerRevealed = false; p.wellT = -999; p.sboss = null; p.ddead = null; p.dchests = null; p.dcleared = false; p.legendTaken = false; if (p.type === 'outpost') p.owner = p.baseOwner; for (const k in p) if (k.startsWith('_shop_')) delete p[k]; });
   (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false; G.lastPay = null; G.siege = null; G.tourney = null; G.stats = newStats(); G.tut = null;
-  G.bounty = [0, 0, 0, 0]; G.contest = null; G.festival = null; G.wboss = null; G.wbossNext = 0; G.wbossCount = 0; G.enc = null; G.encT = null; G.race = null; G.joust = null; G.seen = {};
+  G.bounty = [0, 0, 0, 0]; G.contest = null; G.festival = null; G.wboss = null; G.wbossNext = 0; G.wbossCount = 0; G.enc = null; G.encT = null; G.race = null; G.joust = null; G.seen = {}; G.fromStory = null; G.tourney = null;
   Object.assign(G, { time: 0, dipT: 0, eventT: 50, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, questT: 0 });
   newKingdoms(); newQuests(); newFog();
 }
@@ -8321,7 +8460,7 @@ function saveGame(silent, quiet) {
   const qStrip = q => { const c = Object.assign({}, q); delete c.ent; delete c.foes; return c; };
   const data = {
     v: 1, seed: W.seed, time: G.time, kills: G.kills, uid: uidCounter, waypoint: G.mapWaypoint, savedAt: Date.now(),
-    P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, skills: P.skills, sp: P.sp, comps: P.comps, houses: P.houses, stash: P.stash, forts: P.forts, fortGuards: P.fortGuards, fief: P.fief || null, pins: P.pins || [], grave: P.grave || null, trophies: P.trophies || [], guild: P.guild || null, nemesis: P.nemesis || null, lore: P.lore || [],
+    P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, skills: P.skills, sp: P.sp, comps: P.comps, houses: P.houses, stash: P.stash, forts: P.forts, fortGuards: P.fortGuards, fief: P.fief || null, pins: P.pins || [], grave: P.grave || null, trophies: P.trophies || [], guild: P.guild || null, nemesis: P.nemesis || null, lore: P.lore || [], worn: P.worn || [],
       party: partyNow().filter(e => !e.comp || true).map(e => ({ comp: e.comp, kind: e.kind, name: e.name, hp: Math.round(Math.max(1, e.hp)), k: e.k })), mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
     horse: horseEnt ? { x: horseEnt.x, y: horseEnt.y } : null,
     K: { rel: K.rel, aff: K.aff, rep: K.rep, mil: K.mil, reasons: K.reasons, events: K.events, kev: K.kev, repWhy: K.repWhy, gifts: K.gifts, log: K.log, cd: {} },
@@ -8330,7 +8469,7 @@ function saveGame(silent, quiet) {
     exp: packBits(EXP),
   };
   data.opts = G.opts || normOpts(); data.stats = G.stats; data.tut = G.tut && !G.tut.done ? G.tut.step : null;
-  data.mode = G.mode; data.slot = G.slot || 1; data.bounty = G.bounty || [0, 0, 0, 0]; data.wboss = G.wboss || null; data.wbossNext = G.wbossNext || 0; data.wbossCount = G.wbossCount || 0; data.seen = G.seen || {}; if (G.mode === 'story') data.story = STORY;
+  data.mode = G.mode; data.slot = G.slot || 1; data.bounty = G.bounty || [0, 0, 0, 0]; data.wboss = G.wboss || null; data.wbossNext = G.wbossNext || 0; data.wbossCount = G.wbossCount || 0; data.seen = G.seen || {}; data.fromStory = G.fromStory || null; data.tourney = G.tourney ? { castle: G.tourney.castle, day: G.tourney.day, round: 0, fighting: false, done: !!G.tourney.done } : null; if (STORY) data.story = STORY;
   if (WIPED) return;
   try { localStorage.setItem(saveKey(), JSON.stringify(data)); if (quiet) { } else if (!silent) { toast(`Game saved to slot ${G.slot || 1}.`, 'good'); SND.play('pickup'); } else toast('Autosaved.', ''); }
   catch (e) { toast('Could not save: browser storage is unavailable or full.', 'bad'); }
@@ -8341,7 +8480,7 @@ function loadGame(d) {
   Object.assign(P, d.P); P.inv = d.P.inv; P.eq = d.P.eq; P.mounted = false; uidCounter = d.uid || (Math.max(0, ...P.inv.map(i => i.uid)) + 1);
   recalc();
   G.bounty = d.bounty || [0, 0, 0, 0]; G.contest = null; G.festival = null; G.wboss = d.wboss || null; G.wbossNext = d.wbossNext || 0; G.wbossCount = d.wbossCount || 0; G.enc = null; G.race = null; G.joust = null;
-  G.time = d.time || 0; G.kills = d.kills || 0; G.mapWaypoint = d.waypoint || null; G.stats = Object.assign(newStats(), d.stats || {}); G.seen = d.seen || {}; P.lore = d.P.lore || []; Object.keys(G.stats.kills).forEach(k => { if (BEAST_I[k] != null && !G.seen[k]) G.seen[k] = 1; });
+  G.time = d.time || 0; G.kills = d.kills || 0; G.mapWaypoint = d.waypoint || null; G.stats = Object.assign(newStats(), d.stats || {}); G.seen = d.seen || {}; G.tourney = d.tourney || null; P.lore = d.P.lore || []; P.worn = d.P.worn || []; Object.keys(G.stats.kills).forEach(k => { if (BEAST_I[k] != null && !G.seen[k]) G.seen[k] = 1; });
   Object.assign(K, d.K); K.cd = {};
   Q.active = d.Q.active || []; Q.done = d.Q.done || []; Q.tracked = d.Q.tracked; Q.next = d.Q.next || 1;
   (d.places || []).forEach((s, i) => { const p = W.places[i]; if (p) Object.assign(p, s, { dead: s.dead || [] }); });
@@ -8359,7 +8498,7 @@ function loadGame(d) {
     if (q.type === 'assist') q.stage = 0;
     if (q.type === 'story') { q.sp = 0; q.amb = 0; q.x0 = 0; }
   });
-  G.mode = d.mode === 'story' ? 'story' : 'sandbox'; STORY = d.story || null;
+  G.mode = d.mode === 'story' ? 'story' : 'sandbox'; STORY = d.story || null; G.fromStory = d.fromStory || null; if (G.mode === 'story' && STORY && STORY.done) storyToSandbox(); // a finished story carries on as a sandbox
   // settings belong to the device, not the save, so an imported game keeps this device's settings
 }
 
@@ -9940,7 +10079,7 @@ function update(dt) {
   }
   if ((G.dipT += dt) >= 40) { G.dipT = 0; dipTick(); }
   const dnow = dayNum(); if (G.lastPay == null) G.lastPay = dnow; else if (dnow !== G.lastPay) { G.lastPay = dnow; dailyTick(); }
-  if ((G.lawT = (G.lawT || 0) - dt) <= 0) { G.lawT = .25; thiefTick(); if ((G.law2 = (G.law2 || 0) - 1) <= 0) { G.law2 = 4; lawTick(); cityTick(); guildTick(); festivalTick(); encounterTick(); wbossTick(1); seeTick(); if (G.bounty) G.bounty = G.bounty.map(v => v > 1 ? v * Math.pow(.9, 1 / (DAYLEN / 1)) : 0); } }
+  if ((G.lawT = (G.lawT || 0) - dt) <= 0) { G.lawT = .25; thiefTick(); if ((G.law2 = (G.law2 || 0) - 1) <= 0) { G.law2 = 4; lawTick(); cityTick(); guildTick(); festivalTick(); encounterTick(); wbossTick(1); seeTick(); dockTick(); if (G.bounty) G.bounty = G.bounty.map(v => v > 1 ? v * Math.pow(.9, 1 / (DAYLEN / 1)) : 0); } }
   contestTick(dt); raceTick(dt);
   if ((G.eventT -= dt) <= 0) { G.eventT = rand(60, 115); if (!G.under && !G.tut) worldEvent(); } // no raids or ambushes mid-lesson
   if ((G.autosaveT += dt) >= 180) { G.autosaveT = 0; saveGame(true); }

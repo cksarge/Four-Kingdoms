@@ -20,7 +20,7 @@ When you start a new game you choose a mode:
 - **Sandbox**: the open world with no story.
 - **Tutorial**: a five-minute lesson with a drill sergeant in a training yard (movement, sprinting, combat, blocking and dodging, archery, riding and the menus). When it ends, the same world carries on as an endless sandbox game. It uses Knight difficulty and a Medium world, and shares the sandbox save slot.
 
-There are five save slots, and each can hold a story or a sandbox game. The game also saves itself whenever the tab is hidden or closed. Saves can be downloaded as a file and loaded back from the main menu, so you can keep backups or move a game between a phone and a computer.
+There are five save slots, and each can hold a story or a sandbox game. The game also saves itself whenever the tab is hidden or closed. Saves can be downloaded as a file and loaded back from the main menu, so you can keep backups or move a game between a phone and a computer. The pause menu's *Save Slots* page lets you switch to another game without quitting, and deleting a slot (or all save data, in Settings) always asks first. Finishing the story turns that slot into a sandbox game, marked *Formerly Story*, so you can keep playing in the world you shaped.
 
 ## New game options
 
@@ -48,7 +48,7 @@ Before a new game you can set:
 | I | Inventory |
 | M | Map |
 | K | Diplomacy |
-| J | Quest journal |
+| J | Journal: quests and the chronicle |
 | L | Journal: bestiary and lore |
 | 1 / 2 / 3 | Eat food / drink potion / use bandage |
 | Shift (hold) | Sprint, draining stamina |
@@ -93,15 +93,16 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
   - Assault, murder, pickpocketing and breaking in earn a bounty in that kingdom, shown on the HUD.
   - Guards who spot you offer three choices: pay the fine, serve a day or more in the cells (losing stolen goods and a little XP), or resist.
   - A thieves' guild recruits in taverns after dark. Its four jobs lead to lockpicks, a guild cloak, a fence for stolen goods, and a heist on the crown's tax wagon, unless you betray the guild to the captain.
-- **Festivals:** a spring fair, a harvest market and a winter solstice fill the royal cities with decorations, stalls and games (an archery contest, pie eating, the strongman bell), with prizes to win.
+- **Festivals:** a spring fair, a harvest market and a winter solstice fill the royal cities with decorations, stalls and games (an archery contest, pie eating, and at midwinter the strongman bell or a snowball toss at pop-up snowmen), with prizes to win. The garland, harvest charm, solstice lantern and wool scarf can be worn from your pack, and the lantern lights your way at night; so can the thieves' guild cloak.
 - **Roadside encounters:** travelling the roads turns up short events with choices: a wounded knight, a lost child to escort home, a toll gang, a fleeing thief, a broken-down merchant, a pilgrim, a fortune teller and a deserter.
 - **A nemesis:** a rival knight (a Sir or a Dame) ambushes you on the road every few days.
   - They grow stronger and earn epithets each time they beat you, and they taunt you about where they left you for dead.
   - After three defeats they demand a final duel, which ends with you killing, sparing or exiling them.
+  - Spare them and they turn up every week or so as a friend, with a gift, news of places you have not found, or their sword at your side until nightfall.
 - **World bosses:** every few weeks the Ashen Wyvern (fire breath) or the Hill Giant (boulders and ground slams) roams from village to village, ravaging them. It is marked on your map, and slaying it wins gold, the thanks of every crown, a legendary weapon and a trophy.
-- **The Journal** (L, or from the pause menu):
+- **The Journal** (J or L, or from the pause menu): your quests, the chronicle of the realm, and:
   - **Bestiary:** every creature you see gets an entry, with its portrait, where it lives, what it drops, how many you have slain and tips for fighting it. Creatures you have not met appear as silhouettes.
-  - **Lore:** 24 scrolls about the four kingdoms, the First King and the Ember Crown, the saints, the Ashen Circle and life on the road. They are found at ruins, camps and hidden places, in each cathedral's library, and in dungeon guardians' hoards.
+  - **Lore:** 32 scrolls about the four kingdoms, the First King and the Ember Crown, the saints, the Ashen Circle and life on the road. They are found at ruins, camps and hidden places, in each cathedral's library and in dungeon guardians' hoards. The royal scribe in each city plaza sells copies of rare texts and, for a few coins, marks the nearest lost scroll on your map.
 - Watchtowers guard the roads into each castle and the border crossings. Bowmen on the towers and castle walls shoot at bandits, enemy soldiers and outlaws.
 - Quests, random world events and a day/night cycle.
 - Seasons that change every six days: spring blossom, summer, golden autumn (cheap food) and snowy winter (slower travel off the roads, dear bread).
@@ -112,13 +113,13 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 - Live sieges: when a war would take a fort near you, or your liege is involved, armies march and fight for it while a capture meter fills. Fight for either side to earn reputation. Bandits may also raid a fort you own.
 - Tournaments (sandbox): every eight days a castle holds a tourney. Win three bouts for gold, a rare prize and renown.
   - The second bout is a mounted joust over three passes.
-  - Hold attack to lower your lance and let go as you meet: early for a shield strike (1 point), late for a helm strike (2), or at the last moment to unhorse your opponent and win outright.
+  - Hold attack to lower your lance and let go as you meet: early for a shield strike (1 point), late for a helm strike (2), or at the last moment to unhorse your opponent and win outright. A meter shows your rival closing in on the blue, gold and red strike zones.
 - **Horse races:** the royal stablemaster runs races to the next castle along the road, against three riders.
   - Entry costs 20 gold, and you need a horse.
-  - Ride through every checkpoint flag. The top three win prizes, and the winner also gets a cup for the trophy room.
+  - Ride through every checkpoint flag in order; skip one or leave the course and you are disqualified. The top three win prizes, and the winner also gets a cup for the trophy room.
 - **Ferries and ships:**
   - Ferrymen pole you across wide rivers far from any bridge, for 3 gold.
-  - Seaside towns have a harbour, where merchant ships sail to other harbours for a fare.
+  - Seaside towns have a harbour with a ship, its captain and a deckhand. Ships sail to other harbours for a fare, and your horse and companions come along.
   - Voyages take a day or more. Beware storms that wash supplies overboard, and pirates waiting at the docks.
   - Both are marked on the map.
 - Fiefs: sworn knights with reputation 80 can ask their ruler for a village to hold. Set its taxes, keep its people loyal (feasts help, raids hurt) and collect its income every week.
@@ -128,8 +129,8 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 - Crafting: fletch every arrow type at market benches, and at the royal forges improve gear up to Masterwork or bind a dungeon relic into a blade to enchant it.
 - Fishing at little jetties on rivers, lakes and the coast (buy a rod at a village market), and hermits in the wilds who sell tonics, training and secrets.
 - **Settings:**
-  - Battery Saver (30 fps, fewer particles) and optional chattering NPC voices.
-  - Accessibility: rebindable keys, text size, reduced flashing and motion, and colourblind-friendly map and relation colours.
+  - Battery Saver (30 fps, fewer particles, lighter weather) and optional chattering NPC voices with their own volume.
+  - Accessibility: rebindable keys, text size, reduced flashing and motion, and colourblind-friendly colours, with a different pattern for each kingdom on the map.
 - About 45 music tracks, all generated in code: rotating day and night overworld songs, combat and boss themes, a village, castle and fort theme for each kingdom, and story-mode themes. The music changes with where you are and what you're doing.
 
 ## Achievements and statistics
