@@ -1406,6 +1406,14 @@ const ITEMS = {
   bread: { name: 'Bread', type: 'misc', heal: 22, val: 4, stack: 1, food: 1, desc: 'Restores 22 health. [1]' },
   meat: { name: 'Roast Meat', type: 'misc', heal: 40, val: 10, stack: 1, food: 1, desc: 'Restores 40 health. [1]' },
   potion: { name: 'Healing Draught', type: 'misc', heal: 85, val: 45, stack: 1, potion: 1, desc: 'Restores 85 health. [2]' },
+  apple: { name: 'Apple', type: 'misc', heal: 10, val: 2, stack: 1, food: 1, desc: 'Crisp and sweet. Restores 10 health. [1]' },
+  pear: { name: 'Pear', type: 'misc', heal: 12, val: 2, stack: 1, food: 1, desc: 'Ripe and juicy. Restores 12 health. [1]' },
+  cheese: { name: 'Wheel of Cheese', type: 'misc', heal: 24, val: 7, stack: 1, food: 1, desc: 'Sharp and nutty. Restores 24 health. [1]' },
+  sausage: { name: 'Sausages', type: 'misc', heal: 32, val: 8, stack: 1, food: 1, desc: 'A string of smoked sausages. Restores 32 health. [1]' },
+  pie: { name: 'Meat Pie', type: 'misc', heal: 55, val: 15, stack: 1, food: 1, desc: "Hot from the baker's oven. Restores 55 health. [1]" },
+  honey_cake: { name: 'Honey Cake', type: 'misc', heal: 30, st: 40, val: 12, stack: 1, food: 1, desc: 'Sticky and sweet. Restores 30 health and 40 stamina. [1]' },
+  ale: { name: 'Mug of Ale', type: 'misc', heal: 8, st: 60, val: 3, stack: 1, food: 1, desc: 'Frothy and strong. Restores 8 health and 60 stamina. [1]' },
+  flowers: { name: 'Posy of Flowers', type: 'misc', val: 4, stack: 1, desc: 'Bright blooms from a city flower seller. Someone might appreciate them.' },
   bandage: { name: 'Bandage', type: 'misc', heal: 15, val: 6, stack: 1, band: 1, desc: 'Restores 15 health. [3]' },
   iron: { name: 'Iron Ingots', type: 'misc', good: 1, val: 30, stack: 1, desc: 'Trade good. Albion mines it; Eldoria pays well.' },
   wine: { name: 'Valorian Wine', type: 'misc', good: 1, val: 28, stack: 1, desc: 'Trade good. Valoria presses it; Draven craves it.' },
@@ -1983,6 +1991,104 @@ function genWorld(seed) {
   addDungeon('spider', (t, x, y) => (t === T.DENSE || t === T.FOREST || t === T.SWAMP) && W.own[y * WW + x] !== 1, Math.max(1, sc(1.5)));
   addDungeon('crypt', t => t === T.GRASS || t === T.PLAINS || t === T.HILL, Math.max(1, sc(1.5)));
   addDungeon('mine', t => t === T.HILL || t === T.PASS, Math.max(1, sc(1.5)));
+  // ---------- Royal cities ----------
+  // Every castle is surrounded by a crowded city: paved streets, dirt alleys, packed townhouses and shops,
+  // a market plaza at the gate, a tourney field and a cathedral. Own random stream, laid out after every
+  // other placement, so castles, roads and places stay exactly where older saves expect them.
+  const crr = mulberry32(seed * 131 + 11);
+  const cshuf = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(crr() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  W.places.filter(p => p.type === 'castle').forEach(pl => {
+    const cx = pl.tx, cy = pl.ty, k = pl.owner, RX = 25, RY = 23, OY = 2;
+    const x0 = cx - RX, y0 = cy + OY - RY, BW = RX * 2 + 1, BH = RY * 2 + 1, C = new Uint8Array(BW * BH); // 0 outside, 1 street, 2 lot, 3 building, 4 square, 6 field, 7 open but reserved, 9 untouched
+    const inB = (x, y) => x >= x0 && y >= y0 && x < x0 + BW && y < y0 + BH, get = (x, y) => inB(x, y) ? C[(y - y0) * BW + x - x0] : 0, put = (x, y, v) => { if (inB(x, y)) C[(y - y0) * BW + x - x0] = v; };
+    const inCity = (x, y) => ((x - cx) / RX) ** 2 + ((y - cy - OY) / RY) ** 2 <= 1 && x > 2 && y > 2 && x < WW - 3 && y < WH - 3;
+    const core = (x, y) => Math.abs(x - cx) <= 10 && y >= cy - 9 && y <= cy + 8;
+    // the old ring of cottages and hayricks makes way for the city
+    W.objs = W.objs.filter(o => {
+      if (o.k !== 'house' && o.k !== 'hay') return true;
+      const mx = Math.floor((o.x + o.w / 2) / TS), my = Math.floor((o.y + o.h / 2) / TS); if (!inCity(mx, my) || core(mx, my)) return true;
+      for (let y = Math.floor(o.y / TS); y < Math.ceil((o.y + o.h) / TS); y++) for (let x = Math.floor(o.x / TS); x < Math.ceil((o.x + o.w) / TS); x++) W.solid[y * WW + x] = 0;
+      return false;
+    });
+    for (let y = y0; y < y0 + BH; y++) for (let x = x0; x < x0 + BW; x++) {
+      if (!inCity(x, y) || core(x, y)) continue; const i = y * WW + x, t = ter[i];
+      put(x, y, TINFO[t].block || t === T.FORD || t === T.BRIDGE || t === T.SEA || W.solid[i] || W.wall[i] ? 9 : t === T.ROAD ? 1 : 2);
+    }
+    const reserve = (tx, ty, tw, th, m, v) => { for (let y = ty - m; y < ty + th + m; y++) for (let x = tx - m; x < tx + tw + m; x++) { const c = get(x, y); if (c && c !== 9 && !(v === 7 && c === 1)) put(x, y, v); } };
+    W.objs.forEach(o => { const tx = Math.floor(o.x / TS), ty = Math.floor(o.y / TS), tw = Math.ceil(o.w / TS), th = Math.ceil(o.h / TS); if (tx + tw < x0 || ty + th < y0 || tx > x0 + BW || ty > y0 + BH || core(Math.floor((o.x + o.w / 2) / TS), Math.floor((o.y + o.h / 2) / TS))) return; const own = o.k === 'sign' || o.k === 'bannerpole'; reserve(own ? Math.floor((o.x + o.w / 2) / TS) : tx, own ? Math.floor((o.y + o.h) / TS) : ty, own ? 1 : tw, own ? 1 : th, 1, own ? 7 : 9); });
+    W.interacts.forEach(it => { const tx = Math.floor(it.x / TS), ty = Math.floor(it.y / TS); if (inB(tx, ty)) reserve(tx - 1, ty - 1, 3, 3, 0, it.type === 'sign' ? 7 : 9); });
+    const open = c => c === 1 || c === 2 || c === 7;
+    // streets: a ring road hugging the castle, cross avenues, an outer ring; the plaza at the gate and the tourney field below it
+    const street = (dx, dy) => { const ax = Math.abs(dx);
+      return ((ax === 11 || ax === 12) && dy >= -11 && dy <= 12) || ((dy === -10 || dy === -11) && ax <= 12) || ((dx === 0 || dx === 1) && (dy <= -10 || dy >= 9)) || ((dy === 0 || dy === 1) && ax >= 11)
+        || ((ax === 19 || ax === 20) && dy >= -16 && dy <= 20) || ((dy === -16 || dy === -17 || dy === 19 || dy === 20) && ax <= 20); };
+    const plaza = (dx, dy) => dx >= -8 && dx <= 9 && dy >= 9 && dy <= 15, field = (dx, dy) => dx >= -6 && dx <= 7 && dy >= 16 && dy <= 22;
+    for (let y = y0; y < y0 + BH; y++) for (let x = x0; x < x0 + BW; x++) { const c = get(x, y); if (!open(c)) continue; const dx = x - cx, dy = y - cy; if (plaza(dx, dy)) put(x, y, 4); else if (field(dx, dy)) put(x, y, (dx === 0 || dx === 1) ? 1 : 6); else if (street(dx, dy)) put(x, y, 1); }
+    // the cathedral headlines the city from one of the four quarters that has room for it
+    const CAW = 9, CAH = 8; let cath = null;
+    for (const [tx, ty] of cshuf([[cx + 12, cy - 9], [cx - 20, cy - 9], [cx + 12, cy + 3], [cx - 20, cy + 3]])) {
+      let ok = true; for (let y = ty - 1; y < ty + CAH + 3 && ok; y++) for (let x = tx - 1; x < tx + CAW + 1 && ok; x++) { const c = get(x, y); if (c !== 1 && c !== 2) ok = false; }
+      if (ok) { cath = { tx, ty }; break; }
+    }
+    if (cath) { for (let y = cath.ty - 1; y < cath.ty + CAH + 3; y++) for (let x = cath.tx - 1; x < cath.tx + CAW + 1; x++) put(x, y, y >= cath.ty && y < cath.ty + CAH && x >= cath.tx && x < cath.tx + CAW ? 3 : 4); }
+    // townhouses packed into every block, each with a one-tile alley around it
+    const SIZES = [[4, 3], [3, 3], [4, 2], [3, 2], [5, 3], [2, 2], [3, 2]], builds = [];
+    const fits = (tx, ty, w, h) => { for (let y = ty; y < ty + h; y++) for (let x = tx; x < tx + w; x++) if (get(x, y) !== 2) return false; for (let y = ty - 1; y <= ty + h; y++) for (let x = tx - 1; x <= tx + w; x++) if (get(x, y) === 3 || get(x, y) === 5) return false; return true; };
+    for (let y = y0; y < y0 + BH; y++) for (let x = x0; x < x0 + BW; x++) {
+      if (get(x, y) !== 2) continue;
+      for (const [w, h] of cshuf(SIZES.slice())) if (fits(x, y, w, h)) { for (let yy = y; yy < y + h; yy++) for (let xx = x; xx < x + w; xx++) put(xx, yy, 5); builds.push({ tx: x, ty: y, w, h }); break; }
+    }
+    // shops go to the houses whose doors open onto a street or square, nearest the plaza first; the biggest of those is the tavern
+    const plX = cx + .5, plY = cy + 12, doorOf = b => ({ x: b.tx + Math.floor(b.w / 2), y: b.ty + b.h });
+    const front = builds.filter(b => { const d = doorOf(b), c = get(d.x, d.y); return c === 1 || c === 4; }).sort((a, b) => Math.hypot(a.tx + a.w / 2 - plX, a.ty + a.h - plY) - Math.hypot(b.tx + b.w / 2 - plX, b.ty + b.h - plY));
+    const big = front.slice(0, 12).sort((a, b) => b.w * b.h - a.w * a.h), tav = big[0]; if (tav) tav.shop = 'tavern';
+    const inn = tav && (big.find(b => b !== tav && Math.hypot(b.tx - tav.tx, b.ty - tav.ty) > 6) || big[1]); if (inn) inn.shop = 'inn';
+    const SHOPK = cshuf(['baker', 'butcher', 'apothecary', 'tailor', 'jeweler', 'bowyer', 'vintner', 'grocer', 'spicer']); let si = 0;
+    const byPlaza = (a, b) => Math.hypot(a.tx + a.w / 2 - plX, a.ty + a.h - plY) - Math.hypot(b.tx + b.w / 2 - plX, b.ty + b.h - plY);
+    [...front, ...builds.filter(b => !front.includes(b)).sort(byPlaza)].forEach(b => { if (!b.shop && si < SHOPK.length) b.shop = SHOPK[si++]; }); // alley shops when the streets run out
+    const city = { shops: [], stalls: [], streets: [], plaza: { x: (cx + 1) * TS, y: (cy + 12.5) * TS }, cath: null };
+    builds.forEach(b => {
+      setSolid(b.tx, b.ty, b.w, b.h);
+      addObj({ k: 'house', tx: b.tx, ty: b.ty, tw: b.w, th: b.h, owner: k, v: crr(), tall: b.h >= 3 && crr() < .8, city: true, shop: b.shop });
+      const dx = (b.tx + b.w / 2) * TS, dy = (b.ty + b.h) * TS;
+      if (b.shop) { const names = CITY_NAMES[b.shop]; city.shops.push({ kind: b.shop, name: names[Math.floor(crr() * names.length)], x: dx + 22, y: dy + 14 }); }
+      else if (crr() < .5) W.interacts.push({ type: 'door', x: dx, y: dy + 10, place: pl.id });
+    });
+    if (tav) city.tavernName = city.shops.find(x => x.kind === 'tavern').name;
+    if (inn) city.innName = city.shops.find(x => x.kind === 'inn').name;
+    if (cath) {
+      setSolid(cath.tx, cath.ty, CAW, CAH); addObj({ k: 'cathedral', tx: cath.tx, ty: cath.ty, tw: CAW, th: CAH, owner: k });
+      city.cath = { x: (cath.tx + CAW / 2) * TS, y: (cath.ty + CAH) * TS, name: ['Cathedral of Saint Aldric', 'Cathedral of the Radiant Sun', 'Cathedral of the Iron Saints', 'Cathedral of the Evergreen'][k] };
+      W.interacts.push({ type: 'cathedral', x: city.cath.x, y: city.cath.y + 12, place: pl.id });
+    }
+    // the market plaza: a fountain, a statue of the founder, and a row of stalls
+    const solidAt = (tx, ty, tw, th) => { for (let y = ty; y < ty + th; y++) for (let x = tx; x < tx + tw; x++) put(x, y, 5); setSolid(tx, ty, tw, th); };
+    if (get(cx - 7, cy + 12) === 4 && get(cx - 6, cy + 13) === 4) { solidAt(cx - 7, cy + 12, 2, 2); addObj({ k: 'fountain', tx: cx - 7, ty: cy + 12, tw: 2, th: 2, owner: k }); W.interacts.push({ type: 'fountain', x: (cx - 6) * TS, y: (cy + 14.4) * TS, place: pl.id }); }
+    if (get(cx + 8, cy + 11) === 4) { solidAt(cx + 8, cy + 11, 1, 1); addObj({ k: 'statue', tx: cx + 8, ty: cy + 11, tw: 1, th: 1, owner: k }); W.interacts.push({ type: 'statue', x: (cx + 8.5) * TS, y: (cy + 12.3) * TS, place: pl.id }); }
+    const stallK = cshuf(['fruit', 'butcher', 'fish', 'baker', 'florist', 'grocer', 'spicer', 'tailor']);
+    const stallAt = [[-7, 15], [-5, 15], [-3, 15], [3, 15], [5, 15], [7, 15]];
+    if (city.cath) stallAt.push([cath.tx - cx - 1, cath.ty - cy + CAH + 2], [cath.tx - cx + CAW, cath.ty - cy + CAH + 2]);
+    stallAt.forEach(([dx, dy], i) => { const tx = cx + dx, ty = cy + dy; if (get(tx, ty) !== 4 || i >= stallK.length) return; solidAt(tx, ty, 1, 1); addObj({ k: 'mstall', x: tx * TS - 6, y: ty * TS + 2, w: 44, h: 28, kind: stallK[i], owner: k }); city.stalls.push({ kind: stallK[i], x: (tx + .5) * TS, y: ty * TS - 13 }); });
+    // lamps along the streets, clutter in the alleys, and a couple of public wells
+    const lamps = [];
+    for (let y = y0; y < y0 + BH; y++) for (let x = x0; x < x0 + BW; x++) {
+      const c = get(x, y); if (c !== 1 && c !== 4) continue;
+      if (crr() < .09) city.streets.push({ x: x * TS + 16, y: y * TS + 16 });
+      const edge = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, b2]) => get(x + a, y + b2) === 5 || get(x + a, y + b2) === 2);
+      if (c === 1 && edge && crr() < .16 && lamps.every(l => Math.abs(l.x - x) + Math.abs(l.y - y) > 5)) { lamps.push({ x, y }); addObj({ k: 'lamp', x: x * TS + 12, y: y * TS + 6, w: 8, h: 8 }); }
+    }
+    let wells = 0;
+    for (let y = y0; y < y0 + BH; y++) for (let x = x0; x < x0 + BW; x++) {
+      if (get(x, y) !== 2) continue;
+      let roomy = wells < 2; for (let yy = y - 1; yy <= y + 1 && roomy; yy++) for (let xx = x - 1; xx <= x + 1 && roomy; xx++) if (get(xx, yy) !== 2 && get(xx, yy) !== 1) roomy = false;
+      if (roomy && crr() < .08) { solidAt(x, y, 1, 1); addObj({ k: 'well', tx: x, ty: y, tw: 1, th: 1 }); W.interacts.push({ type: 'well', x: (x + .5) * TS, y: (y + 1.8) * TS, place: pl.id }); wells++; continue; }
+      if (crr() < .11) addObj({ k: 'decor', x: x * TS + 4, y: y * TS + 6, w: 24, h: 20, kind: ['crates', 'barrels', 'cart', 'bench', 'planter', 'woodpile', 'barrels', 'crates'][Math.floor(crr() * 8)], v: crr() });
+    }
+    // pave it: cobbles on streets and squares, packed earth in the alleys and on the tourney field
+    for (let y = y0; y < y0 + BH; y++) for (let x = x0; x < x0 + BW; x++) { const c = get(x, y); if (!c || c === 9) continue; const i = y * WW + x; W.clear[i] = 1; ter[i] = c === 2 || c === 6 ? T.DIRT : T.FLOOR; }
+    for (let y = cy - 10; y <= cy + 9; y++) for (let x = cx - 11; x <= cx + 11; x++) { const i = y * WW + x, t = ter[i]; if (!TINFO[t].block && t !== T.FORD && t !== T.BRIDGE && t !== T.SEA && t !== T.FLOOR) { ter[i] = T.FLOOR; W.clear[i] = 1; } }
+    pl.city = city;
+  });
   // ---------- Trees ----------
   for (let i = 0; i < CW * CHH; i++) { W.chunkTrees.push([]); W.chunkObjs.push([]); }
   for (let ty = 1; ty < WH - 1; ty++) for (let tx = 1; tx < WW - 1; tx++) {
@@ -2123,9 +2229,9 @@ function loseHorse() { P.mounted = false; if (horseEnt) { removeEnt(horseEnt); h
 function useItem(uid) {
   const it = getItem(uid); if (!it) return; const b = ITEMS[it.id];
   if (b.heal) {
-    if (P.hp >= P.maxHp) { toast('You are already at full health.'); return; }
+    if (P.hp >= P.maxHp && !(b.st && P.st < P.maxSt)) { toast('You are already at full health.'); return; }
     const heal = Math.round(b.heal * DIFF().heal);
-    P.hp = Math.min(P.maxHp, P.hp + heal); SND.play('eat'); addText(P.x, P.y - 30, '+' + heal, '#8fe07a', 15); removeItem(uid, 1);
+    P.hp = Math.min(P.maxHp, P.hp + heal); if (b.st) P.st = Math.min(P.maxSt, P.st + b.st); SND.play('eat'); addText(P.x, P.y - 30, '+' + heal, '#8fe07a', 15); removeItem(uid, 1);
   } else if (b.use === 'nock') {
     P.ammo = it.id; toast(`Nocked: <b>${b.name}</b> ×${it.n}`, '', itemIcon(it.id)); SND.play('ui');
   } else if (b.use === 'kmap') {
@@ -2332,14 +2438,14 @@ function doPlayerHit() {
     const host = playerHostileTo(e); if (!host && !input.force) continue;
     const d = dist(P.x, P.y, e.x, e.y); if (d > reach + e.r) continue;
     const a = Math.atan2(e.y - P.y, e.x - P.x); if (Math.abs(angDiff(P.face, a)) > S.arc / 2 + (d < e.r + 16 ? .9 : .12)) continue;
-    let dmg = S.dmg * rand(.9, 1.1) * DIFF().dmgDealt; const crit = Math.random() < .1; if (crit) dmg *= 1.6;
+    let dmg = S.dmg * rand(.9, 1.1) * DIFF().dmgDealt; const crit = Math.random() < .1 + (P.luckT > 0 ? .08 : 0); if (crit) dmg *= 1.6;
     if (P.mounted) dmg *= 1.1 + (S.horse && S.horse.dmgB ? S.horse.dmgB : 0) + .06 * (SK('riding') >= 3 ? 3 : SK('riding') >= 1 ? 1 : 0);
     damage(e, dmg, P, { crit, kb: S.wk === 'great' || S.wk === 'axe' ? 1.6 : S.wk === 'spear' ? 1.2 : 1 }); applyEnch(e, dmg); hits++;
   }
   if (hits) { G.hitstop = .045; addShake(2 + hits); }
 }
 function updatePlayer(dt) {
-  P.flash -= dt; P.iframes -= dt; P.atkCd -= dt;
+  P.flash -= dt; P.iframes -= dt; P.atkCd -= dt; if (P.blessT > 0) P.blessT -= dt; if (P.luckT > 0) P.luckT -= dt; if (P.restT > 0) P.restT -= dt;
   P.face = PAD.on && PAD.aim != null ? PAD.aim : Math.atan2(input.wy - P.y, input.wx - P.x);
   let mx = (input.keys.KeyD ? 1 : 0) - (input.keys.KeyA ? 1 : 0), my = (input.keys.KeyS ? 1 : 0) - (input.keys.KeyW ? 1 : 0);
   const ml = Math.hypot(mx, my); if (ml) { mx /= ml; my /= ml; }
@@ -2369,7 +2475,7 @@ function updatePlayer(dt) {
   if (moved > .1) { P.walk += moved * .09; if (P.mounted) P.hface = turnToward(P.hface, Math.atan2(P.y - oy, P.x - ox), dt * 7); }
   P.stepT -= moved; if (P.stepT < 0) { P.stepT = P.mounted ? 38 : 44; SND.play(P.mounted ? 'hoof' : t === T.TUNDRA ? 'crunch' : 'step', P.mounted ? .8 : 1); }
   if (P.sprinting) { P.st = Math.max(0, P.st - 16 * DIFF().stCost * dt); P.stDelay = .5; }
-  if (P.stDelay > 0) P.stDelay -= dt; else P.st = Math.min(P.maxSt, P.st + (P.blocking ? 6 : P.mounted ? 30 : 26) * DIFF().stRegen * dt);
+  if (P.stDelay > 0) P.stDelay -= dt; else P.st = Math.min(P.maxSt, P.st + (P.blocking ? 6 : P.mounted ? 30 : 26) * DIFF().stRegen * (P.restT > 0 ? 1.3 : 1) * dt);
   updateSpecial(dt);
   if (P.spec) { }
   else if (P.S.bow) updateBow(dt);
@@ -2475,7 +2581,7 @@ function damage(t, amt, src, o = {}) {
   if (t.dead) return 0;
   if (t.isPlayer) {
     if (P.iframes > 0 || G.state !== 'play') return 0;
-    let a = amt * DIFF().dmgTaken;
+    let a = amt * DIFF().dmgTaken * (P.blessT > 0 ? .88 : 1);
     P.combatT = 6;
     if (P.dodge > 0) {
       if (G.tut && src && src.tutYield) G.tut.dodged = true;
@@ -3069,6 +3175,27 @@ function placeSpecs(pl) {
   pl._specs = s; return s;
 }
 function mkPerched(x, y, k, elev, o = {}) { return mkActor('bowman', x, y, Object.assign({ k, perch: true, elev, stand: true, range: 390, aggro: 440, leash: 99999, standFace: Math.PI / 2 }, o)); }
+const CITY_ROLES = { cityshop: 1, innkeeper: 1, hotelier: 1, priest: 1, bard: 1, crier: 1, beggar: 1 };
+let _ncT = -1, _ncE = null; // the one tradesperson whose name shows, so a busy market doesn't pile up labels
+function nearCityNpc() { if (_ncT !== G.time) { _ncT = G.time; _ncE = null; let bd = 120; for (const x of ents) if (CITY_ROLES[x.role] && !x.dead) { const d = dist(P.x, P.y, x.x, x.y); if (d < bd) { bd = d; _ncE = x; } } } return _ncE; }
+const skinTone = () => pick(['#f0d0b0', '#e0b48a', '#c8986a', '#a8744a', '#7a5234']);
+function spawnCity(pl) {
+  const C = pl.city, k = pl.owner, kc = KDATA[k].color;
+  const npc = (x, y, o) => { const f = findFree(x, y); return mkActor('npc', f.x, f.y, Object.assign({ place: pl.id, k, stand: true, standFace: Math.PI / 2 }, o)); };
+  const trade = (kind, x, y, shopName) => { const S = CITY_SHOPS[kind]; npc(x, y, { role: kind === 'tavern' ? 'innkeeper' : kind === 'inn' ? 'hotelier' : 'cityshop', skind: kind, shopName, name: `${pick(NAMES.first)} the ${S.who}`, _look: { body: S.col, head: kind === 'baker' || kind === 'tavern' ? 'cap' : 'hair', hair: pick(['#3a2a1a', '#6a4a2a', '#a8884a', '#d8d8d0']), skin: skinTone(), apron: kind === 'baker' || kind === 'butcher' || kind === 'tavern' || kind === 'grocer' || kind === 'inn' ? '#efe8d8' : null } }); };
+  C.shops.forEach(s => trade(s.kind, s.x, s.y, s.name));
+  C.stalls.forEach(s => trade(s.kind, s.x, s.y, CITY_SHOPS[s.kind].n));
+  if (C.cath) {
+    npc(C.cath.x + 34, C.cath.y + 16, { role: 'priest', name: `${pick(['Bishop', 'Father', 'Mother'])} ${pick(NAMES.first)}`, _look: { body: '#ece6d8', head: 'hood', hood: '#d8d0c0', skin: skinTone(), tabard: kc } });
+    npc(C.cath.x - 60, C.cath.y + 22, { role: 'beggar', name: 'A beggar', standFace: -Math.PI / 2, _look: { body: '#6a5a48', head: 'hood', hood: '#5a4a38', skin: skinTone() } });
+  }
+  npc(C.plaza.x - 100, C.plaza.y + 36, { role: 'bard', name: `${pick(NAMES.first)} the Bard`, stand: false, wanderR: 60, home: { x: C.plaza.x - 100, y: C.plaza.y + 36 }, _look: { body: pick(['#c83a4a', '#3a6ac8', '#e8a030', '#5a9a4a']), head: 'cap', skin: skinTone(), cape: pick(['#e8c040', '#7a2a8a']), plume: '#f4f0e0', lute: 1 } });
+  npc(C.plaza.x + 124, C.plaza.y - 14, { role: 'crier', name: 'The Town Crier', _look: { body: kc, head: 'cap', skin: skinTone(), cape: KDATA[k].accent, tabard: KDATA[k].accent } });
+  const walk = (kind, o) => { const s = pick(C.streets); if (!s) return; const f = findFree(s.x, s.y); return mkActor(kind, f.x, f.y, Object.assign({ place: pl.id, k, home: { x: s.x, y: s.y }, wanderR: 260 }, o)); };
+  for (let i = 0; i < 22; i++) walk('villager', { role: 'townsfolk', noble: chance(.2) });
+  for (let i = 0; i < 5; i++) walk('villager', { role: 'child', scale: .7, wanderR: 180, spd: 115 });
+  for (let i = 0; i < 3; i++) walk('soldier', { wanderR: 480 });
+}
 function spawnPlace(pl) {
   pl.spawned = true; const X = d => pl.x + d * TS, Y = d => pl.y + d * TS;
   const mk = (kind, tx, ty, o) => { const f = findFree(tx, ty); return mkActor(kind, f.x, f.y, Object.assign({ place: pl.id }, o)); };
@@ -3094,6 +3221,7 @@ function spawnPlace(pl) {
       for (let i = 0; i < 2; i++) mk('soldier', pl.x + rand(-6, 6) * TS, pl.y + 14 * TS, { k, wanderR: 350, home: { x: pl.x, y: pl.y + 15 * TS } });
       mk('bowman', pl.x + rand(-5, 5) * TS, pl.y + 13 * TS, { k, wanderR: 300, home: { x: pl.x, y: pl.y + 13 * TS } });
       [[-9, -8], [9, -8], [-9, 8], [9, 8]].forEach(([dx, dy]) => mkPerched(pl.x + dx * TS, pl.y + dy * TS, k, -6, { place: pl.id })); // archers on the corner towers
+      if (pl.city) spawnCity(pl);
       break;
     }
     case 'village': {
@@ -3466,6 +3594,31 @@ function evWolves() {
 function goodsFactor(id, k, selling) { if (k == null) return 1; if (KDATA[k].produces === id) return .6; if (KDATA[k].wants === id) return selling ? 1.65 : 1.5; return 1; }
 function buyPrice(it, shop) { return Math.max(1, Math.round(itemValue(it) * (1 - .05 * SK('trade')) * seasonPrice(it.id) * goodsFactor(it.id, shop.k) * (shop.k != null ? repMul(shop.k) : 1.15))); }
 function sellPrice(it, shop) { return Math.max(1, Math.round(itemValue(it) * .42 * (1 + .05 * SK('trade')) * goodsFactor(it.id, shop.k, true) * (shop.k != null ? clamp(1 + K.rep[shop.k] / 300, .75, 1.3) : 1))); }
+/* ---------------- City trades: shops in townhouses, stalls on the market plaza ---------------- */
+const CITY_SHOPS = {
+  baker: { n: 'Bakery', who: 'Baker', col: '#e8e0cc', stock: a => { a('bread', 1, 20); a('pie', 1, 6); a('honey_cake', 1, 5); } },
+  butcher: { n: 'Butcher', who: 'Butcher', col: '#b04a3a', stock: a => { a('meat', 1, 14); a('sausage', 1, 10); a('furs', 1, randi(1, 3)); } },
+  fruit: { n: 'Fruit Stand', who: 'Fruiterer', col: '#6a9a3a', stock: a => { a('apple', 1, 25); a('pear', 1, 18); a('wine', 1, randi(1, 3)); } },
+  fish: { n: 'Fishmonger', who: 'Fishmonger', col: '#4a7a9a', stock: a => { a('fish', 1, 12); a('salmon', 1, 4); a('fishing_rod', 1, 1); } },
+  grocer: { n: 'Cheesemonger', who: 'Cheesemonger', col: '#d8b870', stock: a => { a('cheese', 1, 10); a('bread', 1, 8); a('apple', 1, 10); } },
+  florist: { n: 'Flower Seller', who: 'Flower Seller', col: '#d86a9a', stock: a => { a('flowers', 1, 20); a('honey_cake', 1, 3); } },
+  apothecary: { n: 'Apothecary', who: 'Apothecary', col: '#4a7a5a', stock: a => { a('potion', 1, 8); a('bandage', 1, 14); a('venom_vial', 1, 4); a('pitch', 1, 4); } },
+  tailor: { n: 'Tailor', who: 'Tailor', col: '#7a4a8a', stock: a => { a('padded', rollQual(2)); a('padded', rollQual(3)); a('leather', rollQual(1)); a('leather', rollQual(2)); if (chance(.5)) a('leather', 3); a('silk', 1, randi(2, 4)); } },
+  jeweler: { n: 'Jeweler', who: 'Jeweler', col: '#3a4a8a', stock: a => { a('gem', 1, randi(1, 3)); a('sapphire', 1, randi(0, 2) || 1); a('silk', 1, 2); if (chance(.3)) a('relic', 1, 1); } },
+  bowyer: { n: 'Bowyer & Fletcher', who: 'Bowyer', col: '#5a6a3a', stock: a => { a(pick(['short_bow', 'hunting_bow']), rollQual(1)); a(pick(['recurve_bow', 'longbow']), rollQual(2)); a('arrow', 1, 80); a('broadhead', 1, 30); a('bodkin', 1, 25); a('fire_arrow', 1, 15); a('timber', 1, 12); } },
+  vintner: { n: 'Wine Cellar', who: 'Vintner', col: '#7a2a3a', stock: a => { a('wine', 1, 10); a('ale', 1, 15); } },
+  spicer: { n: 'Spice Merchant', who: 'Spice Merchant', col: '#c87a2a', stock: a => { a('spices', 1, 10); a('silk', 1, 3); a('honey_cake', 1, 4); } },
+  inn: { n: 'Inn', who: 'Innkeeper', col: '#4a6a9a', stock: a => { a('bread', 1, 10); a('ale', 1, 10); a('honey_cake', 1, 4); a('bandage', 1, 6); } },
+  tavern: { n: 'Tavern', who: 'Tapster', col: '#8a5a2a', stock: a => { a('ale', 1, 20); a('meat', 1, 8); a('pie', 1, 4); a('bread', 1, 10); a('cheese', 1, 4); } },
+};
+const CITY_NAMES = {
+  baker: ['The Golden Crust', 'Hearthstone Bakery', 'The Rising Loaf', 'Oven & Ember'], butcher: ['The Iron Cleaver', 'Hook & Hock', 'The Smokehouse'],
+  apothecary: ['The Green Phial', "Healer's Rest", 'The Mortar & Pestle'], tailor: ['Needle & Thread', 'The Silver Spool', 'Fine Cloth'],
+  jeweler: ['The Gilded Gem', "Crown Jewels", 'The Glittering Stone'], bowyer: ['The Yew & String', 'Fletcher\'s Row', 'The Straight Shaft'],
+  vintner: ['The Cellar Door', 'The Crimson Cask', 'Vine & Barrel'], grocer: ['The Round Wheel', 'Curd & Crumb'], spicer: ['Saffron House', 'The Pepper Road'],
+  inn: ['The Silver Key Inn', "The King's Rest", "The Wayfarer's Inn", 'The Golden Pillow', 'The Weary Traveller', 'The Old Oak Inn', 'The Lantern House'],
+  tavern: ['The Prancing Stag', 'The Drunken Dragon', 'The Rusty Helm', 'The Crown & Tankard', 'The Sleeping Giant', 'The Wandering Knight'],
+};
 function makeShop(kind, pl, k) {
   const s = { kind, k, items: [], t: G.time };
   const add = (id, q = 1, n = 1) => s.items.push({ uid: uidCounter++, id, q, n });
@@ -3491,7 +3644,7 @@ function makeShop(kind, pl, k) {
   } else if (kind === 'trader') {
     s.name = "Ysolde's Curiosities"; for (let i = 0; i < 4; i++) add(pick(LOOT_TIERS[randi(3, 4)].filter(id => ['weapon', 'shield', 'armor'].includes(ITEMS[id].type))), 3);
     add(pick(['fast_horse', 'war_horse'])); add('treasure_map', 1, 2); add('potion', 1, 4); if (chance(.25)) add(pick(LEGENDS));
-  }
+  } else if (CITY_SHOPS[kind]) { s.name = CITY_SHOPS[kind].n; CITY_SHOPS[kind].stock(add); }
   return s;
 }
 /* ---------------- Crafting: fletching at any market, improving and enchanting at the royal forges ---------------- */
@@ -3532,10 +3685,10 @@ function openEnchant(mat) {
 function getShop(e) {
   if (e.shop && G.time - e.shop.t < 300) return e.shop;
   const pl = e.place != null ? W.places[e.place] : null;
-  let kind = e.role === 'merchant' ? 'village' : e.role;
-  const key = '_shop_' + kind;
+  let kind = e.role === 'merchant' ? 'village' : e.role === 'cityshop' || e.role === 'innkeeper' || e.role === 'hotelier' ? e.skind : e.role;
+  const key = '_shop_' + kind + (e.shopName ? '_' + e.shopName : '');
   if (pl && pl[key] && G.time - pl[key].t < 300) return (e.shop = pl[key]);
-  const s = makeShop(kind, pl, e.k != null ? e.k : pl ? pl.owner : null); if (pl) pl[key] = s; e.shop = s; return s;
+  const s = makeShop(kind, pl, e.k != null ? e.k : pl ? pl.owner : null); if (e.shopName) s.name = e.shopName; if (pl) pl[key] = s; e.shop = s; return s;
 }
 
 /* ---------------- Interaction ---------------- */
@@ -3559,13 +3712,14 @@ function interactLabel(b) {
       case 'elder': return `Talk to ${e.name}`; case 'merchant': return `Trade with ${e.name}`; case 'ruler': return `Seek an audience with ${e.name}`;
       case 'armorer': return 'Browse the royal armory'; case 'stable': return 'Visit the royal stables'; case 'caravan': return 'Trade with the caravan'; case 'trader': return `Trade with ${e.name}`;
       case 'traveler': return `Talk to ${e.name}`;
-      case 'coach': return 'Hire a carriage'; case 'hermit': return `Speak with ${e.name}`; case 'captain': return 'Hire soldiers'; case 'instructor': return 'Talk to Sergeant Mara'; case 'herald': return 'Speak with the herald'; case 'companion': return `Talk to ${e.name}`;
+      case 'coach': return 'Hire a carriage'; case 'cityshop': return `Browse ${e.shopName}`; case 'innkeeper': return `Enter ${W.places[e.place].city.tavernName}`; case 'hotelier': return `Take a room at ${W.places[e.place].city.innName}`; case 'priest': return `Speak with ${e.name}`; case 'bard': return 'Listen to the bard'; case 'crier': return 'Hear the town crier'; case 'beggar': return 'Speak to the beggar'; case 'child': return 'Talk to the child'; case 'townsfolk': return e.noble ? 'Talk to the noble' : 'Talk to the townsperson'; case 'hermit': return `Speak with ${e.name}`; case 'captain': return 'Hire soldiers'; case 'instructor': return 'Talk to Sergeant Mara'; case 'herald': return 'Speak with the herald'; case 'companion': return `Talk to ${e.name}`;
     }
     return `Talk to ${e.name.toLowerCase().includes('soldier') || e.name === 'Guard' || e.name === 'Knight' ? KDATA[e.k] ? KDATA[e.k].name + ' ' + e.name.toLowerCase() : e.name : e.name}`;
   }
   const it = b.it, pl = W.places[it.place];
   switch (it.type) {
     case 'chest': return pl.chestOpened ? 'Empty stash' : pl.type === 'camp' ? (pl.cleared ? 'Loot the bandit stash' : 'Bandit stash (guarded)') : 'Search the chest';
+    case 'door': return 'Knock on the door'; case 'fountain': return 'Toss a coin into the fountain'; case 'statue': return 'Read the inscription'; case 'cathedral': return `Enter the ${pl.city && pl.city.cath ? pl.city.cath.name : 'cathedral'}`;
     case 'sign': return 'Signpost, bounty board and carriages'; case 'well': return 'Drink from the well'; case 'fish': return G.fishing ? 'Reel in' : 'Fish here';
     case 'dungeon': return `Enter ${pl.name}${pl.dcleared ? ' (cleared)' : ''}`; case 'home': return 'Enter your house'; case 'fort': return pl.playerFort ? `Your fort: ${pl.name}` : `Look over the ruined fort`; case 'dexit': return 'Climb back outside';
     case 'dchest': return G.under && (G.under.dchests || []).includes(it.idx) ? 'Empty chest' : it.boss ? 'Open the guardian\'s hoard' : 'Open the chest';
@@ -3586,6 +3740,10 @@ function doInteract() {
   else if (it.type === 'fort') fortDialog(pl);
   else if (it.type === 'dexit') leaveDungeon();
   else if (it.type === 'dchest') openDChest(it);
+  else if (it.type === 'door') knockDoor(it, pl);
+  else if (it.type === 'fountain') tossCoin(it, pl);
+  else if (it.type === 'statue') readStatue(pl);
+  else if (it.type === 'cathedral') priestDialog(null, pl);
   else if (it.type === 'well') { if ((pl.wellT || -999) > G.time - 60) { toast('You have drunk your fill for now.'); return; } pl.wellT = G.time; P.st = P.maxSt; P.hp = Math.min(P.maxHp, P.hp + Math.round(12 * DIFF().heal)); SND.play('eat'); toast(`The cool water refreshes you. (+${Math.round(12 * DIFF().heal)} health, stamina restored)`, 'good'); }
   else if (it.type === 'shrine') {
     if (pl.blessed) { toast('The stones are silent. Their gift has been given.'); return; }
@@ -3596,6 +3754,98 @@ function doInteract() {
     for (let i = 0; i < 40; i++) addPart(it.x, it.y, rand(-90, 90), rand(-160, -20), '#bfe8ff', rand(.6, 1.4), 3, -40);
   }
 }
+function tavernDialog(e) {
+  const pl = W.places[e.place], C = pl.city, k = pl.owner, day = dayNum();
+  openDialog({ name: e.name, role: `Keeper of ${C.tavernName}`, portrait: e, text: pick([`Welcome to ${C.tavernName}! Warm fire, cold ale, and no questions asked.`, 'Sit, sit! You look like you could use a drink.', `Best ale in ${KDATA[k].name}, or your coin back. Nobody has ever asked for it back.`]), options: [
+    { t: '<span class="dn">MEAL</span>A hot meal and a mug of ale (8 gold)', dis: P.gold < 8, fn: () => { P.gold -= 8; P.hp = P.maxHp; P.st = P.maxSt; SND.play('eat'); closeDialog(); toast('Stew, bread and ale. You feel wonderful.', 'good'); } },
+    { t: '<span class="dn">ROOM</span>Rent a room and sleep until morning (20 gold)', dis: P.gold < 20, fn: () => { P.gold -= 20; G.time += ((.3 - tod()) + 1) % 1 * DAYLEN; P.hp = P.maxHp; P.st = P.maxSt; closeDialog(); SND.play('eat'); toast('You sleep in a real bed and wake at dawn, fully rested.', 'good'); } },
+    { t: `<span class="dn">ROUND</span>Buy a round for the whole house (40 gold)${pl.roundDay === day ? ' (already bought today)' : ''}`, dis: P.gold < 40 || pl.roundDay === day, fn: () => { P.gold -= 40; pl.roundDay = day; addRep(k, 3, 'Bought a round at the tavern'); SND.play('coin'); closeDialog(); toast(`The whole tavern cheers your name! <b>+3 reputation</b> with ${KDATA[k].name}.`, 'gold'); } },
+    { t: `<span class="dn">RUMOR</span>Buy a rumor (10 gold)`, dis: P.gold < 10, fn: () => {
+      const c = nearestPlace(pl.x, pl.y, p => (p.type === 'camp' || p.type === 'hidden' || p.type === 'dungeon') && !p.disc && !p.rumor);
+      if (!c) { openDialog({ name: e.name, role: 'Innkeeper', portrait: e, text: 'Nothing you have not heard already, friend. Keep your coin.', options: [{ t: 'Fair enough', fn: closeDialog }] }); return; }
+      P.gold -= 10; c.rumor = true; revealArea(c.tx, c.ty, 4);
+      openDialog({ name: e.name, role: 'Innkeeper', portrait: e, text: `A drover in here last week spoke of ${c.type === 'camp' ? 'a bandit camp' : c.name} ${dirTo(pl, c)} of the city, maybe ${leagues(dist(pl.x, pl.y, c.x, c.y))} leagues out. I've marked it on your map.`, options: [{ t: 'Thank you', fn: closeDialog }] });
+    } },
+    { t: '<span class="dn">DICE</span>Join the dice game in the corner', fn: () => diceDialog(e) },
+    { t: '<span class="dn">TRADE</span>Buy food and drink', fn: () => { closeDialog(); openShop(getShop(e), e); } },
+    { t: 'Leave', fn: closeDialog },
+  ] });
+}
+function innDialog(e) {
+  const pl = W.places[e.place], C = pl.city, door = { x: e.x - 22, y: e.y + 6 };
+  const sleep = (cost, extra, msg) => () => { P.gold -= cost; G.time += ((.3 - tod()) + 1) % 1 * DAYLEN; P.hp = P.maxHp; P.st = P.maxSt; P.burn = 0; P.poison = 0; P.chillT = 0; P.respawn = { x: door.x, y: door.y + 10 }; if (extra) extra(); closeDialog(); SND.play('eat'); toast(msg, 'good'); };
+  openDialog({ name: e.name, role: `Keeper of ${C.innName}`, portrait: e, text: pick([`Welcome to ${C.innName}! Clean sheets, hot water, and not a single flea. Well, hardly any.`, 'A room for the night, sir knight? We have just the thing, whatever your purse.', `Travellers from all four kingdoms sleep under this roof. You'll be in fine company.`]), options: [
+    { t: '<span class="dn">BUNK</span>A bunk in the common room (6 gold)', dis: P.gold < 6, fn: sleep(6, null, 'You sleep among snoring travellers and wake at dawn, rested.') },
+    { t: '<span class="dn">ROOM</span>A private room (18 gold) · wake well rested', dis: P.gold < 18, fn: sleep(18, () => { P.restT = 900; }, 'A soft bed and a quiet room. You wake at dawn <b>well rested</b>: stamina returns faster for a while.') },
+    { t: '<span class="dn">SUITE</span>The royal suite (60 gold) · rested, blessed and lucky', dis: P.gold < 60, fn: sleep(60, () => { P.restT = 900; P.blessT = 600; P.luckT = 600; }, 'Feather beds, a fire in the hearth and breakfast on a silver tray. You wake <b>well rested, blessed and lucky</b>.') },
+    { t: '<span class="dn">BATH</span>A hot bath (5 gold) · wash away burns, venom and frost', dis: P.gold < 5, fn: () => { P.gold -= 5; P.burn = 0; P.poison = 0; P.chillT = 0; P.st = P.maxSt; P.hp = Math.min(P.maxHp, P.hp + 20); closeDialog(); SND.play('eat'); toast('You soak until the water goes cold. Much better.', 'good'); } },
+    { t: '<span class="dn">TRADE</span>Buy food and supplies', fn: () => { closeDialog(); openShop(getShop(e), e); } },
+    { t: 'Leave', fn: closeDialog },
+  ] });
+}
+function diceDialog(e, last) {
+  const bet = n => () => {
+    if (P.gold < n) return; const me = [randi(1, 6), randi(1, 6)], them = [randi(1, 6), randi(1, 6)], a = me[0] + me[1], b = them[0] + them[1];
+    let res; if (a > b) { P.gold += n; res = `You roll <b>${me.join(' + ')}</b>, they roll ${them.join(' + ')}. <b style="color:#8fe07a">You win ${n} gold!</b>`; SND.play('coin'); } else if (a < b) { P.gold -= n; res = `You roll ${me.join(' + ')}, they roll <b>${them.join(' + ')}</b>. <b style="color:#e06a5a">You lose ${n} gold.</b>`; SND.play('ui'); } else res = `You both roll ${a}. A draw; the coins stay where they are.`;
+    diceDialog(e, res);
+  };
+  openDialog({ name: 'Dice Players', role: 'A table of sailors, soldiers and scoundrels', portrait: e, text: (last ? last + '<br><br>' : 'Two dice each, highest total wins. ') + 'Another throw?', options: [
+    { t: 'Bet 10 gold', dis: P.gold < 10, fn: bet(10) }, { t: 'Bet 50 gold', dis: P.gold < 50, fn: bet(50) }, { t: 'Bet 200 gold', dis: P.gold < 200, fn: bet(200) }, { t: 'Walk away', fn: closeDialog },
+  ] });
+}
+function priestDialog(e, pl) {
+  const k = pl.owner, C = pl.city, day = dayNum(), port = e || ents.find(x => x.role === 'priest' && x.place === pl.id) || fakeP({ body: '#ece6d8', head: 'hood', hood: '#d8d0c0', skin: '#e0b48a' }, k);
+  openDialog({ name: e ? e.name : C.cath.name, role: e ? `Of the ${C.cath.name}` : 'Candlelight and incense, and a hush like snowfall', portrait: port, text: e ? pick(['Peace be upon you, child. The doors of the cathedral are always open.', 'The saints see every deed, sir knight, the brave and the cruel alike.', 'Kneel, if you wish. There is no shame in asking for strength.']) : 'Sunlight pours through the stained glass in pools of red and gold. Somewhere above, a choir is practising.', options: [
+    { t: `<span class="dn">PRAY</span>Kneel and pray${pl.prayDay === day ? ' (you have prayed today)' : ''}`, dis: pl.prayDay === day, fn: () => { pl.prayDay = day; P.hp = P.maxHp; P.st = P.maxSt; P.burn = 0; P.poison = 0; P.chillT = 0; P.blessT = 480; SND.play('level'); for (let i = 0; i < 30; i++) addPart(P.x, P.y, rand(-60, 60), rand(-150, -30), '#fff2c0', rand(.6, 1.2), 3, -40); closeDialog(); toast('<b>Blessed.</b> Your wounds close, and for a while blows land a little softer.', 'gold'); } },
+    { t: `<span class="dn">TITHE</span>Donate 50 gold to the poor${pl.titheDay === day ? ' (given today)' : ''}`, dis: P.gold < 50 || pl.titheDay === day, fn: () => { P.gold -= 50; pl.titheDay = day; addRep(k, 4, 'Gave alms at the cathedral'); SND.play('coin'); closeDialog(); toast(`The priests will remember your generosity. <b>+4 reputation</b> with ${KDATA[k].name}.`, 'gold'); } },
+    { t: '<span class="dn">CANDLE</span>Light a candle for the fallen (1 gold)', dis: P.gold < 1, fn: () => { P.gold -= 1; SND.play('ui'); closeDialog(); toast(pick(['The little flame gutters, then burns steady.', 'You light a candle among a thousand others.', 'For a moment, you remember every face.'])); } },
+    { t: '<span class="dn">FLOWERS</span>Leave flowers at the altar', dis: !countItem('flowers'), fn: () => { removeItemById('flowers'); P.luckT = 600; closeDialog(); toast('You leave the posy among the candles. You feel <b>lucky</b>.', 'gold'); } },
+    { t: 'Leave', fn: closeDialog },
+  ] });
+}
+function bardDialog(e) {
+  openDialog({ name: e.name, role: 'Singer of songs, teller of tales', portrait: e, text: pick(['A song for a coin, good knight? I know ballads of every battle, and a few that never happened.', 'Ah, a hero! Stay a while. The next verse might be about you.', `They sing of you in the taverns now, you know. Badly, but they sing.`]), options: [
+    { t: 'Toss a coin for a song (5 gold)', dis: P.gold < 5, fn: () => { P.gold -= 5; P.st = P.maxSt; SND.play('level'); e.say = { text: '♪ ' + pick(['Oh the knight rode out at dawn…', 'Four crowns and a broken ring…', 'The Hollow King beneath the hill…', 'A pint for the brave, a grave for the bold…']), t: 4 }; closeDialog(); toast('The song lifts your spirits. <b>Stamina restored.</b>', 'good'); } },
+    { t: 'Ask for news from the road', fn: () => { const ev = (K.log || [])[0]; e.say = { text: ev ? ev.t : 'Quiet roads, for once.', t: 5 }; closeDialog(); } },
+    { t: 'Leave', fn: closeDialog },
+  ] });
+}
+function crierDialog(e, k) {
+  const ev = (K.log || []).slice(0, 3), wars = PAIRS.filter(([a, b]) => relStatus(a, b).n === 'At War').map(([a, b]) => `${KDATA[a].name} and ${KDATA[b].name}`);
+  const lines = [`Hear ye, hear ye! By order of ${KDATA[k].ruler}!`, ...(ev.length ? ev.map(x => esc(x.t)) : ['All is well in the realm!']), wars.length ? `War rages between ${wars.join('; ')}!` : 'The four crowns are at peace, the saints be thanked!'];
+  e.say = { text: 'Hear ye! Hear ye!', t: 3 };
+  openDialog({ name: e.name, role: `Voice of ${KDATA[k].name}`, portrait: e, text: lines.map(t => `<p style="margin:0 0 6px">${t}</p>`).join(''), options: [{ t: 'Thank you', fn: closeDialog }] });
+}
+function beggarDialog(e, k) {
+  openDialog({ name: e.name, role: 'Hollow-cheeked and hopeful', portrait: e, text: pick(['Alms, sir knight? A coin for an old soldier?', 'Spare a coin? The saints will bless you for it.', 'I fought at the Greywater, you know. Now look at me.']), options: [
+    { t: 'Give 5 gold', dis: P.gold < 5, fn: () => { P.gold -= 5; SND.play('coin'); if (!e.given) { e.given = true; addRep(k, 1, 'Gave to a beggar'); } e.say = { text: 'Bless you! Bless you, sir!', t: 3 }; closeDialog(); } },
+    { t: 'Give some food', dis: !P.inv.some(i => ITEMS[i.id].food), fn: () => { const f = P.inv.find(i => ITEMS[i.id].food); removeItem(f.uid, 1); if (!e.given) { e.given = true; addRep(k, 1, 'Fed a beggar'); } e.say = { text: 'Food! Gods keep you, knight.', t: 3 }; closeDialog(); } },
+    { t: 'Not today', fn: closeDialog },
+  ] });
+}
+const KNOCKS = ['A voice calls: "We gave at the cathedral!" The door stays shut.', 'An old woman opens the door, looks you up and down, and wishes you well.', 'A dog barks furiously. Nobody comes.', 'A man in a nightcap peers out. "Do you know what hour it is?"', 'Children giggle behind the door, then run away.', 'A tired mother shushes you. "The baby is finally asleep!"', 'A scholar opens up, blinks at the daylight, and shuts the door again.', 'Nobody answers. Somewhere inside, a kettle whistles.', 'A retired soldier salutes you. "Give them hell out there, sir."'];
+function knockDoor(it, pl) {
+  if (G.time - (it.knockT || -999) < 240) { toast('Nobody wants to answer this door again so soon.'); return; }
+  it.knockT = G.time; SND.play('ui');
+  if (chance(.14)) { const g = pick(['apple', 'bread', 'honey_cake', 'cheese']); addItem(g, 1, 1, true); toast(`A kindly baker's wife presses a <b>${ITEMS[g].name}</b> into your hands. "For the road, sir."`, 'good'); return; }
+  if (chance(.08)) { const n = randi(5, 15); P.gold += n; SND.play('coin'); toast(`A merchant pays you <b>${n} gold</b> to carry a crate upstairs.`, 'gold'); return; }
+  toast(pick(KNOCKS));
+}
+function tossCoin(it, pl) {
+  if (P.gold < 1) { toast('You have no coin to toss.'); return; }
+  P.gold -= 1; SND.play('coin'); for (let i = 0; i < 8; i++) addPart(it.x, it.y - 30, rand(-30, 30), rand(-60, -10), '#bfe8ff', .5, 2.5, 200);
+  const day = dayNum();
+  if (pl.wishDay !== day && chance(.35)) { pl.wishDay = day; P.luckT = 480; toast('The coin flashes as it sinks. You feel <b>lucky</b>.', 'gold'); return; }
+  if (pl.wishDay !== day && chance(.06)) { pl.wishDay = day; addItem('gem', 1, 1, true); toast('Something red glints among the coins. You fish out a <b>Ruby</b>!', 'gold'); return; }
+  toast(pick(['The coin sinks. Nothing happens. Or does it?', 'Plink. Somewhere, a wish is counted.', 'The coin settles among a thousand others.']));
+}
+const FOUNDERS = [
+  'ALDRIC THE FIRST · WHO RAISED THESE WALLS FROM THE ASHES OF THE EMBER CROWN · LET NO FOE PASS THEM WHILE ONE ALBION HEART STILL BEATS',
+  'SOLENNE OF THE DAWN · WHO BROUGHT THE VINES OVER THE MOUNTAINS · MAY THE SUN NEVER SET ON VALORIA',
+  'MORGATH IRONHAND · WHO BROKE THE HOLLOW HOST ON THE ICE · DRAVEN KNEELS TO NO ONE',
+  'THE GREEN LADY · WHO SANG THE FIRST TREES OF THE THORNWOOD · WALK SOFTLY, AND THE FOREST WILL KEEP YOU',
+];
+function readStatue(pl) { openDialog({ name: 'The Founder\'s Statue', role: `${KDATA[pl.owner].name} · weathered bronze`, portrait: fakeP({ body: '#7a9a88', head: 'great', skin: '#8aaa98', shiny: 1 }, pl.owner), text: `The plaque reads:<br><br><i>${FOUNDERS[pl.owner]}</i><br><br>Pigeons have left their own opinion on the founder's helm.`, options: [{ t: 'Walk on', fn: closeDialog }] }); }
 function openChest(it, pl) {
   if (pl.chestOpened) { toast('Nothing left here.'); return; }
   if (pl.type === 'camp' && !pl.cleared) { toast('The bandits still hold this camp. Defeat them first.', 'bad'); return; }
@@ -4184,6 +4434,9 @@ const BARKS = {
   guard: ['Keep your blade sheathed within these walls.', 'Move along, traveler.', 'Another quiet watch, gods willing.', 'Trouble with bandits? Speak to the elders.'],
   friendly: ['Well met, Sir Knight!', 'Your deeds are spoken of in the barracks.', 'An honor to stand beside you.'],
   cold: ['We are watching you.', 'Tread carefully, stranger.', 'Your name is not welcome here.'],
+  town: ['Mind your purse in the market, sir.', 'Have you tried the pies at the bakery? Heavenly.', 'The cathedral bells woke me at dawn again.', 'My cousin swears the tavern ale is watered.', 'Make way! Make way!', 'The king rode through the square yesterday. Or was it a duke?', 'Fresh apples at the plaza, they say.', 'Taxes, taxes. It is all taxes these days.', 'Did you hear the crier? War, always war.', 'The bard in the square knows a hundred songs, and all of them sad.', 'Watch the alleys after dark.', 'A fine day to be in the city!'],
+  noble: ['Out of my way, commoner. Oh. A knight. My apologies.', 'The court is all whispers this season.', 'One simply cannot find good silk anymore.', 'Have you been presented at court? You simply must be.', 'My family has lived in this city for nine generations.'],
+  child: ['Are you a real knight?!', 'Can I hold your sword? Please?', 'Tag! You are it!', 'My mum says knights smell like horses.', 'I am going to be a knight when I grow up!', 'Race you to the fountain!', 'The bard gave me a sweet!'],
   citizen: ['Fine weather for the harvest.', 'Have you seen the prices at market?', 'Bandits took my cousin\'s cart last week.', 'The king\'s tax collectors came again…', 'Mind the wolves after dark.', 'A knight! Are you here to help?'],
 };
 function talkTo(e) {
@@ -4205,6 +4458,15 @@ function talkTo(e) {
     case 'herald': return heraldDialog(e);
     case 'companion': return compDialog(e);
     case 'citizen': e.say = { text: pick(BARKS.citizen), t: 3 }; return;
+    case 'townsfolk': e.say = { text: pick(e.noble ? BARKS.noble : BARKS.town), t: 3 }; return;
+    case 'child': e.say = { text: pick(BARKS.child), t: 3 }; if (chance(.15)) { e.flee = 1.2; e.fleeFrom = P; } return;
+    case 'cityshop': if (K.rep[k] <= -50) { e.say = { text: 'I do not trade with your kind!', t: 2.5 }; return; } return openShop(getShop(e), e);
+    case 'innkeeper': return tavernDialog(e);
+    case 'hotelier': return innDialog(e);
+    case 'priest': return priestDialog(e, W.places[e.place]);
+    case 'bard': return bardDialog(e);
+    case 'crier': return crierDialog(e, k);
+    case 'beggar': return beggarDialog(e, k);
   }
   if (e.faction && e.faction[0] === 'k') {
     let t;
@@ -4521,6 +4783,13 @@ function drawMiscIcon(g, id, b) {
       g.beginPath(); g.moveTo(0, 18); g.bezierCurveTo(-24, 2, -18, -18, 0, -8); g.bezierCurveTo(18, -18, 24, 2, 0, 18); g.fill(); g.shadowBlur = 0;
       g.strokeStyle = 'rgba(255,255,255,.75)'; g.lineWidth = 1; g.beginPath(); g.moveTo(-6, -8); g.lineTo(-2, 2); g.lineTo(-7, 8); g.moveTo(-2, 2); g.lineTo(6, -2); g.stroke(); break;
     }
+    case 'apple': case 'pear': { const c = id === 'apple' ? '#c8302a' : '#b8c040'; g.fillStyle = c; if (id === 'apple') { circ(g, -5, 3, 13); circ(g, 5, 3, 13); } else { circ(g, 0, 7, 14); circ(g, 0, -6, 9); } g.fillStyle = 'rgba(255,255,255,.35)'; ell(g, -6, -2, 4, 6); g.strokeStyle = '#5a3a1a'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(0, id === 'apple' ? -8 : -14); g.lineTo(2, -20); g.stroke(); g.fillStyle = '#5a9a3a'; ell(g, 8, -16, 7, 3.5, -.4); break; }
+    case 'cheese': g.fillStyle = '#e8c048'; g.beginPath(); g.moveTo(-22, 12); g.lineTo(22, 12); g.lineTo(22, -2); g.lineTo(-22, -12); g.closePath(); g.fill(); g.fillStyle = '#f4d870'; g.beginPath(); g.moveTo(-22, -12); g.lineTo(22, -2); g.lineTo(14, -10); g.lineTo(-22, -18); g.closePath(); g.fill(); g.fillStyle = '#c89a28'; [[-10, 4, 3], [4, 6, 2.5], [12, 1, 2], [-2, -1, 2]].forEach(([a, b2, r]) => circ(g, a, b2, r)); break;
+    case 'sausage': g.strokeStyle = '#8a3a22'; g.lineWidth = 11; g.lineCap = 'round'; g.beginPath(); g.moveTo(-20, -8); g.quadraticCurveTo(-8, 10, 4, -2); g.quadraticCurveTo(14, -12, 20, 8); g.stroke(); g.strokeStyle = '#b85a3a'; g.lineWidth = 4; g.beginPath(); g.moveTo(-18, -10); g.quadraticCurveTo(-8, 5, 2, -5); g.stroke(); g.lineCap = 'butt'; g.fillStyle = '#e8d8b8'; circ(g, 4, -2, 3); break;
+    case 'pie': g.fillStyle = '#8a5a2a'; ell(g, 0, 8, 24, 10); g.fillStyle = '#d89a48'; ell(g, 0, 2, 22, 12); g.strokeStyle = '#a86a28'; g.lineWidth = 2; g.beginPath(); for (let i = -2; i <= 2; i++) { g.moveTo(i * 7 - 3, -6); g.lineTo(i * 7 + 3, 8); } g.stroke(); g.fillStyle = '#e8b868'; for (let i = 0; i < 10; i++) circ(g, Math.cos(i / 10 * TAU) * 21, 2 + Math.sin(i / 10 * TAU) * 11, 3); break;
+    case 'honey_cake': g.fillStyle = '#b8782a'; g.fillRect(-18, -4, 36, 18); g.fillStyle = '#d89a3a'; ell(g, 0, -4, 18, 6); g.fillStyle = '#f0b830'; g.beginPath(); g.moveTo(-16, -6); for (let i = 0; i <= 8; i++) g.lineTo(-16 + i * 4, -3 + (i % 2 ? 8 : 2)); g.lineTo(16, -8); g.closePath(); g.fill(); g.fillStyle = 'rgba(255,255,255,.4)'; ell(g, -6, -6, 5, 1.6); break;
+    case 'ale': g.fillStyle = '#8a5a2a'; g.fillRect(-14, -12, 26, 30); g.strokeStyle = '#8a5a2a'; g.lineWidth = 5; g.beginPath(); g.arc(14, 3, 8, -1.3, 1.3); g.stroke(); g.fillStyle = '#e8b048'; g.fillRect(-11, -6, 20, 21); g.fillStyle = '#f8f4e8'; ell(g, -1, -12, 15, 6); circ(g, -10, -9, 5); circ(g, 8, -10, 5); g.strokeStyle = '#5a3a1a'; g.lineWidth = 1.5; [-6, 3].forEach(yy => { g.beginPath(); g.moveTo(-14, yy + 6); g.lineTo(12, yy + 6); g.stroke(); }); break;
+    case 'flowers': g.strokeStyle = '#4a8a3a'; g.lineWidth = 2.5; g.beginPath(); [[-10, -10], [0, -16], [10, -9], [-4, -4], [6, -2]].forEach(([a, b2]) => { g.moveTo(0, 20); g.lineTo(a, b2); }); g.stroke(); [['#e05a6a', -10, -10], ['#ffd04a', 0, -16], ['#c86ad0', 10, -9], ['#ffffff', -4, -4], ['#ff8a4a', 6, -2]].forEach(([c, a, b2]) => { g.fillStyle = c; for (let i = 0; i < 5; i++) circ(g, a + Math.cos(i * 1.26) * 4, b2 + Math.sin(i * 1.26) * 4, 3); g.fillStyle = '#ffe070'; circ(g, a, b2, 2); }); g.fillStyle = '#c8a878'; g.beginPath(); g.moveTo(-8, 8); g.lineTo(8, 8); g.lineTo(4, 22); g.lineTo(-4, 22); g.closePath(); g.fill(); break;
     case 'bread': g.fillStyle = '#c8883a'; ell(g, 0, 4, 22, 13); g.fillStyle = '#e0a860'; ell(g, -2, 0, 18, 9); g.strokeStyle = '#8a5a22'; for (let i = -10; i <= 10; i += 7) { g.beginPath(); g.moveTo(i - 3, -5); g.lineTo(i + 3, 5); g.stroke(); } break;
     case 'meat': g.fillStyle = '#eee6d8'; g.fillRect(8, -4, 18, 6); circ(g, 26, -5, 4); circ(g, 26, 3, 4); g.fillStyle = '#9a4a2a'; ell(g, -4, 0, 17, 14); g.fillStyle = '#c86a3a'; ell(g, -7, -3, 10, 8); break;
     case 'potion': g.fillStyle = '#8a6a4a'; g.fillRect(-4, -26, 8, 8); g.fillStyle = 'rgba(220,230,255,.35)'; g.beginPath(); g.moveTo(-6, -18); g.lineTo(6, -18); g.lineTo(6, -10); g.quadraticCurveTo(20, -4, 18, 10); g.quadraticCurveTo(14, 24, 0, 24); g.quadraticCurveTo(-14, 24, -18, 10); g.quadraticCurveTo(-20, -4, -6, -10); g.closePath(); g.fill(); S('#c8d0e0'); g.fillStyle = '#d02a3a'; ell(g, 0, 10, 15, 11); g.fillStyle = 'rgba(255,255,255,.5)'; ell(g, -7, 4, 3, 5); break;
@@ -4972,6 +5241,12 @@ function drawStruct(g, o, t) {
       break;
     }
     case 'wtower': drawWatchtower(g, o, t, k, kd, towerPart(o)); break;
+    case 'cathedral': drawCathedral(g, o, t, k, kd); break;
+    case 'fountain': drawFountain(g, o, t, kd); break;
+    case 'statue': drawStatue(g, o, k, kd); break;
+    case 'mstall': drawMarketStall(g, o, t, kd); break;
+    case 'lamp': drawLamp(g, o, t); break;
+    case 'decor': drawDecor(g, o); break;
     case 'tent': drawTent(g, x, y, w, h, pick2(o.v, ['#8a6a4a', '#7a5a3a', '#6a4a3a', '#8a4a3a']), '#4a3020', false); break;
     case 'campfire': { const cx = x + 16, cy = y + 18; g.fillStyle = '#5a5048'; for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; circ(g, cx + Math.cos(a) * 12, cy + Math.sin(a) * 8, 4); } g.strokeStyle = '#4a2a10'; g.lineWidth = 4; g.beginPath(); g.moveTo(cx - 9, cy + 4); g.lineTo(cx + 9, cy - 4); g.moveTo(cx - 9, cy - 4); g.lineTo(cx + 9, cy + 4); g.stroke();
       for (let i = 0; i < 4; i++) { const f = Math.sin(t * 12 + i * 2) * 2; g.fillStyle = ['#ff5a1a', '#ff8a2a', '#ffc040', '#fff0a0'][i]; ell(g, cx + (i - 1.5) * 2 + f * .5, cy - 6 - i * 2 + f * .3, 7 - i * 1.5, 11 - i * 2); }
@@ -5029,7 +5304,7 @@ const BSTYLE = [
 ];
 function drawBuilding(g, o, t, k, kd) {
   const x = o.x, y = o.y, w = o.w, h = o.h, v = o.v ?? .5, S = BSTYLE[k] || BSTYLE[0];
-  const wallH = 20, rt = y - 12, rb = y + h - wallH + 3, rmid = rt + (rb - rt) * .46, night = isNight();
+  const wallH = o.tall ? 34 : 20, rt = y - (o.tall ? 18 : 12), rb = y + h - wallH + 3, rmid = rt + (rb - rt) * .46, night = isNight();
   const roof = o.k === 'chapel' ? shade(kd.roof, -.12) : shade(kd.roof, (v - .5) * .2);
   g.fillStyle = 'rgba(0,0,0,.24)'; g.fillRect(x + 7, y + 6, w, h); // shadow
   // front wall
@@ -5049,7 +5324,8 @@ function drawBuilding(g, o, t, k, kd) {
     g.fillStyle = '#4a6a3a'; g.fillRect(x, wy, w, 2.5); g.fillRect(x, y + h - 3, w, 3);
   }
   // windows and door
-  const win = (wx) => {
+  const gf = o.tall ? wy + 14 : wy; // ground floor line
+  const win = (wx, wy = gf) => {
     g.fillStyle = S.beam; g.fillRect(wx - 5, wy + 4, 10, 9);
     g.fillStyle = night ? '#ffcf6a' : '#2e3a48'; g.fillRect(wx - 3.5, wy + 5.5, 7, 6);
     if (!night) { g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(wx - 3, wy + 6, 2, 2); }
@@ -5061,15 +5337,20 @@ function drawBuilding(g, o, t, k, kd) {
   if (o.k === 'stable') {
     g.fillStyle = '#5a3a1e'; g.fillRect(dx - 11, wy + 2, 22, wallH - 2); g.strokeStyle = '#8a6036'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(dx - 10, wy + 3); g.lineTo(dx, y + h); g.lineTo(dx + 10, wy + 3); g.moveTo(dx - 10, y + h); g.lineTo(dx, wy + 3); g.lineTo(dx + 10, y + h); g.stroke(); g.fillStyle = '#3a2412'; g.fillRect(dx - .7, wy + 2, 1.4, wallH - 2);
   } else {
-    g.fillStyle = '#3a2412'; g.beginPath(); g.moveTo(dx - 6.5, y + h); g.lineTo(dx - 6.5, wy + 8); g.arc(dx, wy + 8, 6.5, Math.PI, 0); g.lineTo(dx + 6.5, y + h); g.closePath(); g.fill();
-    g.fillStyle = o.k === 'chapel' ? '#7a4a2a' : '#6a4424'; g.beginPath(); g.moveTo(dx - 5, y + h); g.lineTo(dx - 5, wy + 8.5); g.arc(dx, wy + 8.5, 5, Math.PI, 0); g.lineTo(dx + 5, y + h); g.closePath(); g.fill();
-    g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = .8; g.beginPath(); g.moveTo(dx - 1.7, wy + 5); g.lineTo(dx - 1.7, y + h); g.moveTo(dx + 1.7, wy + 5); g.lineTo(dx + 1.7, y + h); g.stroke();
-    g.fillStyle = '#c8a040'; circ(g, dx + 3, wy + 13, .9);
+    g.fillStyle = '#3a2412'; g.beginPath(); g.moveTo(dx - 6.5, y + h); g.lineTo(dx - 6.5, gf + 8); g.arc(dx, gf + 8, 6.5, Math.PI, 0); g.lineTo(dx + 6.5, y + h); g.closePath(); g.fill();
+    g.fillStyle = o.k === 'chapel' ? '#7a4a2a' : o.shop ? shade(CITY_SHOPS[o.shop].col, -.35) : '#6a4424'; g.beginPath(); g.moveTo(dx - 5, y + h); g.lineTo(dx - 5, gf + 8.5); g.arc(dx, gf + 8.5, 5, Math.PI, 0); g.lineTo(dx + 5, y + h); g.closePath(); g.fill();
+    g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = .8; g.beginPath(); g.moveTo(dx - 1.7, gf + 5); g.lineTo(dx - 1.7, y + h); g.moveTo(dx + 1.7, gf + 5); g.lineTo(dx + 1.7, y + h); g.stroke();
+    g.fillStyle = '#c8a040'; circ(g, dx + 3, gf + 13, .9);
   }
   g.fillStyle = 'rgba(120,110,95,.8)'; ell(g, dx, y + h + 1.5, 9, 2.2); // doorstep
   const nWin = Math.max(1, Math.floor((w - 24) / 30));
   if (o.k === 'chapel') { g.fillStyle = S.beam; circ(g, dx, wy - 2, 7); ['#c83a4a', '#3a6ac8', '#e8c040', '#3aa060'].forEach((c, i) => { g.fillStyle = c; g.beginPath(); g.moveTo(dx, wy - 2); g.arc(dx, wy - 2, 5.5, i * Math.PI / 2, (i + 1) * Math.PI / 2); g.fill(); }); }
   for (let i = 0; i < nWin; i++) { const off = (i + 1) * (w / 2 - 12) / (nWin + 1); win(dx - 12 - off + 4); win(dx + 12 + off - 4); }
+  if (o.tall) { // upper storey: a jettied floor with its own row of windows and a beam between the floors
+    g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(x, gf + 1, w, 2); g.fillStyle = S.beam; g.fillRect(x - 1, gf - 1, w + 2, 2.5);
+    const nUp = Math.max(2, Math.floor((w - 8) / 22)); for (let i = 0; i < nUp; i++) win(x + (i + .5) * w / nUp, wy - 1);
+  }
+  if (o.shop) drawShopfront(g, o, x, y, w, h, gf, dx, t, k, kd, night);
   // the roof
   const up = g.createLinearGradient(0, rt, 0, rmid); up.addColorStop(0, shade(roof, .2)); up.addColorStop(1, shade(roof, .04));
   g.fillStyle = up; g.fillRect(x - 4, rt, w + 8, rmid - rt);
@@ -5268,6 +5549,199 @@ function drawWatchtower(g, o, t, k, kd, part) {
     g.fillStyle = '#3a2a1a'; g.fillRect(cx - 1, ry - 26, 2, 25); drawWavingBanner(g, k, cx + 1, ry - 24, 16, 24, t + x * .01);
   }
 }
+/* ---------------- City art ---------------- */
+function drawShopfront(g, o, x, y, w, h, gf, dx, t, k, kd, night) {
+  const S = CITY_SHOPS[o.shop], col = S.col;
+  // striped awning over the ground floor
+  const ax = x + 3, aw = w - 6, ay = gf + 2, n = Math.max(4, Math.round(aw / 8));
+  g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(ax, ay + 7, aw, 3);
+  for (let i = 0; i < n; i++) { g.fillStyle = i % 2 ? '#f2ead8' : col; g.beginPath(); const x1 = ax + i * aw / n, x2 = ax + (i + 1) * aw / n; g.moveTo(x1, ay - 1); g.lineTo(x2, ay - 1); g.lineTo(x2, ay + 5); g.quadraticCurveTo((x1 + x2) / 2, ay + 10, x1, ay + 5); g.closePath(); g.fill(); }
+  g.fillStyle = shade(col, -.35); g.fillRect(ax - 1, ay - 2.5, aw + 2, 2);
+  // hanging sign on an iron bracket beside the door
+  const sx = dx + 16, sy = gf + 12;
+  g.strokeStyle = '#2a2420'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(sx - 2, sy - 6); g.lineTo(sx + 12, sy - 6); g.moveTo(sx + 1, sy - 6); g.lineTo(sx + 1, sy - 3); g.moveTo(sx + 10, sy - 6); g.lineTo(sx + 10, sy - 3); g.stroke();
+  const sw = Math.sin(t * 1.6 + x) * .06; g.save(); g.translate(sx + 5.5, sy - 3); g.rotate(sw);
+  g.fillStyle = '#6a4424'; rrect(g, -7.5, 0, 15, 12, 2); g.fill(); g.fillStyle = '#e8d8a8'; rrect(g, -6, 1.5, 12, 9, 1.5); g.fill();
+  drawShopGlyph(g, o.shop, 0, 6, col); g.restore();
+  if (o.shop === 'inn') { g.fillStyle = night ? '#ffd27a' : '#d8a040'; circ(g, dx - 11, gf + 7, 2.4); circ(g, dx + 11, gf + 7, 2.4); g.fillStyle = '#4a6a3a'; ell(g, x + 7, y + h - 3, 5, 3.5); ell(g, x + w - 7, y + h - 3, 5, 3.5); }
+  if (o.shop === 'tavern') { // barrels by the door and a lantern
+    [[x + 6, y + h - 6], [x + 14, y + h - 4]].forEach(([bx, by]) => { g.fillStyle = '#7a4a24'; ell(g, bx, by, 5, 6); g.strokeStyle = '#3a2412'; g.lineWidth = 1; g.beginPath(); g.moveTo(bx - 5, by - 2); g.lineTo(bx + 5, by - 2); g.moveTo(bx - 5, by + 2); g.lineTo(bx + 5, by + 2); g.stroke(); });
+    g.fillStyle = night ? '#ffd27a' : '#d8a040'; circ(g, dx - 11, gf + 7, 2.4);
+  }
+}
+function drawShopGlyph(g, kind, x, y, col) {
+  g.save(); g.translate(x, y);
+  switch (kind) {
+    case 'baker': g.fillStyle = '#c8883a'; ell(g, 0, 0, 4.5, 2.6); g.strokeStyle = '#8a5a22'; g.lineWidth = .8; g.beginPath(); g.moveTo(-1.5, -2); g.lineTo(-.5, 2); g.moveTo(1, -2); g.lineTo(2, 2); g.stroke(); break;
+    case 'butcher': g.fillStyle = '#9a4a2a'; ell(g, -1, .5, 3.5, 2.8); g.fillStyle = '#eee6d8'; g.fillRect(1.5, -.6, 3.5, 1.2); circ(g, 5, -.8, .9); circ(g, 5, .8, .9); break;
+    case 'apothecary': g.fillStyle = '#5ab870'; circ(g, 0, 1.2, 3); g.fillStyle = '#d8e8e0'; g.fillRect(-1, -3.6, 2, 2.6); break;
+    case 'tailor': g.strokeStyle = '#5a5a60'; g.lineWidth = 1; g.beginPath(); g.moveTo(-4, 3); g.lineTo(3, -3); g.stroke(); g.fillStyle = col; circ(g, 2.5, 1.5, 2.2); break;
+    case 'jeweler': g.fillStyle = '#6ab0ff'; g.beginPath(); g.moveTo(0, -3.5); g.lineTo(3.5, -.5); g.lineTo(0, 3.5); g.lineTo(-3.5, -.5); g.closePath(); g.fill(); g.fillStyle = 'rgba(255,255,255,.7)'; g.fillRect(-1, -2, 1.2, 1.2); break;
+    case 'bowyer': g.strokeStyle = '#6a4424'; g.lineWidth = 1.3; g.beginPath(); g.arc(-2, 0, 4, -1.2, 1.2); g.stroke(); g.strokeStyle = '#888'; g.lineWidth = .7; g.beginPath(); g.moveTo(-.6, -3.7); g.lineTo(-.6, 3.7); g.moveTo(-3, 0); g.lineTo(4.5, 0); g.stroke(); break;
+    case 'vintner': g.fillStyle = '#6a1a2a'; g.fillRect(-1.6, -1, 3.2, 4.5); g.fillRect(-.7, -3.8, 1.4, 3); g.fillStyle = '#9a3a4a'; g.fillRect(-1.6, 1, 3.2, 1.2); break;
+    case 'grocer': g.fillStyle = '#e8c048'; g.beginPath(); g.moveTo(-4, 2.5); g.lineTo(4, 2.5); g.lineTo(4, -.5); g.lineTo(-4, -2.5); g.closePath(); g.fill(); g.fillStyle = '#c89a28'; circ(g, -1, .8, .8); circ(g, 2, 1.2, .7); break;
+    case 'spicer': g.fillStyle = '#c87a2a'; ell(g, 0, 1, 3.6, 2.6); g.fillStyle = '#e84a2a'; ell(g, 0, -1.2, 2.4, 1.2); break;
+    case 'inn': g.strokeStyle = '#b8902e'; g.lineWidth = 1.3; g.beginPath(); g.arc(-2, -1, 2.2, 0, TAU); g.moveTo(0, -1); g.lineTo(4.5, -1); g.moveTo(3, -1); g.lineTo(3, 1.2); g.moveTo(4.4, -1); g.lineTo(4.4, .8); g.stroke(); g.fillStyle = '#5a4a8a'; g.fillRect(-4.5, 2.2, 9, 1.8); break;
+    case 'tavern': g.fillStyle = '#8a5a2a'; g.fillRect(-2.8, -2.4, 5, 5.6); g.fillStyle = '#e8b048'; g.fillRect(-2.2, -1.2, 3.8, 3.8); g.fillStyle = '#f8f4e8'; ell(g, -.3, -2.4, 3.2, 1.4); g.strokeStyle = '#8a5a2a'; g.lineWidth = 1; g.beginPath(); g.arc(2.6, .6, 1.8, -1.3, 1.3); g.stroke(); break;
+  }
+  g.restore();
+}
+const cathCache = new Map();
+function drawCathedral(g, o, t, k, kd) {
+  const night = isNight(), key = k + (night ? 'n' : 'd') + '_' + curSeason, PADX = 60, PADT = 330;
+  let cv = cathCache.get(key);
+  if (!cv) { cv = document.createElement('canvas'); cv.width = o.w + PADX * 2; cv.height = o.h + PADT + 30; const c = cv.getContext('2d'); c.translate(PADX, PADT); paintCathedral(c, o.w, o.h, k, kd, night); cathCache.set(key, cv); }
+  g.drawImage(cv, o.x - PADX, o.y - PADT);
+  if (night) { g.fillStyle = 'rgba(255,200,110,.18)'; ell(g, o.x + o.w / 2, o.y + o.h + 8, 60, 14); }
+}
+function paintCathedral(g, w, h, k, kd, night) {
+  const cx = w / 2, st = shade(kd.stone, .18), stD = shade(kd.stone, -.12), roof = k === 1 ? '#3a5a8a' : k === 3 ? shade(kd.roof, -.05) : '#4a5058', sty = (BSTYLE[k] || BSTYLE[0]).tile;
+  const gold = '#e7c35a', glass = night ? ['#ffd27a', '#ffb050', '#ffe6a0', '#ff9a5a'] : ['#c83a4a', '#3a6ac8', '#e8c040', '#3aa060'];
+  const faceH = 78, fy = h - faceH; // the south facade
+  g.fillStyle = 'rgba(0,0,0,.24)'; g.fillRect(14, 10, w, h);
+  // apse at the north end, nave and side aisles running toward the facade, transept across the middle
+  const nL = cx - 70, nR = cx + 70, aL = cx - 118, aR = cx + 118;
+  const roofRect = (x1, y1, x2, y2, horiz) => {
+    const gr = horiz ? g.createLinearGradient(0, y1, 0, y2) : g.createLinearGradient(x1, 0, x2, 0);
+    gr.addColorStop(0, shade(roof, .22)); gr.addColorStop(.5, roof); gr.addColorStop(.501, shade(roof, -.12)); gr.addColorStop(1, shade(roof, -.36));
+    g.fillStyle = gr; g.fillRect(x1, y1, x2 - x1, y2 - y1);
+    g.strokeStyle = 'rgba(0,0,0,.2)'; g.lineWidth = 1; g.beginPath();
+    if (horiz) for (let xx = x1 + 6; xx < x2; xx += 6) { g.moveTo(xx, y1); g.lineTo(xx, y2); } else for (let yy = y1 + 5; yy < y2; yy += 5) { g.moveTo(x1, yy); g.lineTo(x2, yy); }
+    g.stroke(); g.fillStyle = shade(roof, .4); if (horiz) g.fillRect(x1, (y1 + y2) / 2 - 1, x2 - x1, 2); else g.fillRect((x1 + x2) / 2 - 1, y1, 2, y2 - y1);
+  };
+  // aisles (lower, with buttresses and pinnacles)
+  roofRect(aL, 40, nL, fy, false); roofRect(nR, 40, aR, fy, false);
+  for (let yy = 56; yy < fy - 10; yy += 34) [[aL, -1], [aR, 1]].forEach(([ex, d]) => {
+    g.fillStyle = stD; g.fillRect(ex - (d < 0 ? 12 : 0), yy - 5, 12, 10); g.strokeStyle = stD; g.lineWidth = 3; g.beginPath(); g.moveTo(ex + d * 6, yy); g.quadraticCurveTo(ex - d * 14, yy - 10, d < 0 ? nL : nR, yy - 4); g.stroke();
+    g.fillStyle = st; g.beginPath(); g.moveTo(ex + d * 6 - 4, yy - 3); g.lineTo(ex + d * 6, yy - 16); g.lineTo(ex + d * 6 + 4, yy - 3); g.fill();
+  });
+  // apse
+  const apG = g.createRadialGradient(cx - 20, 30, 10, cx, 44, 78); apG.addColorStop(0, shade(roof, .2)); apG.addColorStop(1, shade(roof, -.3));
+  g.fillStyle = apG; g.beginPath(); g.arc(cx, 44, 70, Math.PI, 0); g.lineTo(nR, 60); g.lineTo(nL, 60); g.closePath(); g.fill();
+  g.strokeStyle = 'rgba(0,0,0,.22)'; g.lineWidth = 1; for (let a = Math.PI + .3; a < TAU; a += .38) { g.beginPath(); g.moveTo(cx, 44); g.lineTo(cx + Math.cos(a) * 70, 44 + Math.sin(a) * 70); g.stroke(); }
+  // nave
+  roofRect(nL, 44, nR, fy, false);
+  // transept arms reaching past the aisles
+  roofRect(8, 92, w - 8, 150, true);
+  [[8, 1], [w - 8, -1]].forEach(([ex, d]) => { g.fillStyle = st; g.beginPath(); g.moveTo(ex, 150); g.lineTo(ex, 92); g.lineTo(ex - d * 10, 121); g.closePath(); g.fill(); g.fillStyle = glass[1]; circ(g, ex + d * 4, 121, 5); });
+  // crossing tower and its great spire
+  g.fillStyle = stD; g.fillRect(cx - 30, 100, 60, 44); g.fillStyle = st; g.fillRect(cx - 30, 92, 60, 14);
+  for (let i = 0; i < 3; i++) { g.fillStyle = '#1e1a18'; rrect(g, cx - 22 + i * 17, 114, 8, 22, 4); g.fill(); g.fillStyle = glass[i]; rrect(g, cx - 20.5 + i * 17, 117, 5, 16, 2.5); g.fill(); }
+  drawSpire(g, cx, 96, 34, 168, roof, sty);
+  // the facade: twin towers with spires, a gable with a rose window, and three great doors
+  g.fillStyle = shade(st, -.06); g.fillRect(aL, fy, aR - aL, faceH);
+  g.strokeStyle = 'rgba(0,0,0,.14)'; g.lineWidth = 1; for (let yy = fy + 9, r = 0; yy < h; yy += 9, r++) { g.beginPath(); g.moveTo(aL, yy); g.lineTo(aR, yy); g.stroke(); for (let xx = aL + (r % 2) * 11; xx < aR; xx += 22) { g.beginPath(); g.moveTo(xx, yy - 9); g.lineTo(xx, yy); g.stroke(); } }
+  // gable
+  g.fillStyle = st; g.beginPath(); g.moveTo(nL, fy + 2); g.lineTo(cx, fy - 64); g.lineTo(nR, fy + 2); g.closePath(); g.fill();
+  g.strokeStyle = gold; g.lineWidth = 2; g.beginPath(); g.moveTo(nL + 4, fy); g.lineTo(cx, fy - 60); g.lineTo(nR - 4, fy); g.stroke();
+  g.fillStyle = gold; g.fillRect(cx - 1.5, fy - 80, 3, 18); g.fillRect(cx - 7, fy - 74, 14, 3);
+  // rose window
+  const rx = cx, ry = fy - 10, rr = 24;
+  g.fillStyle = shade(st, -.3); circ(g, rx, ry, rr + 4); g.fillStyle = '#1e1a18'; circ(g, rx, ry, rr);
+  for (let i = 0; i < 12; i++) { g.fillStyle = glass[i % 4]; g.beginPath(); g.moveTo(rx, ry); g.arc(rx, ry, rr - 2, i / 12 * TAU, (i + 1) / 12 * TAU); g.closePath(); g.fill(); }
+  g.strokeStyle = shade(st, -.2); g.lineWidth = 1.5; for (let i = 0; i < 12; i++) { const a = i / 12 * TAU; g.beginPath(); g.moveTo(rx, ry); g.lineTo(rx + Math.cos(a) * rr, ry + Math.sin(a) * rr); g.stroke(); }
+  g.beginPath(); g.arc(rx, ry, rr * .45, 0, TAU); g.stroke(); g.fillStyle = gold; circ(g, rx, ry, 4);
+  if (night) { g.fillStyle = 'rgba(255,200,110,.25)'; circ(g, rx, ry, rr + 10); }
+  // towers
+  [[aL, nL], [nR, aR]].forEach(([x1, x2], ti) => {
+    const tw = x2 - x1, top = fy - 70;
+    const tg = g.createLinearGradient(x1, 0, x2, 0); tg.addColorStop(0, shade(st, .06)); tg.addColorStop(1, shade(st, -.2));
+    g.fillStyle = tg; g.fillRect(x1, top, tw, h - top);
+    g.strokeStyle = 'rgba(0,0,0,.14)'; g.lineWidth = 1; for (let yy = top + 10; yy < fy; yy += 10) { g.beginPath(); g.moveTo(x1, yy); g.lineTo(x2, yy); g.stroke(); }
+    g.fillStyle = shade(st, -.28); g.fillRect(x1 - 3, top - 4, tw + 6, 8); for (let xx = x1 - 3; xx < x2 + 3; xx += 9) { g.fillStyle = shade(st, .1); g.fillRect(xx, top - 10, 5, 7); }
+    for (let i = 0; i < 2; i++) { const wx = x1 + tw * (i ? .66 : .34); g.fillStyle = '#1e1a18'; rrect(g, wx - 5, top + 16, 10, 30, 5); g.fill(); g.fillStyle = glass[(i + ti * 2) % 4]; rrect(g, wx - 3.5, top + 19, 7, 25, 3.5); g.fill(); }
+    g.fillStyle = '#1e1a18'; rrect(g, x1 + tw / 2 - 5, fy + 8, 10, 26, 5); g.fill(); g.fillStyle = glass[(ti + 1) % 4]; rrect(g, x1 + tw / 2 - 3.5, fy + 11, 7, 21, 3.5); g.fill();
+    drawSpire(g, x1 + tw / 2, top - 6, tw * .5, 118, roof, sty);
+    // a long kingdom banner down each tower
+    g.fillStyle = kd.color; g.fillRect(x1 + tw / 2 - 8, fy + 40, 16, 30); g.beginPath(); g.moveTo(x1 + tw / 2 - 8, fy + 70); g.lineTo(x1 + tw / 2, fy + 64); g.lineTo(x1 + tw / 2 + 8, fy + 70); g.fill();
+    g.fillStyle = gold; g.fillRect(x1 + tw / 2 - 8, fy + 40, 16, 2.5); circ(g, x1 + tw / 2, fy + 52, 3.5);
+  });
+  // three pointed portals with carved arches, wooden doors and steps
+  const portal = (px, pw, ph) => {
+    g.fillStyle = shade(st, -.32); g.beginPath(); g.moveTo(px - pw / 2 - 5, h); g.lineTo(px - pw / 2 - 5, h - ph + pw * .5); g.quadraticCurveTo(px - pw / 2 - 5, h - ph - 8, px, h - ph - 14); g.quadraticCurveTo(px + pw / 2 + 5, h - ph - 8, px + pw / 2 + 5, h - ph + pw * .5); g.lineTo(px + pw / 2 + 5, h); g.closePath(); g.fill();
+    g.fillStyle = '#4a2c16'; g.beginPath(); g.moveTo(px - pw / 2, h); g.lineTo(px - pw / 2, h - ph + pw * .5); g.quadraticCurveTo(px - pw / 2, h - ph, px, h - ph - 6); g.quadraticCurveTo(px + pw / 2, h - ph, px + pw / 2, h - ph + pw * .5); g.lineTo(px + pw / 2, h); g.closePath(); g.fill();
+    g.strokeStyle = 'rgba(0,0,0,.4)'; g.lineWidth = 1; g.beginPath(); g.moveTo(px, h); g.lineTo(px, h - ph - 4); for (let xx = px - pw / 2 + 4; xx < px + pw / 2; xx += 5) { g.moveTo(xx, h); g.lineTo(xx, h - ph + pw * .5); } g.stroke();
+    g.strokeStyle = gold; g.lineWidth = 1.2; g.beginPath(); g.moveTo(px - pw / 2, h - ph * .45); g.lineTo(px + pw / 2, h - ph * .45); g.stroke(); g.fillStyle = gold; circ(g, px - 3, h - ph * .3, 1.4); circ(g, px + 3, h - ph * .3, 1.4);
+  };
+  portal(cx, 30, 46); portal(cx - 44, 18, 32); portal(cx + 44, 18, 32);
+  g.fillStyle = shade(st, .1); g.fillRect(cx - 62, h - 3, 124, 5); g.fillStyle = shade(st, -.1); g.fillRect(cx - 70, h + 2, 140, 4);
+  // saints in niches between the doors
+  [cx - 22, cx + 22].forEach(sx => { g.fillStyle = shade(st, -.35); rrect(g, sx - 5, h - 44, 10, 22, 5); g.fill(); g.fillStyle = shade(st, .25); ell(g, sx, h - 32, 3, 8); circ(g, sx, h - 41, 2.6); });
+}
+function drawFountain(g, o, t, kd) {
+  const cx = o.x + o.w / 2, cy = o.y + o.h / 2 + 4, st = shade(kd.stone, .15);
+  g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, cx + 5, cy + 8, 34, 18);
+  g.fillStyle = shade(st, -.35); ell(g, cx, cy + 6, 32, 17); g.fillStyle = st; ell(g, cx, cy, 32, 17);
+  const wg = g.createRadialGradient(cx - 6, cy - 4, 2, cx, cy, 28); wg.addColorStop(0, '#8fd0f0'); wg.addColorStop(1, '#3a7aa8'); g.fillStyle = wg; ell(g, cx, cy, 26, 13);
+  g.strokeStyle = 'rgba(255,255,255,.45)'; g.lineWidth = 1; for (let i = 0; i < 3; i++) { const r = ((t * 12 + i * 9) % 26); g.globalAlpha = 1 - r / 26; g.beginPath(); g.ellipse(cx, cy, r, r * .5, 0, 0, TAU); g.stroke(); } g.globalAlpha = 1;
+  g.fillStyle = 'rgba(255,215,90,.8)'; [[-12, 4], [8, -5], [14, 5], [-4, 8]].forEach(([a, b2]) => circ(g, cx + a, cy + b2, 1.3));
+  g.fillStyle = shade(st, -.2); g.fillRect(cx - 4, cy - 20, 8, 20); g.fillStyle = st; ell(g, cx, cy - 20, 13, 6); g.fillStyle = '#6ab8e0'; ell(g, cx, cy - 21, 10, 4.2);
+  g.fillStyle = shade(st, -.1); g.fillRect(cx - 2, cy - 32, 4, 12); g.fillStyle = st; circ(g, cx, cy - 33, 3.5);
+  g.strokeStyle = 'rgba(200,235,255,.8)'; g.lineWidth = 1.4;
+  for (let i = 0; i < 6; i++) { const a = i / 6 * TAU + t * .4, sp = 16 + Math.sin(t * 3 + i) * 2; g.beginPath(); g.moveTo(cx, cy - 34); g.quadraticCurveTo(cx + Math.cos(a) * sp * .6, cy - 44, cx + Math.cos(a) * sp, cy - 20 + Math.sin(a) * 4); g.stroke(); }
+  if (Math.random() < .3 * QMUL()) addPart(cx + rand(-10, 10), cy - 22, rand(-15, 15), rand(-30, -5), 'rgba(220,240,255,.8)', .4, 1.5, 200);
+}
+function drawStatue(g, o, k, kd) {
+  const cx = o.x + o.w / 2, by = o.y + o.h, st = shade(kd.stone, .1), br = k === 1 ? '#c8a050' : '#7a9a88', brD = shade(br, -.3);
+  g.fillStyle = 'rgba(0,0,0,.24)'; ell(g, cx + 6, by, 18, 6);
+  g.fillStyle = shade(st, -.3); g.fillRect(cx - 14, by - 16, 28, 16); g.fillStyle = st; g.fillRect(cx - 16, by - 20, 32, 6); g.fillStyle = gold2(); g.fillRect(cx - 7, by - 11, 14, 5);
+  g.fillStyle = shade(st, -.1); g.fillRect(cx - 10, by - 26, 20, 7);
+  // a knight on the plinth, sword raised
+  g.fillStyle = brD; g.fillRect(cx - 6, by - 42, 5, 17); g.fillRect(cx + 1, by - 42, 5, 17);
+  g.fillStyle = br; rrect(g, cx - 8, by - 62, 16, 22, 4); g.fill(); g.fillStyle = brD; g.beginPath(); g.moveTo(cx - 8, by - 58); g.lineTo(cx - 14, by - 32); g.lineTo(cx - 4, by - 40); g.fill();
+  g.fillStyle = br; circ(g, cx, by - 67, 6); g.fillStyle = brD; g.fillRect(cx - 6, by - 68, 12, 2);
+  g.strokeStyle = br; g.lineWidth = 3; g.beginPath(); g.moveTo(cx + 7, by - 58); g.lineTo(cx + 12, by - 72); g.stroke();
+  g.strokeStyle = shade(br, .3); g.lineWidth = 2; g.beginPath(); g.moveTo(cx + 12, by - 72); g.lineTo(cx + 16, by - 98); g.stroke(); g.fillStyle = brD; g.fillRect(cx + 8, by - 74, 8, 2.5);
+  g.fillStyle = 'rgba(255,255,255,.18)'; ell(g, cx - 3, by - 56, 2.5, 7);
+  g.fillStyle = '#e8e4dc'; circ(g, cx + 3, by - 73, 2.2);
+}
+const gold2 = () => '#c9a24a';
+function drawMarketStall(g, o, t, kd) {
+  const x = o.x, y = o.y, w = o.w, h = o.h, kind = o.kind, col = CITY_SHOPS[kind] ? CITY_SHOPS[kind].col : kd.color;
+  g.fillStyle = 'rgba(0,0,0,.22)'; g.fillRect(x + 5, y + 6, w, h);
+  // counter
+  g.fillStyle = '#7a5030'; g.fillRect(x, y + h - 12, w, 12); g.fillStyle = '#9a6a3e'; g.fillRect(x, y + h - 14, w, 3);
+  g.strokeStyle = 'rgba(0,0,0,.25)'; g.lineWidth = 1; for (let i = 8; i < w; i += 9) { g.beginPath(); g.moveTo(x + i, y + h - 11); g.lineTo(x + i, y + h); g.stroke(); }
+  // goods laid out on the counter
+  const gx = x + 4, gy = y + h - 16, gw = w - 8;
+  const pile = (c, n, r) => { for (let i = 0; i < n; i++) { g.fillStyle = shade(c, (hash2(i, x) - .5) * .3); circ(g, gx + 3 + (i % 7) * (gw / 7), gy - Math.floor(i / 7) * 3.5, r); } };
+  switch (kind) {
+    case 'fruit': pile('#c8302a', 7, 2.8); for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? '#b8c040' : '#e8902a'; circ(g, gx + 5 + i * 6, gy - 5, 2.6); } break;
+    case 'butcher': g.fillStyle = '#5a5a60'; g.fillRect(x + 2, y - 14, w - 4, 1.6); for (let i = 0; i < 4; i++) { const hx = x + 8 + i * 9; g.strokeStyle = '#888'; g.beginPath(); g.moveTo(hx, y - 13); g.lineTo(hx, y - 8); g.stroke(); g.fillStyle = i % 2 ? '#9a3a2a' : '#b85a3a'; ell(g, hx, y - 3, 3.2, 5.5); } g.fillStyle = '#b85a3a'; ell(g, gx + 10, gy, 7, 3.5); g.fillStyle = '#e8d8c8'; ell(g, gx + 26, gy, 6, 3); break;
+    case 'fish': g.fillStyle = '#d8eef8'; g.fillRect(gx, gy - 4, gw, 5); for (let i = 0; i < 5; i++) { g.fillStyle = i % 2 ? '#9ab0c0' : '#c8b0a0'; ell(g, gx + 4 + i * 7, gy - 2, 4, 1.8, .3); } break;
+    case 'baker': for (let i = 0; i < 5; i++) { g.fillStyle = '#c8883a'; ell(g, gx + 4 + i * 7, gy - 1, 3.5, 2.2); } g.fillStyle = '#d89a48'; circ(g, gx + 10, gy - 6, 3.2); circ(g, gx + 24, gy - 6, 3.2); break;
+    case 'florist': for (let i = 0; i < 9; i++) { g.fillStyle = ['#e05a6a', '#ffd04a', '#c86ad0', '#ffffff', '#ff8a4a'][i % 5]; circ(g, gx + 2 + i * 4, gy - 3 - (i % 3) * 2, 2.2); } g.fillStyle = '#4a8a3a'; g.fillRect(gx, gy, gw, 2); break;
+    case 'grocer': g.fillStyle = '#e8c048'; for (let i = 0; i < 3; i++) { ell(g, gx + 6 + i * 12, gy - 1, 5, 3); } g.fillStyle = '#c89a28'; circ(g, gx + 8, gy - 1, .9); break;
+    case 'spicer': ['#c8302a', '#e8a030', '#e8d040', '#8a5a2a', '#6a9a3a'].forEach((c, i) => { g.fillStyle = '#b89a6a'; ell(g, gx + 4 + i * 7.5, gy, 3.6, 2.4); g.fillStyle = c; ell(g, gx + 4 + i * 7.5, gy - 1.2, 2.8, 1.4); }); break;
+    case 'tailor': ['#7a4a8a', '#c83a4a', '#3a6ac8', '#e8c040'].forEach((c, i) => { g.fillStyle = c; g.fillRect(gx + i * 9, gy - 5, 8, 6); g.fillStyle = 'rgba(255,255,255,.2)'; g.fillRect(gx + i * 9, gy - 5, 8, 1.5); }); break;
+  }
+  // striped awning on posts
+  g.fillStyle = '#5a3a1e'; g.fillRect(x + 1, y - 18, 2.5, h + 4); g.fillRect(x + w - 3.5, y - 18, 2.5, h + 4);
+  const n = 6; for (let i = 0; i < n; i++) { g.fillStyle = i % 2 ? '#f2ead8' : col; const x1 = x - 3 + i * (w + 6) / n, x2 = x - 3 + (i + 1) * (w + 6) / n; g.beginPath(); g.moveTo(x1, y - 22); g.lineTo(x2, y - 22); g.lineTo(x2, y - 13); g.quadraticCurveTo((x1 + x2) / 2, y - 8, x1, y - 13); g.closePath(); g.fill(); }
+  g.fillStyle = shade(col, -.35); g.fillRect(x - 3, y - 24, w + 6, 2.5);
+  // a crate or basket at the front
+  g.fillStyle = '#8a6036'; g.fillRect(x + w - 12, y + h - 4, 10, 7); g.strokeStyle = '#5a3a1e'; g.lineWidth = 1; g.strokeRect(x + w - 12, y + h - 4, 10, 7);
+}
+function drawLamp(g, o, t) {
+  const bx = o.x + 4, by = o.y + 8, night = isNight();
+  g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, bx + 3, by + 1, 5, 2);
+  g.fillStyle = '#2a2622'; g.fillRect(bx - 1.5, by - 34, 3, 34); g.fillRect(bx - 3.5, by - 3, 7, 3); g.fillRect(bx - 1, by - 36, 8, 2);
+  g.fillStyle = '#3a3430'; g.fillRect(bx + 3, by - 36, 6, 9); g.fillStyle = night ? '#ffd67a' : '#c8b48a'; g.fillRect(bx + 4, by - 34.5, 4, 6);
+  g.fillStyle = '#2a2622'; g.beginPath(); g.moveTo(bx + 2, by - 36); g.lineTo(bx + 6, by - 40); g.lineTo(bx + 10, by - 36); g.fill();
+  if (night) { g.fillStyle = 'rgba(255,210,120,.22)'; circ(g, bx + 6, by - 31, 12); }
+}
+function drawDecor(g, o) {
+  const x = o.x, y = o.y, v = o.v || 0;
+  g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, x + 14, y + 18, 13, 4);
+  switch (o.kind) {
+    case 'crates': [[2, 6, 12], [13, 8, 11], [7, -3, 10]].forEach(([dx, dy, s]) => { g.fillStyle = '#9a7040'; g.fillRect(x + dx, y + dy, s, s); g.strokeStyle = '#5a3a1e'; g.lineWidth = 1; g.strokeRect(x + dx + .5, y + dy + .5, s - 1, s - 1); g.beginPath(); g.moveTo(x + dx, y + dy); g.lineTo(x + dx + s, y + dy + s); g.stroke(); }); break;
+    case 'barrels': [[7, 8], [18, 10], [12, 1]].forEach(([dx, dy]) => { g.fillStyle = '#7a4a24'; ell(g, x + dx, y + dy + 3, 5.5, 6.5); g.fillStyle = '#9a6030'; ell(g, x + dx, y + dy - 2, 5, 2.5); g.strokeStyle = '#3a2412'; g.lineWidth = 1; g.beginPath(); g.moveTo(x + dx - 5.5, y + dy + 1); g.lineTo(x + dx + 5.5, y + dy + 1); g.moveTo(x + dx - 5.5, y + dy + 6); g.lineTo(x + dx + 5.5, y + dy + 6); g.stroke(); }); break;
+    case 'cart': g.fillStyle = '#8a6036'; g.fillRect(x + 2, y + 4, 20, 10); g.strokeStyle = '#5a3a1e'; g.lineWidth = 1.2; g.strokeRect(x + 2, y + 4, 20, 10); g.beginPath(); g.moveTo(x + 22, y + 9); g.lineTo(x + 30, y + 7); g.stroke(); g.fillStyle = '#4a2f18'; circ(g, x + 7, y + 15, 3.5); circ(g, x + 17, y + 15, 3.5); g.fillStyle = '#d8c090'; ell(g, x + 9, y + 3, 5, 3.5); ell(g, x + 16, y + 3, 4.5, 3.2); break;
+    case 'bench': g.fillStyle = '#7a5030'; g.fillRect(x + 1, y + 8, 26, 5); g.fillStyle = '#5a3a1e'; g.fillRect(x + 3, y + 13, 2.5, 5); g.fillRect(x + 22, y + 13, 2.5, 5); g.fillRect(x + 1, y + 3, 26, 3); break;
+    case 'planter': g.fillStyle = '#7a5030'; g.fillRect(x + 1, y + 8, 26, 9); g.fillStyle = '#4a7a3a'; ell(g, x + 14, y + 7, 13, 4.5); ['#e05a6a', '#ffd04a', '#c86ad0', '#ffffff'].forEach((c, i) => { g.fillStyle = c; circ(g, x + 5 + i * 6 + v * 2, y + 5 + (i % 2) * 2, 1.8); }); break;
+    case 'woodpile': for (let r = 0; r < 3; r++) for (let i = 0; i < 4 - r; i++) { g.fillStyle = '#8a6036'; circ(g, x + 6 + i * 6 + r * 3, y + 14 - r * 5, 3.2); g.fillStyle = '#c8a070'; circ(g, x + 6 + i * 6 + r * 3, y + 14 - r * 5, 1.6); } break;
+  }
+}
 function drawRuinTower(g, o, cx, cy, r) {
   const sd = Math.floor(o.x * .3 + o.y * .7), st = '#8a857c';
   g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, cx + 8, cy + 12, r + 4, r * .7);
@@ -5410,6 +5884,8 @@ function drawHuman(g, x, y, face, L, o) {
   g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 1; g.stroke();
   if (L.mail) { g.fillStyle = 'rgba(0,0,0,.18)'; for (let i = -8; i <= 8; i += 3) circ(g, -2 + (i % 2), i, .7); }
   if (L.tabard) { g.fillStyle = L.tabard; rrect(g, -5.5, -4.5, 11, 9, 2); g.fill(); }
+  if (L.apron) { g.fillStyle = L.apron; rrect(g, -1, -6.5, 8.5, 13, 2.5); g.fill(); g.strokeStyle = 'rgba(0,0,0,.18)'; g.lineWidth = .8; g.stroke(); }
+  if (L.lute) { g.fillStyle = '#b8783a'; ell(g, 5, 6.5, 4.8, 3.4); g.fillStyle = '#3a2410'; circ(g, 5, 6.5, 1.2); g.fillStyle = '#6a4422'; g.fillRect(8, 5.8, 9, 1.5); }
   if (L.pauld) { g.fillStyle = L.shiny ? '#e8ecf0' : '#8a8e94'; circ(g, 0, -10, 4.2); circ(g, 0, 10, 4.2); }
   // weapon arm
   const hx = 3, hy = 10.5;
@@ -6156,7 +6632,7 @@ function drawOverlays(g, e, t) {
     g.fillStyle = 'rgba(0,0,0,.65)'; g.fillRect(e.x - w / 2 - 1, top - 1, w + 2, 6);
     g.fillStyle = hostileP ? (f > .5 ? '#d8403a' : '#ff6a3a') : e.ally || e.role === 'traveler' ? '#5ab0e0' : '#b8b090'; g.fillRect(e.x - w / 2, top, w * f, 4);
   }
-  if ((e.kind === 'leader' || e.kind === 'knight' || e.boss || e.named || (e.role && e.role !== 'citizen')) && near < 260) {
+  if ((e.kind === 'leader' || e.kind === 'knight' || e.boss || e.named || (e.role && e.role !== 'citizen' && e.role !== 'townsfolk' && e.role !== 'child')) && (CITY_ROLES[e.role] ? e === nearCityNpc() : near < 260)) {
     g.font = `${e.role ? 'italic ' : ''}11px "EB Garamond", Georgia, serif`; g.textAlign = 'center';
     const nm = e.kind === 'knight' && e.k != null ? `Knight of ${KDATA[e.k].name}` : e.name;
     g.lineWidth = 3; g.strokeStyle = 'rgba(0,0,0,.8)'; g.strokeText(nm, e.x, top - 5); g.fillStyle = hostileP ? '#ffb0a0' : e.role === 'ruler' ? '#ffd76a' : '#f0e6cc'; g.fillText(nm, e.x, top - 5);
@@ -6273,7 +6749,7 @@ function renderWorld(t) {
       if (playing) light(P.x, P.y, 190, .85);
       for (const e of ents) if (e.burn > 0 && !e.dead) light(e.x, e.y, 110, .8);
       for (const p of projs) if (p.arrow === 'fire_arrow' && (!p.stuck || p.life > 1)) light(p.x, p.y, 70, .7);
-      for (const it of list) { const o = it.o; if (!o) continue; if (o.k === 'campfire') light(o.x + 16, o.y + 14, 210 + Math.sin(t * 9) * 8, 1); else if (o.k === 'house' || o.k === 'barracks' || o.k === 'smithy' || o.k === 'chapel' || o.k === 'stable' || o.k === 'hut') light(o.x + o.w / 2, o.y + o.h, 80, .7); else if (o.k === 'keep') light(o.x + o.w / 2, o.y + o.h, 200, .8); else if (o.k === 'tower' || o.k === 'wtower' || o.k === 'bannerpole') light(o.x + o.w / 2, o.y + o.h / 2, 110, .6); else if (o.k === 'hidden' && (o.kind === 'grove' || o.kind === 'shrine')) light(o.x + o.w / 2, o.y + o.h / 2, 160, .8); else if (o.k === 'torch') light(o.x + 8, o.y + 6, 200 + Math.sin(t * 9 + o.x) * 8, 1); else if (o.k === 'crystal') light(o.x + 14, o.y + 18, 150, .8); else if (o.k === 'dexit') light(o.x + 18, o.y + 10, 170, .9); else if (o.k === 'dentrance' && o.theme !== 'crypt') light(o.x + o.w / 2 - (o.theme === 'cave' ? 30 : 0), o.y + o.h - 16, o.theme === 'ice' ? 120 : 80, .6); }
+      for (const it of list) { const o = it.o; if (!o) continue; if (o.k === 'campfire') light(o.x + 16, o.y + 14, 210 + Math.sin(t * 9) * 8, 1); else if (o.k === 'lamp') light(o.x + 10, o.y - 22, 150, .95); else if (o.k === 'cathedral') light(o.x + o.w / 2, o.y + o.h - 30, 260, .85); else if (o.k === 'fountain') light(o.x + o.w / 2, o.y + o.h / 2, 90, .4); else if (o.k === 'house' || o.k === 'barracks' || o.k === 'smithy' || o.k === 'chapel' || o.k === 'stable' || o.k === 'hut') light(o.x + o.w / 2, o.y + o.h, 80, .7); else if (o.k === 'keep') light(o.x + o.w / 2, o.y + o.h, 200, .8); else if (o.k === 'tower' || o.k === 'wtower' || o.k === 'bannerpole') light(o.x + o.w / 2, o.y + o.h / 2, 110, .6); else if (o.k === 'hidden' && (o.kind === 'grove' || o.kind === 'shrine')) light(o.x + o.w / 2, o.y + o.h / 2, 160, .8); else if (o.k === 'torch') light(o.x + 8, o.y + 6, 200 + Math.sin(t * 9 + o.x) * 8, 1); else if (o.k === 'crystal') light(o.x + 14, o.y + 18, 150, .8); else if (o.k === 'dexit') light(o.x + 18, o.y + 10, 170, .9); else if (o.k === 'dentrance' && o.theme !== 'crypt') light(o.x + o.w / 2 - (o.theme === 'cave' ? 30 : 0), o.y + o.h - 16, o.theme === 'ice' ? 120 : 80, .6); }
     }
     ctx.drawImage(lightCv, 0, 0, VW, VH);
     if (settings.quality !== 'low') {
