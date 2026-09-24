@@ -1115,7 +1115,7 @@ const SND = {
     let best = null, br = 1;
     for (const p of W.places) { const R = PLACE_R[p.type] * TS, d = dist(P.x, P.y, p.x, p.y); if (d < R && d / R < br) { br = d / R; best = p; } }
     if (best) switch (best.type) {
-      case 'castle': return 'castle_' + best.owner;
+      case 'castle': return G.festival && best.city ? 'festival' : 'castle_' + best.owner;
       case 'village': return 'town_' + best.owner;
       case 'outpost': return 'fort_' + best.owner;
       case 'camp': if (!best.cleared) return 'camp'; break;
@@ -1363,6 +1363,7 @@ const SONGS = {
   frost: { title: 'The Frozen Reaches', vol: 3.4, root: 49, mode: 'aeo', bpm: 68, prog: [0, 5, 3, 4, 0, 5, 6, 0], seed: 371, lead: { i: 'flute', o: 0, r: R_SPARSE, alt: { i: 'bell', o: 12 } }, arp: { i: 'bell', p: '0...2...', v: .04 }, pad: { i: 'hum', v: .03 }, drone: { n: [0, 7], o: -12, v: .04, t: 'triangle' }, bass: { p: '0.......', d: 8 } },
   frost_night: { title: 'White Silence', vol: 4, root: 44, mode: 'aeo', mel: 'mpent', bpm: 56, prog: [0, 0, 5, 5, 6, 6, 4, 4], seed: 381, lead: { i: 'bell', o: 0, r: R_LONG, v: .1 }, pad: { i: 'hum', v: .035 }, arp: { i: 'harp', p: '0.......', v: .045 }, drone: { n: [0], v: .04, t: 'triangle' } },
   cave: { title: 'Into the Deep', vol: 3.8, root: 45, mode: 'phr', bpm: 58, prog: [0, 1, 0, 6, 0, 1, 5, 0], seed: 391, lead: { i: 'bell', o: 0, r: R_SPARSE, v: .09 }, pad: { i: 'hum', v: .035 }, drone: { n: [0, 7], o: -12, v: .05, t: 'triangle' }, arp: { i: 'harp', p: '0.......', v: .04 } },
+  festival: { title: 'Fair Day', root: 53, mode: 'ion', bpm: 128, prog: [0, 4, 5, 3, 0, 4, 3, 4], seed: 601, lead: { i: 'recorder', r: R_FOLK, alt: { i: 'fiddle', o: 0 } }, arp: { i: 'lute', p: '0.2.1.2.' }, bass: { p: '0.4.0.4.' }, drums: { b: 'x...x...', t: '..x..xx.' } },
   tavern: { title: 'The Merry Tankard', root: 50, mode: 'mix', bpm: 132, prog: [0, 6, 3, 4, 0, 6, 4, 0], seed: 571, lead: { i: 'fiddle', r: R_FOLK, alt: { i: 'flute', o: 0 } }, arp: { i: 'lute', p: '0.2.1.2.' }, bass: { p: '0.4.0.4.' }, drums: { b: 'x..x..x.', t: '..x..x.x' } },
   cathedral: { title: 'Vespers', vol: 3.4, root: 45, mode: 'dor', bpm: 54, prog: [0, 3, 5, 4, 0, 5, 3, 4], seed: 587, lead: { i: 'choir', o: 0, r: R_LONG, v: .12 }, pad: { i: 'organ', v: .035 }, counter: { i: 'bell', o: 0, r: R_LONG, v: .035 }, drone: { n: [0, 7], o: -12, v: .04, t: 'triangle' } },
   crypt: { title: 'The Silent Tombs', vol: 3.8, root: 43, mode: 'hmin', bpm: 52, prog: [0, 0, 5, 5, 3, 3, 4, 4], seed: 401, lead: { i: 'hum', o: 0, r: R_LONG, v: .12 }, counter: { i: 'bell', o: 0, r: R_LONG, v: .04 }, drone: { n: [0], o: -12, v: .06, t: 'triangle' }, pad: { i: 'organ', v: .02 } },
@@ -1528,6 +1529,16 @@ const ITEMS = {
   honey_cake: { name: 'Honey Cake', type: 'misc', heal: 30, st: 40, val: 12, stack: 1, food: 1, desc: 'Sticky and sweet. Restores 30 health and 40 stamina. [1]' },
   ale: { name: 'Mug of Ale', type: 'misc', heal: 8, st: 60, val: 3, stack: 1, food: 1, desc: 'Frothy and strong. Restores 8 health and 60 stamina. [1]' },
   flowers: { name: 'Posy of Flowers', type: 'misc', val: 4, stack: 1, desc: 'Bright blooms from a city flower seller. Someone might appreciate them.' },
+  silver_ring: { name: 'Silver Ring', type: 'misc', val: 40, stolen: 1, desc: 'Lifted from a stranger. Only a fence will buy it.' },
+  gold_locket: { name: 'Gold Locket', type: 'misc', val: 70, stolen: 1, desc: 'Someone\'s keepsake, still warm. Only a fence will buy it.' },
+  jeweled_brooch: { name: 'Jeweled Brooch', type: 'misc', val: 120, stolen: 1, desc: 'A noble\'s brooch. Only a fence will buy it.' },
+  merchant_ledger: { name: "Merchant's Ledger", type: 'misc', val: 0, stolen: 1, desc: 'Columns of numbers that someone would kill to keep secret.' },
+  contraband: { name: 'Sealed Crate', type: 'misc', val: 0, stolen: 1, desc: 'Heavy, and something inside clinks. Do not open it.' },
+  shadow_cloak: { name: 'Guild Cloak', type: 'misc', val: 60, desc: 'The thieves\' guild\'s grey cloak. While you carry it, pockets are easier to pick.' },
+  garland: { name: 'Spring Garland', type: 'misc', val: 25, desc: 'A crown of spring flowers from the fair. It never seems to wilt.' },
+  harvest_charm: { name: 'Harvest Charm', type: 'misc', val: 25, desc: 'Wheat braided into a knot, for luck in the lean months.' },
+  solstice_lantern: { name: 'Solstice Lantern', type: 'misc', val: 30, desc: 'A paper lantern from the longest night. It glows faintly in the dark.' },
+  cider: { name: 'Mulled Cider', type: 'misc', heal: 14, st: 50, val: 4, stack: 1, food: 1, desc: 'Hot, spiced and sweet. Restores 14 health and 50 stamina. [1]' },
   bandage: { name: 'Bandage', type: 'misc', heal: 15, val: 6, stack: 1, band: 1, desc: 'Restores 15 health. [3]' },
   iron: { name: 'Iron Ingots', type: 'misc', good: 1, val: 30, stack: 1, desc: 'Trade good. Albion mines it; Eldoria pays well.' },
   wine: { name: 'Valorian Wine', type: 'misc', good: 1, val: 28, stack: 1, desc: 'Trade good. Valoria presses it; Draven craves it.' },
@@ -2802,6 +2813,7 @@ function damage(t, amt, src, o = {}) {
     return a;
   }
   if (t.important || t.kind === 'horse') return 0;
+  if (t.dummy && t.fest && G.contest && G.contest.kind === 'archery' && o.proj && src === P) { G.contest.hits++; toast(`Hit! (${G.contest.hits})`, 'good'); }
   if (t.dummy) { if (settings.dmgNums) addText(t.x + rand(-8, 8), t.y - 30, Math.round(amt) + (o.crit ? '!' : ''), o.crit ? '#ffd24a' : '#fff4e0', o.crit ? 19 : 14); t.flash = .15; SND.play('hit', .7); for (let i = 0; i < 5; i++) addPart(t.x, t.y - 12, rand(-70, 70), rand(-90, 10), '#d8b050', .4, 2.5, 200); if (G.tut && src === P) { if (o.proj && t.isTarget) G.tut.arrows++; else if (!o.proj && !t.isTarget) G.tut.hits++; } return amt; } // straw never dies
   const wasHostile = src === P ? playerHostileTo(t) : true;
   if (src === P) t.lastHitProj = !!o.proj;
@@ -2832,12 +2844,13 @@ function damage(t, amt, src, o = {}) {
 function alertPlace(pid, tg) { ents.forEach(e => { if (e.place === pid && !e.civ && !e.dead && !e.target && hostile(e, tg) && dist(e.x, e.y, tg.x, tg.y) < 700) e.target = tg; }); }
 function crime(t) {
   if (t.faction === 'wild') { t.aggroPlayer = true; return; }
+  if (t.criminal || t.dummy) return;
   if (t.civ) {
-    const k = ownerAtPx(t.x, t.y); addRep(k, -12, 'Assaulted a civilian'); aggroNearby(k, 700); return;
+    const k = ownerAtPx(t.x, t.y); addRep(k, -12, 'Assaulted a civilian'); addBounty(k, 40, 'Assaulting a citizen'); aggroNearby(k, 700); return;
   }
   if (t.faction[0] === 'k') {
     if (!t.aggroPlayer) {
-      addRep(t.k, -10, `Attacked soldiers of ${KDATA[t.k].name}`);
+      addRep(t.k, -10, `Attacked soldiers of ${KDATA[t.k].name}`); addBounty(t.k, 60, `Attacking the ${KDATA[t.k].name} guard`);
       for (let j = 0; j < 4; j++) if (j !== t.k && getRel(t.k, j) <= -50) addRep(j, 3, `Struck at their enemy, ${KDATA[t.k].name}`, true);
     }
     aggroNearby(t.k, 750);
@@ -2849,6 +2862,8 @@ function kill(t, src) {
   SND.play(t.faction === 'hollow' ? 'bones' : 'death');
   for (let i = 0; i < 14 * QMUL(); i++) addPart(t.x, t.y, rand(-140, 140), rand(-160, 40), '#8a1a12', rand(.4, .9), 3, 260);
   const byP = src === P || (src && src.ally);
+  if (t.loot) dropGold(t.x, t.y, t.loot);
+  if (src === P && !t.criminal && !G.tut) { if (t.civ && t.faction !== 'wild') addBounty(ownerAtPx(t.x, t.y), 120, 'Murder'); else if (t.faction && t.faction[0] === 'k' && !t.aggroPlayer && !t.party) addBounty(t.k, 100, `Killing a soldier of ${KDATA[t.k].name}`); }
   if (byP) { gainXP(t.xp); G.kills++; G.stats.kills[t.kind] = (G.stats.kills[t.kind] || 0) + 1; if (t.lastHitProj) G.stats.bowKills++; if ((t.boss || t.dboss) && t.name && !t.tourney && !t.tut) addTrophy(t.name, t.kind, t.x, t.y); }
   // loot
   const b = ATYPES[t.kind];
@@ -3235,7 +3250,14 @@ function addRep(k, v, reason, silent) {
 }
 const repMul = k => clamp(1 - K.rep[k] / 250, .6, 1.4);
 function repTitle(k) { const r = K.rep[k]; if (P.allegiance === k) return r >= 80 ? 'Lord Protector' : r >= 55 ? 'Knight Captain' : 'Sworn Knight'; return r >= 60 ? 'Honored' : r >= 25 ? 'Respected' : r > -25 ? 'Stranger' : r > -40 ? 'Distrusted' : 'Outlaw'; }
-function territoryOf(k) { return Math.round(W.landCount[k] * .25); }
+function territoryOf(k) { return Math.round(((G.under && G.over ? G.over.W : W).landCount || [0, 0, 0, 0])[k] * .25); }
+/* Menus that read the world (diplomacy, the map) still work indoors and underground: point at the overworld while they draw,
+   with the knight standing at the door they came in by. */
+function withOverworld(fn) {
+  if (!G.under || !G.over) return fn();
+  const w0 = W, n0 = WW, px = P.x, py = P.y; W = G.over.W; setWorldSize(W.size); P.x = G.over.px; P.y = G.over.py;
+  try { return fn(); } finally { W = w0; setWorldSize(n0); P.x = px; P.y = py; }
+}
 function holdings(k) { return { v: W.places.filter(p => p.type === 'village' && p.owner === k).length, f: W.places.filter(p => p.type === 'outpost' && p.owner === k).length }; }
 
 const INCIDENTS = {
@@ -3362,21 +3384,186 @@ const CITY_ROLES = { dicer: 1, cityshop: 1, innkeeper: 1, hotelier: 1, priest: 1
 let _ncT = -1, _ncE = null; // the one tradesperson whose name shows, so a busy market doesn't pile up labels
 function nearCityNpc() { if (_ncT !== G.time) { _ncT = G.time; _ncE = null; let bd = 120; for (const x of ents) if (CITY_ROLES[x.role] && !x.dead) { const d = dist(P.x, P.y, x.x, x.y); if (d < bd) { bd = d; _ncE = x; } } } return _ncE; }
 const skinTone = () => pick(['#f0d0b0', '#e0b48a', '#c8986a', '#a8744a', '#7a5234']);
+function cityPeriod() { const t = tod(); return t < .23 || t >= .8 ? 'night' : t < .3 ? 'dawn' : t < .72 ? 'day' : 'dusk'; }
+const cityOpen = () => { const p2 = cityPeriod(); return p2 === 'day' || p2 === 'dawn'; };
 function spawnCity(pl) {
-  const C = pl.city, k = pl.owner, kc = KDATA[k].color;
-  const npc = (x, y, o) => { const f = findFree(x, y); return mkActor('npc', f.x, f.y, Object.assign({ place: pl.id, k, stand: true, standFace: Math.PI / 2 }, o)); };
+  const C = pl.city, k = pl.owner, kc = KDATA[k].color, open = cityOpen(); pl.cityPer = cityPeriod(); pl.cityFest = G.festival || null;
+  const npc = (x, y, o) => { const f = findFree(x, y); return mkActor('npc', f.x, f.y, Object.assign({ place: pl.id, k, stand: true, standFace: Math.PI / 2, cityNpc: true }, o)); };
   const trade = (kind, x, y, shopName) => { const S = CITY_SHOPS[kind]; npc(x, y, { role: kind === 'tavern' ? 'innkeeper' : kind === 'inn' ? 'hotelier' : 'cityshop', skind: kind, shopName, name: `${pick(NAMES.first)} the ${S.who}`, _look: { body: S.col, head: kind === 'baker' || kind === 'tavern' ? 'cap' : 'hair', hair: pick(['#3a2a1a', '#6a4a2a', '#a8884a', '#d8d8d0']), skin: skinTone(), apron: kind === 'baker' || kind === 'butcher' || kind === 'tavern' || kind === 'grocer' || kind === 'inn' ? '#efe8d8' : null } }); };
-  C.shops.forEach(s => { if (!INDOOR_SHOPS.includes(s.kind)) trade(s.kind, s.x, s.y, s.name); });
-  C.stalls.forEach(s => trade(s.kind, s.x, s.y, CITY_SHOPS[s.kind].n));
+  if (open) { C.shops.forEach(s => { if (!INDOOR_SHOPS.includes(s.kind)) trade(s.kind, s.x, s.y, s.name); }); C.stalls.forEach(s => trade(s.kind, s.x, s.y, CITY_SHOPS[s.kind].n)); }
   if (C.cath) {
     npc(C.cath.x - 60, C.cath.y + 22, { role: 'beggar', name: 'A beggar', standFace: -Math.PI / 2, _look: { body: '#6a5a48', head: 'hood', hood: '#5a4a38', skin: skinTone() } });
   }
-  npc(C.plaza.x - 100, C.plaza.y + 36, { role: 'bard', name: `${pick(NAMES.first)} the Bard`, stand: false, wanderR: 60, home: { x: C.plaza.x - 100, y: C.plaza.y + 36 }, _look: { body: pick(['#c83a4a', '#3a6ac8', '#e8a030', '#5a9a4a']), head: 'cap', skin: skinTone(), cape: pick(['#e8c040', '#7a2a8a']), plume: '#f4f0e0', lute: 1 } });
-  npc(C.plaza.x + 124, C.plaza.y - 14, { role: 'crier', name: 'The Town Crier', _look: { body: kc, head: 'cap', skin: skinTone(), cape: KDATA[k].accent, tabard: KDATA[k].accent } });
-  const walk = (kind, o) => { const s = pick(C.streets); if (!s) return; const f = findFree(s.x, s.y); return mkActor(kind, f.x, f.y, Object.assign({ place: pl.id, k, home: { x: s.x, y: s.y }, wanderR: 260 }, o)); };
-  for (let i = 0; i < 22; i++) walk('villager', { role: 'townsfolk', noble: chance(.2) });
-  for (let i = 0; i < 5; i++) walk('villager', { role: 'child', scale: .7, wanderR: 180, spd: 115 });
-  for (let i = 0; i < 3; i++) walk('soldier', { wanderR: 480 });
+  if (open) npc(C.plaza.x - 100, C.plaza.y + 36, { role: 'bard', name: `${pick(NAMES.first)} the Bard`, stand: false, wanderR: 60, home: { x: C.plaza.x - 100, y: C.plaza.y + 36 }, _look: { body: pick(['#c83a4a', '#3a6ac8', '#e8a030', '#5a9a4a']), head: 'cap', skin: skinTone(), cape: pick(['#e8c040', '#7a2a8a']), plume: '#f4f0e0', lute: 1 } });
+  if (open) npc(C.plaza.x + 124, C.plaza.y - 14, { role: 'crier', name: 'The Town Crier', _look: { body: kc, head: 'cap', skin: skinTone(), cape: KDATA[k].accent, tabard: KDATA[k].accent } });
+  const walk = (kind, o) => { const s = pick(C.streets); if (!s) return; const f = findFree(s.x, s.y); return mkActor(kind, f.x, f.y, Object.assign({ place: pl.id, k, home: { x: s.x, y: s.y }, wanderR: 260, cityNpc: true }, o)); };
+  if (open) {
+    for (let i = 0; i < 22; i++) walk('villager', { role: 'townsfolk', noble: chance(.2) });
+    for (let i = 0; i < 5; i++) walk('villager', { role: 'child', scale: .7, wanderR: 180, spd: 115 });
+    for (let i = 0; i < 3; i++) walk('soldier', { wanderR: 480 });
+    if (G.festival) spawnFestival(pl, npc, walk);
+  } else { // after dark: a few late walkers, the night watch with torches, and cutpurses
+    for (let i = 0; i < 5; i++) walk('villager', { role: 'townsfolk', drunk: chance(.5), wanderR: 200 });
+    for (let i = 0; i < 3; i++) walk('soldier', { wanderR: 520, torch: true, name: 'Night watchman' });
+    for (let i = 0; i < 2; i++) walk('villager', { role: 'thief', name: 'Shady figure', wanderR: 320, spd: 105, _look: { body: '#3a3a44', head: 'hood', hood: '#26262e', skin: skinTone() } });
+  }
+}
+/* the city changes with the hour: shops shut at dusk, the streets empty and the watch comes out */
+function cityTick() {
+  for (const pl of W.places) {
+    if (pl.type !== 'castle' || !pl.spawned || !pl.city) continue;
+    const per = cityPeriod(), wasOpen = pl.cityPer === 'day' || pl.cityPer === 'dawn', open = per === 'day' || per === 'dawn';
+    if (wasOpen !== open || (pl.cityFest || null) !== (G.festival || null)) { ents = ents.filter(e => !(e.cityNpc && e.place === pl.id && !e.follow)); spawnCity(pl); }
+    pl.cityPer = per;
+  }
+}
+/* ---------------- Crime and justice ---------------- */
+function addBounty(k, n, why) {
+  if (k == null || !KDATA[k] || K.rep[k] <= -40) return; G.bounty = G.bounty || [0, 0, 0, 0];
+  G.bounty[k] = Math.round((G.bounty[k] || 0) + n); toast(`<b>Crime:</b> ${why}. Your bounty in ${KDATA[k].name} is now <b>${G.bounty[k]} gold</b>.`, 'bad');
+}
+function stolenItems() { return P.inv.filter(it => ITEMS[it.id].stolen && !isEquipped(it.uid)); }
+function lawTick() {
+  if (G.under || dialogOpen || UI.stack.length || G.state !== 'play' || !G.bounty) return;
+  const k = ownerAtPx(P.x, P.y), b = G.bounty[k]; if (!b || b < 5 || K.rep[k] <= -40 || (G.arrestCd || 0) > G.time) return;
+  const g2 = ents.find(e => !e.dead && !e.aggroPlayer && e.target !== P && e.faction && e.faction[0] === 'k' && e.k === k && (e.kind === 'guard' || e.kind === 'soldier' || e.kind === 'knight') && !e.party && !e.perch && dist(e.x, e.y, P.x, P.y) < 200);
+  if (!g2) return; if (!g2.halt) { g2.halt = G.time; g2.say = { text: pick(['Halt! In the name of the crown!', 'Stop right there, criminal!', 'You! Stay where you are!']), t: 2.5 }; return; }
+  if (G.time - g2.halt < 1.2) return; g2.halt = 0; arrestDialog(g2, k);
+}
+function arrestDialog(e, k) {
+  const b = G.bounty[k], days = clamp(Math.ceil(b / 150), 1, 3), loot = stolenItems();
+  openDialog({ name: e.kind === 'knight' ? `Knight of ${KDATA[k].name}` : `${KDATA[k].name} guard`, role: 'The law of the crown', portrait: e, text: `You have committed crimes against ${KDATA[k].full}. Your bounty is <b>${b} gold</b>.${loot.length ? ' And what is that in your pack? Stolen goods, by the look of it.' : ''} Pay the fine, or come quietly.`, options: [
+    { t: `<span class="dn">PAY</span>Pay the fine (${b} gold)${loot.length ? ', and hand over the stolen goods' : ''}`, dis: P.gold < b, fn: () => { P.gold -= b; G.bounty[k] = 0; loot.forEach(it => removeItem(it.uid, it.n || 1)); G.arrestCd = G.time + 30; SND.play('coin'); closeDialog(); toast(`You pay ${b} gold. Your record in ${KDATA[k].name} is clean.`, 'good'); } },
+    { t: `<span class="dn">JAIL</span>Go quietly (${days} day${days > 1 ? 's' : ''} in the cells)`, fn: () => goToJail(k, days) },
+    { t: '<span class="dn">RESIST</span>Draw your sword', fn: () => { closeDialog(); addBounty(k, 50, 'Resisting arrest'); aggroNearby(k, 700); e.aggroPlayer = true; e.target = P; G.arrestCd = G.time + 90; } },
+  ] });
+}
+function goToJail(k, days) {
+  closeDialog(); if (G.under) leaveDungeon(true);
+  const loot = stolenItems(); loot.forEach(it => removeItem(it.uid, it.n || 1));
+  const lostXp = Math.min(P.xp, Math.round(xpNeed(P.lvl) * .12 * days)); P.xp -= lostXp;
+  G.time += days * DAYLEN; G.bounty[k] = 0; G.arrestCd = G.time + 60; P.hp = Math.max(P.hp, Math.round(P.maxHp * .8)); P.st = P.maxSt; P.mounted = false;
+  const c = W.places.find(p => p.type === 'castle' && p.owner === k) || W.places[k]; const f = findFree(c.x, c.y + 12 * TS); P.x = f.x; P.y = f.y; cam.x = P.x; cam.y = P.y;
+  ents.forEach(e => { if (e.target === P) { e.target = null; e.aggroPlayer = false; } });
+  openDialog({ name: 'The Cells', role: KDATA[k].castle, portrait: 'grave', text: `${days} day${days > 1 ? 's' : ''} of cold stone, thin gruel and a snoring cellmate. The gaoler finally swings the door open.${loot.length ? ' Your stolen goods stay with the crown.' : ''}${lostXp ? ` You feel rusty (−${lostXp} XP).` : ''}`, options: [{ t: 'Walk free', fn: closeDialog }] });
+}
+function canPickpocket(e) { if (!['townsfolk', 'patron', 'guest', 'customer', 'worshipper'].includes(e.role) || e.robbed) return false; const a = Math.atan2(P.y - e.y, P.x - e.x); return Math.abs(angDiff(e.face, a)) > 1.9; }
+function pickpocket(e, k) {
+  e.robbed = true; const ch = .5 + (isNight() ? .15 : 0) + (countItem('shadow_cloak') ? .15 : 0) - (e.noble ? .1 : 0);
+  if (Math.random() < ch) {
+    const gold = e.noble ? randi(25, 70) : randi(4, 20); P.gold += gold; SND.play('coin'); let extra = '';
+    if (chance(e.noble ? .45 : .2)) { const id = pick(e.noble ? ['gold_locket', 'jeweled_brooch', 'silver_ring'] : ['silver_ring', 'silver_ring', 'gold_locket']); addItem(id, 1, 1, true); extra = ` and a <b>${ITEMS[id].name}</b>`; }
+    G.stats.picks = (G.stats.picks || 0) + 1; if (P.guild && P.guild.stage === 1) P.guild.picks = (P.guild.picks || 0) + 1;
+    toast(`You lift <b>${gold} gold</b>${extra} without a sound.`, 'gold');
+  } else { e.say = { text: 'Thief! THIEF!', t: 3 }; e.flee = 4; e.fleeFrom = P; SND.play('fail'); addBounty(k, 50, 'Pickpocketing'); }
+}
+/* ---------------- Night thieves bump into you and run ---------------- */
+function thiefTick() {
+  if (G.under || G.state !== 'play') return;
+  for (const e of ents) {
+    if (e.role !== 'thief' || e.dead || e.stole || dist(e.x, e.y, P.x, P.y) > 40 || !P.gold) continue;
+    const n = Math.min(P.gold, randi(8, 35)); P.gold -= n; e.loot = n; e.stole = true;
+    Object.assign(e, { faction: 'bandit', civ: false, criminal: true, role: null, aggro: 0, flee: 45, fleeFrom: P, name: 'Cutpurse', spd: 150 }); e.say = { text: 'Heh!', t: 2 };
+    toast(`A cutpurse snatched <b>${n} gold</b>! Catch them!`, 'bad'); SND.play('coin');
+  }
+}
+/* ---------------- The thieves' guild ---------------- */
+function guildQuest(title, obj, loc, extra) { Q.active = Q.active.filter(q => q.type !== 'guild'); const q = Object.assign({ id: Q.next++, type: 'guild', title, obj, desc: obj, loc, giverName: 'The hooded figure', reward: { gold: 0, xp: 0, rep: {}, rel: [], items: [] }, started: G.time }, extra || {}); Q.active.push(q); Q.tracked = q.id; toast(`<b>Guild job:</b> ${esc(title)}`, 'gold'); SND.play('quest'); return q; }
+function guildDone(msg, gold, xp) { Q.active = Q.active.filter(q => q.type !== 'guild'); if (gold) { P.gold += gold; SND.play('coin'); } if (xp) gainXP(xp); toast(`<b>Guild job done.</b> ${msg}${gold ? ` +${gold} gold` : ''}`, 'gold'); }
+function guildDialog(e) {
+  const G2 = P.guild || (P.guild = { stage: 0 }), who = { name: 'A hooded figure', role: 'Keeps to the shadows', portrait: e };
+  if (G2.stage === 6) { e.say = { text: 'I don\'t know you.', t: 2 }; return; }
+  const say = (text, opts) => openDialog(Object.assign({}, who, { text, options: opts.concat([{ t: 'Leave', fn: closeDialog }]) }));
+  if (G2.stage === 0) return say('Honest work never paid anyone\'s rent in this city. If you want real coin, prove your fingers are quick. Lift three purses, from anyone, in any city. Come back when it is done.', [{ t: '<span class="dn">JOIN</span>I\'m listening.', fn: () => { G2.stage = 1; G2.picks = 0; closeDialog(); guildQuest('The Lightest Fingers', 'Pick 3 pockets in any city (stand behind someone and interact)', null); } }]);
+  if (G2.stage === 1) { if ((G2.picks || 0) < 3) return say(`${G2.picks || 0} of 3 so far. Behind them, never in front.`, []); const c = W.places.filter(p => p.type === 'castle' && p.city && p.city.cath && p.id !== (e.place ?? -1)).sort((a, b) => dist(P.x, P.y, a.x, a.y) - dist(P.x, P.y, b.x, b.y))[0] || W.places.find(p => p.type === 'castle' && p.city && p.city.cath); G2.stage = 2; G2.target = c.id; guildDone('Nicely done.', 60, 80); addItem('contraband', 1, 1, true); return say(`Not bad. Now, this crate needs to reach our friend in ${c.name}: the beggar who sits by the cathedral. The watch will not ask questions if you don\'t give them a reason to.`, [{ t: 'Consider it done.', fn: () => { closeDialog(); guildQuest('Contraband', `Deliver the sealed crate to the beggar at the cathedral in ${c.name}`, { x: c.city.cath.x - 60, y: c.city.cath.y + 22 }); } }]); }
+  if (G2.stage === 2) return say('The crate. The beggar. The cathedral. Go.', []);
+  if (G2.stage === 3) { if (!countItem('merchant_ledger')) return say('A merchant has been cooking his books, and we want the proof. Wait for dark, pick the lock of any closed bakery, apothecary or jeweller, and bring me the ledger from the strongbox inside.', []); removeItemById('merchant_ledger'); G2.stage = 4; addItem('shadow_cloak', 1, 1, true); guildDone('The guild cloak is yours, and our fence will buy what the shops won\'t.', 250, 160); return say('Oh, this is juicy. You have earned the cloak, and a word with our fence. One last job, the big one. The crown\'s tax wagon leaves the capital tomorrow, lightly guarded. Or… you could run to the captain and sell us out. I would think very carefully about that.', [{ t: '<span class="dn">ROB</span>Let\'s take the crown\'s gold.', fn: () => { closeDialog(); startWagonJob(); } }, { t: 'Let me think about it.', fn: closeDialog }]); }
+  if (G2.stage === 4) return say('The wagon, knight. Or have you lost your nerve?', [{ t: '<span class="dn">ROB</span>Tell me where the wagon is.', fn: () => { closeDialog(); startWagonJob(); } }, { t: '<span class="dn">FENCE</span>Show me what the fence will buy', fn: () => { closeDialog(); const f = { role: 'cityshop', skind: 'fence', shopName: 'The Fence', place: e.place, k: e.k }; const s2 = getShop(f); s2.fence = true; openShop(s2, f); } }]);
+  if (G2.stage === 5) return say('The guild remembers its friends. Our fence is always open to you.', [{ t: '<span class="dn">FENCE</span>Sell stolen goods', fn: () => { closeDialog(); const f = { role: 'cityshop', skind: 'fence', shopName: 'The Fence', place: e.place, k: e.k }; const s2 = getShop(f); s2.fence = true; openShop(s2, f); } }]);
+}
+function startWagonJob() {
+  const c = W.places.find(p => p.type === 'castle' && p.city && p.owner === (ownerAtPx(P.x, P.y))) || W.places[0];
+  let spot = null; for (let r = 30; r < 44 && !spot; r++) for (let a = 0; a < TAU && !spot; a += .2) { const tx = Math.round(c.tx + Math.cos(a) * r), ty = Math.round(c.ty + Math.sin(a) * r); if (terAt(tx, ty) === T.ROAD) spot = { x: tx * TS + 16, y: ty * TS + 16 }; }
+  spot = spot || { x: c.x + 36 * TS, y: c.y }; P.guild.stage = 4; P.guild.wk = c.owner;
+  guildQuest("The Crown's Gold", `Waylay the tax wagon on the road outside ${c.name}`, spot, { wagon: true });
+}
+function guildTick() {
+  const q = Q.active.find(x => x.type === 'guild'); if (!q) return;
+  if (q.title === 'The Lightest Fingers') q.obj = `Pick 3 pockets in any city (${Math.min(3, (P.guild && P.guild.picks) || 0)}/3). Stand behind someone and interact.`;
+  if (q.wagon && q.loc && !G.under) {
+    if (!q.spawned && dist(P.x, P.y, q.loc.x, q.loc.y) < 900) { q.spawned = true; const k = P.guild.wk; q.guards = []; for (let i = 0; i < 4; i++) { const f = findFree(q.loc.x + rand(-70, 70), q.loc.y + rand(-50, 50)); q.guards.push(mkActor(i ? 'soldier' : 'knight', f.x, f.y, { k, quest: q.id, leash: 700, home: { x: q.loc.x, y: q.loc.y } })); } const f2 = findFree(q.loc.x, q.loc.y); q.cart = mkActor('npc', f2.x, f2.y, { role: 'taxcart', name: 'Tax wagon', k, stand: true, cart: true, quest: q.id }); }
+    if (q.spawned && q.guards.every(g3 => g3.dead) && dist(P.x, P.y, q.loc.x, q.loc.y) < 200) { if (q.cart) removeEnt(q.cart); addBounty(P.guild.wk, 300, 'Robbing the crown'); P.guild.stage = 5; guildDone('The crown\'s gold is yours, and the guild calls you friend.', 900, 400); addTrophy("The Crown's Tax Chest", 'tourney', q.loc.x, q.loc.y); }
+  }
+}
+/* ---------------- Festivals: a spring fair, a harvest market and the winter solstice ---------------- */
+const FEST = {
+  spring: { n: 'Spring Fair', game: 'archery contest', shop: 'fest_spring', col: '#e86a9a' },
+  harvest: { n: 'Harvest Market', game: 'pie-eating contest', shop: 'fest_harvest', col: '#d8882a' },
+  solstice: { n: 'Solstice of Lanterns', game: 'strongman bell', shop: 'fest_solstice', col: '#4a6ac8' },
+};
+function festivalNow() { const d = (dayNum() - 1) % SEASON_DAYS; if (d !== 2 && d !== 3) return null; return ['spring', null, 'harvest', 'solstice'][curSeason]; }
+function festivalTick() { const f = festivalNow(); if (f !== (G.festival || null)) { G.festival = f; if (f) toast(`🎉 The <b>${FEST[f].n}</b> has begun in every royal city! Stalls, games and prizes in the plazas.`, 'gold'); } }
+function spawnFestival(pl, npc, walk) {
+  const C = pl.city, F = FEST[G.festival];
+  npc(C.plaza.x + 40, C.plaza.y + 110, { role: 'cityshop', skind: F.shop, shopName: F.n, name: `${pick(NAMES.first)} the ${CITY_SHOPS[F.shop].who}`, _look: { body: F.col, head: 'cap', skin: skinTone(), apron: '#efe8d8' } });
+  npc(C.plaza.x - 40, C.plaza.y + 150, { role: 'gamesmaster', name: 'The Games Master', _look: { body: F.col, head: 'cap', skin: skinTone(), cape: '#e8c040', plume: '#f4f0e0' } });
+  for (let i = 0; i < 8; i++) walk('villager', { role: 'townsfolk', wanderR: 160, home: { x: C.plaza.x + rand(-150, 150), y: C.plaza.y + rand(40, 220) } });
+}
+function festDeco(pl) { // decorations laid around the plaza, remembered per city and festival
+  if (pl._fd && pl._fd.f === G.festival) return pl._fd.list;
+  const C = pl.city, px = C.plaza.x, py = C.plaza.y, list = [], f = G.festival;
+  list.push({ k: 'bunting', x: px - 290, y: py - 56, w: 580 }, { k: 'bunting', x: px - 290, y: py + 90, w: 580 });
+  if (f === 'spring') { list.push({ k: 'maypole', x: px + 20, y: py + 190 }); for (let i = 0; i < 6; i++) list.push({ k: 'flowerpot', x: px - 250 + i * 100, y: py + 100 }); }
+  if (f === 'harvest') { for (let i = 0; i < 7; i++) list.push({ k: i % 2 ? 'hay' : 'pumpkins', x: px - 260 + i * 86, y: py + 100 }); list.push({ k: 'pumpkins', x: px + 120, y: py + 200 }); }
+  if (f === 'solstice') { list.push({ k: 'bonfire', x: px + 20, y: py + 200 }); for (let i = 0; i < 6; i++) list.push({ k: 'lanternpost', x: px - 250 + i * 100, y: py + 100 }); }
+  pl._fd = { f, list }; return list;
+}
+function drawFestDeco(g, d, t) {
+  const col = FEST[G.festival].col;
+  switch (d.k) {
+    case 'bunting': { g.strokeStyle = '#5a3a1e'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(d.x, d.y); g.quadraticCurveTo(d.x + d.w / 2, d.y + 30, d.x + d.w, d.y); g.stroke(); const n = Math.floor(d.w / 22); for (let i = 1; i < n; i++) { const u = i / n, x = d.x + d.w * u, y = d.y + 60 * u * (1 - u) + Math.sin(t * 2 + i) * 1; if (G.festival === 'solstice') { g.fillStyle = i % 2 ? '#ffd27a' : '#ff9a4a'; ell(g, x, y + 6, 4.5, 6); g.fillStyle = 'rgba(255,220,140,.25)'; circ(g, x, y + 6, 11); } else { g.fillStyle = [col, '#f2ead8', '#e8c040', '#5a9ad8'][i % 4]; g.beginPath(); g.moveTo(x - 6, y); g.lineTo(x + 6, y); g.lineTo(x, y + 12); g.closePath(); g.fill(); } } break; }
+    case 'maypole': { g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, d.x + 4, d.y + 2, 22, 7); g.fillStyle = '#e8e0cc'; g.fillRect(d.x - 3, d.y - 110, 6, 110); g.fillStyle = '#4a8a3a'; circ(g, d.x, d.y - 112, 8); ['#e86a9a', '#5a9ad8', '#e8c040', '#6ab84a', '#c86ad0'].forEach((c, i) => { const a = t * 1.2 + i * 1.26; g.strokeStyle = c; g.lineWidth = 2; g.beginPath(); g.moveTo(d.x, d.y - 108); g.quadraticCurveTo(d.x + Math.cos(a) * 20, d.y - 60, d.x + Math.cos(a) * 34, d.y - 6 + Math.sin(a) * 6); g.stroke(); }); break; }
+    case 'flowerpot': g.fillStyle = '#8a4a2a'; g.fillRect(d.x - 8, d.y - 10, 16, 12); ['#e05a6a', '#ffd04a', '#c86ad0', '#ffffff'].forEach((c, i) => { g.fillStyle = c; circ(g, d.x - 6 + i * 4, d.y - 14 - (i % 2) * 3, 3); }); break;
+    case 'pumpkins': [[-8, 0, 9], [7, 2, 8], [0, -6, 7]].forEach(([dx, dy, r2]) => { g.fillStyle = '#d8741a'; ell(g, d.x + dx, d.y + dy, r2 + 2, r2); g.strokeStyle = '#a8540a'; g.lineWidth = 1; g.beginPath(); g.moveTo(d.x + dx, d.y + dy - r2); g.lineTo(d.x + dx, d.y + dy + r2); g.stroke(); g.fillStyle = '#4a6a2a'; g.fillRect(d.x + dx - 1, d.y + dy - r2 - 3, 2, 4); }); break;
+    case 'hay': g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, d.x + 3, d.y + 4, 18, 5); g.fillStyle = '#d8b050'; g.fillRect(d.x - 16, d.y - 14, 32, 18); g.fillStyle = '#e8c868'; g.fillRect(d.x - 16, d.y - 14, 32, 5); g.strokeStyle = '#8a6a22'; g.lineWidth = 1; g.strokeRect(d.x - 16, d.y - 14, 32, 18); break;
+    case 'lanternpost': g.fillStyle = '#3a2a1a'; g.fillRect(d.x - 1.5, d.y - 40, 3, 40); g.fillRect(d.x - 10, d.y - 40, 20, 2); [-9, 9].forEach(dx => { g.fillStyle = '#ff9a4a'; ell(g, d.x + dx, d.y - 33, 4.5, 6); g.fillStyle = 'rgba(255,210,120,.3)'; circ(g, d.x + dx, d.y - 33, 12); }); break;
+    case 'bonfire': { g.fillStyle = '#5a5048'; for (let i = 0; i < 10; i++) { const a = i / 10 * TAU; circ(g, d.x + Math.cos(a) * 22, d.y + Math.sin(a) * 12, 5); } for (let i = 0; i < 5; i++) { const f = Math.sin(t * 12 + i * 2) * 3; g.fillStyle = ['#ff5a1a', '#ff8a2a', '#ffc040', '#fff0a0', '#ffffff'][i]; ell(g, d.x + (i - 2) * 3 + f * .5, d.y - 12 - i * 5 + f * .3, 16 - i * 3, 24 - i * 4); } if (Math.random() < .5) addPart(d.x + rand(-8, 8), d.y - 30, rand(-15, 15), rand(-70, -40), '#ffb040', rand(.4, 1), 2); break; }
+  }
+}
+/* the games: archery at the spring fair, pie eating at the harvest, ringing the bell at the solstice */
+function gamesDialog(e) {
+  const f = G.festival; if (!f) { e.say = { text: 'The games are over until next season!', t: 3 }; return; }
+  const txt = { spring: 'Step up, step up! Three targets, thirty seconds. Hit as many as you can! Eight or more wins the garland. No bow? I will lend you one.', harvest: 'The pie-eating contest! Eight seconds, as many pies as you can stuff in. Beat both our champions to win the harvest charm! (Mash interact.)', solstice: 'Ring the bell! Strike when the bar is full. Three tries. A perfect ring wins the solstice lantern!' }[f];
+  openDialog({ name: e.name, role: FEST[f].n, portrait: e, text: txt, options: [{ t: `<span class="dn">PLAY</span>Enter the ${FEST[f].game} (5 gold)`, dis: P.gold < 5 || !!G.contest, fn: () => { P.gold -= 5; closeDialog(); startContest(f, e); } }, { t: 'Maybe later', fn: closeDialog }] });
+}
+function startContest(f, e) {
+  if (f === 'spring') {
+    let loan = null; const prevW = P.eq.weapon; if (!P.S.bow) { const b = P.inv.find(i => ITEMS[i.id].wk === 'bow'); if (b) equip(b.uid, true); else { loan = addItem('short_bow', 1, 1, true); equip(loan.uid, true); } }
+    if (!P.inv.some(i => ITEMS[i.id].type === 'ammo')) addItem('arrow', 1, 20, true);
+    const tg = []; for (let i = 0; i < 3; i++) { const f2 = findFree(e.x - 140 + i * 140, e.y + 220 + (i % 2) * 40); tg.push(mkActor('dummy', f2.x, f2.y, { dummy: true, isTarget: true, fest: true, name: 'Festival Target', atkCd: 1e9, aggro: 0, stand: true })); }
+    G.contest = { kind: 'archery', t: 30, hits: 0, tg, loan: loan && loan.uid, prevW }; toast('Go! Hit the targets!', 'gold');
+  } else if (f === 'harvest') G.contest = { kind: 'pie', t: 8, n: 0, rivals: [randi(16, 24), randi(14, 26)] };
+  else G.contest = { kind: 'bell', ph: 0, tries: 3, best: 0 };
+  SND.play('quest');
+}
+function contestPress() { // interact during a contest
+  const C = G.contest; if (!C) return false;
+  if (C.kind === 'pie') { C.n++; SND.play('eat', .6); return true; }
+  if (C.kind === 'bell') { const pw = Math.round((Math.sin(C.ph) + 1) * 50); C.best = Math.max(C.best, pw); C.tries--; SND.play(pw >= 95 ? 'level' : 'hit'); toast(`Strike! Power ${pw}.`, pw >= 95 ? 'gold' : ''); if (C.tries <= 0) endContest(); return true; }
+  return false;
+}
+function contestTick(dt) {
+  const C = G.contest; if (!C) return;
+  if (C.kind === 'bell') { C.ph += dt * 4.2; return; }
+  C.t -= dt; if (C.t <= 0) endContest();
+}
+function endContest() {
+  const C = G.contest; G.contest = null; let prize = 0, item = null, msg = '';
+  if (C.kind === 'archery') { C.tg.forEach(x => removeEnt(x)); if (C.loan) { unequip('weapon'); removeItem(C.loan, 1); } if (C.prevW && P.eq.weapon !== C.prevW && getItem(C.prevW)) equip(C.prevW, true); prize = C.hits >= 8 ? 150 : C.hits >= 5 ? 70 : C.hits >= 2 ? 20 : 0; if (C.hits >= 8) item = 'garland'; msg = `${C.hits} hits!`; }
+  if (C.kind === 'pie') { const best = Math.max(...C.rivals); const win = C.n > best; prize = win ? 120 : C.n > Math.min(...C.rivals) ? 30 : 0; if (win) item = 'harvest_charm'; else addItem('pie', 1, 1, true); msg = `You ate ${C.n} pies; the champions managed ${C.rivals.join(' and ')}.${win ? ' You win!' : ''}`; }
+  if (C.kind === 'bell') { prize = C.best >= 95 ? 150 : C.best >= 80 ? 60 : 10; if (C.best >= 95) item = 'solstice_lantern'; msg = `Best strike: ${C.best}.`; }
+  if (prize) { P.gold += prize; SND.play('coin'); } if (item) addItem(item, 1, 1, true);
+  toast(`🎉 ${msg} ${prize ? `You win ${prize} gold` : 'No prize this time'}${item ? ` and the ${ITEMS[item].name}` : ''}!`, prize ? 'gold' : '');
 }
 function spawnPlace(pl) {
   pl.spawned = true; const X = d => pl.x + d * TS, Y = d => pl.y + d * TS;
@@ -3775,7 +3962,7 @@ function evWolves() {
 /* ---------------- Shops ---------------- */
 function goodsFactor(id, k, selling) { if (k == null) return 1; if (KDATA[k].produces === id) return .6; if (KDATA[k].wants === id) return selling ? 1.65 : 1.5; return 1; }
 function buyPrice(it, shop) { return Math.max(1, Math.round(itemValue(it) * (1 - .05 * SK('trade')) * seasonPrice(it.id) * goodsFactor(it.id, shop.k) * (shop.k != null ? repMul(shop.k) : 1.15))); }
-function sellPrice(it, shop) { return Math.max(1, Math.round(itemValue(it) * .42 * (1 + .05 * SK('trade')) * goodsFactor(it.id, shop.k, true) * (shop.k != null ? clamp(1 + K.rep[shop.k] / 300, .75, 1.3) : 1))); }
+function sellPrice(it, shop) { if (shop.fence) return Math.max(1, Math.round(itemValue(it) * .6)); return Math.max(1, Math.round(itemValue(it) * .42 * (1 + .05 * SK('trade')) * goodsFactor(it.id, shop.k, true) * (shop.k != null ? clamp(1 + K.rep[shop.k] / 300, .75, 1.3) : 1))); }
 /* ---------------- City trades: shops in townhouses, stalls on the market plaza ---------------- */
 const CITY_SHOPS = {
   baker: { n: 'Bakery', who: 'Baker', col: '#e8e0cc', stock: a => { a('bread', 1, 20); a('pie', 1, 6); a('honey_cake', 1, 5); } },
@@ -3790,6 +3977,10 @@ const CITY_SHOPS = {
   bowyer: { n: 'Bowyer & Fletcher', who: 'Bowyer', col: '#5a6a3a', stock: a => { a(pick(['short_bow', 'hunting_bow']), rollQual(1)); a(pick(['recurve_bow', 'longbow']), rollQual(2)); a('arrow', 1, 80); a('broadhead', 1, 30); a('bodkin', 1, 25); a('fire_arrow', 1, 15); a('timber', 1, 12); } },
   vintner: { n: 'Wine Cellar', who: 'Vintner', col: '#7a2a3a', stock: a => { a('wine', 1, 10); a('ale', 1, 15); } },
   spicer: { n: 'Spice Merchant', who: 'Spice Merchant', col: '#c87a2a', stock: a => { a('spices', 1, 10); a('silk', 1, 3); a('honey_cake', 1, 4); } },
+  fest_spring: { n: 'Spring Fair Stall', who: 'Fair Seller', col: '#e86a9a', stock: a => { a('flowers', 1, 20); a('honey_cake', 1, 10); a('garland', 1, 2); a('apple', 1, 15); } },
+  fest_harvest: { n: 'Harvest Market Stall', who: 'Harvest Seller', col: '#d8882a', stock: a => { a('pie', 1, 10); a('apple', 1, 25); a('pear', 1, 20); a('cider', 1, 12); a('cheese', 1, 8); a('harvest_charm', 1, 2); } },
+  fest_solstice: { n: 'Solstice Stall', who: 'Lantern Seller', col: '#4a6ac8', stock: a => { a('cider', 1, 15); a('honey_cake', 1, 8); a('solstice_lantern', 1, 3); a('sausage', 1, 8); } },
+  fence: { n: 'Fence', who: 'Fence', col: '#3a3a44', stock: a => { a('potion', 1, 3); a('bandage', 1, 6); a('broadhead', 1, 20); } },
   inn: { n: 'Inn', who: 'Innkeeper', col: '#4a6a9a', stock: a => { a('bread', 1, 10); a('ale', 1, 10); a('honey_cake', 1, 4); a('bandage', 1, 6); } },
   tavern: { n: 'Tavern', who: 'Tapster', col: '#8a5a2a', stock: a => { a('ale', 1, 20); a('meat', 1, 8); a('pie', 1, 4); a('bread', 1, 10); a('cheese', 1, 4); } },
 };
@@ -3893,6 +4084,8 @@ function interactLabel(b) {
   if (b.grave) return 'Read your gravestone';
   if (b.e) {
     const e = b.e;
+    if (canPickpocket(e)) return '<span style="color:#e8c060">Pick their pocket</span>';
+    if (e.role === 'guild') return 'Speak to the hooded figure'; if (e.role === 'gamesmaster') return `Play the ${FEST[G.festival] ? FEST[G.festival].game : 'festival game'}`;
     switch (e.role) {
       case 'elder': return `Talk to ${e.name}`; case 'merchant': return `Trade with ${e.name}`; case 'ruler': return `Seek an audience with ${e.name}`;
       case 'armorer': return 'Browse the royal armory'; case 'stable': return 'Visit the royal stables'; case 'caravan': return 'Trade with the caravan'; case 'trader': return `Trade with ${e.name}`;
@@ -3904,7 +4097,7 @@ function interactLabel(b) {
   const it = b.it, pl = W.places[it.place];
   switch (it.type) {
     case 'chest': return pl.chestOpened ? 'Empty stash' : pl.type === 'camp' ? (pl.cleared ? 'Loot the bandit stash' : 'Bandit stash (guarded)') : 'Search the chest';
-    case 'door': return 'Knock on the door'; case 'enter': return `Enter ${it.shop.name}`; case 'iexit': return 'Go back outside'; case 'ibed': return G.under && G.under.kind === 'house' ? 'Sleep until morning' : 'Bed'; case 'istash': return 'Open your stash'; case 'irooms': return 'Go up to the rooms'; case 'ibox': return 'Offerings box'; case 'itrophy': { const tr = (P.trophies || [])[it.idx]; return tr ? `Trophy: ${tr.n}` : 'An empty pedestal'; } case 'fountain': return 'Toss a coin into the fountain'; case 'statue': return 'Read the inscription'; case 'cathedral': return `Enter the ${pl.city && pl.city.cath ? pl.city.cath.name : 'cathedral'}`;
+    case 'door': return 'Knock on the door'; case 'enter': return (!cityOpen() && it.shop.kind !== 'tavern' && it.shop.kind !== 'inn' ? 'Locked: ' : 'Enter ') + it.shop.name; case 'iexit': return 'Go back outside'; case 'ibed': return G.under && G.under.kind === 'house' ? 'Sleep until morning' : 'Bed'; case 'istash': return 'Open your stash'; case 'irooms': return 'Go up to the rooms'; case 'ibox': return 'Offerings box'; case 'istrong': return 'Force the strongbox'; case 'itrophy': { const tr = (P.trophies || [])[it.idx]; return tr ? `Trophy: ${tr.n}` : 'An empty pedestal'; } case 'fountain': return 'Toss a coin into the fountain'; case 'statue': return 'Read the inscription'; case 'cathedral': return `Enter the ${pl.city && pl.city.cath ? pl.city.cath.name : 'cathedral'}`;
     case 'sign': return 'Signpost, bounty board and carriages'; case 'well': return 'Drink from the well'; case 'fish': return G.fishing ? 'Reel in' : 'Fish here';
     case 'dungeon': return `Enter ${pl.name}${pl.dcleared ? ' (cleared)' : ''}`; case 'home': return 'Enter your house'; case 'fort': return pl.playerFort ? `Your fort: ${pl.name}` : `Look over the ruined fort`; case 'dexit': return 'Climb back outside';
     case 'dchest': return G.under && (G.under.dchests || []).includes(it.idx) ? 'Empty chest' : it.boss ? 'Open the guardian\'s hoard' : 'Open the chest';
@@ -3914,6 +4107,7 @@ function interactLabel(b) {
 }
 function doInteract() {
   if (G.fishing) { reelIn(); return; }
+  if (contestPress()) return;
   const b = findInteract(); if (!b) return;
   if (b.grave) return readGrave();
   if (b.e) return talkTo(b.e);
@@ -3930,6 +4124,7 @@ function doInteract() {
   else if (it.type === 'fountain') tossCoin(it, pl);
   else if (it.type === 'statue') readStatue(pl);
   else if (it.type === 'cathedral') enterInterior({ kind: 'cathedral', place: pl.id, owner: pl.owner, name: pl.city.cath.name, key: 'cath' + pl.id, door: { x: it.x, y: it.y } });
+  else if (it.type === 'enter' && !cityOpen() && it.shop.kind !== 'tavern' && it.shop.kind !== 'inn') breakInDialog(it, pl);
   else if (it.type === 'enter') enterInterior({ kind: INTERIOR_OF[it.shop.kind] || 'shop', shopKind: it.shop.kind, place: pl.id, owner: pl.owner, name: it.shop.name, key: it.shop.key, door: { x: it.x, y: it.y } });
   else if (it.type === 'iexit') leaveDungeon(true);
   else if (it.type === 'ibed') { const hp = W.places[G.under.place]; if (G.under.kind === 'house') { const add = ((.3 - tod()) + 1) % 1 * DAYLEN; G.time += add; P.hp = P.maxHp; P.st = P.maxSt; P.respawn = { x: G.under.door.x, y: G.under.door.y + 12 }; SND.play('eat'); toast('You sleep in your own bed and wake at dawn, fully rested.', 'good'); } }
@@ -3937,6 +4132,7 @@ function doInteract() {
   else if (it.type === 'irooms') { const inn = ents.find(e => e.role === 'hotelier'); if (inn) innDialog(inn); }
   else if (it.type === 'ibox') { const cp = W.places[G.under.place]; priestDialog(ents.find(e => e.role === 'priest') || null, cp); }
   else if (it.type === 'itrophy') readTrophy(it.idx);
+  else if (it.type === 'istrong') { W.interacts = W.interacts.filter(x => x !== it); const g0 = randi(30, 90); P.gold += g0; let msg = `${g0} gold`; if (P.guild && P.guild.stage === 3 && !countItem('merchant_ledger')) { addItem('merchant_ledger', 1, 1, true); msg += ' and the merchant\'s ledger'; } else if (chance(.5)) { const id = pick(['silver_ring', 'gold_locket', 'jeweled_brooch']); addItem(id, 1, 1, true); msg += ` and a ${ITEMS[id].name}`; } SND.play('chest'); toast(`You force the strongbox: ${msg}.`, 'gold'); }
   else if (it.type === 'well') { if ((pl.wellT || -999) > G.time - 60) { toast('You have drunk your fill for now.'); return; } pl.wellT = G.time; P.st = P.maxSt; P.hp = Math.min(P.maxHp, P.hp + Math.round(12 * DIFF().heal)); SND.play('eat'); toast(`The cool water refreshes you. (+${Math.round(12 * DIFF().heal)} health, stamina restored)`, 'good'); }
   else if (it.type === 'shrine') {
     if (pl.blessed) { toast('The stones are silent. Their gift has been given.'); return; }
@@ -4005,12 +4201,14 @@ function bardDialog(e) {
 }
 function crierDialog(e, k) {
   const ev = (K.log || []).slice(0, 3), wars = PAIRS.filter(([a, b]) => relStatus(a, b).n === 'At War').map(([a, b]) => `${KDATA[a].name} and ${KDATA[b].name}`);
-  const lines = [`Hear ye, hear ye! By order of ${KDATA[k].ruler}!`, ...(ev.length ? ev.map(x => esc(x.t)) : ['All is well in the realm!']), wars.length ? `War rages between ${wars.join('; ')}!` : 'The four crowns are at peace, the saints be thanked!'];
+  const lines = [`Hear ye, hear ye! By order of ${KDATA[k].ruler}!`, ...(G.festival ? [`The ${FEST[G.festival].n} is upon us! Games and prizes in the plaza!`] : []), ...(ev.length ? ev.map(x => esc(x.t)) : ['All is well in the realm!']), wars.length ? `War rages between ${wars.join('; ')}!` : 'The four crowns are at peace, the saints be thanked!'];
   e.say = { text: 'Hear ye! Hear ye!', t: 3 };
   openDialog({ name: e.name, role: `Voice of ${KDATA[k].name}`, portrait: e, text: lines.map(t => `<p style="margin:0 0 6px">${t}</p>`).join(''), options: [{ t: 'Thank you', fn: closeDialog }] });
 }
 function beggarDialog(e, k) {
-  openDialog({ name: e.name, role: 'Hollow-cheeked and hopeful', portrait: e, text: pick(['Alms, sir knight? A coin for an old soldier?', 'Spare a coin? The saints will bless you for it.', 'I fought at the Greywater, you know. Now look at me.']), options: [
+  const guildDrop = P.guild && P.guild.stage === 2 && e.place === P.guild.target && countItem('contraband');
+  openDialog({ name: e.name, role: 'Hollow-cheeked and hopeful', portrait: e, text: guildDrop ? 'Ah. You have something for me, I think. Quickly now.' : pick(['Alms, sir knight? A coin for an old soldier?', 'Spare a coin? The saints will bless you for it.', 'I fought at the Greywater, you know. Now look at me.']), options: [
+    ...(guildDrop ? [{ t: '<span class="dn">GUILD</span>Hand over the sealed crate', fn: () => { removeItemById('contraband'); P.guild.stage = 3; closeDialog(); guildDone('The beggar slips you a set of lockpicks. You can now pick the locks of closed shops at night.', 150, 120); guildQuest('A Quiet Night\'s Work', 'At night, pick the lock of a closed bakery, apothecary or jeweller and take the ledger from its strongbox', null); } }] : []),
     { t: 'Give 5 gold', dis: P.gold < 5, fn: () => { P.gold -= 5; SND.play('coin'); if (!e.given) { e.given = true; addRep(k, 1, 'Gave to a beggar'); } e.say = { text: 'Bless you! Bless you, sir!', t: 3 }; closeDialog(); } },
     { t: 'Give some food', dis: !P.inv.some(i => ITEMS[i.id].food), fn: () => { const f = P.inv.find(i => ITEMS[i.id].food); removeItem(f.uid, 1); if (!e.given) { e.given = true; addRep(k, 1, 'Fed a beggar'); } e.say = { text: 'Food! Gods keep you, knight.', t: 3 }; closeDialog(); } },
     { t: 'Not today', fn: closeDialog },
@@ -4113,6 +4311,7 @@ function genInterior(b) {
     });
     obj('f_table', 11.4, 6.6, 52, 34, { v: 5 }, true); npc('villager', 11.1, 7.2, { role: 'dicer', name: 'A dice player', standFace: 0 }); npc('villager', 13.4, 7.2, { role: 'dicer', name: 'A dice player', standFace: Math.PI });
     obj('f_barrel', 14.4, 8.5, 24, 28, {}, true); obj('f_barrel', 15, 9.3, 24, 28, {}, true); obj('f_barrel', .3, 9.3, 24, 28, {}, true);
+    if (night && !(P.guild && P.guild.stage === 6)) npc('npc', 15.2, 5.2, { role: 'guild', name: 'A hooded figure', standFace: Math.PI, _look: { body: '#34343c', head: 'hood', hood: '#22222a', skin: '#c8a888', cape: '#2a2a30' } });
     if (night) { patron(10.5, 3.6, Math.PI / 2); patron(8.9, 9.2, -Math.PI / 2); patron(4.6, 3.4, -Math.PI / 2); patron(12.8, 3.8, -Math.PI / 2); } else patron(4.6, 3.4, -Math.PI / 2);
   } else if (b.kind === 'inn') {
     obj('f_shelf', 1, -1.05, 90, 28, { v: 'keys' }); obj('f_hearth', 5.6, -1.35, 70, 50);
@@ -4138,6 +4337,7 @@ function genInterior(b) {
     if (b.shopKind === 'baker') obj('f_hearth', 7.4, -1.35, 70, 50, { v: 'oven' });
     obj('f_barrel', .3, 5.8, 24, 28, {}, true); obj('f_crate', 8.5, 6, 28, 26, {}, true); obj('f_rug', 3, 4.4, 4 * TS, 2 * TS, { v: b.owner });
     if (r() < .6) patron(2.4, 4.8, -Math.PI / 2, { role: 'customer' });
+    if (b.breakIn && !b.robbed) { obj('f_chest', 7.6, 1.1, 32, 24, {}, true); ints.push({ type: 'istrong', x: X(8.1), y: Y(2.3) }); }
   } else if (b.kind === 'house') {
     obj('f_bed', .3, .15, 40, 64, {}, true); ints.push({ type: 'ibed', x: X(1.7), y: Y(1.6) });
     obj('f_chest', .3, 2.6, 32, 24, {}, true); ints.push({ type: 'istash', x: X(1.7), y: Y(3.1) });
@@ -4152,6 +4352,13 @@ function genInterior(b) {
   objs.forEach(o => { o.sy = o.sy ?? (o.y + o.h); const ci = Math.floor((o.y + o.h / 2) / (CH * TS)) * cw + Math.floor((o.x + o.w / 2) / (CH * TS)); if (DW.chunkObjs[ci]) DW.chunkObjs[ci].push(o); });
   return { W: DW, n, entry: { x: X(mid), y: Y(rh - 1.25) }, npcs };
 }
+function breakInDialog(it, pl) {
+  const picks = P.guild && P.guild.stage >= 3 && P.guild.stage !== 6;
+  if (!picks) { toast(`${it.shop.name} is shut for the night. Come back after dawn.`); return; }
+  openDialog({ name: it.shop.name, role: 'Shut for the night', portrait: 'sign', text: 'The shutters are closed and the door is locked. Your lockpicks are in your pocket.', options: [
+    { t: '<span class="dn">PICK</span>Pick the lock', fn: () => { closeDialog(); const seen = ents.some(e => !e.dead && e.faction && e.faction[0] === 'k' && e.k === pl.owner && dist(e.x, e.y, P.x, P.y) < 420); if (seen && chance(.5)) addBounty(pl.owner, 80, 'Breaking and entering'); enterInterior({ kind: INTERIOR_OF[it.shop.kind] || 'shop', shopKind: it.shop.kind, place: pl.id, owner: pl.owner, name: it.shop.name, key: it.shop.key, door: { x: it.x, y: it.y }, breakIn: true }); } },
+    { t: 'Leave it', fn: closeDialog }] });
+}
 function enterInterior(b) {
   if (G.under) return;
   if (ents.some(e => !e.dead && playerHostileTo(e) && dist(e.x, e.y, P.x, P.y) < 260)) { toast('Not with enemies at your back!', 'bad'); return; }
@@ -4161,7 +4368,7 @@ function enterInterior(b) {
   W = D.W; setWorldSize(D.n); ents = party; projs = []; pickups = []; parts = []; texts = []; chunkCache.clear();
   P.x = D.entry.x; P.y = D.entry.y; P.kbx = P.kby = 0; cam.x = P.x; cam.y = P.y;
   party.forEach(e => { const f = findFree(P.x + rand(-40, 40), P.y - rand(10, 40)); e.x = f.x; e.y = f.y; });
-  D.npcs.forEach(n0 => mkActor(n0.kind, n0.x, n0.y, n0.o));
+  if (!b.breakIn) D.npcs.forEach(n0 => mkActor(n0.kind, n0.x, n0.y, n0.o));
   G.under = Object.assign({ interior: true, id: 'i' + b.key }, b); $('mmWrap').classList.add('hidden'); SND.play('door');
   showAreaTitle(b.name.toUpperCase(), { tavern: 'Ale, song and gossip', inn: 'A bed for every traveller', cathedral: 'Hush. The saints are listening', shop: CITY_SHOPS[b.shopKind] ? CITY_SHOPS[b.shopKind].n : 'A shop', house: 'Home, sweet home' }[b.kind] || '');
 }
@@ -4401,7 +4608,7 @@ function spawnPartyMember(m, x = P.x, y = P.y) {
 function captainDialog(e) {
   const k = e.k, rep = K.rep[k], hired = partyNow().filter(x => x.hired).length, cap = hiredCap(), mul = 1 - (SK('lead') >= 4 ? .4 : SK('lead') >= 2 ? .2 : 0);
   openDialog({ name: e.name, role: `Captain of ${KDATA[k].castle}`, portrait: e, text: rep < 0 ? 'I do not lend soldiers to strangers of ill repute. Earn some standing with the crown first.' : `Soldiers for hire, if your purse is full. You lead ${hired} of ${cap}. (Leadership lets you command more.) Each draws daily pay.`,
-    options: [...Object.entries(HIRE).map(([kind, h]) => { const cost = Math.round(h.cost * mul); return { t: `Hire a ${h.n} <span class="dn">${cost}g · ${h.up}g a day${h.rep ? ` · rep ${h.rep}` : ''}</span>`, dis: rep < (h.rep || 0) || hired >= cap || P.gold < cost, fn: () => { P.gold -= cost; const m = spawnPartyMember({ kind, k, name: `${pick(NAMES.first)} the ${h.n}` }, e.x, e.y); m.say = { text: 'At your command!', t: 2.5 }; SND.play('coin'); captainDialog(e); } }; }), { t: 'Farewell', fn: closeDialog }] });
+    options: [...(P.guild && P.guild.stage >= 3 && P.guild.stage <= 4 ? [{ t: '<span class="dn">BETRAY</span>Report the thieves\' guild', fn: () => { P.guild.stage = 6; Q.active = Q.active.filter(q => q.type !== 'guild'); P.gold += 400; addRep(k, 10, 'Broke the thieves\' guild'); SND.play('quest'); closeDialog(); toast('The captain\'s men raid the guild\'s hideouts that night. +400 gold, and the crown\'s gratitude.', 'gold'); } }] : []), ...Object.entries(HIRE).map(([kind, h]) => { const cost = Math.round(h.cost * mul); return { t: `Hire a ${h.n} <span class="dn">${cost}g · ${h.up}g a day${h.rep ? ` · rep ${h.rep}` : ''}</span>`, dis: rep < (h.rep || 0) || hired >= cap || P.gold < cost, fn: () => { P.gold -= cost; const m = spawnPartyMember({ kind, k, name: `${pick(NAMES.first)} the ${h.n}` }, e.x, e.y); m.say = { text: 'At your command!', t: 2.5 }; SND.play('coin'); captainDialog(e); } }; }), { t: 'Farewell', fn: closeDialog }] });
 }
 function compDialog(e) {
   const c = COMPANIONS.find(cc => cc.id === e.comp0);
@@ -4736,6 +4943,10 @@ const BARKS = {
 function talkTo(e) {
   if (e.party) return partyDialog(e);
   const k = e.k != null ? e.k : ownerAtPx(e.x, e.y);
+  if (canPickpocket(e)) return pickpocket(e, k);
+  if (e.role === 'guild') return guildDialog(e);
+  if (e.role === 'gamesmaster') return gamesDialog(e);
+  if (e.role === 'taxcart') { e.say = { text: 'Keep your distance!', t: 2 }; return; }
   switch (e.role) {
     case 'elder': return elderDialog(e, W.places[e.place]);
     case 'ruler': return rulerDialog(e, k);
@@ -6248,6 +6459,7 @@ function lookFor(e) {
       else L = { body: pick(['#8a5a2a', '#5a6a8a', '#7a3a4a']), head: 'cap', skin: e.skin };
       break;
   }
+  if (e.torch) L = Object.assign({}, L, { torch: 1 });
   e._look = L; return L;
 }
 function drawHuman(g, x, y, face, L, o) {
@@ -6264,6 +6476,7 @@ function drawHuman(g, x, y, face, L, o) {
   g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 1; g.stroke();
   if (L.mail) { g.fillStyle = 'rgba(0,0,0,.18)'; for (let i = -8; i <= 8; i += 3) circ(g, -2 + (i % 2), i, .7); }
   if (L.tabard) { g.fillStyle = L.tabard; rrect(g, -5.5, -4.5, 11, 9, 2); g.fill(); }
+  if (L.torch) { g.fillStyle = '#4a2f18'; g.fillRect(4, -12, 2.5, 9); const f = Math.sin(performance.now() / 70) * 1; g.fillStyle = '#ff8a2a'; ell(g, 5 + f * .3, -14, 3, 4.5); g.fillStyle = '#ffe080'; ell(g, 5 + f * .3, -13.5, 1.6, 2.4); }
   if (L.apron) { g.fillStyle = L.apron; rrect(g, -1, -6.5, 8.5, 13, 2.5); g.fill(); g.strokeStyle = 'rgba(0,0,0,.18)'; g.lineWidth = .8; g.stroke(); }
   if (L.lute) { g.fillStyle = '#b8783a'; ell(g, 5, 6.5, 4.8, 3.4); g.fillStyle = '#3a2410'; circ(g, 5, 6.5, 1.2); g.fillStyle = '#6a4422'; g.fillRect(8, 5.8, 9, 1.5); }
   if (L.pauld) { g.fillStyle = L.shiny ? '#e8ecf0' : '#8a8e94'; circ(g, 0, -10, 4.2); circ(g, 0, 10, 4.2); }
@@ -6566,11 +6779,12 @@ const UI = {
   stack: [],
   ids: { act: 'actScreen', ach: 'achScreen', stats: 'statScreen', skills: 'skillScreen', mode: 'modeScreen', cont: 'contScreen', pause: 'pauseScreen', inv: 'invScreen', map: 'mapScreen', dip: 'dipScreen', quests: 'questScreen', settings: 'settingsScreen', help: 'helpScreen', shop: 'shopScreen' },
   open(n) {
+    if (n === 'map' && G.under && !G.under.interior) { toast('Your map is no use down here. Find your way back to the ladder.'); return; }
     if (dialogOpen) closeDialog();
     if (this.isOpen(n)) return;
     if (n !== 'settings' && n !== 'help') this.closeAll();
     this.stack.push(n); $(this.ids[n]).classList.add('show'); SND.play('open'); if (G.tut) (G.tut.opened || (G.tut.opened = {}))[n] = true;
-    if (n === 'inv') renderInventory(); else if (n === 'skills') renderSkills(); else if (n === 'ach') renderAch(); else if (n === 'stats') renderStats(); else if (n === 'map') openMap(); else if (n === 'dip') renderDiplomacy(); else if (n === 'quests') renderQuests(); else if (n === 'settings') renderSettings(); else if (n === 'pause') renderPause();
+    if (n === 'inv') renderInventory(); else if (n === 'skills') renderSkills(); else if (n === 'ach') renderAch(); else if (n === 'stats') withOverworld(renderStats); else if (n === 'map') withOverworld(openMap); else if (n === 'dip') withOverworld(renderDiplomacy); else if (n === 'quests') withOverworld(renderQuests); else if (n === 'settings') renderSettings(); else if (n === 'pause') withOverworld(renderPause);
     tipHide();
   },
   close() { const n = this.stack.pop(); if (n) { $(this.ids[n]).classList.remove('show'); SND.play('close'); } tipHide(); if (n === 'act') actFinish(); },
@@ -6719,7 +6933,7 @@ function openMap() {
   $('mapExplored').innerHTML = `${exploredPct()}% of the realms charted<br>${W.places.filter(p => p.disc).length} of ${W.places.length} places found<br>${W.places.filter(p => p.type === 'camp' && p.cleared).length} camps cleared`;
   mapView.cx = P.x / TS; mapView.cy = P.y / TS; mapView.z = 3; mapView.sel = null; $('mapInfo').classList.add('hidden');
 }
-$('mapCenter').onclick = () => { mapView.cx = P.x / TS; mapView.cy = P.y / TS; };
+$('mapCenter').onclick = () => withOverworld(() => { mapView.cx = P.x / TS; mapView.cy = P.y / TS; });
 function drawBigMap() {
   const c = $('bigMap'); const r = c.getBoundingClientRect(); const dpr = Math.min(2, devicePixelRatio || 1);
   const w = Math.max(10, Math.round(r.width * dpr)), h = Math.max(10, Math.round(r.height * dpr)); if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
@@ -6756,7 +6970,8 @@ function drawBigMap() {
   const c = $('bigMap'); let moved = 0;
   c.addEventListener('mousedown', e => { mapView.drag = { x: e.clientX, y: e.clientY, cx: mapView.cx, cy: mapView.cy, b: e.button }; moved = 0; c.classList.add('drag'); });
   addEventListener('mousemove', e => { const d = mapView.drag; if (!d || d.b !== 0) return; const dx = e.clientX - d.x, dy = e.clientY - d.y; moved += Math.abs(dx) + Math.abs(dy); const zz = mapView.z * (c.width / c.getBoundingClientRect().width) / Math.min(2, devicePixelRatio || 1); mapView.cx = d.cx - dx / mapView.z; mapView.cy = d.cy - dy / mapView.z; });
-  addEventListener('mouseup', e => {
+  addEventListener('mouseup', ev => withOverworld(() => mapUp(ev)));
+  function mapUp(e) {
     const d = mapView.drag; if (!d) return; mapView.drag = null; c.classList.remove('drag');
     if (moved > 6) return;
     const r = c.getBoundingClientRect(); const tx = mapView.cx + (e.clientX - r.left - r.width / 2) / mapView.z, ty = mapView.cy + (e.clientY - r.top - r.height / 2) / mapView.z;
@@ -6775,7 +6990,7 @@ function drawBigMap() {
     if (best.type === 'hidden') extra = HIDDEN_DEFS[best.def].desc + (best.chestOpened ? '<br>Looted' : '');
     mi.innerHTML = `<b style="font-family:var(--fh);color:var(--gold-l)">${best.name}</b><br><span style="color:var(--ink2);font-size:12px">${typeN} · ${leagues(dist(P.x, P.y, best.x, best.y))} leagues ${compass(best.x - P.x, best.y - P.y)}</span><br>${extra}`;
     mi.classList.remove('hidden');
-  });
+  }
   let tp = null, pinch = null;
   const tdist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
   c.addEventListener('touchstart', e => {
@@ -6966,7 +7181,7 @@ function renderShop() {
     const can = P.gold >= pr && !lock;
     return row(it, pr, `<button class="btn sm ${can ? 'gold' : ''}" data-buy="${i}" ${can ? '' : 'disabled'}>${lock ? 'Locked' : qty > 1 ? 'Buy ' + qty : 'Buy'}</button>`, lock ? ` · <span class="dn">${lock}</span>` : '');
   }).join('') : '<div class="empty">Sold out.</div>';
-  const mine = P.inv.filter(it => ITEMS[it.id].type !== 'quest' && !isEquipped(it.uid) && ITEMS[it.id].val);
+  const mine = P.inv.filter(it => ITEMS[it.id].type !== 'quest' && !isEquipped(it.uid) && ITEMS[it.id].val && (!ITEMS[it.id].stolen || s.fence));
   $('shopSell').innerHTML = mine.length ? mine.map(it => { const pr = sellPrice(it, s); return row(it, pr, `<button class="btn sm" data-sell="${it.uid}">Sell</button>${ITEMS[it.id].stack && it.n > 1 ? ` <button class="btn sm" data-sellall="${it.uid}">All</button>` : ''}`); }).join('') : '<div class="empty">Nothing to sell. (Equipped items cannot be sold.)</div>';
   $('shopGold').textContent = fmt(P.gold);
   $('shopNote').innerHTML = s.frost ? '❄ Rimewood bows and rime-iron frost arrows are made here in the snowfields. Elsewhere they are rare.' : 'Tip: buy trade goods where they are produced and sell where they are wanted.';
@@ -7105,6 +7320,7 @@ function renderWorld(t) {
   const dead = [];
   for (const e of ents) { if (e.x < vx - 60 || e.x > vx + VW + 60 || e.y < vy - 60 || e.y > vy + VH + 80) continue; if (e.dead) dead.push(e); else list.push({ y: e.perch ? e.y + 120 : e.y, e }); }
   if (playing && G.state !== 'dead') list.push({ y: P.y, e: P });
+  if (playing && G.festival && !G.under) for (const pl of W.places) if (pl.type === 'castle' && pl.city && dist(P.x, P.y, pl.x, pl.y) < 1400) festDeco(pl).forEach(d => list.push({ y: d.y + (d.k === 'bunting' ? -400 : 0), fd: d }));
   if (playing && P.grave && !G.under && Math.abs(P.grave.x - cam.x) < VW && Math.abs(P.grave.y - cam.y) < VH) list.push({ y: P.grave.y + 8, grave: 1 });
   dead.forEach(e => drawEntity(g, e, t));
   list.sort((a, b) => a.y - b.y);
@@ -7121,6 +7337,7 @@ function renderWorld(t) {
       g.globalAlpha = 1;
     } else if (it.o) { drawStruct(g, it.o, t); if (it.o.home) { const o = it.o; g.fillStyle = '#3a2a1a'; g.fillRect(o.x + o.w - 10, o.y - 30, 2, 26); g.fillStyle = '#e7c35a'; g.beginPath(); g.moveTo(o.x + o.w - 8, o.y - 30); g.lineTo(o.x + o.w + 8, o.y - 25); g.lineTo(o.x + o.w - 8, o.y - 20); g.fill(); } }
     else if (it.grave) drawGrave(g, P.grave, t);
+    else if (it.fd) drawFestDeco(g, it.fd, t);
     else drawEntity(g, it.e, t);
   }
   signQueue.forEach(o => drawSignPlanks(g, o)); signQueue.length = 0;
@@ -7159,6 +7376,8 @@ function renderWorld(t) {
       lc.globalCompositeOperation = 'destination-out';
       const light = (x, y, r, i) => { const sx = (x - vx) * s, sy = (y - vy) * s, rr = r * s; if (sx < -rr || sy < -rr || sx > lw + rr || sy > lh + rr) return; const gr = lc.createRadialGradient(sx, sy, 0, sx, sy, rr); gr.addColorStop(0, `rgba(0,0,0,${i})`); gr.addColorStop(1, 'rgba(0,0,0,0)'); lc.fillStyle = gr; lc.fillRect(sx - rr, sy - rr, rr * 2, rr * 2); };
       if (playing) light(P.x, P.y, 190, .85);
+      for (const e of ents) if (e.torch && !e.dead) light(e.x, e.y - 8, 170, .85);
+      for (const it of list) { const d = it.fd; if (!d) continue; if (d.k === 'bonfire') light(d.x, d.y - 10, 260, 1); else if (d.k === 'lanternpost') light(d.x, d.y - 33, 120, .8); else if (d.k === 'bunting' && G.festival === 'solstice') light(d.x + d.w / 2, d.y + 20, 240, .5); }
       for (const e of ents) if (e.burn > 0 && !e.dead) light(e.x, e.y, 110, .8);
       for (const p of projs) if (p.arrow === 'fire_arrow' && (!p.stuck || p.life > 1)) light(p.x, p.y, 70, .7);
       for (const it of list) { const o = it.o; if (!o) continue; if (o.k === 'campfire') light(o.x + 16, o.y + 14, 210 + Math.sin(t * 9) * 8, 1); else if (o.k === 'lamp') light(o.x + 10, o.y - 22, 150, .95); else if (o.k === 'f_hearth') light(o.x + o.w / 2, o.y + o.h + 10, 260 + Math.sin(t * 7) * 10, 1); else if (o.k === 'f_candle') light(o.x + 7, o.y + 4, 130, .9); else if (o.k === 'f_window') light(o.x + 15, o.y + 90, 150, .55); else if (o.k === 'f_bar') light(o.x + o.w / 2, o.y + 10, 200, .6); else if (o.k === 'f_altar') light(o.x + o.w / 2, o.y + 10, 170, .8); else if (o.k === 'cathedral') light(o.x + o.w / 2, o.y + o.h - 30, 260, .85); else if (o.k === 'fountain') light(o.x + o.w / 2, o.y + o.h / 2, 90, .4); else if (o.k === 'house' || o.k === 'barracks' || o.k === 'smithy' || o.k === 'chapel' || o.k === 'stable' || o.k === 'hut') light(o.x + o.w / 2, o.y + o.h, 80, .7); else if (o.k === 'keep') light(o.x + o.w / 2, o.y + o.h, 200, .8); else if (o.k === 'tower' || o.k === 'wtower' || o.k === 'bannerpole') light(o.x + o.w / 2, o.y + o.h / 2, 110, .6); else if (o.k === 'hidden' && (o.kind === 'grove' || o.kind === 'shrine')) light(o.x + o.w / 2, o.y + o.h / 2, 160, .8); else if (o.k === 'torch') light(o.x + 8, o.y + 6, 200 + Math.sin(t * 9 + o.x) * 8, 1); else if (o.k === 'crystal') light(o.x + 14, o.y + 18, 150, .8); else if (o.k === 'dexit') light(o.x + 18, o.y + 10, 170, .9); else if (o.k === 'dentrance' && o.theme !== 'crypt') light(o.x + o.w / 2 - (o.theme === 'cave' ? 30 : 0), o.y + o.h - 16, o.theme === 'ice' ? 120 : 80, .6); }
@@ -7222,7 +7441,8 @@ function updateHUD(force) {
   const own = ownerAtPx(P.x, P.y); const rs = statusOf(K.rep[own]);
   if (G.under) { setIf('terr', 'u' + G.under.id, () => { $('terrBanner').src = bannerURL(G.under.owner); $('terrName').textContent = G.under.name; }); setIf('terrRep', 'u' + G.under.id, () => $('terrRep').innerHTML = G.under.interior ? (W.places[G.under.place] ? W.places[G.under.place].name : KDATA[G.under.owner || 0].full) : 'Underground'); }
   else setIf('terr', own, v => { $('terrBanner').src = bannerURL(v); $('terrName').textContent = KDATA[v].full; });
-  if (!G.under) setIf('terrRep', `${repTitle(own)}|${Math.round(K.rep[own])}|${rs.c}`, () => $('terrRep').innerHTML = `<span style="color:${K.rep[own] <= -40 ? '#ff5a3a' : rs.c}">${repTitle(own)}</span> · Rep ${sgn(K.rep[own])}`);
+  const bnt = G.bounty && G.bounty[own] >= 5 ? G.bounty[own] : 0;
+  if (!G.under) setIf('terrRep', `${repTitle(own)}|${Math.round(K.rep[own])}|${rs.c}|${bnt}`, () => $('terrRep').innerHTML = `<span style="color:${K.rep[own] <= -40 ? '#ff5a3a' : rs.c}">${repTitle(own)}</span> · Rep ${sgn(K.rep[own])}${bnt ? ` · <span style="color:#ff8a6a">Wanted ${bnt}g</span>` : ''}`);
   const S = P.S;
   const ammoId = S.bow ? curAmmo() : null, ammoN = ammoId ? countItem(ammoId) : 0;
   setIf('sw', S.wid + '|' + S.wq + '|' + Math.round(S.dmg) + '|' + ammoId + '|' + ammoN, () => { const it = getItem(P.eq.weapon); const sl = $('slotW'); sl.querySelector('img').src = it ? itemIcon(it.id) : itemIcon('wooden_sword'); sl.querySelector('.sn').innerHTML = it ? `<span style="color:${itemColor(it)}">${itemName(it)}</span>` : 'Bare Fists'; sl.querySelector('.ss').textContent = S.bow ? (ammoId ? `${ITEMS[ammoId].name} ×${ammoN} · [R] switch` : 'No arrows!') : `${Math.round(S.dmg)} dmg · ${S.spd} spd · ${S.rng} rng`; });
@@ -7251,6 +7471,7 @@ function updateHUD(force) {
     if (G.fishing) pr = G.fishing.st === 'bite' ? '<span style="color:#ffe08a">A bite! </span><kbd>E</kbd> Reel in!' : 'Fishing… wait for a bite, then press <kbd>E</kbd>';
     if (input.force) pr = '<span style="color:#ff9a7a">⚠ Holding Q: your attacks will hit friendly and neutral characters</span>' + (pr ? ' &nbsp; ' + pr : '');
   }
+  if (G.contest) { const C = G.contest; pr = C.kind === 'archery' ? `🎯 Archery contest · ${C.hits} hits · ${Math.ceil(C.t)}s` : C.kind === 'pie' ? `🥧 EAT! Mash <kbd>E</kbd> · ${C.n} pies · ${Math.ceil(C.t)}s` : `🔔 Strike with <kbd>E</kbd> when full: <span style="display:inline-block;width:120px;height:10px;background:#2a1a10;border:1px solid #d8b25a;vertical-align:middle"><span style="display:block;height:100%;width:${Math.round((Math.sin(C.ph) + 1) * 50)}%;background:linear-gradient(90deg,#d8b25a,#ff5a3a)"></span></span> · ${C.tries} left`; }
   if (PAD.on) pr = pr.replace(/<kbd>E<\/kbd>/g, '<kbd>X</kbd>').replace(/<kbd>F<\/kbd>/g, '<kbd>B</kbd>');
   else if (TOUCH.on) pr = pr.replace(/press <kbd>E<\/kbd>/g, 'tap ✋').replace(/<kbd>E<\/kbd>/g, '<kbd>✋</kbd>');
   else if (keyOf('KeyE') !== 'KeyE') pr = pr.replace(/<kbd>E<\/kbd>/g, `<kbd>${keyName('KeyE')}</kbd>`);
@@ -7430,7 +7651,7 @@ addEventListener('keydown', ev => {
   if (dialogOpen) { const n = parseInt(e.key); if (n >= 1) { const b = $('dOpts').children[n - 1]; if (b && !b.disabled) b.click(); } return; }
   if (G.state !== 'play' || e.repeat) return;
   const tog = { KeyI: 'inv', KeyM: 'map', KeyK: 'dip', KeyJ: 'quests', KeyP: 'skills', KeyL: 'journal' }[e.code]; if (tog === 'journal' && !UI.ids.journal) return;
-  if (tog) { if (tog === 'map' && G.under) { toast(G.under.interior ? 'Step outside to read your map.' : 'Your map is no use down here. Find your way back to the ladder.'); return; } UI.toggle(tog); return; }
+  if (tog) { if (tog === 'map' && G.under && !G.under.interior) { toast('Your map is no use down here. Find your way back to the ladder.'); return; } UI.toggle(tog); return; }
   if (UI.stack.length) return;
   if (e.code === 'Space') tryDodge();
   else if (e.code === 'KeyE') doInteract();
@@ -7589,6 +7810,7 @@ function resetState() {
   ents = []; pickups = []; projs = []; parts = []; texts = []; horseEnt = null; uidCounter = 1; nextEid = 1;
   W.places.forEach(p => { p.disc = false; p.rumor = false; p.spawned = false; p.dead = []; p.cleared = false; p.chestOpened = false; p.clearedAt = 0; p.offers = null; p.request = false; p.blessed = false; p.investigated = false; p.rumorUsed = false; p.backerRevealed = false; p.wellT = -999; p.sboss = null; p.ddead = null; p.dchests = null; p.dcleared = false; p.legendTaken = false; if (p.type === 'outpost') p.owner = p.baseOwner; for (const k in p) if (k.startsWith('_shop_')) delete p[k]; });
   (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false; G.lastPay = null; G.siege = null; G.tourney = null; G.stats = newStats(); G.tut = null;
+  G.bounty = [0, 0, 0, 0]; G.contest = null; G.festival = null;
   Object.assign(G, { time: 0, dipT: 0, eventT: 50, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, questT: 0 });
   newKingdoms(); newQuests(); newFog();
 }
@@ -7632,7 +7854,7 @@ function saveGame(silent, quiet) {
   const qStrip = q => { const c = Object.assign({}, q); delete c.ent; delete c.foes; return c; };
   const data = {
     v: 1, seed: W.seed, time: G.time, kills: G.kills, uid: uidCounter, waypoint: G.mapWaypoint, savedAt: Date.now(),
-    P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, skills: P.skills, sp: P.sp, comps: P.comps, houses: P.houses, stash: P.stash, forts: P.forts, fortGuards: P.fortGuards, fief: P.fief || null, pins: P.pins || [], grave: P.grave || null, trophies: P.trophies || [],
+    P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, skills: P.skills, sp: P.sp, comps: P.comps, houses: P.houses, stash: P.stash, forts: P.forts, fortGuards: P.fortGuards, fief: P.fief || null, pins: P.pins || [], grave: P.grave || null, trophies: P.trophies || [], guild: P.guild || null,
       party: partyNow().filter(e => !e.comp || true).map(e => ({ comp: e.comp, kind: e.kind, name: e.name, hp: Math.round(Math.max(1, e.hp)), k: e.k })), mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
     horse: horseEnt ? { x: horseEnt.x, y: horseEnt.y } : null,
     K: { rel: K.rel, aff: K.aff, rep: K.rep, mil: K.mil, reasons: K.reasons, events: K.events, kev: K.kev, repWhy: K.repWhy, gifts: K.gifts, log: K.log, cd: {} },
@@ -7641,7 +7863,7 @@ function saveGame(silent, quiet) {
     exp: packBits(EXP),
   };
   data.opts = G.opts || normOpts(); data.stats = G.stats; data.tut = G.tut && !G.tut.done ? G.tut.step : null;
-  data.mode = G.mode; data.slot = G.slot || 1; if (G.mode === 'story') data.story = STORY;
+  data.mode = G.mode; data.slot = G.slot || 1; data.bounty = G.bounty || [0, 0, 0, 0]; if (G.mode === 'story') data.story = STORY;
   if (WIPED) return;
   try { localStorage.setItem(saveKey(), JSON.stringify(data)); if (quiet) { } else if (!silent) { toast(`Game saved to slot ${G.slot || 1}.`, 'good'); SND.play('pickup'); } else toast('Autosaved.', ''); }
   catch (e) { toast('Could not save: browser storage is unavailable or full.', 'bad'); }
@@ -7651,6 +7873,7 @@ function loadGame(d) {
   newPlayer();
   Object.assign(P, d.P); P.inv = d.P.inv; P.eq = d.P.eq; P.mounted = false; uidCounter = d.uid || (Math.max(0, ...P.inv.map(i => i.uid)) + 1);
   recalc();
+  G.bounty = d.bounty || [0, 0, 0, 0]; G.contest = null; G.festival = null;
   G.time = d.time || 0; G.kills = d.kills || 0; G.mapWaypoint = d.waypoint || null; G.stats = Object.assign(newStats(), d.stats || {});
   Object.assign(K, d.K); K.cd = {};
   Q.active = d.Q.active || []; Q.done = d.Q.done || []; Q.tracked = d.Q.tracked; Q.next = d.Q.next || 1;
@@ -9250,6 +9473,8 @@ function update(dt) {
   }
   if ((G.dipT += dt) >= 40) { G.dipT = 0; dipTick(); }
   const dnow = dayNum(); if (G.lastPay == null) G.lastPay = dnow; else if (dnow !== G.lastPay) { G.lastPay = dnow; dailyTick(); }
+  if ((G.lawT = (G.lawT || 0) - dt) <= 0) { G.lawT = .25; thiefTick(); if ((G.law2 = (G.law2 || 0) - 1) <= 0) { G.law2 = 4; lawTick(); cityTick(); guildTick(); festivalTick(); if (G.bounty) G.bounty = G.bounty.map(v => v > 1 ? v * Math.pow(.9, 1 / (DAYLEN / 1)) : 0); } }
+  contestTick(dt);
   if ((G.eventT -= dt) <= 0) { G.eventT = rand(60, 115); if (!G.under && !G.tut) worldEvent(); } // no raids or ambushes mid-lesson
   if ((G.autosaveT += dt) >= 180) { G.autosaveT = 0; saveGame(true); }
   if ((ambT -= dt) <= 0) {
@@ -9284,8 +9509,8 @@ function frame(now) {
     if (G.state !== 'menu' && P) {
       updateHUD(false);
       if (settings.minimap && (mmT -= 1) <= 0) { mmT = 2; drawMinimap(); }
-      if (UI.isOpen('map')) drawBigMap();
-      if (UI.isOpen('dip') && dipDirty) renderDiplomacy();
+      if (UI.isOpen('map')) withOverworld(drawBigMap);
+      if (UI.isOpen('dip') && dipDirty) withOverworld(renderDiplomacy);
     }
   }
   requestAnimationFrame(frame);
