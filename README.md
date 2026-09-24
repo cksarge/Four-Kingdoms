@@ -45,6 +45,8 @@ Before a new game you can set:
 | 1 / 2 / 3 | Eat food / drink potion / use bandage |
 | Shift (hold) | Sprint, draining stamina |
 | Q + left click | Hit characters who aren't hostile, such as villagers, guards or peaceful animals. Normally your attacks pass through them. Attacking people costs reputation and turns guards against you |
+| G | Companions: follow me / hold position |
+| P | Skills |
 | Esc | Pause |
 
 ## Features
@@ -63,6 +65,10 @@ Before a new game you can set:
 - Carriages for fast travel between towns you have discovered (the castle coachman or any village signpost), for a fee by the league.
 - Bounty boards on every signpost: bandit captains, wanted outlaws and dangerous beasts.
 - Dungeons to explore underground: smugglers' caves, spider caves, crypts, abandoned mines and an ice cave in the snowfields. Each is a torch-lit maze with traps (spike plates, dart launchers, webs), side chests and a boss guarding a hoard. The first boss of each kind drops a legendary weapon. Saving underground returns you to the entrance.
+- Skills: a point every level for Swordsmanship, Archery, Riding, Leadership and Trade.
+- Companions and soldiers: hire spearmen, bowmen and knights from castle captains (daily pay), or recruit four named sellswords found in the villages, including a healer and a venom archer. Named companions are knocked down, never killed.
+- Property: buy a house in a friendly village (rest, a safe stash, and you wake there if you fall), or restore a ruined fort that pays a daily income and can be garrisoned.
+- Crafting: fletch every arrow type at market benches, and at the royal forges improve gear up to Masterwork or bind a dungeon relic into a blade to enchant it.
 - Fishing at little jetties on rivers, lakes and the coast (buy a rod at a village market), and hermits in the wilds who sell tonics, training and secrets.
 - About 45 music tracks, all generated in code: rotating day and night overworld songs, combat and boss themes, a village, castle and fort theme for each kingdom, and story-mode themes. The music changes with where you are and what you're doing.
 
