@@ -12,6 +12,7 @@ When you start a new game you choose a mode:
 
 - **Story Mode**: a hedge knight finds a dying royal courier, and the trail leads to an ancient conspiracy. A shared opening splits into three storylines depending on your choices (unmasking the Ashen Circle, stopping the Hollow King, or seizing power yourself). There are about 20 main quests per playthrough and 15 endings. Which ending you get depends on your choices and on the state of the world: wars, alliances and your reputation with each kingdom. When the story ends you can keep playing the same world as a sandbox or return to the main menu.
 - **Sandbox**: the open world with no story.
+- **Tutorial**: a five-minute lesson with a drill sergeant in a training yard (movement, sprinting, combat, blocking and dodging, archery, riding and the menus). When it ends, the same world carries on as an endless sandbox game. It uses Knight difficulty and a Medium world, and shares the sandbox save slot.
 
 Story and sandbox games are saved separately, so starting one never overwrites the other.
 
