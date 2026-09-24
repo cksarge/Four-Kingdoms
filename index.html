@@ -316,6 +316,10 @@ select{font-family:var(--fb);font-size:14px;background:#1b130b;color:var(--ink);
 
 /* settings */
 #settingsScreen .panel{width:min(560px,calc(94vw/var(--ui-scale)))}
+.wipeBox{margin-top:14px;padding:4px 8px;border:1px solid rgba(201,88,74,.4);border-radius:6px;background:rgba(90,26,18,.18)}
+.wipeBox label small{display:block;font-size:13px;color:var(--muted);font-style:italic;font-family:var(--fb);text-transform:none;letter-spacing:0;font-weight:400}
+.wipeConfirm{padding:4px 4px 10px;font-size:14.5px;line-height:1.45;color:#f0d2c8}.wipeConfirm b{color:#ff9d8a}
+.wipeBtns{display:flex;gap:10px;justify-content:center;margin-top:10px}
 .setRow{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:8px 4px;border-bottom:1px solid rgba(154,117,54,.2);font-size:16px}
 .setRow label{font-family:var(--fh);font-size:13px;letter-spacing:.06em}
 input[type=range]{-webkit-appearance:none;appearance:none;width:220px;height:6px;border-radius:3px;background:linear-gradient(90deg,#b88c3a var(--p,50%),#1b130b var(--p,50%));border:1px solid #6b4e26;outline:none}
@@ -656,7 +660,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div class="dipGrid">
         <div class="dipCol" id="dipColL"></div>
         <div class="dipMid">
-          <div class="graphBox"><svg id="dipGraph" viewBox="0 0 450 400"></svg></div>
+          <div class="graphBox"><svg id="dipGraph" viewBox="0 -4 450 428"></svg></div>
           <div class="legendRow">
             <span style="--c:#4fd07a">Allied</span><span style="--c:#9ccf6a">Friendly</span><span style="--c:#9a9280">Neutral</span><span style="--c:#e0a040">Tense</span><span style="--c:#e0603a">Hostile</span><span style="--c:#ff2a1a">At War</span>
           </div>
@@ -854,8 +858,9 @@ function compass(dx, dy) { const a = Math.atan2(dy, dx); const dirs = ['East', '
 /* ---------------- Settings ---------------- */
 const DEFAULT_SETTINGS = { music: 0.45, sound: 0.7, effects: 0.6, shake: true, dmgNums: true, minimap: true, uiScale: 1, quality: 'high' };
 let settings = loadSettings();
+let WIPED = false; // set while all save data is being deleted, so nothing writes it back
 function loadSettings() { try { return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem('fk_settings') || '{}')); } catch (e) { return Object.assign({}, DEFAULT_SETTINGS); } }
-function saveSettings() { try { localStorage.setItem('fk_settings', JSON.stringify(settings)); } catch (e) { } }
+function saveSettings() { if (WIPED) return; try { localStorage.setItem('fk_settings', JSON.stringify(settings)); } catch (e) { } }
 function applySettings() {
   document.documentElement.style.setProperty('--ui-scale', settings.uiScale);
   $('mmWrap').classList.toggle('hidden', !settings.minimap);
@@ -2529,6 +2534,7 @@ function damage(t, amt, src, o = {}) {
     if (src === P) { if (!wasHostile && !o.dot) crime(t); if (t.place != null) alertPlace(t.place, P); }
     if (t.civ) { t.flee = 3; t.fleeFrom = src; }
   }
+  if (t.tutYield && t.hp < t.maxHp * .3 && G.tut && G.tut.step < 7) { t.hp = t.maxHp * .7; t.say = { text: G.tut.step === 6 ? 'Not yet! Show me a dodge first.' : 'Not yet! Show me a block first.', t: 3 }; return amt; } // no yielding before the lesson gets there
   if (t.tutYield && t.hp < t.maxHp * .3) { Object.assign(t, { tutYield: false, aggroPlayer: false, target: null, faction: 'civ', civ: true, boss: false, stand: true }); t.say = { text: 'I yield! Mercy, sir!', t: 3 }; SND.play('yield'); if (G.tut) G.tut.yielded = true; return amt; }
   if (t.tourney && t.hp < t.maxHp * .15) { t.hp = Math.max(1, t.hp); tourneyYield(t); return amt; } // bouts are to the yield
   if (t.hp <= 0 && t.comp) { t.hp = 1; t.downed = 15; t.target = null; t.wind = 0; toast(`${t.name} is down!`, 'bad'); return amt; }
@@ -2747,6 +2753,7 @@ function separate() {
 /* ---------------- Projectiles, pickups, particles ---------------- */
 function arrowCanHit(p, t) {
   if (t === p.src || t.dead) return false;
+  if (t.dummy && !t.isTarget) return false; // arrows fly past the sword dummy; the archery target is behind it
   if (p.src === P) return playerHostileTo(t) || (p.force && !t.isPlayer && !t.important && t.kind !== 'horse');
   return hostile(p.src, t);
 }
@@ -4003,11 +4010,11 @@ const TUT = [
   { t: 'Block a strike from the recruit: hold right click while facing them', at: 'recruit', enter: () => tutRecruit(), done: T => T.blocked },
   { t: 'Dodge a strike: press Space just as the blow lands', at: 'recruit', done: T => T.dodged },
   { t: 'Beat the recruit until they yield', at: 'recruit', done: T => T.yielded },
-  { t: 'Press Tab to swap to the bow Mara gave you', enter: () => { const b = addItem('short_bow', 1, 1, true); addItem('arrow', 1, 25, true); equip(b.uid, true, 'weapon2'); toast('Mara hands you a <b>Short Bow</b> and 25 arrows.', 'gold'); }, done: () => P.S.bow },
+  { t: 'Press Tab to swap to the bow Mara gave you', enter: () => { let b = P.inv.find(i => i.id === 'short_bow'); if (!b) { b = addItem('short_bow', 1, 1, true); addItem('arrow', 1, 25, true); toast('Mara hands you a <b>Short Bow</b> and 25 arrows.', 'gold'); } if (P.eq.weapon !== b.uid) equip(b.uid, true, 'weapon2'); }, done: () => P.S.bow },
   { t: 'Hold left click to draw, release to shoot the archery target (2 hits)', at: 'target', done: T => T.arrows >= 2 },
   { t: 'Press I to open your inventory', done: T => T.opened && T.opened.inv },
   { t: 'Press M to open the map', done: T => T.opened && T.opened.map },
-  { t: 'Close the map (Esc), then press F to mount your horse', enter: () => { if (!P.eq.horse) { const h = addItem('old_horse', 1, 1, true); equip(h.uid, true); toast('Mara gives you an <b>Old Horse</b>. It is slow, but it is yours.', 'gold'); } }, done: () => P.mounted },
+  { t: 'Press F to mount your horse', enter: () => { if (!P.eq.horse) { const h = addItem('old_horse', 1, 1, true); equip(h.uid, true); toast('Mara gives you an <b>Old Horse</b>. It is slow, but it is yours.', 'gold'); } }, done: () => P.mounted },
   { t: 'Press J to open your quest journal', done: T => T.opened && T.opened.quests },
   { t: 'Return to Sergeant Mara', at: 'mara', done: T => T.graduated },
 ];
@@ -4028,7 +4035,7 @@ function tutBegin(step) {
   const e = (kind, dx, dy, o) => { const f = findFree(sp.x + dx * TS, sp.y + dy * TS); return mkActor(kind, f.x, f.y, Object.assign({ tut: true, persistent: true, stand: true, standFace: Math.PI / 2 }, o)); };
   G.tut.mara = e('npc', 0, 0, { role: 'instructor', name: 'Sergeant Mara', _look: { body: '#9c3b2c', mail: 1, head: 'hair', hair: '#6a3a1a', skin: '#e0b48a', cape: '#6e1a12', tabard: '#c23a2c', weapon: { wk: 'spear', len: 46, col: '#9ba1a8' } } });
   G.tut.dummy = e('dummy', 3, 0, { dummy: true, name: 'Training Dummy', atkCd: 1e9, aggro: 0 });
-  G.tut.target = e('dummy', 9, -1, { dummy: true, isTarget: true, name: 'Archery Target', atkCd: 1e9, aggro: 0 });
+  G.tut.target = e('dummy', 9, -2, { dummy: true, isTarget: true, name: 'Archery Target', atkCd: 1e9, aggro: 0 });
   Q.active = Q.active.filter(q => q.type !== 'tut'); G.tut.q = { id: Q.next++, type: 'tut', title: 'The Training Yard', obj: '', desc: 'Sergeant Mara is teaching you the basics. Follow her instructions.', giverName: 'Sergeant Mara', reward: { gold: 50, xp: 60, rep: {}, rel: [], items: [] }, started: G.time };
   Q.active.unshift(G.tut.q); Q.tracked = G.tut.q.id;
   tutGo(step || 0);
@@ -4045,7 +4052,9 @@ function tutGo(i) {
 function tutTick(dt) {
   const T = G.tut; if (!T || T.done) return;
   if (P.sprinting) T.sprint += dt;
-  if (T.recruit && T.step >= 5 && T.step <= 7 && T.recruit.dead) { T.recruit = null; tutRecruit(); }
+  if (T.step === 9 && !P.inv.some(i => ITEMS[i.id].type === 'ammo')) { addItem('arrow', 1, 15, true); toast('Mara tosses you another bundle of arrows.', ''); } // never run dry at the butts
+  if (T.recruit && T.step >= 5 && T.step <= 7 && T.recruit.dead && !T.yielded) { T.recruit = null; tutRecruit(); }
+  if (T.recruit && T.step >= 5 && T.step <= 6 && T.recruit.civ) { removeEnt(T.recruit); T.recruit = null; T.yielded = false; tutRecruit(); } // a recruit who yielded early can't teach blocking or dodging
   const st = TUT[T.step]; if (st && st.done(T)) { if (T.step === 7 || T.step === 2) T.q.obj = ''; tutGo(T.step + 1); }
 }
 function tutTarget(q) { const T = G.tut; if (!T) return null; const st = TUT[T.step]; const e = st && st.at && T[st.at === 'mara' ? 'mara' : st.at]; return e && !e.dead ? { x: e.x, y: e.y } : null; }
@@ -5923,10 +5932,21 @@ function renderSettings() {
   const sw = (key, label) => `<div class="setRow"><label>${label}</label><div class="switch ${settings[key] ? 'on' : ''}" data-k="${key}"></div></div>`;
   const seg = (key, label, opts) => `<div class="setRow"><label>${label}</label><div class="seg">${opts.map(([v, n]) => `<button class="${settings[key] === v ? 'on' : ''}" data-k="${key}" data-v="${v}">${n}</button>`).join('')}</div></div>`;
   b.innerHTML = slider('music', 'Music Volume') + slider('sound', 'Sound Volume') + slider('effects', 'Effects Volume') + sw('shake', 'Screen Shake') + sw('dmgNums', 'Damage Numbers') + sw('minimap', 'Minimap') +
-    seg('uiScale', 'UI Scale', [[.85, '85%'], [1, '100%'], [1.15, '115%'], [1.3, '130%']]) + seg('quality', 'Graphics Quality', [['low', 'Low'], ['medium', 'Medium'], ['high', 'High']]);
+    seg('uiScale', 'UI Scale', [[.85, '85%'], [1, '100%'], [1.15, '115%'], [1.3, '130%']]) + seg('quality', 'Graphics Quality', [['low', 'Low'], ['medium', 'Medium'], ['high', 'High']])
+    + `<div class="wipeBox" id="wipeBox"><div class="setRow" style="border:0"><label>Save Data<small>Story and sandbox saves, endings, achievements and settings</small></label><button class="btn red sm" id="wipeAsk">Delete All Save Data</button></div>
+      <div class="wipeConfirm hidden" id="wipeConfirm"><b>Delete everything?</b> Both saved games, every ending and achievement you have discovered, and your settings will be erased from this browser. This cannot be undone.<div class="wipeBtns"><button class="btn red" id="wipeYes">Delete Everything</button><button class="btn" id="wipeNo">Cancel</button></div></div></div>`;
+  $('wipeAsk').onclick = () => { $('wipeConfirm').classList.remove('hidden'); $('wipeAsk').disabled = true; SND.play('ui'); };
+  $('wipeNo').onclick = () => { $('wipeConfirm').classList.add('hidden'); $('wipeAsk').disabled = false; SND.play('ui'); };
+  $('wipeYes').onclick = wipeAllData;
   b.querySelectorAll('input[type=range]').forEach(el => el.oninput = () => { settings[el.dataset.k] = el.value / 100; el.style.setProperty('--p', el.value + '%'); el.nextElementSibling.textContent = el.value; saveSettings(); SND.init(); SND.apply(); });
   b.querySelectorAll('.switch').forEach(el => el.onclick = () => { settings[el.dataset.k] = !settings[el.dataset.k]; el.classList.toggle('on'); saveSettings(); applySettings(); });
   b.querySelectorAll('.seg button').forEach(el => el.onclick = () => { const k = el.dataset.k; settings[k] = k === 'uiScale' ? +el.dataset.v : el.dataset.v; saveSettings(); if (k === 'quality') chunkCache.clear(); applySettings(); renderSettings(); });
+}
+
+function wipeAllData() {
+  WIPED = true;
+  try { Object.keys(localStorage).filter(k => k.startsWith('fk_')).forEach(k => localStorage.removeItem(k)); } catch (e) { }
+  location.reload();
 }
 
 /* ---------------- Shop ---------------- */
@@ -6476,6 +6496,7 @@ function saveGame(silent) {
   };
   data.opts = G.opts || normOpts(); data.stats = G.stats; data.tut = G.tut && !G.tut.done ? G.tut.step : null;
   if (G.mode === 'story') { data.mode = 'story'; data.story = STORY; }
+  if (WIPED) return;
   try { localStorage.setItem(saveKey(), JSON.stringify(data)); if (!silent) { toast('Game saved.', 'good'); SND.play('pickup'); } else toast('Autosaved.', ''); }
   catch (e) { toast('Could not save: browser storage is unavailable or full.', 'bad'); }
 }
@@ -8083,7 +8104,7 @@ function update(dt) {
   }
   if ((G.dipT += dt) >= 40) { G.dipT = 0; dipTick(); }
   const dnow = dayNum(); if (G.lastPay == null) G.lastPay = dnow; else if (dnow !== G.lastPay) { G.lastPay = dnow; dailyTick(); }
-  if ((G.eventT -= dt) <= 0) { G.eventT = rand(60, 115); if (!G.under) worldEvent(); }
+  if ((G.eventT -= dt) <= 0) { G.eventT = rand(60, 115); if (!G.under && !G.tut) worldEvent(); } // no raids or ambushes mid-lesson
   if ((G.autosaveT += dt) >= 180) { G.autosaveT = 0; saveGame(true); }
   if ((ambT -= dt) <= 0) {
     ambT = rand(1.5, 4);
