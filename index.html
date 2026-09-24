@@ -815,6 +815,10 @@ const SND = {
       case 'bowdraw': this.noise(.4, .05, 'sfx', 650, 5, 1.7); this.tone(150, .4, 'sawtooth', .015, 'sfx', 0, 1.35, .1); break;
       case 'swap': this.noise(.12, .18, 'sfx', 2600, 2, .6); this.tone(700, .08, 'triangle', .06, 'sfx', .04); break;
       case 'xbow': this.noise(.08, .3, 'sfx', 900, 1, .4); this.tone(210, .1, 'square', .05, 'sfx', 0, .5); break;
+      case 'rain': this.noise(4, .05 * v, 'fx', 2600, .5, 1); this.noise(4, .035 * v, 'fx', 700, .6, 1, 'lowpass'); break;
+      case 'thunder': this.noise(2.8, .45, 'fx', 110, .6, .5, 'lowpass'); this.noise(.35, .28, 'fx', 700, .8, .4); break;
+      case 'cast': this.noise(.25, .12, 'sfx', 3000, 2, .4); this.noise(.1, .1, 'sfx', 600, 1, .5, 'lowpass', .35); break;
+      case 'splash': this.noise(.3, .22, 'sfx', 900, .6, .4, 'lowpass'); this.noise(.2, .1, 'sfx', 3500, 1.5, .5, 'bandpass', .05); break;
       case 'bowfull': this.tone(260, .07, 'triangle', .05); break;
       case 'bowshot': this.noise(.12, .28, 'sfx', 1700, 1.4, .45); this.tone(118, .16, 'triangle', .2, 'sfx', 0, .55); break;
       case 'thunk': this.noise(.06, .22 * v, 'sfx', 520, 1.2, .5, 'lowpass'); break;
@@ -1265,6 +1269,10 @@ const ITEMS = {
   fire_arrow: { name: 'Fire Arrows', type: 'ammo', use: 'nock', stack: 1, val: 4, dmgM: .9, col: '#ff8a2a', eff: 'Sets foes burning', desc: 'Pitch-soaked rags, lit as you draw. Sets the target burning for 4 seconds. Water puts it out.' },
   venom_arrow: { name: 'Venom Arrows', type: 'ammo', use: 'nock', stack: 1, val: 4, dmgM: .9, col: '#6ad04a', eff: 'Poisons & slows', desc: 'Tipped with Eldorian marsh-adder venom. Poisons for 8 seconds and slows the target.' },
   frost_arrow: { name: 'Frost Arrows', type: 'ammo', use: 'nock', stack: 1, val: 5, dmgM: .95, col: '#9fdcff', eff: 'Chills: slows movement & attacks', desc: 'Heads of rime-iron from the snowfields of Draven. Chills the target, slowing its movement and attacks.' },
+  fishing_rod: { name: 'Fishing Rod', type: 'misc', val: 25, desc: 'A willow rod and line. Use it at the little jetties on rivers, lakes and the sea shore.' },
+  fish: { name: 'River Trout', type: 'misc', heal: 26, val: 6, stack: 1, food: 1, desc: 'Restores 26 health. [1]' },
+  salmon: { name: 'Silver Salmon', type: 'misc', heal: 45, val: 18, stack: 1, food: 1, desc: 'Restores 45 health. A fine catch. [1]' },
+  golden_carp: { name: 'Golden Carp', type: 'misc', val: 140, stack: 1, desc: 'A fish of legend, scaled like coin. Collectors pay handsomely.' },
   bread: { name: 'Bread', type: 'misc', heal: 22, val: 4, stack: 1, food: 1, desc: 'Restores 22 health. [1]' },
   meat: { name: 'Roast Meat', type: 'misc', heal: 40, val: 10, stack: 1, food: 1, desc: 'Restores 40 health. [1]' },
   potion: { name: 'Healing Draught', type: 'misc', heal: 85, val: 45, stack: 1, potion: 1, desc: 'Restores 85 health. [2]' },
@@ -1788,6 +1796,28 @@ function genWorld(seed) {
       if (towerOK(tx, ty)) { addTower(tx, ty, k); made++; }
     }
   }
+  // ---------- Fishing spots and hermit huts (own random stream) ----------
+  const prr = mulberry32(seed * 101 + 7), pri = (a, b) => a + Math.floor(prr() * (b - a + 1));
+  W.fish = []; W.hermits = [];
+  for (let a = 0, want = sc(16); a < 30000 && W.fish.length < want; a++) {
+    const tx = pri(6, WW - 7), ty = pri(6, WH - 7), i = ty * WW + tx, t = ter[i];
+    if (TINFO[t].block || t === T.ROAD || t === T.BRIDGE || t === T.FORD || t === T.FLOOR || W.solid[i] || W.clear[i]) continue;
+    let wd = null; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const tt = terAt(tx + dx, ty + dy), t2 = terAt(tx + dx * 2, ty + dy * 2); if ((tt === T.WATER || tt === T.SEA) && (t2 === T.WATER || t2 === T.SEA)) { wd = [dx, dy]; break; } }
+    if (!wd || W.fish.some(f => Math.hypot(f.tx - tx, f.ty - ty) < 26) || W.places.some(p => Math.hypot(p.tx - tx, p.ty - ty) < 10)) continue;
+    W.clear[i] = 1; W.fish.push({ tx, ty, dx: wd[0], dy: wd[1], x: (tx + .5) * TS, y: (ty + .5) * TS });
+    addObj({ k: 'jetty', x: tx * TS, y: ty * TS, w: TS, h: TS, dx: wd[0], dy: wd[1], sy: ty * TS + 4 });
+    W.interacts.push({ type: 'fish', x: (tx + .5) * TS, y: (ty + .5) * TS, fish: W.fish.length - 1 });
+  }
+  const HERMIT_N = ['Old Maddock', 'Mother Ysel', 'Brother Anselm', 'Grey Wendel', 'Sister Orla', 'Hob the Wise', 'Aldous Moss', 'Crone Hesper'];
+  for (let a = 0, want = Math.max(3, sc(5)); a < 30000 && W.hermits.length < want; a++) {
+    const tx = pri(12, WW - 13), ty = pri(12, WH - 13), t = ter[ty * WW + tx];
+    if (!(t === T.FOREST || t === T.DENSE || t === T.HILL || t === T.TUNDRA || t === T.SWAMP)) continue;
+    if (!freeRect(tx - 1, ty - 1, 3, 3)) continue; let busy = false; for (let y = ty - 2; y <= ty + 3; y++) for (let x = tx - 2; x <= tx + 2; x++) if (W.clear[y * WW + x]) busy = true; if (busy) continue;
+    if (W.places.some(p => Math.hypot(p.tx - tx, p.ty - ty) < 25) || W.hermits.some(h => Math.hypot(h.tx - tx, h.ty - ty) < 60)) continue;
+    setSolid(tx - 1, ty - 1, 2, 2); for (let y = ty - 2; y <= ty + 3; y++) for (let x = tx - 2; x <= tx + 2; x++) W.clear[y * WW + x] = 1;
+    addObj({ k: 'hut', tx: tx - 1, ty: ty - 1, tw: 2, th: 2, v: prr() });
+    W.hermits.push({ tx, ty, x: tx * TS, y: (ty + 1.9) * TS, name: HERMIT_N[W.hermits.length % HERMIT_N.length] });
+  }
   // ---------- Trees ----------
   for (let i = 0; i < CW * CHH; i++) { W.chunkTrees.push([]); W.chunkObjs.push([]); }
   for (let ty = 1; ty < WH - 1; ty++) for (let tx = 1; tx < WW - 1; tx++) {
@@ -2104,7 +2134,7 @@ function loose() {
   if (P.mounted && S.horse && S.horse.dmgB) dmg *= 1 + S.horse.dmgB;
   if (P.mounted && S.saddle) dmg *= 1.15;
   const storm = S.ench === 'storm' && d >= 1, pierce = P.pierceNext ? 3 : storm ? 2 : 0, v = spd * (storm ? 1.15 : 1); P.pierceNext = false;
-  projs.push({ x: P.x + Math.cos(a) * 16, y: P.y + Math.sin(a) * 16, vx: Math.cos(a) * v, vy: Math.sin(a) * v, dmg, crit, src: P, life: S.rng * (.45 + .55 * d) / spd, arrow: id, frost: S.frost, force: input.force, pierce });
+  projs.push({ x: P.x + Math.cos(a) * 16, y: P.y + Math.sin(a) * 16, vx: Math.cos(a) * v, vy: Math.sin(a) * v, dmg, crit, src: P, life: S.rng * (.45 + .55 * d) * wxRange() / spd, arrow: id, frost: S.frost, force: input.force, pierce });
   P.atkCd = .2; P.st -= S.shotCost * DIFF().stCost; P.stDelay = .6;
   SND.play('bowshot'); if (id === 'fire_arrow') SND.play('ignite');
 }
@@ -2130,6 +2160,8 @@ function updatePlayer(dt) {
   if (P.mounted) { spd *= P.S.hspd; if (t === T.DENSE || t === T.SWAMP || t === T.FORD) spd *= .55; else if (t === T.FOREST) spd *= .8; spd *= 1 - P.S.slow * .4; }
   else spd *= 1 - P.S.slow;
   if (countItem('supplies')) spd *= .9;
+  spd *= wxMove();
+  if (curSeason === 3 && t !== T.ROAD && t !== T.BRIDGE && t !== T.DESERT && t !== T.FLOOR && ownerAtPx(P.x, P.y) !== 1) spd *= .92; // winter snow
   P.blocking = input.rmb && P.S.block > 0 && !P.S.bow && !P.mounted && P.st > 1 && P.dodge <= 0 && P.swing <= 0;
   if (P.blocking) spd *= .45;
   if (P.drawing) spd *= P.mounted ? .8 : .55;
@@ -2155,6 +2187,7 @@ function updatePlayer(dt) {
   else if ((input.lmb || input.clicked) && P.atkCd <= 0 && P.dodge <= 0 && P.st >= P.S.cost * .5) startAttack();
   input.clicked = false;
   if (P.swing > 0) { P.swing -= dt; const prog = 1 - P.swing / P.swingDur; if (!P.hitDone && prog >= .42) { P.hitDone = true; doPlayerHit(); } }
+  updateFishing(dt);
   G.snowAmt = (G.snowAmt || 0) + ((inSnow() ? 1 : 0) - (G.snowAmt || 0)) * Math.min(1, dt * .7);
   // regen slowly out of combat
   P.combatT = (P.combatT || 0) - dt; if (P.combatT <= 0 && P.hp < P.maxHp) P.hp = Math.min(P.maxHp, P.hp + dt * DIFF().regen);
@@ -2406,7 +2439,7 @@ function think(e) {
   }
   if (e.target && (e.target.dead || dist(e.x, e.y, e.target.x, e.target.y) > e.aggro * 2.2 || !hostile(e, e.target) || (e.target.isPlayer && G.state !== 'play'))) e.target = null;
   if (!e.target || Math.random() < .25) {
-    const n = nearestHostile(e, e.target ? Math.min(e.aggro, dist(e.x, e.y, e.target.x, e.target.y) * .7) : e.aggro);
+    const n = nearestHostile(e, e.target ? Math.min(e.aggro, dist(e.x, e.y, e.target.x, e.target.y) * .7) : e.aggro * wxAggro());
     if (n) { if (!e.target && e.place != null) { e.target = n; alertPlace(e.place, n); } e.target = n; }
   }
 }
@@ -2432,7 +2465,7 @@ function updateActor(e, dt) {
       if (e.perch) { }
       else if (d < 150) { gx = e.x - Math.cos(a) * 50; gy = e.y - Math.sin(a) * 50; }
       else if (d > e.range * .85) { gx = tg.x; gy = tg.y; }
-      if (d < e.range && e.atkCd <= 0 && e.wind <= 0) e.wind = e.windT;
+      if (d < e.range * wxRange() && e.atkCd <= 0 && e.wind <= 0) e.wind = e.windT;
     } else {
       if (d > e.range * .75 + tg.r) { gx = tg.x; gy = tg.y; }
       else if (d < e.r + tg.r + 2) { gx = e.x - Math.cos(a) * 20; gy = e.y - Math.sin(a) * 20; sm = .5; }
@@ -2465,7 +2498,7 @@ function updateActor(e, dt) {
     if (l > 2) {
       dx /= l; dy /= l;
       if (e.detour > 0) { e.detour -= dt; const s = e.detourS; const ndx = dx * .3 - dy * s, ndy = dy * .3 + dx * s; dx = ndx; dy = ndy; }
-      const t = terAtPx(e.x, e.y); const sp = e.spd * sm * (TINFO[t].spd || 1) * (e.chill > 0 ? .45 : 1) * (e.poison > 0 ? .8 : 1);
+      const t = terAtPx(e.x, e.y); const sp = e.spd * sm * (TINFO[t].spd || 1) * (e.chill > 0 ? .45 : 1) * (e.poison > 0 ? .8 : 1) * wxMove();
       const ox = e.x, oy = e.y; moveEnt(e, dx * sp * dt, dy * sp * dt);
       const mv = Math.hypot(e.x - ox, e.y - oy); e.vx = (e.x - ox) / dt; e.vy = (e.y - oy) / dt;
       e.walk += mv * .09; if (face == null && mv > .2) face = Math.atan2(e.y - oy, e.x - ox);
@@ -2478,7 +2511,7 @@ function tickStatus(e, dt) {
   const q = QMUL();
   if (e.chill > 0) { e.chill -= dt; if (Math.random() < 6 * dt * q) addPart(e.x + rand(-8, 8), e.y - rand(0, 14), rand(-10, 10), rand(-20, -5), Math.random() < .5 ? '#e4f6ff' : '#9fdcff', .6, 2); }
   if (e.burn > 0) {
-    e.burn -= dt; const tt = terAtPx(e.x, e.y); if (tt === T.FORD || tt === T.SWAMP) e.burn = 0; // water puts the fire out
+    e.burn -= dt * (1 + wxOf('rain')); const tt = terAtPx(e.x, e.y); // rain halves burning if (tt === T.FORD || tt === T.SWAMP) e.burn = 0; // water puts the fire out
     if (Math.random() < 16 * dt * q) addPart(e.x + rand(-7, 7), e.y - rand(2, 16), rand(-12, 12), rand(-60, -30), pick(['#ff5a1a', '#ff9a2a', '#ffd04a']), .45, 3);
   }
   if (e.poison > 0) { e.poison -= dt; if (Math.random() < 4 * dt * q) addPart(e.x + rand(-7, 7), e.y - rand(0, 10), rand(-6, 6), rand(-25, -10), Math.random() < .5 ? '#7ad04a' : '#4a9a2a', .7, 2.5); }
@@ -2584,6 +2617,62 @@ let DAYLEN = 480;
 const dayNum = () => Math.floor(G.time / DAYLEN + .3) + 1;
 const tod = () => (G.time / DAYLEN + .3) % 1;
 function darkness() { const t = tod(); if (t > .27 && t < .73) return 0; const d = t <= .27 ? .27 - t : t - .73; return Math.min(.58, d * 4.2); }
+/* ---------------- Seasons & weather ---------------- */
+const SEASON_DAYS = 6, SEASONS = ['Spring', 'Summer', 'Autumn', 'Winter'];
+let curSeason = 0;
+const seasonOf = () => Math.floor((dayNum() - 1) / SEASON_DAYS) % 4;
+function applySeason(announce) {
+  curSeason = seasonOf(); buildPalette(); buildTreeSprites(); chunkCache.clear();
+  if (announce) { toast(['🌱 <b>Spring</b> has come. The roads are muddy and the fields green.', '☀ <b>Summer</b> arrives, long days and dry roads.', '🍂 <b>Autumn</b>. The harvest is in, and food is cheap in the markets.', '❄ <b>Winter</b> has come. Snow on the fields, slow travel, dear bread.'][curSeason], 'gold'); SND.play('bell'); }
+}
+const seasonPrice = id => ITEMS[id].food ? (curSeason === 3 ? 1.3 : curSeason === 2 ? .7 : 1) : 1;
+const WX = { clear: 'Clear', rain: 'Rain', fog: 'Fog', sand: 'Sandstorm', snow: 'Snowfall', blizzard: 'Blizzard' };
+function wxRegion() { if (inDesert()) return 'desert'; if (inSnow()) return 'snow'; const k = ownerAtPx(P.x, P.y); return k === 3 ? 'marsh' : k === 1 ? 'valoria' : 'green'; }
+function wxTable(reg) {
+  const sn = curSeason, dawn = tod() > .2 && tod() < .36;
+  if (reg === 'desert') return { clear: 6, sand: sn === 1 ? 3.5 : 2.2 };
+  if (reg === 'snow') return { clear: 3, snow: 3, blizzard: sn === 3 ? 4 : 2 };
+  const w = { clear: 5, rain: sn === 1 ? 1.2 : 2.6, fog: (reg === 'marsh' ? 2.4 : .8) * (dawn ? 3 : 1) };
+  if (reg === 'valoria') { w.rain *= .5; w.fog *= .5; }
+  else if (sn === 3) { w.snow = 2.4; w.rain *= .4; }
+  return w;
+}
+function pickWeather() { const tb = wxTable(wxRegion()); let tot = 0; for (const k in tb) tot += tb[k]; let r = Math.random() * tot; for (const k in tb) { r -= tb[k]; if (r <= 0) return k; } return 'clear'; }
+function updateWeather(dt) {
+  const w = G.wx || (G.wx = { type: 'clear', amt: 0, t: rand(60, 160), reg: null, next: null });
+  const reg = wxRegion();
+  if (reg !== w.reg) { w.reg = reg; if (!(w.type in wxTable(reg))) w.next = pickWeather(); } // weather belongs to a region, so it fades when you leave
+  w.t -= dt; if (w.t <= 0 && !w.next) w.next = pickWeather();
+  if (w.next) { w.amt = Math.max(0, w.amt - dt * .12); if (w.amt <= 0) { w.type = w.next; w.next = null; w.t = w.type === 'clear' ? rand(150, 360) : rand(120, 300); } }
+  else if (w.type !== 'clear') w.amt = Math.min(1, w.amt + dt * .1);
+  if (w.type === 'rain' && w.amt > .7 && Math.random() < dt / 30) { G.lightning = .3; setTimeout(() => SND.play('thunder'), rand(300, 1400)); }
+  if (G.lightning > 0) G.lightning -= dt;
+}
+const wxOf = type => G.wx && G.wx.type === type ? G.wx.amt : 0;
+const wxMove = () => 1 - .15 * (wxOf('sand') + wxOf('blizzard'));
+const wxAggro = () => 1 - .35 * wxOf('fog') - .2 * wxOf('blizzard') - .1 * wxOf('rain');
+const wxRange = () => 1 - .25 * wxOf('fog') - .4 * wxOf('sand') - .2 * wxOf('blizzard');
+function drawWeather(c, VW, VH, vx, vy, t) {
+  const md = (a, m) => ((a % m) + m) % m, hq = settings.quality !== 'low';
+  const rain = wxOf('rain'), fog = wxOf('fog'), sand = wxOf('sand'), bliz = wxOf('blizzard'), snow = Math.min(1.8, (G.snowAmt || 0) * .8 + wxOf('snow') + bliz * 1.6);
+  if (rain > .01) {
+    c.fillStyle = `rgba(20,30,50,${.2 * rain})`; c.fillRect(0, 0, VW, VH);
+    if (hq) { c.strokeStyle = `rgba(185,205,235,${.45 * rain})`; c.lineWidth = 1; c.beginPath(); const n = Math.round(170 * rain); for (let i = 0; i < n; i++) { const z = .6 + hash2(i, 21) * .8, x = md(hash2(i, 23) * 3000 - vx * z + t * 60 * z, VW + 40) - 20, y = md(hash2(i, 29) * 3000 - vy * z + t * 900 * z, VH + 40) - 20; c.moveTo(x, y); c.lineTo(x - 3 * z, y + 14 * z); } c.stroke(); }
+  }
+  if (snow > .02) {
+    c.fillStyle = `rgba(225,236,250,${.07 * Math.min(1, snow) + .14 * bliz})`; c.fillRect(0, 0, VW, VH);
+    if (hq) { const n = Math.round(110 * snow); c.fillStyle = '#fff'; for (let i = 0; i < n; i++) { const z = .5 + hash2(i, 11) * .9, x = md(hash2(i, 3) * 2000 - vx * z * .6 + Math.sin(t * .9 + i) * 14 + t * (16 + 260 * bliz) * z, VW + 20) - 10, y = md(hash2(i, 5) * 2000 - vy * z * .6 + t * (42 + 60 * bliz) * z, VH + 20) - 10; c.globalAlpha = Math.min(1, (.45 + .45 * z) * Math.min(1, snow)); c.fillRect(x, y, 1.2 * z + .6, 1.2 * z + .6); } c.globalAlpha = 1; }
+  }
+  if (sand > .01) {
+    c.fillStyle = `rgba(196,150,86,${.3 * sand})`; c.fillRect(0, 0, VW, VH);
+    if (hq) { c.strokeStyle = `rgba(236,206,150,${.55 * sand})`; c.lineWidth = 1.2; c.beginPath(); const n = Math.round(90 * sand); for (let i = 0; i < n; i++) { const z = .5 + hash2(i, 41) * .9, x = md(hash2(i, 43) * 3000 - vx * z + t * 520 * z, VW + 60) - 30, y = md(hash2(i, 47) * 3000 - vy * z + Math.sin(t * 2 + i) * 10, VH + 20) - 10; c.moveTo(x, y); c.lineTo(x - 18 * z, y + 2); } c.stroke(); }
+  }
+  if (fog > .01) {
+    const gr = c.createRadialGradient(VW / 2, VH / 2, 70, VW / 2, VH / 2, Math.max(VW, VH) * .62); gr.addColorStop(0, `rgba(205,210,215,${.1 * fog})`); gr.addColorStop(1, `rgba(205,210,215,${.75 * fog})`); c.fillStyle = gr; c.fillRect(0, 0, VW, VH);
+    if (hq) for (let i = 0; i < 7; i++) { const x = md(hash2(i, 51) * 3000 - vx * .8 + t * 9, VW + 400) - 200, y = md(hash2(i, 53) * 3000 - vy * .8, VH + 300) - 150; c.fillStyle = `rgba(215,220,225,${.1 * fog})`; circ(c, x, y, 120 + hash2(i, 57) * 90); }
+  }
+  if (G.lightning > 0) { c.fillStyle = `rgba(235,240,255,${Math.min(.5, G.lightning * 1.6)})`; c.fillRect(0, 0, VW, VH); }
+}
 function isNight() { return G && G.state !== 'menu' && darkness() > .3; }
 
 /* ---------------- Diplomacy state ---------------- */
@@ -2768,13 +2857,15 @@ function spawnPlace(pl) {
   switch (pl.type) {
     case 'camp':
       if (pl.cleared && G.time - pl.clearedAt > 1500) { pl.cleared = false; pl.dead = []; pl.chestOpened = false; }
-      if (!pl.cleared) specsSpawn(pl.tier); break;
+      if (!pl.cleared) specsSpawn(pl.tier);
+      Q.active.filter(q => q.type === 'bounty' && q.bk === 'captain' && q.place === pl.id).forEach(q => spawnCaptain(q, pl)); break;
     case 'ruin': if (pl.guarded) specsSpawn(1); break;
     case 'hidden': specsSpawn(1); break;
     case 'castle': {
       const k = pl.owner, sp = pl.spots, T_ = v => v * TS + TS / 2;
       mkActor('npc', T_(sp.ruler[0]) - TS / 2, T_(sp.ruler[1]), { place: pl.id, role: 'ruler', k, name: KDATA[k].ruler, stand: true, standFace: Math.PI / 2, royal: true });
       mkActor('npc', T_(sp.armorer[0]), T_(sp.armorer[1]), { place: pl.id, role: 'armorer', k, name: pick(NAMES.first) + ' the Armorer', stand: true, standFace: Math.PI / 2 });
+      mkActor('npc', pl.x + 5 * TS, pl.y + 12.5 * TS, { place: pl.id, role: 'coach', k, name: pick(NAMES.first) + ' the Coachman', stand: true, standFace: Math.PI / 2, cart: true });
       mkActor('npc', T_(sp.stable[0]), T_(sp.stable[1]), { place: pl.id, role: 'stable', k, name: pick(NAMES.first) + ' the Stablemaster', stand: true, standFace: Math.PI / 2 });
       sp.guards.forEach((g, i) => mkActor(i === 4 ? 'knight' : 'guard', T_(g[0]), T_(g[1]), { place: pl.id, k, stand: i < 4, standFace: Math.PI / 2, leash: 520 }));
       for (let i = 0; i < 5; i++) { const a = rand(0, TAU); mk('villager', pl.x + Math.cos(a) * 15 * TS, pl.y + Math.sin(a) * 14 * TS, { home: { x: pl.x, y: pl.y + 5 * TS }, wanderR: 520, role: 'citizen', k }); }
@@ -2809,6 +2900,11 @@ function updateSpawns(dt) {
     const d = dist(P.x, P.y, pl.x, pl.y);
     if (!pl.spawned && d < 1500) spawnPlace(pl); else if (pl.spawned && d > 2300) despawnPlace(pl);
   }
+  (W.hermits || []).forEach((h, i) => {
+    const d = dist(P.x, P.y, h.x, h.y);
+    if (!h.spawned && d < 1300) { h.spawned = true; h.ent = mkActor('npc', h.x, h.y, { role: 'hermit', hid: i, name: h.name, wanderR: 60, home: { x: h.x, y: h.y }, _look: { body: '#6a5a44', head: 'hood', hood: '#5a4a34', skin: '#d8b090', cape: '#4a3a2a' } }); }
+    else if (h.spawned && d > 2200) { h.spawned = false; if (h.ent) removeEnt(h.ent); h.ent = null; }
+  });
   for (const tw of W.towers || []) {
     const d = dist(P.x, P.y, tw.x, tw.y);
     if (!tw.spawned && d < 1400) { tw.spawned = true; tw.ent = mkPerched(tw.x, tw.y, W.own[tw.ty * WW + tw.tx], 62, { watch: true }); }
@@ -2962,6 +3058,7 @@ function questTarget(q) {
     case 'find': return q.stage === 0 ? { x: q.spot.x, y: q.spot.y, r: 5 * TS } : { x: W.places[q.giver].x, y: W.places[q.giver].y };
     case 'escort': case 'supplies': case 'deliver': case 'message': { const p = W.places[q.target]; return { x: p.x, y: p.y }; }
     case 'assist': case 'raid': return q.loc;
+    case 'bounty': if (q.bk === 'captain') { const p = W.places[q.place]; return { x: p.x, y: p.y }; } return { x: q.loc.x, y: q.loc.y, r: 6 * TS };
     case 'story': return storyTarget(q);
   }
   return null;
@@ -3022,10 +3119,11 @@ function questUpdate() {
         break;
       }
       case 'story': storyUpdate(q); break;
+      case 'bounty': updateBounty(q); break;
     }
   }
 }
-function questOnKill(t) { }
+function questOnKill(t) { if (t.bounty) { const q = Q.active.find(a => a.id === t.bounty); if (q) completeQuest(q); } }
 function questOnCamp(pl) { }
 function questOnPickup(p) {
   const q = Q.active.find(a => a.id === p.qid); if (!q) return;
@@ -3140,7 +3238,7 @@ function evWolves() {
 
 /* ---------------- Shops ---------------- */
 function goodsFactor(id, k, selling) { if (k == null) return 1; if (KDATA[k].produces === id) return .6; if (KDATA[k].wants === id) return selling ? 1.65 : 1.5; return 1; }
-function buyPrice(it, shop) { return Math.max(1, Math.round(itemValue(it) * goodsFactor(it.id, shop.k) * (shop.k != null ? repMul(shop.k) : 1.15))); }
+function buyPrice(it, shop) { return Math.max(1, Math.round(itemValue(it) * seasonPrice(it.id) * goodsFactor(it.id, shop.k) * (shop.k != null ? repMul(shop.k) : 1.15))); }
 function sellPrice(it, shop) { return Math.max(1, Math.round(itemValue(it) * .42 * goodsFactor(it.id, shop.k, true) * (shop.k != null ? clamp(1 + K.rep[shop.k] / 300, .75, 1.3) : 1))); }
 function makeShop(kind, pl, k) {
   const s = { kind, k, items: [], t: G.time };
@@ -3148,7 +3246,7 @@ function makeShop(kind, pl, k) {
   if (kind === 'village') {
     s.name = pl.name + (pl.frost ? ' Frost Market' : ' Market'); add('bread', 1, 12); add('meat', 1, 5); add('bandage', 1, 6); add('potion', 1, randi(1, 3));
     add(KDATA[k].produces, 1, randi(6, 12)); add(pick(['iron', 'wine', 'furs', 'spices', 'silk'].filter(g => g !== KDATA[k].produces)), 1, randi(2, 5));
-    add('map_' + k, 1, 1); if (chance(.4)) add('map_' + pick([0, 1, 2, 3].filter(j => j !== k)), 1, 1);
+    add('fishing_rod', 1, 1); add('map_' + k, 1, 1); if (chance(.4)) add('map_' + pick([0, 1, 2, 3].filter(j => j !== k)), 1, 1);
     for (let i = 0; i < randi(2, 3); i++) { const t = chance(.3) ? 2 : 1; add(pick(LOOT_TIERS[t].filter(id => ['weapon', 'shield', 'armor'].includes(ITEMS[id].type))), rollQual(t - 1)); }
     add('arrow', 1, randi(30, 60)); if (chance(.4)) add('broadhead', 1, randi(15, 30)); if (chance(.5)) add(pick(['short_bow', 'hunting_bow']), rollQual(1));
     if (k === 3) add('venom_arrow', 1, randi(15, 25));
@@ -3199,23 +3297,26 @@ function interactLabel(b) {
       case 'elder': return `Talk to ${e.name}`; case 'merchant': return `Trade with ${e.name}`; case 'ruler': return `Seek an audience with ${e.name}`;
       case 'armorer': return 'Browse the royal armory'; case 'stable': return 'Visit the royal stables'; case 'caravan': return 'Trade with the caravan'; case 'trader': return `Trade with ${e.name}`;
       case 'traveler': return `Talk to ${e.name}`;
+      case 'coach': return 'Hire a carriage'; case 'hermit': return `Speak with ${e.name}`;
     }
     return `Talk to ${e.name.toLowerCase().includes('soldier') || e.name === 'Guard' || e.name === 'Knight' ? KDATA[e.k] ? KDATA[e.k].name + ' ' + e.name.toLowerCase() : e.name : e.name}`;
   }
   const it = b.it, pl = W.places[it.place];
   switch (it.type) {
     case 'chest': return pl.chestOpened ? 'Empty stash' : pl.type === 'camp' ? (pl.cleared ? 'Loot the bandit stash' : 'Bandit stash (guarded)') : 'Search the chest';
-    case 'sign': return 'Read the signpost'; case 'well': return 'Drink from the well';
+    case 'sign': return 'Signpost, bounty board and carriages'; case 'well': return 'Drink from the well'; case 'fish': return G.fishing ? 'Reel in' : 'Fish here';
     case 'shrine': return pl.blessed ? 'The shrine is silent' : 'Pray at the shrine';
   }
   return 'Interact';
 }
 function doInteract() {
+  if (G.fishing) { reelIn(); return; }
   const b = findInteract(); if (!b) return;
   if (b.e) return talkTo(b.e);
   const it = b.it, pl = W.places[it.place];
   if (it.type === 'chest') openChest(it, pl);
   else if (it.type === 'sign') readSign(pl);
+  else if (it.type === 'fish') startFishing(it);
   else if (it.type === 'well') { if ((pl.wellT || -999) > G.time - 60) { toast('You have drunk your fill for now.'); return; } pl.wellT = G.time; P.st = P.maxSt; P.hp = Math.min(P.maxHp, P.hp + Math.round(12 * DIFF().heal)); SND.play('eat'); toast(`The cool water refreshes you. (+${Math.round(12 * DIFF().heal)} health, stamina restored)`, 'good'); }
   else if (it.type === 'shrine') {
     if (pl.blessed) { toast('The stones are silent. Their gift has been given.'); return; }
@@ -3259,13 +3360,112 @@ function signDest(pl) {
   const home = W.places[pl.owner];
   return [home, ...near(p => (p.type === 'village' || p.type === 'castle') && p !== home, 3)];
 }
+/* ---------------- Fast travel ---------------- */
+function travelDests(from) {
+  return W.places.filter(p => (p.type === 'castle' || p.type === 'village') && p.disc && p !== from && K.rep[p.owner] > -40 && !(P.allegiance != null && p.owner !== P.allegiance && relStatus(P.allegiance, p.owner).n === 'At War'))
+    .sort((a, b) => dist(from.x, from.y, a.x, a.y) - dist(from.x, from.y, b.x, b.y)).slice(0, 8);
+}
+const travelCost = (a, b) => Math.max(8, Math.round(dist(a.x, a.y, b.x, b.y) / TS / 10 * 3.5));
+function openTravel(from, who, portrait) {
+  if (ents.some(e => !e.dead && playerHostileTo(e) && dist(e.x, e.y, P.x, P.y) < 520)) { toast('Not with enemies about!', 'bad'); return; }
+  if (Q.active.some(q => q.type === 'escort')) { toast('No coach will take your traveling companion. Finish the escort on foot.', 'bad'); return; }
+  const ds = travelDests(from);
+  openDialog({
+    name: who, role: `Carriages from ${from.name}`, portrait: portrait || 'sign',
+    text: ds.length ? 'Where to? The roads are long, but my horses are fresh. You pay by the league.' : 'You know of no other towns I could take you to. Explore a little, and come back.',
+    options: [...ds.map(d => { const c = travelCost(from, d); return { t: `${d.name} <span class="dn">${KDATA[d.owner].name} · ${leagues(dist(from.x, from.y, d.x, d.y))} lg · ${c}g</span>`, dis: P.gold < c, fn: () => fastTravel(from, d, c) }; }), { t: 'Not today', fn: closeDialog }]
+  });
+}
+function fastTravel(from, to, cost) {
+  closeDialog(); P.gold -= cost; const lg = dist(from.x, from.y, to.x, to.y) / TS / 10, hrs = Math.max(1, Math.round(lg * .6));
+  withLoading(`Traveling to ${to.name}…`, () => {
+    const f = findFree(to.x + (to.type === 'castle' ? 0 : TS), to.y + (to.type === 'castle' ? 12 : 4) * TS); P.x = f.x; P.y = f.y; P.kbx = P.kby = 0;
+    if (horseEnt) { const h = findFree(P.x + 34, P.y + 10); horseEnt.x = h.x; horseEnt.y = h.y; horseEnt.called = false; }
+    ents.forEach(e => { if (e.follow && !e.caravan && (!e.followE || e.followE === P)) { const g2 = findFree(P.x + rand(-50, 50), P.y + rand(-50, 50)); e.x = g2.x; e.y = g2.y; } });
+    G.time += hrs * DAYLEN / 24; projs = []; cam.x = P.x; cam.y = P.y; to.disc = true; G.fishing = null;
+    toast(`You arrive at <b>${to.name}</b> after ${hrs} hour${hrs > 1 ? 's' : ''} on the road.`, 'good', bannerURL(to.owner));
+    if (Math.random() < .15) setTimeout(() => { if (G.state !== 'play') return; const a = rand(0, TAU); for (let i = 0; i < 3; i++) { const g2 = findFree(P.x + Math.cos(a) * 330 + rand(-50, 50), P.y + Math.sin(a) * 330 + rand(-50, 50)); const b = mkActor('bandit', g2.x, g2.y, { tier: Math.min(3, 1 + Math.floor(P.lvl / 3)), transient: true, roam: true }); b.target = P; } toast('Bandits followed the coach! Ambush!', 'bad'); SND.play('horn'); }, 1500);
+  });
+}
+/* ---------------- Fishing ---------------- */
+function startFishing(it) {
+  if (!countItem('fishing_rod')) { toast('You need a fishing rod. Village markets sell them.'); return; }
+  if (P.mounted) { toast('Dismount to fish.'); return; }
+  const f = W.fish[it.fish];
+  G.fishing = { st: 'wait', t: rand(2.5, 7), x0: P.x, y0: P.y, bx: f.x + f.dx * TS * 1.9, by: f.y + f.dy * TS * 1.9 };
+  SND.play('cast');
+}
+function updateFishing(dt) {
+  const F = G.fishing; if (!F) return;
+  P.face = Math.atan2(F.by - P.y, F.bx - P.x);
+  if (dist(P.x, P.y, F.x0, F.y0) > 24 || P.combatT > 5.5 || P.swing > 0) { G.fishing = null; toast('You reel in your line.'); return; }
+  F.t -= dt;
+  if (F.st === 'wait' && F.t <= 0) { F.st = 'bite'; F.t = .55 + DIFF().heal * .25; SND.play('splash'); for (let i = 0; i < 6; i++) addPart(F.bx, F.by, rand(-40, 40), rand(-50, -10), '#cfe4f4', .4, 2); }
+  else if (F.st === 'bite' && F.t <= 0) { G.fishing = null; toast('It got away…'); }
+}
+function reelIn() {
+  const F = G.fishing; G.fishing = null; if (!F) return;
+  if (F.st !== 'bite') { toast('Too soon! You scared the fish away.'); return; }
+  const r = Math.random(), id = r < .02 ? 'golden_carp' : r < .25 ? 'salmon' : 'fish';
+  addItem(id, 1, 1); SND.play('splash'); if (G.stats) G.stats.fish = (G.stats.fish || 0) + 1;
+  for (let i = 0; i < 10; i++) addPart(F.bx, F.by, rand(-60, 60), rand(-80, -20), i % 2 ? '#cfe4f4' : '#ffffff', .5, 2.5, 200);
+}
+/* ---------------- Hermits ---------------- */
+function hermitDialog(e) {
+  P.hermit = P.hermit || {}; const got = P.hermit[e.hid] = P.hermit[e.hid] || {};
+  const buy = (cost, fn) => () => { if (P.gold < cost) return; P.gold -= cost; SND.play('level'); fn(); recalc(); hermitDialog(e); };
+  const opts = [];
+  if (!got.hp) opts.push({ t: 'Brew me one of your tonics <span class="dn">+10 max health, for good · 180g</span>', dis: P.gold < 180, fn: buy(180, () => { got.hp = 1; P.bonusHp += 10; P.hp += 10; toast('<b>Hermit\'s tonic:</b> +10 maximum health.', 'gold'); }) });
+  if (!got.st) opts.push({ t: 'Teach me the old breathing ways <span class="dn">+15 max stamina, for good · 160g</span>', dis: P.gold < 160, fn: buy(160, () => { got.st = 1; P.bonusSt += 15; toast('<b>Breathing ways:</b> +15 maximum stamina.', 'gold'); }) });
+  const hid = W.places.filter(p => p.type === 'hidden' && !p.disc && !p.rumor);
+  if (hid.length) opts.push({ t: 'Tell me of a hidden place <span class="dn">80g</span>', dis: P.gold < 80, fn: buy(80, () => { const h = hid.sort((a, b) => dist(P.x, P.y, a.x, a.y) - dist(P.x, P.y, b.x, b.y))[0]; h.rumor = true; revealArea(h.tx, h.ty, 6); toast(`The hermit speaks of <b>${h.name}</b>, ${dirTo(P, h)} of here. Marked on your map.`, 'gold'); }) });
+  opts.push({ t: 'Farewell', fn: closeDialog });
+  openDialog({ name: e.name, role: 'Hermit of the wilds', portrait: e, text: pick(['Few find their way to my door. Sit, sit. What do you seek?', 'The woods tell me things, knight. For a little coin, I will tell you.', 'Mind the herbs. Now, what brings a sword so far from the road?']), options: opts });
+}
+/* ---------------- Bounty boards ---------------- */
+const BOUNTY_EPI = ['the Red', 'Blackhand', 'the Butcher', 'Three-Fingers', 'the Crow', 'Ironjaw', 'Longknife', 'the Grey', 'Half-Ear', 'the Viper'];
+function bountySpot(pl) { for (let i = 0; i < 20; i++) { const sp = randomLandSpot(pl.x, pl.y, 35, 75); if (W.places.every(p => dist(p.x, p.y, sp.x, sp.y) > 14 * TS)) return sp; } return randomLandSpot(pl.x, pl.y, 35, 75); }
+function genBounties(pl) {
+  if (pl.bounties && G.time - pl.bountyT < DAYLEN * 2) return pl.bounties;
+  pl.bountyT = G.time; const list = [], gold = () => Math.round((70 + P.lvl * 18) * rand(.9, 1.2));
+  const camps = W.places.filter(c => c.type === 'camp' && !c.cleared && dist(c.x, c.y, pl.x, pl.y) < 110 * TS);
+  if (camps.length) { const c = pick(camps); list.push({ bk: 'captain', place: c.id, name: `${pick(NAMES.first)} ${pick(BOUNTY_EPI)}`, gold: gold() + c.tier * 30, where: c.name }); }
+  const sp = bountySpot(pl); list.push({ bk: 'outlaw', loc: sp, name: `${pick(NAMES.first)} ${pick(BOUNTY_EPI)}`, gold: gold() + 40 });
+  const sp2 = bountySpot(pl), tr = terAtPx(sp2.x, sp2.y);
+  const beast = tr === T.DESERT ? ['scorpion', 'the Scorpion Queen'] : tr === T.TUNDRA ? ['ice_bear', 'the White Matriarch'] : tr === T.FOREST || tr === T.DENSE ? (chance(.5) ? ['bear', 'Old Grizzle'] : ['wolf', 'the Pale Alpha']) : ['boar', 'the Tusked Terror'];
+  list.push({ bk: 'beast', loc: sp2, beast: beast[0], name: beast[1], gold: gold() + 60 });
+  pl.bounties = list; return list;
+}
+function openBounties(pl) {
+  const list = genBounties(pl);
+  const txt = b => b.bk === 'captain' ? `WANTED: bandit captain <b>${b.name}</b>, who leads the ${b.where}.` : b.bk === 'outlaw' ? `WANTED: the outlaw <b>${b.name}</b>, last seen ${dirTo(pl, b.loc)} of ${pl.name}.` : `A beast called <b>${b.name}</b> is killing livestock ${dirTo(pl, b.loc)} of ${pl.name}.`;
+  openDialog({
+    name: 'Bounty Board', role: `${pl.name} · ${KDATA[pl.owner].full}`, portrait: 'sign',
+    text: list.length ? list.map(b => '➤ ' + txt(b) + ` <span style="color:var(--gold)">${b.gold}g</span>`).join('<br>') : 'The board is bare. New notices go up every couple of days.',
+    options: [...list.map((b, i) => ({ t: `Take the bounty on ${b.name} <span class="dn">${b.gold}g</span>`, fn: () => {
+      const q = { type: 'bounty', bk: b.bk, name: b.name, place: b.place, loc: b.loc, beast: b.beast, title: `Bounty: ${b.name}`, desc: txt(b) + ' Bring them down and claim the reward.', obj: `Slay ${b.name}` + (b.bk === 'captain' ? ` at the ${b.where}` : ''), giver: pl.id, giverName: pl.name, k: pl.owner, reward: { gold: b.gold, xp: 40 + P.lvl * 8, rep: { [pl.owner]: 6 }, rel: [], items: [] } };
+      if (acceptQuest(q)) { list.splice(i, 1); if (b.bk === 'captain' && W.places[b.place].spawned) spawnCaptain(q, W.places[b.place]); }
+      closeDialog();
+    } })), { t: 'Leave the board', fn: closeDialog }]
+  });
+}
+function spawnCaptain(q, pl) { if (ents.some(e => e.bounty === q.id && !e.dead)) return; const f = findFree(pl.x, pl.y + TS); mkActor('leader', f.x, f.y, { place: pl.id, bounty: q.id, named: true, chief: q.name, tier: Math.min(4, (pl.tier || 1) + 1), leash: 440, wanderR: 60, home: { x: pl.x, y: pl.y } }); }
+function updateBounty(q) {
+  if (q.bk === 'captain') return;
+  const here = ents.filter(e => e.bounty === q.id && !e.dead), d = dist(P.x, P.y, q.loc.x, q.loc.y);
+  if (!here.length && d < 1300) {
+    const tier = Math.min(4, 1 + Math.floor(P.lvl / 3)), o = { bounty: q.id, named: true, home: { x: q.loc.x, y: q.loc.y }, leash: 700, quest: q.id };
+    if (q.bk === 'outlaw') { mkActor('leader', q.loc.x, q.loc.y, Object.assign({ chief: q.name, tier }, o)); for (let i = 0; i < 2; i++) { const f = findFree(q.loc.x + rand(-60, 60), q.loc.y + rand(-60, 60)); mkActor(i ? 'xbowman' : 'bandit', f.x, f.y, { tier, home: o.home, leash: 700, quest: q.id }); } }
+    else { const b = mkActor(q.beast, q.loc.x, q.loc.y, Object.assign({ name: q.name, tier: 3, scale: 1.3, aggro: 300 }, o)); b.hp = b.maxHp = Math.round(b.maxHp * 2.4); b.dmg *= 1.4; if (q.beast === 'wolf') for (let i = 0; i < 3; i++) { const f = findFree(q.loc.x + rand(-70, 70), q.loc.y + rand(-70, 70)); mkActor('wolf', f.x, f.y, { home: o.home, leash: 700, quest: q.id }); } }
+  } else if (here.length && d > 2600) ents = ents.filter(e => e.quest !== q.id); // too far: let them wander off, they return when you come back
+}
 function readSign(pl) {
   const others = signDest(pl);
   others.forEach(o => { if (!o.disc) { o.disc = true; } });
   openDialog({
     name: 'Signpost', role: `${pl.name} · ${KDATA[pl.owner].full}`, portrait: 'sign',
     text: `<i>Welcome to ${pl.name}.</i><br>` + others.map(o => `➤ <b>${o.name}</b> — ${leagues(dist(o.x, o.y, pl.x, pl.y))} leagues ${compass(o.x - pl.x, o.y - pl.y)}`).join('<br>') + '<br><span style="font-size:13px;color:var(--muted)">These places have been marked on your map.</span>',
-    options: [{ t: 'Continue on your way', fn: closeDialog }]
+    options: [{ t: `Read the bounty board <span class="dn">${genBounties(pl).length} notice${genBounties(pl).length === 1 ? '' : 's'}</span>`, fn: () => openBounties(pl) }, { t: 'Hire a carriage from here', fn: () => openTravel(pl, 'Village Carter') }, { t: 'Continue on your way', fn: closeDialog }]
   });
 }
 const BARKS = {
@@ -3285,6 +3485,8 @@ function talkTo(e) {
     }
     case 'traveler': e.say = { text: e.follow ? 'Lead on — I will follow.' : 'Safe travels!', t: 2.5 }; return;
     case 'story': return storyTalk(e);
+    case 'coach': return openTravel(W.places[e.place], e.name, e);
+    case 'hermit': return hermitDialog(e);
     case 'citizen': e.say = { text: pick(BARKS.citizen), t: 3 }; return;
   }
   if (e.faction && e.faction[0] === 'k') {
@@ -3614,7 +3816,23 @@ function drawWeaponShape(g, wk, len, col, icon, wooden, draw, arrowCol) {
 /* ---------------- Terrain palette & chunks ---------------- */
 const KTINT = [['#000000', 0], ['#c8b860', .1], ['#3a3446', .22], ['#2fa060', .1]];
 let PAL = null;
-function buildPalette() { PAL = []; for (let k = 0; k < 4; k++) { PAL[k] = TINFO.map((ti, t) => ([T.GRASS, T.PLAINS, T.FOREST, T.DENSE, T.HILL, T.SWAMP, T.FARM].includes(t) && KTINT[k][1]) ? mix(ti.c, KTINT[k][0], KTINT[k][1]) : ti.c); } }
+const SEASON_TINT = [
+  { g: ['#86c24a', .08], f: ['#5aa03a', .06] },
+  null,
+  { g: ['#c8a04a', .3], f: ['#b8682a', .36], farm: ['#d8b048', .35], h: ['#b89048', .25] },
+  { g: ['#e2e9ee', .6], f: ['#cfd8de', .38], farm: ['#dfe6ea', .5], h: ['#dde4e8', .55], sw: ['#aab8b8', .3] },
+];
+function buildPalette() {
+  PAL = []; const st = SEASON_TINT[curSeason];
+  for (let k = 0; k < 4; k++) {
+    PAL[k] = TINFO.map((ti, t) => {
+      let c = ([T.GRASS, T.PLAINS, T.FOREST, T.DENSE, T.HILL, T.SWAMP, T.FARM].includes(t) && KTINT[k][1]) ? mix(ti.c, KTINT[k][0], KTINT[k][1]) : ti.c;
+      if (curSeason === 3 && k === 1) { if (t === T.GRASS || t === T.PLAINS || t === T.FOREST) c = mix(c, '#a8a890', .15); return c; } // no snow in sunny Valoria
+      const m = st && (t === T.GRASS || t === T.PLAINS ? st.g : t === T.FOREST || t === T.DENSE ? st.f : t === T.FARM ? st.farm : t === T.HILL ? st.h : t === T.SWAMP ? st.sw : null);
+      return m ? mix(c, m[0], m[1]) : c;
+    });
+  }
+}
 const chunkCache = new Map(); let chunkFrame = 0, chunksBuilt = 0;
 function blobGroup(t) { if (t === T.SEA || t === T.WATER) return 2; if (t === T.ROAD) return 3; if (t === T.BRIDGE || t === T.FARM || t === T.FLOOR) return 9; if (t === T.FORD) return 2; if (t === T.MOUNT || t === T.SNOW) return 1; return 0; }
 function getChunk(cx, cy) {
@@ -3782,15 +4000,17 @@ function buildTreeSprites() {
   treeSprites.length = 0;
   for (let kind = 0; kind < 8; kind++) for (let v = 0; v < 3; v++) {
     const c = document.createElement('canvas'); c.width = 72; c.height = 90; const g = c.getContext('2d'); const bx = 36, by = 82;
-    if (kind >= 6) { drawSnowPlant(g, kind, v, bx, by); treeSprites.push(c); continue; }
+    if (kind >= 6 || (curSeason === 3 && kind === 1)) { drawSnowPlant(g, kind >= 6 ? kind : 6, v, bx, by); treeSprites.push(c); continue; } // winter pines carry snow
+    if (curSeason === 3 && (kind === 0 || kind === 2)) { drawSnowPlant(g, 7, v, bx, by); if (kind === 2) { g.fillStyle = '#e8e4d8'; g.fillRect(bx - 2, by - 30, 3.5, 24); } treeSprites.push(c); continue; } // bare in winter
     if (kind >= 4) { drawDesertPlant(g, kind, v, bx, by); treeSprites.push(c); continue; }
     g.fillStyle = 'rgba(0,0,0,.22)'; ell(g, bx + 8, by - 2, 22, 8);
     g.fillStyle = kind === 2 ? '#d8d4c8' : '#5a3c22'; g.fillRect(bx - 3, by - 20, 6, 20);
     if (kind === 2) { g.fillStyle = '#333'; g.fillRect(bx - 3, by - 14, 3, 2); g.fillRect(bx, by - 8, 3, 2); }
     const j = (v - 1) * .07;
-    if (kind === 0) { const cs = ['#2e5a22', '#3a6e2a', '#4a8234', '#5e9a42'].map(c2 => shade(c2, j)); [[0, -38, 22], [-12, -30, 15], [12, -30, 15], [0, -46, 16]].forEach(([x, y, r], i) => { g.fillStyle = cs[i === 3 ? 2 : 0]; circ(g, bx + x, by + y, r); }); g.fillStyle = cs[1]; circ(g, bx - 4, by - 42, 15); g.fillStyle = cs[2]; circ(g, bx - 7, by - 46, 9); g.fillStyle = cs[3]; circ(g, bx - 9, by - 49, 4); }
+    if (kind === 0) { const cs = (curSeason === 2 ? [['#7a3a16', '#a8521a', '#c8782a', '#e0a040'], ['#6a3a18', '#94541e', '#b8702a', '#d09038'], ['#8a4a1a', '#b86a22', '#d89030', '#e8b048']][v] : ['#2e5a22', '#3a6e2a', '#4a8234', '#5e9a42']).map(c2 => shade(c2, j)); [[0, -38, 22], [-12, -30, 15], [12, -30, 15], [0, -46, 16]].forEach(([x, y, r], i) => { g.fillStyle = cs[i === 3 ? 2 : 0]; circ(g, bx + x, by + y, r); }); g.fillStyle = cs[1]; circ(g, bx - 4, by - 42, 15); g.fillStyle = cs[2]; circ(g, bx - 7, by - 46, 9); g.fillStyle = cs[3]; circ(g, bx - 9, by - 49, 4); }
     if (kind === 1) { const cs = ['#1e4020', '#2a5228', '#386634'].map(c2 => shade(c2, j)); for (let l = 0; l < 4; l++) { const w = 22 - l * 4.5, y = by - 18 - l * 13; g.fillStyle = cs[l % 2 ? 1 : 0]; g.beginPath(); g.moveTo(bx - w, y); g.lineTo(bx, y - 20); g.lineTo(bx + w, y); g.closePath(); g.fill(); g.fillStyle = cs[2]; g.beginPath(); g.moveTo(bx - w * .6, y - 3); g.lineTo(bx, y - 20); g.lineTo(bx - w * .1, y - 2); g.fill(); } }
-    if (kind === 2) { const cs = ['#5a8a34', '#6e9e40', '#8ab854'].map(c2 => shade(c2, j)); g.fillStyle = cs[0]; circ(g, bx, by - 40, 17); circ(g, bx - 10, by - 32, 11); circ(g, bx + 10, by - 33, 11); g.fillStyle = cs[1]; circ(g, bx - 3, by - 44, 11); g.fillStyle = cs[2]; circ(g, bx - 6, by - 47, 5); }
+    if (kind === 2) { const cs = (curSeason === 2 ? ['#b8902a', '#d0a838', '#e8c858'] : ['#5a8a34', '#6e9e40', '#8ab854']).map(c2 => shade(c2, j)); g.fillStyle = cs[0]; circ(g, bx, by - 40, 17); circ(g, bx - 10, by - 32, 11); circ(g, bx + 10, by - 33, 11); g.fillStyle = cs[1]; circ(g, bx - 3, by - 44, 11); g.fillStyle = cs[2]; circ(g, bx - 6, by - 47, 5); }
+    if (curSeason === 0 && kind === 0) { g.fillStyle = '#f4bccb'; [[-9, -40], [7, -46], [-2, -52], [12, -34], [-13, -30], [3, -36]].forEach(([dx, dy]) => circ(g, bx + dx, by + dy, 2)); } // spring blossom
     if (kind === 3) { g.strokeStyle = '#4a3828'; g.lineCap = 'round'; g.lineWidth = 4; g.beginPath(); g.moveTo(bx, by); g.lineTo(bx, by - 40); g.stroke(); g.lineWidth = 2.5; [[-14, -52, -26], [12, -48, -30], [-8, -60, -38], [10, -62, -44]].forEach(([dx, ty2, fy]) => { g.beginPath(); g.moveTo(bx, by + fy); g.lineTo(bx + dx, by + ty2); g.stroke(); }); g.lineWidth = 1.5; g.beginPath(); g.moveTo(bx - 14, by - 52); g.lineTo(bx - 20, by - 56); g.moveTo(bx + 12, by - 48); g.lineTo(bx + 18, by - 54); g.stroke(); }
     treeSprites.push(c);
   }
@@ -3853,6 +4073,27 @@ function drawStruct(g, o, t) {
     case 'stall': { g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(x + 4, y + 6, w, h); g.fillStyle = '#7a5530'; g.fillRect(x, y + h - 14, w, 14); ['#d8a040', '#c04a3a', '#6aa040', '#e0d0a0'].forEach((c, i) => { g.fillStyle = c; circ(g, x + 8 + i * 13, y + h - 12, 4); }); for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? '#f0e8d8' : kd.color; g.fillRect(x - 2 + i * (w + 4) / 6, y - 14, (w + 4) / 6 + .5, 16); } g.fillStyle = '#3a2a1a'; g.fillRect(x, y, 2, h); g.fillRect(x + w - 2, y, 2, h); break; }
     case 'hay': g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, x + 20, y + 26, 16, 7); g.fillStyle = '#c8a840'; circ(g, x + 16, y + 16, 14); g.fillStyle = '#e0c860'; circ(g, x + 13, y + 12, 8); break;
     case 'sign': drawSignpost(g, o); break;
+    case 'jetty': {
+      const cx = x + w / 2, cy = y + h / 2, ex = cx + o.dx * 30, ey = cy + o.dy * 30;
+      g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(Math.min(cx, ex) - 8 + 3, Math.min(cy, ey) - 8 + 4, Math.abs(ex - cx) + 16, Math.abs(ey - cy) + 16);
+      g.fillStyle = '#4a3018'; [[-7, -7], [7, -7], [-7, 7], [7, 7]].forEach(([a, b2]) => circ(g, ex + a, ey + b2, 2.4));
+      g.fillStyle = '#8a6036'; g.fillRect(Math.min(cx, ex) - 8, Math.min(cy, ey) - 8, Math.abs(ex - cx) + 16, Math.abs(ey - cy) + 16);
+      g.strokeStyle = '#6a4424'; g.lineWidth = 1; for (let i = -8; i <= 30; i += 5) { g.beginPath(); if (o.dx) { const xx = cx + o.dx * i; g.moveTo(xx, cy - 8); g.lineTo(xx, cy + 8); } else { const yy = cy + o.dy * i; g.moveTo(cx - 8, yy); g.lineTo(cx + 8, yy); } g.stroke(); }
+      g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 1.2; const rr = (t * 12 + x) % 18; g.beginPath(); g.ellipse(ex + o.dx * 22, ey + o.dy * 22, 4 + rr, 2 + rr * .45, 0, 0, TAU); g.stroke();
+      g.fillStyle = '#5a7a3a'; for (let i = 0; i < 4; i++) g.fillRect(cx - o.dy * 12 + i * 2 - 3, cy - o.dx * 12 - 10 + (i % 2) * 3, 1.4, 10);
+      break;
+    }
+    case 'hut': {
+      const cx = x + w / 2;
+      g.fillStyle = 'rgba(0,0,0,.22)'; ell(g, cx + 8, y + h - 2, w * .55, 9);
+      g.fillStyle = '#7a5a3a'; g.fillRect(x + 6, y + h * .38, w - 12, h * .6); g.fillStyle = '#5a3e24'; g.fillRect(x + 6, y + h * .38, w - 12, 3);
+      g.fillStyle = '#3a2614'; rrect(g, cx - 7, y + h - 22, 14, 20, 5); g.fill();
+      g.fillStyle = '#b89a52'; g.beginPath(); g.moveTo(x - 4, y + h * .44); g.lineTo(cx, y - 14); g.lineTo(x + w + 4, y + h * .44); g.closePath(); g.fill();
+      g.strokeStyle = '#8a7038'; g.lineWidth = 1; for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(x + i * (w + 8) / 6 - 4, y + h * .44); g.lineTo(cx, y - 14); g.stroke(); }
+      g.fillStyle = '#6a5a4a'; g.fillRect(x + w - 16, y - 4, 6, 12);
+      if (Math.random() < .12 * QMUL()) addPart(x + w - 13, y - 6, rand(-5, 5), rand(-25, -12), 'rgba(170,170,170,.45)', rand(1, 2), 3);
+      break;
+    }
     case 'wtower': {
       g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(x + 10, y + 10, w, h);
       g.strokeStyle = '#5a3a1e'; g.lineWidth = 4; g.beginPath(); g.moveTo(x + 4, y + h); g.lineTo(x + 8, y - 30); g.moveTo(x + w - 4, y + h); g.lineTo(x + w - 8, y - 30); g.moveTo(x + 4, y + h - 10); g.lineTo(x + w - 8, y - 20); g.stroke();
@@ -4708,6 +4949,7 @@ function renderWorld(t) {
     if (p.rec && (t * 1.3 + p.x * .01) % 1.6 < .18) { g.fillStyle = 'rgba(255,248,210,.95)'; circ(g, p.x - ca * 7, p.y - sa * 7, 2.6); }
     if (p.arrow) { g.fillStyle = ITEMS[p.arrow].col; circ(g, p.x, p.y, 1.8); if (p.arrow === 'fire_arrow' && (!p.stuck || p.life > 1)) { g.fillStyle = 'rgba(255,170,50,.8)'; circ(g, p.x, p.y, 3 + Math.random() * 1.5); } }
   }
+  if (G.fishing) { const F = G.fishing, bob = F.st === 'bite' ? 3 + Math.sin(t * 30) * 2 : Math.sin(t * 3) * 1.2; g.strokeStyle = 'rgba(230,230,220,.6)'; g.lineWidth = 1; g.beginPath(); g.moveTo(P.x + Math.cos(P.face) * 18, P.y + Math.sin(P.face) * 18 - 8); g.quadraticCurveTo((P.x + F.bx) / 2, (P.y + F.by) / 2 - 20, F.bx, F.by + bob); g.stroke(); g.fillStyle = '#e8e0d0'; circ(g, F.bx, F.by + bob, 3); g.fillStyle = '#c0302a'; circ(g, F.bx, F.by + bob - 1.5, 2); }
   // particles
   for (const p of parts) { g.globalAlpha = clamp(p.life / p.max, 0, 1); g.fillStyle = p.c; g.fillRect(p.x - p.s / 2, p.y - p.s / 2, p.s, p.s); }
   g.globalAlpha = 1;
@@ -4734,7 +4976,7 @@ function renderWorld(t) {
       if (playing) light(P.x, P.y, 190, .85);
       for (const e of ents) if (e.burn > 0 && !e.dead) light(e.x, e.y, 110, .8);
       for (const p of projs) if (p.arrow === 'fire_arrow' && (!p.stuck || p.life > 1)) light(p.x, p.y, 70, .7);
-      for (const it of list) { const o = it.o; if (!o) continue; if (o.k === 'campfire') light(o.x + 16, o.y + 14, 210 + Math.sin(t * 9) * 8, 1); else if (o.k === 'house' || o.k === 'barracks' || o.k === 'smithy' || o.k === 'chapel' || o.k === 'stable') light(o.x + o.w / 2, o.y + o.h, 80, .7); else if (o.k === 'keep') light(o.x + o.w / 2, o.y + o.h, 200, .8); else if (o.k === 'tower' || o.k === 'wtower' || o.k === 'bannerpole') light(o.x + o.w / 2, o.y + o.h / 2, 110, .6); else if (o.k === 'hidden' && (o.kind === 'grove' || o.kind === 'shrine')) light(o.x + o.w / 2, o.y + o.h / 2, 160, .8); }
+      for (const it of list) { const o = it.o; if (!o) continue; if (o.k === 'campfire') light(o.x + 16, o.y + 14, 210 + Math.sin(t * 9) * 8, 1); else if (o.k === 'house' || o.k === 'barracks' || o.k === 'smithy' || o.k === 'chapel' || o.k === 'stable' || o.k === 'hut') light(o.x + o.w / 2, o.y + o.h, 80, .7); else if (o.k === 'keep') light(o.x + o.w / 2, o.y + o.h, 200, .8); else if (o.k === 'tower' || o.k === 'wtower' || o.k === 'bannerpole') light(o.x + o.w / 2, o.y + o.h / 2, 110, .6); else if (o.k === 'hidden' && (o.kind === 'grove' || o.kind === 'shrine')) light(o.x + o.w / 2, o.y + o.h / 2, 160, .8); }
     }
     ctx.drawImage(lightCv, 0, 0, VW, VH);
     if (settings.quality !== 'low') {
@@ -4743,16 +4985,8 @@ function renderWorld(t) {
       ctx.globalCompositeOperation = 'source-over';
     }
   }
-  // snowfall over the snowfields
-  if (playing && G.snowAmt > .02 && settings.quality !== 'low') {
-    const md = (a, m) => ((a % m) + m) % m, n = Math.round(110 * G.snowAmt);
-    ctx.fillStyle = `rgba(225,236,250,${.07 * G.snowAmt})`; ctx.fillRect(0, 0, VW, VH);
-    for (let i = 0; i < n; i++) {
-      const z = .5 + hash2(i, 11) * .9, x = md(hash2(i, 3) * 2000 - vx * z * .6 + Math.sin(t * .9 + i) * 14 + t * 16 * z, VW + 20) - 10, y = md(hash2(i, 5) * 2000 - vy * z * .6 + t * 42 * z, VH + 20) - 10;
-      ctx.globalAlpha = (.45 + .45 * z) * G.snowAmt; ctx.fillStyle = '#fff'; ctx.fillRect(x, y, 1.2 * z + .6, 1.2 * z + .6);
-    }
-    ctx.globalAlpha = 1;
-  }
+  // weather: rain, snow, fog, sandstorms
+  if (playing) drawWeather(ctx, VW, VH, vx, vy, t);
   // edge indicators
   if (playing && G.state === 'play') {
     const tq = Q.active.find(q => q.id === Q.tracked); const marks = [];
@@ -4794,7 +5028,8 @@ function updateHUD(force) {
   } else setIf('boss', 0, () => $('bossBar').classList.add('hidden'));
   if (!force && (hudT -= 1) > 0) return; hudT = 10;
   const tt = tod(); const tn = tt < .22 ? 'Night' : tt < .3 ? 'Dawn' : tt < .45 ? 'Morning' : tt < .55 ? 'Midday' : tt < .7 ? 'Afternoon' : tt < .8 ? 'Dusk' : 'Night';
-  setIf('clk', `${isNight() ? '☾' : '☀'} Day ${dayNum()} · ${tn}`, v => $('clock').textContent = v);
+  const wt = G.wx && G.wx.type !== 'clear' && G.wx.amt > .3 ? G.wx.type : null, ic = wt === 'rain' ? '☂' : wt === 'snow' || wt === 'blizzard' ? '❄' : wt === 'fog' ? '≋' : wt === 'sand' ? '≈' : isNight() ? '☾' : '☀';
+  setIf('clk', `${ic} ${SEASONS[curSeason]} · Day ${dayNum()} · ${tn}${wt ? ' · ' + WX[wt] : ''}`, v => $('clock').textContent = v);
   const own = ownerAtPx(P.x, P.y); const rs = statusOf(K.rep[own]);
   setIf('terr', own, v => { $('terrBanner').src = bannerURL(v); $('terrName').textContent = KDATA[v].full; });
   setIf('terrRep', `${repTitle(own)}|${Math.round(K.rep[own])}|${rs.c}`, () => $('terrRep').innerHTML = `<span style="color:${K.rep[own] <= -40 ? '#ff5a3a' : rs.c}">${repTitle(own)}</span> · Rep ${sgn(K.rep[own])}`);
@@ -4822,6 +5057,7 @@ function updateHUD(force) {
   if (G.state === 'play' && !paused()) {
     const b = findInteract(); if (b) pr = `<kbd>E</kbd> ${interactLabel(b)}`;
     if (!P.mounted && horseEnt && dist(P.x, P.y, horseEnt.x, horseEnt.y) < 70) pr += (pr ? ' &nbsp; ' : '') + '<kbd>F</kbd> Mount horse';
+    if (G.fishing) pr = G.fishing.st === 'bite' ? '<span style="color:#ffe08a">A bite! </span><kbd>E</kbd> Reel in!' : 'Fishing… wait for a bite, then press <kbd>E</kbd>';
     if (input.force) pr = '<span style="color:#ff9a7a">⚠ Holding Q: your attacks will hit friendly and neutral characters</span>' + (pr ? ' &nbsp; ' + pr : '');
   }
   setIf('pr', pr, v => { $('prompt').innerHTML = v; $('prompt').classList.toggle('show', !!v); });
@@ -4930,7 +5166,7 @@ function prepareWorld(seed, opts = normOpts()) { setWorldSize(SIZES[opts.size].n
 function resetState() {
   ents = []; pickups = []; projs = []; parts = []; texts = []; horseEnt = null; uidCounter = 1; nextEid = 1;
   W.places.forEach(p => { p.disc = false; p.rumor = false; p.spawned = false; p.dead = []; p.cleared = false; p.chestOpened = false; p.clearedAt = 0; p.offers = null; p.request = false; p.blessed = false; p.investigated = false; p.rumorUsed = false; p.backerRevealed = false; p.wellT = -999; if (p.type === 'outpost') p.owner = p.baseOwner; for (const k in p) if (k.startsWith('_shop_')) delete p[k]; });
-  (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; });
+  (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false;
   Object.assign(G, { time: 0, dipT: 0, eventT: 50, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, questT: 0 });
   newKingdoms(); newQuests(); newFog();
 }
@@ -4972,7 +5208,7 @@ function saveGame(silent) {
   const qStrip = q => { const c = Object.assign({}, q); delete c.ent; delete c.foes; return c; };
   const data = {
     v: 1, seed: W.seed, time: G.time, kills: G.kills, uid: uidCounter, waypoint: G.mapWaypoint, savedAt: Date.now(),
-    P: { x: P.x, y: P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
+    P: { x: P.x, y: P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
     horse: horseEnt ? { x: horseEnt.x, y: horseEnt.y } : null,
     K: { rel: K.rel, aff: K.aff, rep: K.rep, mil: K.mil, reasons: K.reasons, events: K.events, kev: K.kev, repWhy: K.repWhy, gifts: K.gifts, log: K.log, cd: {} },
     Q: { active: Q.active.filter(q => q.type !== 'raid' && q.sid !== 'hraid').map(qStrip), done: Q.done.map(qStrip), tracked: Q.tracked, next: Q.next },
@@ -6058,7 +6294,7 @@ function storyBegin() {
 /* ---------------- Loop ---------------- */
 let last = performance.now(), mmT = 0, ambT = 0, fpsA = 0;
 function update(dt) {
-  G.time += dt;
+  G.time += dt; updateWeather(dt);
   input.wx = cam.x + (input.mx - VW / 2) / ZOOM; input.wy = cam.y + (input.my - VH / 2) / ZOOM;
   updatePlayer(dt);
   if (STORY) storyTick(dt);
@@ -6075,6 +6311,7 @@ function update(dt) {
   if ((ambT -= dt) <= 0) {
     ambT = rand(1.5, 4);
     const amb = terAtPx(P.x, P.y);
+    if (wxOf('rain') > .2) { SND.play('rain'); ambT = Math.min(ambT, 3); } if (wxOf('sand') > .3) SND.play('wind'); if (wxOf('blizzard') > .3) SND.play('gale');
     if (amb === T.TUNDRA) { if (Math.random() < .45) SND.play('gale'); else if (isNight() && Math.random() < .12) SND.play('howl'); }
     else if (amb === T.DESERT) { if (!isNight()) { if (Math.random() < .4) SND.play('wind'); } else if (Math.random() < .12) SND.play('yip'); else SND.play('cricket'); }
     else if (isNight()) SND.play('cricket'); else if ([T.FOREST, T.DENSE, T.GRASS, T.HILL].includes(amb)) SND.play('bird');
@@ -6086,6 +6323,7 @@ function frame(now) {
   const dt = Math.min(.05, (now - last) / 1000); last = now; const t = now / 1000;
   fpsA = fpsA * .95 + (1 / Math.max(dt, .001)) * .05;
   if (W) {
+    if (seasonOf() !== curSeason) { applySeason(G.state === 'play' && G.seasonInit); } if (G.state === 'play') G.seasonInit = true;
     if (G.state === 'play' && !paused()) { if (G.hitstop > 0) G.hitstop -= dt; else update(dt); }
     else { input.clicked = false; G.shake *= Math.pow(.004, dt); if (G.state === 'dead') { updateFX(dt); for (const e of ents) updateActor(e, dt * .3); } }
     if (G.state === 'menu') { G.menuCam.a += dt * .015; cam.x = WW * TS / 2 + Math.cos(G.menuCam.a) * WW * TS * .28; cam.y = WH * TS / 2 + Math.sin(G.menuCam.a * 1.3) * WH * TS * .26; }
