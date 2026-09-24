@@ -2511,12 +2511,54 @@ function playerDie() {
   P.hp = 0; G.state = 'dead'; SND.play('death'); addShake(12); G.stats.deaths++;
   for (let i = 0; i < 30; i++) addPart(P.x, P.y, rand(-150, 150), rand(-150, 150), '#8a1a12', rand(.5, 1.2), 3);
   const iron = DIFF().ironman;
+  if (!iron) raiseGrave();
   if (iron) { G.ironDead = true; try { localStorage.removeItem(saveKey()); } catch (e) { } }
   setTimeout(() => {
     $('deathSub').textContent = iron ? `Slain on day ${dayNum()}. On Forsaken there is no rising again. Your tale ends here, and this save has been erased.` : `Slain on day ${dayNum()}. Rise again at your last refuge, losing ${Math.round(DIFF().goldLoss * 100)}% of your purse.`;
     $('btnRespawn').classList.toggle('hidden', iron); $('btnLoadSave').classList.toggle('hidden', iron);
     UI.show('deathScreen');
   }, 900);
+}
+/* ---------------- Your last grave: a stone where you most recently fell ---------------- */
+function deathCause() {
+  const b = P.lastBlow || {};
+  if (b.dot) return { fire: 'burned alive', venom: 'poisoned', frost: 'frozen' }[b.dot] || 'slain';
+  const e = b.src; if (!e) return 'slain by unknown hands';
+  if (e.trap) return 'caught by a hidden trap';
+  const n = e.soldier && e.k != null && KDATA[e.k] && !e.boss ? `${KDATA[e.k].name} ${e.name.toLowerCase()}` : e.name;
+  return `slain by ${e.boss ? n : (/^[aeiou]/i.test(n) ? 'an ' : 'a ') + (e.soldier ? n : n.toLowerCase())}`;
+}
+function todName() { const t = tod(); return t < .22 ? 'in the dead of night' : t < .3 ? 'at dawn' : t < .45 ? 'in the morning' : t < .56 ? 'at midday' : t < .7 ? 'in the afternoon' : t < .78 ? 'at dusk' : 'at night'; }
+function raiseGrave() {
+  const x = G.under ? G.over.px : P.x, y = G.under ? G.over.py + 22 : P.y;
+  const pl = nearestPlace(x, y, p => p.type === 'village' || p.type === 'castle' || p.type === 'outpost' || p.type === 'camp' || p.type === 'ruin' || p.type === 'hidden');
+  let where = KDATA[ownerAtPx(x, y)] ? `the wilds of ${KDATA[ownerAtPx(x, y)].name}` : 'the wilds';
+  if (G.under) where = `the depths of ${G.under.name || 'a dungeon'}`;
+  else if (pl) { const d = dist(x, y, pl.x, pl.y); where = d < (pl.r || 10) * TS * .7 ? pl.name : `${leagues(d)} leagues ${dirTo(pl, { x, y })} of ${pl.name}`; }
+  P.grave = { x, y, day: dayNum(), when: todName(), season: SEASONS[curSeason], gold: P.gold, lost: Math.floor(P.gold * DIFF().goldLoss), lvl: P.lvl, cause: deathCause(), where, n: G.stats.deaths, kills: G.kills };
+}
+function readGrave() {
+  const g2 = P.grave; if (!g2) return; SND.play('ui');
+  const ord = n => n + (n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th');
+  openDialog({ name: 'Your Gravestone', role: `The ${ord(g2.n)} time you fell`, portrait: 'grave', text: `<p style="text-align:center;letter-spacing:.08em;margin:0 0 10px"><b>HERE FELL A KNIGHT</b><br><i>who did not stay down</i></p>
+    <p style="margin:0 0 4px"><b>Fell:</b> day ${g2.day}, ${g2.when}, in ${g2.season.toLowerCase()}</p>
+    <p style="margin:0 0 4px"><b>Where:</b> ${esc(g2.where)}</p>
+    <p style="margin:0 0 4px"><b>How:</b> ${esc(g2.cause)}</p>
+    <p style="margin:0 0 4px"><b>Purse:</b> ${fmt(g2.gold)} gold, of which ${fmt(g2.lost)} was lost</p>
+    <p style="margin:0"><b>At the time:</b> level ${g2.lvl}, ${fmt(g2.kills)} foes slain</p>`, options: [
+    { t: 'Pay your respects', fn: () => { closeDialog(); toast(pick(['You stand a moment in silence. Better luck this time.', 'You brush the moss off your own name. Strange feeling.', 'Not today, grave. Not today.'])); } },
+    { t: 'Leave it be', fn: closeDialog },
+  ] });
+}
+function drawGrave(g, gv, t) {
+  const x = gv.x, y = gv.y + 8;
+  g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, x + 4, y + 2, 12, 4);
+  g.fillStyle = '#5e4a2e'; ell(g, x, y + 1, 11, 4); // turned earth
+  g.fillStyle = '#6a6660'; g.beginPath(); g.moveTo(x - 8, y); g.lineTo(x - 8, y - 16); g.arc(x, y - 16, 8, Math.PI, 0); g.lineTo(x + 8, y); g.closePath(); g.fill();
+  g.fillStyle = '#8e8a82'; g.beginPath(); g.moveTo(x - 7, y - 1); g.lineTo(x - 7, y - 16); g.arc(x, y - 16, 7, Math.PI, 0); g.lineTo(x + 7, y - 1); g.closePath(); g.fill();
+  g.fillStyle = 'rgba(255,255,255,.18)'; g.fillRect(x - 6, y - 18, 2, 14);
+  g.strokeStyle = '#4a4640'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(x, y - 20); g.lineTo(x, y - 9); g.moveTo(x - 3.5, y - 16.5); g.lineTo(x + 3.5, y - 16.5); g.stroke();
+  g.fillStyle = '#5a8a3a'; circ(g, x - 7, y - 1, 2.2); circ(g, x + 6, y, 1.8); g.fillStyle = '#e8e0c0'; circ(g, x + 9, y - 1, 1.4);
 }
 function respawnPlayer() {
   if (G.under) leaveDungeon(true);
@@ -2630,6 +2672,7 @@ function damage(t, amt, src, o = {}) {
     if (P.mounted) a *= 1 - (SK('riding') >= 4 ? .24 : SK('riding') >= 2 ? .12 : 0);
     a = Math.max(.5, a);
     if (G.tourney && G.tourney.fighting && src && src.tourney && P.hp - a <= 1) { tourneyLose(); return a; }
+    P.lastBlow = { src: src && !src.isPlayer ? { name: src.name, k: src.k, kind: src.kind, boss: !!(src.boss || src.chief || src.named), trap: !!src.isTrap, soldier: !!(src.faction && src.faction[0] === 'k') } : null, dot: o.dot || null };
     P.hp -= a; P.flash = .15; addShake(3 + a * .25); SND.play('hurt');
     $('hurtVignette').style.boxShadow = 'inset 0 0 160px rgba(170,0,0,.55)'; setTimeout(() => $('hurtVignette').style.boxShadow = 'inset 0 0 160px rgba(170,0,0,0)', 180);
     if (settings.dmgNums) addText(P.x + rand(-6, 6), P.y - 28, Math.round(a), '#ff6a5a', 15);
@@ -3713,6 +3756,7 @@ function getShop(e) {
 /* ---------------- Interaction ---------------- */
 function findInteract() {
   let best = null, bd = 62;
+  if (P && P.grave && !G.under) { const d = dist(P.x, P.y, P.grave.x, P.grave.y + 12); if (d < 44) { bd = d; best = { grave: 1, d }; } }
   for (const e of ents) {
     if (e.dead || e.kind === 'horse') continue;
     if (!(e.role || (e.faction && e.faction[0] === 'k' && !playerHostileTo(e)))) continue;
@@ -3725,6 +3769,7 @@ function findInteract() {
   return best;
 }
 function interactLabel(b) {
+  if (b.grave) return 'Read your gravestone';
   if (b.e) {
     const e = b.e;
     switch (e.role) {
@@ -3749,6 +3794,7 @@ function interactLabel(b) {
 function doInteract() {
   if (G.fishing) { reelIn(); return; }
   const b = findInteract(); if (!b) return;
+  if (b.grave) return readGrave();
   if (b.e) return talkTo(b.e);
   const it = b.it, pl = W.places[it.place];
   if (it.type === 'chest') openChest(it, pl);
@@ -6117,6 +6163,7 @@ function drawPortrait(cv2, e) {
   const k = e && e.k != null ? e.k : null;
   const bg = g.createRadialGradient(W2 / 2, W2 * .4, 5, W2 / 2, W2 / 2, W2 * .7); bg.addColorStop(0, k != null ? shade(KDATA[k].color, -.3) : '#4a3a28'); bg.addColorStop(1, '#120c07'); g.fillStyle = bg; g.fillRect(0, 0, W2, W2);
   if (e === 'ember') { g.save(); g.scale(W2 / 128, W2 / 128); g.translate(64, 70); g.shadowColor = '#ff9a3a'; g.shadowBlur = 26; g.fillStyle = '#f0b040'; g.beginPath(); g.moveTo(-40, 18); g.lineTo(-44, -18); g.lineTo(-22, 0); g.lineTo(0, -36); g.lineTo(22, 0); g.lineTo(44, -18); g.lineTo(40, 18); g.closePath(); g.fill(); g.shadowBlur = 0; g.fillStyle = '#c0302a'; circ(g, 0, 2, 6); g.fillStyle = '#8a5a14'; g.fillRect(-40, 18, 80, 9); g.restore(); return; }
+  if (e === 'grave') { g.save(); g.scale(W2 / 128, W2 / 128); g.translate(64, 98); g.fillStyle = '#4a3a22'; ell(g, 0, 8, 46, 12); g.fillStyle = '#6a6660'; g.beginPath(); g.moveTo(-30, 6); g.lineTo(-30, -44); g.arc(0, -44, 30, Math.PI, 0); g.lineTo(30, 6); g.closePath(); g.fill(); g.fillStyle = '#9a968e'; g.beginPath(); g.moveTo(-26, 4); g.lineTo(-26, -44); g.arc(0, -44, 26, Math.PI, 0); g.lineTo(26, 4); g.closePath(); g.fill(); g.strokeStyle = '#4a4640'; g.lineWidth = 5; g.beginPath(); g.moveTo(0, -58); g.lineTo(0, -18); g.moveTo(-13, -46); g.lineTo(13, -46); g.stroke(); g.fillStyle = '#5a8a3a'; circ(g, -24, 4, 7); circ(g, 22, 6, 6); g.fillStyle = '#e8e0c0'; circ(g, 30, 4, 3.5); g.restore(); return; }
   if (e === 'sign') { g.save(); g.translate(W2 / 2, W2 / 2); g.fillStyle = '#4a3018'; g.fillRect(-4, -10, 8, 60); g.fillStyle = '#8a6030'; g.beginPath(); g.moveTo(-40, -30); g.lineTo(30, -30); g.lineTo(42, -18); g.lineTo(30, -6); g.lineTo(-40, -6); g.fill(); g.fillStyle = '#8a6030'; g.beginPath(); g.moveTo(40, 4); g.lineTo(-30, 4); g.lineTo(-42, 16); g.lineTo(-30, 28); g.lineTo(40, 28); g.fill(); g.restore(); return; }
   const L = e && e.kind ? lookFor(e) : { body: KDATA[k || 0].color, head: 'crown', hair: KDATA[k || 0].rulerHair || '#8a7a6a', fem: KDATA[k || 0].fem, skin: '#e8c49a', cape: '#f0ece0', ermine: 1 };
   const s = W2 / 128; g.save(); g.scale(s, s);
@@ -6192,6 +6239,7 @@ function drawMinimap() {
   }
   for (const e of ents) { if (e.dead) continue; const [mx, my] = toM(e.x, e.y); if (mx < 0 || my < 0 || mx > S || my > S) continue; if (playerHostileTo(e)) { g.fillStyle = '#ff4a3a'; circ(g, mx, my, 2); } else if (e.ally || e.role === 'traveler') { g.fillStyle = '#6ad0ff'; circ(g, mx, my, 2); } else if (e === horseEnt) { g.fillStyle = '#f5e6bd'; circ(g, mx, my, 2.2); } }
   Q.active.forEach(q => { const tg = questTarget(q); if (!tg) return; let [mx, my] = toM(tg.x, tg.y); const inside = mx > 6 && my > 6 && mx < S - 6 && my < S - 6; const tracked = Q.tracked === q.id; if (!inside) { const a = Math.atan2(my - S / 2, mx - S / 2); mx = S / 2 + Math.cos(a) * (S / 2 - 9); my = S / 2 + Math.sin(a) * (S / 2 - 9); } g.save(); g.translate(mx, my); g.rotate(Math.PI / 4); g.fillStyle = tracked ? '#ffd24a' : '#d8b25a'; g.globalAlpha = tracked ? 1 : .7; g.fillRect(-3.5, -3.5, 7, 7); g.strokeStyle = '#000'; g.strokeRect(-3.5, -3.5, 7, 7); g.restore(); });
+  if (P && P.grave && !G.under) { const [mx, my] = toM(P.grave.x, P.grave.y); if (mx > 4 && my > 4 && mx < S - 4 && my < S - 4) { g.fillStyle = '#c8c4bc'; g.beginPath(); g.moveTo(mx - 2.5, my + 3); g.lineTo(mx - 2.5, my - 1); g.arc(mx, my - 1, 2.5, Math.PI, 0); g.lineTo(mx + 2.5, my + 3); g.closePath(); g.fill(); } }
   if (G.mapWaypoint) { const [mx, my] = toM(G.mapWaypoint.x, G.mapWaypoint.y); g.strokeStyle = '#6ad0ff'; g.lineWidth = 2; g.beginPath(); g.arc(clamp(mx, 6, S - 6), clamp(my, 6, S - 6), 4, 0, TAU); g.stroke(); }
   g.save(); g.translate(S / 2, S / 2); g.rotate(P.face); g.fillStyle = '#fff'; g.strokeStyle = '#000'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(7, 0); g.lineTo(-5, -5); g.lineTo(-2, 0); g.lineTo(-5, 5); g.closePath(); g.fill(); g.stroke(); g.restore();
 }
@@ -6382,6 +6430,7 @@ function drawBigMap() {
   }
   if (MAPF.quests) Q.active.forEach(q => { const t = questTarget(q); if (!t) return; const [sx, sy] = toS(t.x, t.y); if (t.r) { g.strokeStyle = 'rgba(255,210,74,.8)'; g.setLineDash([6 * dpr, 5 * dpr]); g.lineWidth = 2 * dpr; g.beginPath(); g.arc(sx, sy, t.r / TS * z, 0, TAU); g.stroke(); g.setLineDash([]); } g.save(); g.translate(sx, sy); g.rotate(Math.PI / 4); g.fillStyle = Q.tracked === q.id ? '#ffd24a' : '#c8a040'; g.fillRect(-6 * dpr, -6 * dpr, 12 * dpr, 12 * dpr); g.strokeStyle = '#000'; g.lineWidth = 1.5 * dpr; g.strokeRect(-6 * dpr, -6 * dpr, 12 * dpr, 12 * dpr); g.restore(); });
   if (G.mapWaypoint) { const [sx, sy] = toS(G.mapWaypoint.x, G.mapWaypoint.y); g.strokeStyle = '#6ad0ff'; g.lineWidth = 3 * dpr; g.beginPath(); g.arc(sx, sy, 8 * dpr, 0, TAU); g.stroke(); g.beginPath(); g.moveTo(sx, sy - 14 * dpr); g.lineTo(sx, sy + 14 * dpr); g.moveTo(sx - 14 * dpr, sy); g.lineTo(sx + 14 * dpr, sy); g.stroke(); }
+  if (P && P.grave && !G.under) { const [gx, gy] = toS(P.grave.x, P.grave.y); g.fillStyle = 'rgba(15,10,5,.8)'; circ(g, gx, gy, 9 * dpr); g.fillStyle = '#b8b4ac'; g.beginPath(); g.moveTo(gx - 4.5 * dpr, gy + 5 * dpr); g.lineTo(gx - 4.5 * dpr, gy - 1.5 * dpr); g.arc(gx, gy - 1.5 * dpr, 4.5 * dpr, Math.PI, 0); g.lineTo(gx + 4.5 * dpr, gy + 5 * dpr); g.closePath(); g.fill(); if (mapView.z >= 2.2) { g.font = `italic ${11 * dpr}px 'EB Garamond', Georgia, serif`; g.textAlign = 'center'; g.lineWidth = 3 * dpr; g.strokeStyle = 'rgba(15,10,5,.85)'; g.strokeText('Your last grave', gx, gy + 20 * dpr); g.fillStyle = '#d8d0c0'; g.fillText('Your last grave', gx, gy + 20 * dpr); } }
   (P.pins || []).forEach(pn => { const [sx, sy] = toS(pn.x, pn.y), [ic, col] = PIN_ICONS[pn.icon]; g.fillStyle = 'rgba(15,10,5,.8)'; circ(g, sx, sy, 11 * dpr); g.fillStyle = col; g.font = `bold ${14 * dpr}px Georgia`; g.fillText(ic, sx, sy + 5 * dpr); if (pn.text && mapView.z >= 2.2) { g.font = `italic ${11 * dpr}px 'EB Garamond', Georgia, serif`; g.lineWidth = 3 * dpr; g.strokeStyle = 'rgba(15,10,5,.85)'; g.strokeText(pn.text, sx, sy + 22 * dpr); g.fillStyle = '#f5e6bd'; g.fillText(pn.text, sx, sy + 22 * dpr); } });
   if (MAPF.player) { const [sx, sy] = toS(P.x, P.y); const pulse = 1 + Math.sin(performance.now() / 250) * .2; g.fillStyle = 'rgba(255,255,255,.25)'; circ(g, sx, sy, 14 * dpr * pulse); g.save(); g.translate(sx, sy); g.rotate(P.face); g.fillStyle = '#fff'; g.strokeStyle = '#000'; g.lineWidth = 2 * dpr; g.beginPath(); g.moveTo(11 * dpr, 0); g.lineTo(-7 * dpr, -7 * dpr); g.lineTo(-3 * dpr, 0); g.lineTo(-7 * dpr, 7 * dpr); g.closePath(); g.fill(); g.stroke(); g.restore(); }
   // compass
@@ -6715,6 +6764,7 @@ function renderWorld(t) {
   const dead = [];
   for (const e of ents) { if (e.x < vx - 60 || e.x > vx + VW + 60 || e.y < vy - 60 || e.y > vy + VH + 80) continue; if (e.dead) dead.push(e); else list.push({ y: e.perch ? e.y + 120 : e.y, e }); }
   if (playing && G.state !== 'dead') list.push({ y: P.y, e: P });
+  if (playing && P.grave && !G.under && Math.abs(P.grave.x - cam.x) < VW && Math.abs(P.grave.y - cam.y) < VH) list.push({ y: P.grave.y + 8, grave: 1 });
   dead.forEach(e => drawEntity(g, e, t));
   list.sort((a, b) => a.y - b.y);
   const q = QMUL();
@@ -6723,11 +6773,13 @@ function renderWorld(t) {
       const tr = it.tr, s = tr.s; const spr = treeSprites[tr.kind * 3 + (Math.floor(tr.x * 7 + tr.y) % 3)];
       let fade = false; if (playing && Math.abs(P.x - tr.x) < 34 * s && P.y < tr.y && P.y > tr.y - 70 * s) fade = true;
       if (!fade) for (const e of ents) { if (!e.dead && Math.abs(e.x - tr.x) < 26 && e.y < tr.y && e.y > tr.y - 60 && playerHostileTo(e)) { fade = true; break; } }
+      if (!fade && P && P.grave && !G.under && Math.abs(P.grave.x - tr.x) < 30 * s && P.grave.y + 8 < tr.y + 4 && P.grave.y + 8 > tr.y - 66 * s) fade = true;
       if (fade) g.globalAlpha = .42;
       const sway = q > .5 ? Math.sin(t * 1.2 + tr.x * .05) * 1.2 : 0;
       g.drawImage(spr, tr.x - 36 * s + sway, tr.y - 82 * s, 72 * s, 90 * s);
       g.globalAlpha = 1;
     } else if (it.o) { drawStruct(g, it.o, t); if (it.o.home) { const o = it.o; g.fillStyle = '#3a2a1a'; g.fillRect(o.x + o.w - 10, o.y - 30, 2, 26); g.fillStyle = '#e7c35a'; g.beginPath(); g.moveTo(o.x + o.w - 8, o.y - 30); g.lineTo(o.x + o.w + 8, o.y - 25); g.lineTo(o.x + o.w - 8, o.y - 20); g.fill(); } }
+    else if (it.grave) drawGrave(g, P.grave, t);
     else drawEntity(g, it.e, t);
   }
   signQueue.forEach(o => drawSignPlanks(g, o)); signQueue.length = 0;
@@ -7096,7 +7148,7 @@ function saveGame(silent) {
   const qStrip = q => { const c = Object.assign({}, q); delete c.ent; delete c.foes; return c; };
   const data = {
     v: 1, seed: W.seed, time: G.time, kills: G.kills, uid: uidCounter, waypoint: G.mapWaypoint, savedAt: Date.now(),
-    P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, skills: P.skills, sp: P.sp, comps: P.comps, houses: P.houses, stash: P.stash, forts: P.forts, fortGuards: P.fortGuards, fief: P.fief || null, pins: P.pins || [],
+    P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, skills: P.skills, sp: P.sp, comps: P.comps, houses: P.houses, stash: P.stash, forts: P.forts, fortGuards: P.fortGuards, fief: P.fief || null, pins: P.pins || [], grave: P.grave || null,
       party: partyNow().filter(e => !e.comp || true).map(e => ({ comp: e.comp, kind: e.kind, name: e.name, hp: Math.round(Math.max(1, e.hp)), k: e.k })), mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
     horse: horseEnt ? { x: horseEnt.x, y: horseEnt.y } : null,
     K: { rel: K.rel, aff: K.aff, rep: K.rep, mil: K.mil, reasons: K.reasons, events: K.events, kev: K.kev, repWhy: K.repWhy, gifts: K.gifts, log: K.log, cd: {} },
