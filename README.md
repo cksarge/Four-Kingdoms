@@ -40,8 +40,8 @@ Before a new game you can set:
 | K | Diplomacy |
 | J | Quest journal |
 | 1 / 2 / 3 | Eat food / drink potion / use bandage |
-| Q (hold) | Sprint, draining stamina |
-| Shift + left click | Hit characters who aren't hostile, such as villagers, guards or peaceful animals. Normally your attacks pass through them. Attacking people costs reputation and turns guards against you |
+| Shift (hold) | Sprint, draining stamina |
+| Q + left click | Hit characters who aren't hostile, such as villagers, guards or peaceful animals. Normally your attacks pass through them. Attacking people costs reputation and turns guards against you |
 | Esc | Pause |
 
 ## Features
