@@ -10,7 +10,13 @@ Play online at **https://cksarge.github.io/Four-Kingdoms/**, or download `index.
 
 When you start a new game you choose a mode:
 
-- **Story Mode**: a hedge knight finds a dying royal courier, and the trail leads to an ancient conspiracy. A shared opening splits into three storylines depending on your choices (unmasking the Ashen Circle, stopping the Hollow King, or seizing power yourself). There are about 20 main quests per playthrough and 15 endings. Which ending you get depends on your choices and on the state of the world: wars, alliances and your reputation with each kingdom. When the story ends you can keep playing the same world as a sandbox or return to the main menu.
+- **Story Mode**: a hedge knight finds a dying royal courier, and the trail leads to an ancient conspiracy. The story runs in three acts, about 35 main quests in all, and a full playthrough lasts several hours and many in-game weeks.
+  - **Act I:** a shared opening splits into three storylines depending on your choices: unmasking the Ashen Circle, stopping the Hollow King, or seizing power yourself.
+  - **Act II, *The Long War*:** every storyline passes through this act. Two crowns go to war, and you choose a side or try to broker peace. Your decisions settle the fate of a captive heir, a Hollow blight in the fens, the Bone Wyrm, the Pale Hand's secret roll, and a siege of a royal capital. It ends at the Council of Winter.
+  - **Act III:** each storyline continues with its own quests and bosses, including the Ashen Seneschal, Rimeheart, a poisoned feast and a crown council. It ends in a final battle against the Hollow King, who rises a second time. The allies who fight beside you depend on the choices you made in Act II.
+  - **22 endings:** which one you get depends on your choices and on the state of the world, meaning its wars, alliances and your reputation with each kingdom.
+  - **Epilogue:** a closing section of several pages covers how it ended, what became of each kingdom, the fates of the people you met, and your legacy and deeds.
+  - When the story ends you can keep playing the same world as a sandbox or return to the main menu.
 - **Sandbox**: the open world with no story.
 - **Tutorial**: a five-minute lesson with a drill sergeant in a training yard (movement, sprinting, combat, blocking and dodging, archery, riding and the menus). When it ends, the same world carries on as an endless sandbox game. It uses Knight difficulty and a Medium world, and shares the sandbox save slot.
 
@@ -23,7 +29,7 @@ Before a new game you can set:
 - **Difficulty**, in six levels: Peasant, Squire, Knight (the standard game), Champion, Warlord and Forsaken. Difficulty changes damage taken and dealt, enemy health, health and stamina regeneration, stamina costs, healing, how much gold you lose when you fall, your starting gear and gold, and how friendly the four kingdoms are at the start. Forsaken is an Ironman mode: you get one life, and dying erases the save.
 - **World size**, from Extra Small to Extra Large. Larger worlds have more villages, ruins and bandit camps.
 - **Homeland**, the kingdom you start in (sandbox only; the story always begins in Albion).
-- **Wildlife** (scarce, normal or abundant), **day length** (short, normal or long), and whether to **start with the map explored**.
+- **Wildlife** (scarce, normal or abundant), **day length** (short, normal or long), **starting season** (spring, summer, autumn or winter), and whether to **start with the map explored**.
 
 ## Controls
 
