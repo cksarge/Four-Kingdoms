@@ -58,6 +58,11 @@ Before a new game you can set:
 - Legendary enchanted weapons, including a burning sword, a venom blade, a frost longsword, a life-draining axe and a lightning bow.
 - Watchtowers guard the roads into each castle and the border crossings. Bowmen on the towers and castle walls shoot at bandits, enemy soldiers and outlaws.
 - Quests, random world events and a day/night cycle.
+- Seasons that change every six days: spring blossom, summer, golden autumn (cheap food) and snowy winter (slower travel off the roads, dear bread).
+- Regional weather: rain and thunderstorms, morning fog in the marshes, sandstorms in the desert and blizzards in the snowfields. Fog and storms shorten how far enemies see and archers shoot; rain puts out fires.
+- Carriages for fast travel between towns you have discovered (the castle coachman or any village signpost), for a fee by the league.
+- Bounty boards on every signpost: bandit captains, wanted outlaws and dangerous beasts.
+- Fishing at little jetties on rivers, lakes and the coast (buy a rod at a village market), and hermits in the wilds who sell tonics, training and secrets.
 - About 45 music tracks, all generated in code: rotating day and night overworld songs, combat and boss themes, a village, castle and fort theme for each kingdom, and story-mode themes. The music changes with where you are and what you're doing.
 
 ## License
