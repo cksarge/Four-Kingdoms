@@ -20,7 +20,7 @@ When you start a new game you choose a mode:
 - **Sandbox**: the open world with no story.
 - **Tutorial**: a five-minute lesson with a drill sergeant in a training yard (movement, sprinting, combat, blocking and dodging, archery, riding and the menus). When it ends, the same world carries on as an endless sandbox game. It uses Knight difficulty and a Medium world, and shares the sandbox save slot.
 
-Story and sandbox games are saved separately, so starting one never overwrites the other.
+There are five save slots, and each can hold a story or a sandbox game. The game also saves itself whenever the tab is hidden or closed. Saves can be downloaded as a file and loaded back from the main menu, so you can keep backups or move a game between a phone and a computer.
 
 ## New game options
 
@@ -97,6 +97,9 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 - Property: buy a house in a friendly village (rest, a safe stash, and you wake there if you fall), or restore a ruined fort that pays a daily income and can be garrisoned.
 - Crafting: fletch every arrow type at market benches, and at the royal forges improve gear up to Masterwork or bind a dungeon relic into a blade to enchant it.
 - Fishing at little jetties on rivers, lakes and the coast (buy a rod at a village market), and hermits in the wilds who sell tonics, training and secrets.
+- **Settings:**
+  - Battery Saver (30 fps, fewer particles) and optional chattering NPC voices.
+  - Accessibility: rebindable keys, text size, reduced flashing and motion, and colourblind-friendly map and relation colours.
 - About 45 music tracks, all generated in code: rotating day and night overworld songs, combat and boss themes, a village, castle and fort theme for each kingdom, and story-mode themes. The music changes with where you are and what you're doing.
 
 ## Achievements and statistics

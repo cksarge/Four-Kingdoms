@@ -80,6 +80,15 @@ body.touch #prompt kbd{font-size:15px}
   body.touch #mmWrap{zoom:.8}
   body.touch #prompt{top:30%}
 }
+.slotList{display:flex;flex-direction:column;gap:8px;max-height:calc(70vh/var(--ui-scale));overflow-y:auto}
+.slotCard{position:relative}.slotCard.empty{opacity:.7;border-style:dashed}
+.slotActs{display:flex;gap:6px;margin-top:6px}
+#dialog,#toasts,#questTracker,#prompt,#tip{zoom:var(--text-scale,1)}
+body.touch #toasts{zoom:calc(var(--ui-scale) * var(--text-scale,1))}
+#setBody{max-height:calc(76vh/var(--ui-scale) - 90px);overflow-y:auto;padding-right:8px}
+#settingsScreen .panel{width:min(640px,calc(94vw/var(--ui-scale)))}
+.keyGrid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}.keyGrid .setRow{font-size:13.5px;padding:5px 4px}@media (max-width:700px){.keyGrid{grid-template-columns:1fr}}
+.keyBtn{min-width:78px}
 #helpTouch{display:none}
 body.touch #helpTouch{display:block}
 #hud.off{opacity:0}
@@ -589,6 +598,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
           <button class="btn" id="btnMenuSettings">Settings</button>
           <button class="btn" id="btnHow">How to Play</button>
           <button class="btn" id="btnAch">Achievements</button>
+          <button class="btn sm" id="btnMenuImport" style="margin-top:4px;opacity:.85">Load Save File…</button>
         </div>
       </div>
       <div class="credit">Progress saves to this browser</div>
@@ -604,7 +614,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div id="modePick" class="modeBox">
         <div class="modeCard story" data-mode="story"><div class="mcT">STORY MODE</div><div class="mcD">Follow a hedge knight's tale across the four kingdoms. Your choices shape the realm and decide one of many endings.</div></div>
         <div class="modeCard" data-mode="sandbox"><div class="mcT">SANDBOX</div><div class="mcD">The open realm with no story. Explore, fight, trade and meddle in diplomacy for as long as you like.</div></div>
-        <div class="modeCard tut" data-mode="tutorial"><div class="mcT">TUTORIAL</div><div class="mcD">A quick lesson in the training yard: moving, fighting, archery, riding and the menus. Afterwards, keep playing the same world as an endless sandbox.</div><div class="mcS">About five minutes · Knight difficulty · Medium world · uses your sandbox save</div></div>
+        <div class="modeCard tut" data-mode="tutorial"><div class="mcT">TUTORIAL</div><div class="mcD">A quick lesson in the training yard: moving, fighting, archery, riding and the menus. Afterwards, keep playing the same world as an endless sandbox.</div><div class="mcS">About five minutes · Knight difficulty · Medium world</div></div>
       </div>
       <div id="setupBox" class="hidden">
         <div class="setH">DIFFICULTY</div>
@@ -625,6 +635,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <div class="lockNote hidden" id="exploredLock">Forsaken: you must discover the realm yourself</div>
         <div class="setBtns"><button class="btn sm" id="btnSetupBack">Back</button><button class="btn gold" id="btnSetupGo">Forge the Realm</button></div>
       </div>
+      <div id="slotBox" class="hidden"><div id="slotList" class="modeBox slotList"></div><div class="setBtns"><button class="btn sm" id="btnSlotBack">Back</button><span class="segNote" style="margin:0">Each slot can hold a story or a sandbox game.</span></div></div>
       <div id="newConfirm" class="confirmBox hidden">
         <div style="margin-bottom:10px" id="newConfirmText"></div>
         <button class="btn gold sm" id="btnNewYes">Begin Anew</button> <button class="btn sm" id="btnNewNo">Back</button>
@@ -636,9 +647,11 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   <div id="contScreen" class="screen">
     <div class="panel rv">
       <div class="closeX" data-close>✕</div>
-      <div class="ptitle" style="font-size:26px">CONTINUE</div>
+      <div class="ptitle" style="font-size:26px" id="contTitle">CONTINUE</div>
       <div class="orn">✦</div>
-      <div id="contList" class="modeBox"></div>
+      <div class="segNote" id="contNote" style="text-align:center"></div>
+      <div id="contList" class="modeBox slotList"></div>
+      <div style="text-align:center;margin-top:12px"><button class="btn sm" id="btnImport">Load save file…</button><input type="file" id="importFile" accept=".json,application/json" style="display:none"></div>
     </div>
   </div>
 
@@ -659,7 +672,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <button class="ptile" data-act="ach"><img data-icon="shard_0" alt=""><span>Achievements</span></button>
         <button class="ptile" data-act="settings"><span class="pg">⚙</span><span>Settings</span></button>
       </div>
-      <div class="pauseRow"><button class="btn" data-act="save">Save Game</button><button class="btn red" data-act="main">Main Menu</button></div>
+      <div class="pauseRow"><button class="btn" data-act="save">Save Game</button><button class="btn" data-act="download" title="Download this save as a file">⬇ Download Save</button><button class="btn red" data-act="main">Main Menu</button></div>
       <div id="quitConfirm" class="confirmBox hidden">
         <div style="margin-bottom:8px">Return to the main menu?</div>
         <button class="btn gold sm" data-act="saveQuit">Save &amp; Quit</button>
@@ -771,15 +784,15 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div class="ptitle" style="font-size:26px">HOW TO PLAY</div>
       <div class="orn">✦</div>
       <div class="cols">
-        <div><kbd>W A S D</kbd> Move</div><div><kbd>Mouse</kbd> Aim</div>
+        <div><kbd data-k="move">W A S D</kbd> Move</div><div><kbd>Mouse</kbd> Aim</div>
         <div><kbd>LMB</kbd> Attack (hold to chain)</div><div><kbd>RMB</kbd> Block with shield</div>
-        <div><kbd>LMB</kbd> With a bow: hold to draw, release to shoot. A full draw flies farthest and hits hardest</div><div><kbd>R</kbd> Switch arrow type (bows are two-handed: no blocking)</div>
-        <div><kbd>Tab</kbd> Swap to your sidearm (set one in the inventory)</div><div><kbd>C</kbd> Special move: sword whirlwind, axe crushing blow, spear lunge, piercing arrow; while blocking, a shield bash</div>
-        <div><kbd>Space</kbd> Dodge: time it just as a blow lands to take no damage</div><div><kbd>E</kbd> Talk / loot / interact</div>
-        <div><kbd>F</kbd> Mount, dismount, call horse</div><div><kbd>Shift</kbd> Sprint (hold; drains stamina)</div><div><kbd>Q</kbd>+<kbd>LMB</kbd> Hit friendly or neutral characters (villagers, guards, animals). Hurting people is a crime</div>
-        <div><kbd>P</kbd> Skills (one point per level)</div><div><kbd>G</kbd> Companions: follow or hold position</div>
-        <div><kbd>I</kbd> Inventory</div><div><kbd>M</kbd> Map</div>
-        <div><kbd>K</kbd> Diplomacy (kingdoms)</div><div><kbd>J</kbd> Quest journal</div>
+        <div><kbd>LMB</kbd> With a bow: hold to draw, release to shoot. A full draw flies farthest and hits hardest</div><div><kbd data-k="KeyR">R</kbd> Switch arrow type (bows are two-handed: no blocking)</div>
+        <div><kbd data-k="Tab">Tab</kbd> Swap to your sidearm (set one in the inventory)</div><div><kbd data-k="KeyC">C</kbd> Special move: sword whirlwind, axe crushing blow, spear lunge, piercing arrow; while blocking, a shield bash</div>
+        <div><kbd data-k="Space">Space</kbd> Dodge: time it just as a blow lands to take no damage</div><div><kbd data-k="KeyE">E</kbd> Talk / loot / interact</div>
+        <div><kbd data-k="KeyF">F</kbd> Mount, dismount, call horse</div><div><kbd data-k="ShiftLeft">Shift</kbd> Sprint (hold; drains stamina)</div><div><kbd data-k="KeyQ">Q</kbd>+<kbd>LMB</kbd> Hit friendly or neutral characters (villagers, guards, animals). Hurting people is a crime</div>
+        <div><kbd data-k="KeyP">P</kbd> Skills (one point per level)</div><div><kbd data-k="KeyG">G</kbd> Companions: follow or hold position</div>
+        <div><kbd data-k="KeyI">I</kbd> Inventory</div><div><kbd data-k="KeyM">M</kbd> Map</div>
+        <div><kbd data-k="KeyK">K</kbd> Diplomacy (kingdoms)</div><div><kbd data-k="KeyJ">J</kbd> Quest journal</div>
         <div><kbd>1</kbd>–<kbd>3</kbd> Eat food / drink potion</div><div><kbd>Esc</kbd> Pause / close</div>
       </div>
       <div id="helpTouch" style="margin-top:12px;padding:10px 12px;border:1px solid rgba(154,117,54,.4);border-radius:6px;background:rgba(0,0,0,.25)"><b style="font-family:var(--fh);color:var(--gold-l)">ON A PHONE OR TABLET</b><br>Drag anywhere on the left of the screen to move. <b>⚔</b> attacks (hold it to draw a bow, release to shoot), <b>🛡</b> blocks, <b>↻</b> dodges, <b>✦</b> is your special move and <b>✋</b> talks and interacts (or tap the prompt). Attacks and arrows aim at the nearest foe by themselves. The small buttons sprint, mount, swap weapons, switch arrows, eat, drink a potion, call your companions and go fullscreen. On the map, drag to pan, pinch to zoom, tap a place for details and press and hold to set a waypoint.</div>
@@ -928,17 +941,29 @@ function mix(h1, h2, t) {
 function compass(dx, dy) { const a = Math.atan2(dy, dx); const dirs = ['East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest', 'North', 'Northeast']; return dirs[(Math.round(a / (Math.PI / 4)) + 8) % 8]; }
 
 /* ---------------- Settings ---------------- */
-const DEFAULT_SETTINGS = { music: 0.45, sound: 0.7, effects: 0.6, shake: true, dmgNums: true, minimap: true, uiScale: 1, quality: 'high' };
+const DEFAULT_SETTINGS = { music: 0.45, sound: 0.7, effects: 0.6, shake: true, dmgNums: true, minimap: true, uiScale: 1, quality: 'high', battery: false, voices: true, noFlash: false, cb: false, textScale: 1, keys: {} };
 let settings = loadSettings();
+/* Key bindings: every action keeps its default code inside the game; settings.keys maps it to the physical key. */
+const KEY_ACTIONS = [['KeyW', 'Move up'], ['KeyS', 'Move down'], ['KeyA', 'Move left'], ['KeyD', 'Move right'], ['ShiftLeft', 'Sprint'], ['Space', 'Dodge'], ['KeyE', 'Interact'], ['KeyF', 'Horse'], ['KeyQ', 'Hit friendlies (hold)'], ['KeyR', 'Switch arrows'], ['Tab', 'Swap weapon'], ['KeyC', 'Special move'], ['KeyG', 'Companions'], ['KeyI', 'Inventory'], ['KeyM', 'Map'], ['KeyK', 'Diplomacy'], ['KeyJ', 'Quests'], ['KeyP', 'Skills'], ['KeyL', 'Journal'], ['Digit1', 'Eat food'], ['Digit2', 'Drink potion'], ['Digit3', 'Use bandage']];
+const KEY_LOGICAL = new Set(KEY_ACTIONS.map(a => a[0]));
+let keyRev = {};
+function keyOf(code) { return (settings.keys && settings.keys[code]) || code; }
+function buildKeyMap() { keyRev = {}; KEY_ACTIONS.forEach(([c]) => { keyRev[keyOf(c)] = c; }); }
+function mapKey(code) { if (keyRev[code]) return keyRev[code]; return KEY_LOGICAL.has(code) ? null : code; } // a default key that has been moved elsewhere does nothing
+function keyName(code) { const c = keyOf(code); return c.startsWith('Key') ? c.slice(3) : c.startsWith('Digit') ? c.slice(5) : { ShiftLeft: 'Shift', ShiftRight: 'R-Shift', ControlLeft: 'Ctrl', AltLeft: 'Alt', Space: 'Space', Tab: 'Tab', ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→', Enter: 'Enter', Backquote: '`', CapsLock: 'Caps' }[c] || c; }
 let WIPED = false; // set while all save data is being deleted, so nothing writes it back
 function loadSettings() { try { return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem('fk_settings') || '{}')); } catch (e) { return Object.assign({}, DEFAULT_SETTINGS); } }
 function saveSettings() { if (WIPED) return; try { localStorage.setItem('fk_settings', JSON.stringify(settings)); } catch (e) { } }
+let lastCb = null;
 function applySettings() {
   document.documentElement.style.setProperty('--ui-scale', TOUCH && TOUCH.on ? Math.min(settings.uiScale, TOUCH.scale) : settings.uiScale);
+  document.documentElement.style.setProperty('--text-scale', settings.textScale || 1);
+  buildKeyMap(); if (typeof refreshKeyHints === 'function') refreshKeyHints();
+  if (lastCb !== null && lastCb !== !!settings.cb && W && W.places && typeof buildMapLayers === 'function') { buildMapLayers(); chunkCache.clear(); } lastCb = !!settings.cb;
   $('mmWrap').classList.toggle('hidden', !settings.minimap);
   SND.apply(); resize();
 }
-const QMUL = () => settings.quality === 'low' ? 0.35 : settings.quality === 'medium' ? 0.65 : 1;
+const QMUL = () => settings.battery ? .35 : settings.quality === 'low' ? 0.35 : settings.quality === 'medium' ? 0.65 : 1;
 
 /* ---------------- Audio (procedural) ---------------- */
 const SND = {
@@ -969,6 +994,16 @@ const SND = {
     if (sweep) f.frequency.exponentialRampToValueAtTime(freq * sweep, t + dur);
     const g = c.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     s.connect(f); f.connect(g); g.connect(this[bus]); s.start(t, Math.random() * .5); s.stop(t + dur + .05);
+  },
+  babble(seed, n = 6, who) { // a little burst of gibberish, pitched per speaker
+    if (!this.ctx || !settings.voices) return;
+    let h = 7; for (const ch of String(seed || '')) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    let base = 150 + (h % 160), rate = .072 + ((h >> 8) % 28) / 1000;
+    if (who && who.scale && who.scale < .9) base *= 1.75;
+    if (who && who.role === 'ruler') { base *= .72; rate *= 1.25; }
+    if (who && who._look && who._look.fem) base *= 1.3;
+    const type = ['square', 'triangle', 'sawtooth'][(h >> 4) % 3], vol = type === 'sawtooth' ? .03 : .045;
+    for (let i = 0; i < n; i++) { const f = base * (1 + ((((h >> (i % 20)) & 7) - 3) * .07)) * (1 + (Math.random() - .5) * .14); this.tone(f, rate * (.7 + Math.random() * .5), type, vol, 'fx', i * rate * 1.08, 1 + (Math.random() - .5) * .35, .004); }
   },
   play(n, v = 1) {
     if (!this.ctx) return;
@@ -1353,7 +1388,7 @@ const cv = $('game');
 const ctx = cv.getContext('2d');
 let VW = innerWidth, VH = innerHeight, DPR = 1;
 function resize() {
-  DPR = Math.min(window.devicePixelRatio || 1, settings.quality === 'high' ? 2 : 1);
+  DPR = Math.min(window.devicePixelRatio || 1, settings.quality === 'high' && !settings.battery ? 2 : 1);
   VW = innerWidth; VH = innerHeight;
   cv.width = Math.floor(VW * DPR); cv.height = Math.floor(VH * DPR);
   if (typeof lightCv !== 'undefined') { lightCv.width = Math.ceil(VW / 2); lightCv.height = Math.ceil(VH / 2); }
@@ -1393,7 +1428,10 @@ const STATUS = [
   { min: 60, n: 'Allied', c: '#4fd07a' }, { min: 25, n: 'Friendly', c: '#9ccf6a' }, { min: -24.99, n: 'Neutral', c: '#b8ae98' },
   { min: -49.99, n: 'Tense', c: '#e0a040' }, { min: -74.99, n: 'Hostile', c: '#e0603a' }, { min: -101, n: 'At War', c: '#ff3a24' },
 ];
-function statusOf(v) { for (const s of STATUS) if (v >= s.min) return s; return STATUS[5]; }
+const STATUS_CB = { Allied: '#3aa0f0', Friendly: '#8ac4f0', Neutral: '#b8ae98', Tense: '#f0d040', Hostile: '#f09a2a', 'At War': '#ff7a00' };
+function statusOf(v) { let r = STATUS[5]; for (const s of STATUS) if (v >= s.min) { r = s; break; } return settings.cb ? Object.assign({}, r, { c: STATUS_CB[r.n] }) : r; }
+const KCOL_CB = ['#D55E00', '#0072B2', '#CC79A7', '#F0E442'];
+const kcol = k => settings.cb ? KCOL_CB[k] : KDATA[k].color; // kingdom colours on maps and borders
 
 const NAMES = {
   pre: [['Ash', 'Bram', 'Kings', 'Oak', 'Thorn', 'Wick', 'Mill', 'Stone', 'Harrow', 'Elm', 'Fox', 'Red', 'Hollow', 'Brook'],
@@ -2535,7 +2573,7 @@ function doPlayerHit() {
     if (P.mounted) dmg *= 1.1 + (S.horse && S.horse.dmgB ? S.horse.dmgB : 0) + .06 * (SK('riding') >= 3 ? 3 : SK('riding') >= 1 ? 1 : 0);
     damage(e, dmg, P, { crit, kb: S.wk === 'great' || S.wk === 'axe' ? 1.6 : S.wk === 'spear' ? 1.2 : 1 }); applyEnch(e, dmg); hits++;
   }
-  if (hits) { G.hitstop = .045; addShake(2 + hits); }
+  if (hits) { G.hitstop = settings.noFlash ? 0 : .045; addShake(2 + hits); }
 }
 function updatePlayer(dt) {
   P.flash -= dt; P.iframes -= dt; P.atkCd -= dt; if (P.blessT > 0) P.blessT -= dt; if (P.luckT > 0) P.luckT -= dt; if (P.restT > 0) P.restT -= dt;
@@ -2749,7 +2787,7 @@ function damage(t, amt, src, o = {}) {
     if (G.tourney && G.tourney.fighting && src && src.tourney && P.hp - a <= 1) { tourneyLose(); return a; }
     P.lastBlow = { src: src && !src.isPlayer ? { name: src.name, k: src.k, kind: src.kind, boss: !!(src.boss || src.chief || src.named), trap: !!src.isTrap, soldier: !!(src.faction && src.faction[0] === 'k') } : null, dot: o.dot || null };
     P.hp -= a; P.flash = .15; addShake(3 + a * .25); SND.play('hurt');
-    $('hurtVignette').style.boxShadow = 'inset 0 0 160px rgba(170,0,0,.55)'; setTimeout(() => $('hurtVignette').style.boxShadow = 'inset 0 0 160px rgba(170,0,0,0)', 180);
+    if (!settings.noFlash) $('hurtVignette').style.boxShadow = 'inset 0 0 160px rgba(170,0,0,.55)'; setTimeout(() => $('hurtVignette').style.boxShadow = 'inset 0 0 160px rgba(170,0,0,0)', 180);
     if (settings.dmgNums) addText(P.x + rand(-6, 6), P.y - 28, Math.round(a), '#ff6a5a', 15);
     if (src && !o.proj) { const d = Math.hypot(P.x - src.x, P.y - src.y) || 1; P.kbx = (P.x - src.x) / d * 150; P.kby = (P.y - src.y) / d * 150; }
     for (let i = 0; i < 5 * QMUL(); i++) addPart(P.x, P.y, rand(-80, 80), rand(-100, 20), '#a01a14', .5, 2.5, 200);
@@ -2906,7 +2944,7 @@ function updateActor(e, dt) {
   if (e.healer && P.hp < P.maxHp && dist(e.x, e.y, P.x, P.y) < 160) { P.hp = Math.min(P.maxHp, P.hp + 1.6 * dt); if (Math.random() < 2 * dt) addPart(P.x + rand(-8, 8), P.y - rand(0, 16), 0, -30, '#8fe07a', .6, 2.5); }
   if (e.comp && !e.target && (e.bantT = (e.bantT ?? rand(40, 90)) - dt) <= 0) { e.bantT = rand(70, 150); const c = COMPANIONS.find(cc => cc.id === e.comp); if (c) e.say = { text: pick(c.lines), t: 3.5 }; }
   e.flash -= dt; e.atkCd -= dt * (e.chill > 0 ? .5 : 1); if (e.swing > 0) e.swing -= dt;
-  if (e.say) { e.say.t -= dt; if (e.say.t <= 0) e.say = null; }
+  if (e.say) { if (!e.say.v) { e.say.v = 1; if (Math.abs(e.x - P.x) < 420 && Math.abs(e.y - P.y) < 300) SND.babble(e.name, e.say.text && e.say.text.length > 28 ? 6 : 4, e); } e.say.t -= dt; if (e.say.t <= 0) e.say = null; }
   if ((e.kbx || e.kby) && !e.perch) { moveEnt(e, e.kbx * dt, e.kby * dt); const f = Math.pow(.004, dt); e.kbx *= f; e.kby *= f; if (Math.abs(e.kbx) + Math.abs(e.kby) < 5) e.kbx = e.kby = 0; }
   if (e.guardBroken > 0) e.guardBroken -= dt;
   if (e.stun > 0) { e.stun -= dt; e.wind = 0; return; } // staggered by a bash or heavy blow
@@ -3133,7 +3171,7 @@ function drawWeather(c, VW, VH, vx, vy, t) {
     const gr = c.createRadialGradient(VW / 2, VH / 2, 70, VW / 2, VH / 2, Math.max(VW, VH) * .62); gr.addColorStop(0, `rgba(205,210,215,${.1 * fog})`); gr.addColorStop(1, `rgba(205,210,215,${.75 * fog})`); c.fillStyle = gr; c.fillRect(0, 0, VW, VH);
     if (hq) for (let i = 0; i < 7; i++) { const x = md(hash2(i, 51) * 3000 - vx * .8 + t * 9, VW + 400) - 200, y = md(hash2(i, 53) * 3000 - vy * .8, VH + 300) - 150; c.fillStyle = `rgba(215,220,225,${.1 * fog})`; circ(c, x, y, 120 + hash2(i, 57) * 90); }
   }
-  if (G.lightning > 0) { c.fillStyle = `rgba(235,240,255,${Math.min(.5, G.lightning * 1.6)})`; c.fillRect(0, 0, VW, VH); }
+  if (G.lightning > 0 && !settings.noFlash) { c.fillStyle = `rgba(235,240,255,${Math.min(.5, G.lightning * 1.6)})`; c.fillRect(0, 0, VW, VH); }
 }
 function isNight() { return G && G.state !== 'menu' && darkness() > .3; }
 
@@ -5139,8 +5177,8 @@ function renderChunk(g, cx, cy) {
   g.lineWidth = 2; g.setLineDash([5, 5]);
   for (let ty = y0; ty < y0 + CH; ty++) for (let tx = x0; tx < x0 + CH; tx++) {
     const i = ty * WW + tx; if (W.ter[i] === T.SEA) continue; const k = W.own[i];
-    if (tx + 1 < WW && W.own[i + 1] !== k && W.ter[i + 1] !== T.SEA) { g.strokeStyle = hexA(KDATA[k].color, .45); g.beginPath(); g.moveTo((tx + 1) * TS + ox, ty * TS + oy); g.lineTo((tx + 1) * TS + ox, (ty + 1) * TS + oy); g.stroke(); }
-    if (ty + 1 < WH && W.own[i + WW] !== k && W.ter[i + WW] !== T.SEA) { g.strokeStyle = hexA(KDATA[k].color, .45); g.beginPath(); g.moveTo(tx * TS + ox, (ty + 1) * TS + oy); g.lineTo((tx + 1) * TS + ox, (ty + 1) * TS + oy); g.stroke(); }
+    if (tx + 1 < WW && W.own[i + 1] !== k && W.ter[i + 1] !== T.SEA) { g.strokeStyle = hexA(kcol(k), .45); g.beginPath(); g.moveTo((tx + 1) * TS + ox, ty * TS + oy); g.lineTo((tx + 1) * TS + ox, (ty + 1) * TS + oy); g.stroke(); }
+    if (ty + 1 < WH && W.own[i + WW] !== k && W.ter[i + WW] !== T.SEA) { g.strokeStyle = hexA(kcol(k), .45); g.beginPath(); g.moveTo(tx * TS + ox, (ty + 1) * TS + oy); g.lineTo((tx + 1) * TS + ox, (ty + 1) * TS + oy); g.stroke(); }
   }
   g.setLineDash([]);
 }
@@ -6089,7 +6127,7 @@ function drawHorse(g, x, y, face, hb, walk, rider, allegiance) {
 function drawWyrm(g, e) {
   const t = performance.now() / 1000, sc = (e.scale || 1) * 1.6, ivory = '#e4dcc8', dark = '#a89c82', glow = '#8fd8ff';
   g.save(); g.translate(e.x, e.y); g.fillStyle = 'rgba(0,0,0,.3)'; ell(g, 4, 14 * sc, 36 * sc, 14 * sc);
-  g.rotate(e.face); g.scale(sc, sc); if (e.flash > 0) g.filter = 'brightness(2)'; if (e.dead) g.globalAlpha = Math.max(0, 1 - (e.deadT - 7) / 3);
+  g.rotate(e.face); g.scale(sc, sc); if (e.flash > 0 && !settings.noFlash) g.filter = 'brightness(2)'; if (e.dead) g.globalAlpha = Math.max(0, 1 - (e.deadT - 7) / 3);
   const w = Math.sin(e.walk * 1.2) * 4, sway = Math.sin(t * 2 + e.walk * .3) * 5;
   g.fillStyle = 'rgba(120,200,255,.12)'; ell(g, 0, 0, 30, 20); // ghost-fire aura
   // tattered wings folded back
@@ -6113,7 +6151,7 @@ function drawWyrm(g, e) {
 function drawSpider(g, e) {
   g.save(); g.translate(e.x, e.y); const sc = e.scale || 1; g.scale(sc, sc);
   g.fillStyle = 'rgba(0,0,0,.3)'; ell(g, 2, 7, 15, 6);
-  g.rotate(e.face); if (e.flash > 0) g.filter = 'brightness(2.2)'; if (e.dead) g.globalAlpha = Math.max(0, 1 - (e.deadT - 7) / 3);
+  g.rotate(e.face); if (e.flash > 0 && !settings.noFlash) g.filter = 'brightness(2.2)'; if (e.dead) g.globalAlpha = Math.max(0, 1 - (e.deadT - 7) / 3);
   const w = Math.sin(e.walk * 2) * 3; g.strokeStyle = '#1e1814'; g.lineWidth = 2; g.lineCap = 'round';
   for (let s2 = -1; s2 <= 1; s2 += 2) for (let i = 0; i < 4; i++) { const a = (i - 1.5) * .5, ph = (i % 2 ? w : -w) * s2; g.beginPath(); g.moveTo(Math.cos(a) * 4, s2 * 3); g.quadraticCurveTo(Math.cos(a) * 10 + ph, s2 * 12, Math.cos(a) * 15 + ph, s2 * (15 + Math.abs(ph))); g.stroke(); }
   g.fillStyle = '#2a221c'; ell(g, -7, 0, 9, 7.5); g.fillStyle = '#8a1a14'; ell(g, -8, 0, 3.5, 2);
@@ -6124,7 +6162,7 @@ function drawSpider(g, e) {
 function drawCanine(g, e, kind, snowy) {
   const big = (kind === 'jackal' ? .85 : 1.08) * (e.scale || 1), pal = snowy ? { back: '#a8b0ba', body: '#dde2e8', belly: '#f4f6f8', dark: '#6e7680' } : kind === 'jackal' ? { back: '#6a4a2a', body: '#c09260', belly: '#e8cc9a', dark: '#4a3420' } : { back: '#4e4e56', body: '#7e7e86', belly: '#b8b8be', dark: '#34343a' };
   g.save(); g.translate(e.x, e.y); g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, 3, 8 * big, 17 * big, 6 * big);
-  g.rotate(e.face); g.scale(big, big); if (e.flash > 0) g.filter = 'brightness(2.2)'; if (e.dead) g.globalAlpha = Math.max(0, 1 - (e.deadT - 7) / 3);
+  g.rotate(e.face); g.scale(big, big); if (e.flash > 0 && !settings.noFlash) g.filter = 'brightness(2.2)'; if (e.dead) g.globalAlpha = Math.max(0, 1 - (e.deadT - 7) / 3);
   const s = Math.sin(e.walk * 1.5) * 4, wag = Math.sin(e.walk * 1.1 + performance.now() / 300) * 3;
   g.fillStyle = pal.dark; [[8, -5], [8, 5], [-8, -5], [-8, 5]].forEach(([lx, ly], i) => ell(g, lx + (i % 3 ? s : -s), ly * 1.05, 3.6, 2.2));
   g.fillStyle = pal.body; g.beginPath(); g.moveTo(-12, -2.5); g.quadraticCurveTo(-22, -3 + wag, -28, wag); g.quadraticCurveTo(-22, 4 + wag, -12, 2.5); g.fill();
@@ -6142,7 +6180,7 @@ function drawCanine(g, e, kind, snowy) {
 function drawBoar(g, e) {
   const big = 1.08 * (e.scale || 1);
   g.save(); g.translate(e.x, e.y); g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, 3, 9 * big, 17 * big, 6.5 * big);
-  g.rotate(e.face); g.scale(big, big); if (e.flash > 0) g.filter = 'brightness(2.2)'; if (e.dead) g.globalAlpha = Math.max(0, 1 - (e.deadT - 7) / 3);
+  g.rotate(e.face); g.scale(big, big); if (e.flash > 0 && !settings.noFlash) g.filter = 'brightness(2.2)'; if (e.dead) g.globalAlpha = Math.max(0, 1 - (e.deadT - 7) / 3);
   const s = Math.sin(e.walk * 1.7) * 3.5;
   g.fillStyle = '#2a1e16'; [[8, -6], [8, 6], [-8, -6], [-8, 6]].forEach(([lx, ly], i) => ell(g, lx + (i % 3 ? s : -s), ly, 3.4, 2.4));
   g.strokeStyle = '#3a2a1e'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(-13, 0); g.quadraticCurveTo(-18, 2, -17, 5); g.stroke();
@@ -6158,7 +6196,7 @@ function drawBoar(g, e) {
 function drawGoat(g, e) {
   g.save(); g.translate(e.x, e.y);
   g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, 3, 8, 15, 5.5);
-  g.rotate(e.face); if (e.flash > 0) g.filter = 'brightness(2.2)';
+  g.rotate(e.face); if (e.flash > 0 && !settings.noFlash) g.filter = 'brightness(2.2)';
   if (e.dead) g.globalAlpha = Math.max(0, 1 - (e.deadT - 7) / 3);
   const s = Math.sin(e.walk * 1.6) * 4, col = '#d9d2c2';
   g.fillStyle = '#6a6258'; [[7, -5], [7, 5], [-7, -5], [-7, 5]].forEach(([lx, ly], i) => ell(g, lx + (i % 3 ? s : -s), ly, 3, 1.8));
@@ -6180,7 +6218,7 @@ function drawAnimal(g, e) {
   g.save(); g.translate(e.x, e.y);
   const big = e.kind === 'ice_bear' ? 1.65 : kind === 'bear' ? 1.5 : kind === 'boar' ? 1.05 : kind === 'jackal' ? .85 : 1;
   g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, 3, 8 * big, 16 * big, 6 * big);
-  g.rotate(e.face); if (e.flash > 0) g.filter = 'brightness(2.2)';
+  g.rotate(e.face); if (e.flash > 0 && !settings.noFlash) g.filter = 'brightness(2.2)';
   if (e.dead) g.globalAlpha = Math.max(0, 1 - (e.deadT - 7) / 3);
   const s = Math.sin(e.walk * 1.5) * 4;
   const col = snowy ? (kind === 'wolf' ? '#c9d0d8' : '#eeeae0') : kind === 'wolf' ? '#7a7a80' : kind === 'jackal' ? '#b08a58' : kind === 'boar' ? '#4a3a2e' : '#5a3a22';
@@ -6203,7 +6241,7 @@ function drawDesertAnimal(g, e) {
   const s = Math.sin(e.walk * 2) * 3;
   if (e.kind === 'scorpion') {
     g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, 2, 5, 13, 5);
-    g.rotate(e.face); if (e.flash > 0) g.filter = 'brightness(2.2)';
+    g.rotate(e.face); if (e.flash > 0 && !settings.noFlash) g.filter = 'brightness(2.2)';
     const col = '#7a5230', dk = '#4a3018';
     g.strokeStyle = dk; g.lineWidth = 1.6; g.lineCap = 'round';
     for (let i = 0; i < 4; i++) for (const sd of [-1, 1]) { const lx = 4 - i * 3.5, w = (i % 2 ? s : -s) * .6; g.beginPath(); g.moveTo(lx, sd * 3); g.lineTo(lx - 2 + w, sd * 9); g.lineTo(lx - 4 + w, sd * 11); g.stroke(); }
@@ -6215,7 +6253,7 @@ function drawDesertAnimal(g, e) {
   } else { // camel
     const big = 1.3;
     g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, 3, 10, 20, 7);
-    g.rotate(e.face); if (e.flash > 0) g.filter = 'brightness(2.2)';
+    g.rotate(e.face); if (e.flash > 0 && !settings.noFlash) g.filter = 'brightness(2.2)';
     const col = '#c49a5c';
     g.fillStyle = shade(col, -.3); [[9, -6], [9, 6], [-9, -6], [-9, 6]].forEach(([lx, ly], i) => ell(g, (lx + (i % 3 ? s : -s)) * big, ly * big, 3.4 * big, 2.2 * big));
     g.fillStyle = col; ell(g, 0, 0, 14 * big, 7 * big);
@@ -6279,7 +6317,7 @@ function buildMapLayers() {
     if (t === T.ROAD || t === T.BRIDGE) put(imgs.roads, i, TINFO[t].mm);
     if (t !== T.SEA) {
       const edge = (x + 1 < WW && W.own[i + 1] !== k && W.ter[i + 1] !== T.SEA) || (y + 1 < WH && W.own[i + WW] !== k && W.ter[i + WW] !== T.SEA) || (x > 0 && W.own[i - 1] !== k && W.ter[i - 1] !== T.SEA) || (y > 0 && W.own[i - WW] !== k && W.ter[i - WW] !== T.SEA);
-      put(imgs.borders, i, KDATA[k].color, edge ? 230 : 38);
+      put(imgs.borders, i, kcol(k), edge ? 230 : 38);
     }
   }
   for (const k in imgs) if (k !== 'full') L[k].getContext('2d').putImageData(imgs[k], 0, 0);
@@ -6367,6 +6405,7 @@ document.addEventListener('mouseout', e => { const t = e.target.closest('[data-t
 /* ---------------- Dialog ---------------- */
 let dialogOpen = false;
 function openDialog(d) {
+  if (d.portrait && typeof d.portrait === 'object') SND.babble(d.name, Math.max(3, Math.min(12, Math.round(String(d.text).replace(/<[^>]+>/g, '').length / 16))), d.portrait);
   dialogOpen = true; SND.narr = d.portrait === 'ember'; $('dName').textContent = d.name; $('dRole').textContent = d.role || ''; $('dText').innerHTML = d.text;
   drawPortrait($('dPort'), d.portrait);
   const box = $('dOpts'); box.innerHTML = '';
@@ -6686,18 +6725,23 @@ function renderQuests() {
 function renderSettings() {
   const b = $('setBody');
   const slider = (key, label) => `<div class="setRow"><label>${label}</label><div style="display:flex;align-items:center;gap:8px"><input type="range" min="0" max="100" value="${Math.round(settings[key] * 100)}" data-k="${key}" style="--p:${settings[key] * 100}%"><span class="val">${Math.round(settings[key] * 100)}</span></div></div>`;
-  const sw = (key, label) => `<div class="setRow"><label>${label}</label><div class="switch ${settings[key] ? 'on' : ''}" data-k="${key}"></div></div>`;
+  const sw = (key, label) => `<div class="setRow"><label>${label.replace(/<small>(.*)<\/small>/, '<small style="display:block;font-size:12.5px;color:var(--muted);font-style:italic;font-family:var(--fb);text-transform:none;letter-spacing:0">$1</small>')}</label><div class="switch ${settings[key] ? 'on' : ''}" data-k="${key}"></div></div>`;
   const seg = (key, label, opts) => `<div class="setRow"><label>${label}</label><div class="seg">${opts.map(([v, n]) => `<button class="${settings[key] === v ? 'on' : ''}" data-k="${key}" data-v="${v}">${n}</button>`).join('')}</div></div>`;
   b.innerHTML = slider('music', 'Music Volume') + slider('sound', 'Sound Volume') + slider('effects', 'Effects Volume') + sw('shake', 'Screen Shake') + sw('dmgNums', 'Damage Numbers') + sw('minimap', 'Minimap') +
     seg('uiScale', 'UI Scale', [[.85, '85%'], [1, '100%'], [1.15, '115%'], [1.3, '130%']]) + seg('quality', 'Graphics Quality', [['low', 'Low'], ['medium', 'Medium'], ['high', 'High']])
+    + sw('battery', 'Battery Saver <small>30 frames a second and fewer particles</small>') + sw('voices', 'NPC Voices')
+    + `<div class="setH" style="margin-top:14px">ACCESSIBILITY</div>` + seg('textScale', 'Text Size', [[1, 'Normal'], [1.2, 'Large'], [1.45, 'Huge']]) + sw('noFlash', 'Reduce Flashing &amp; Motion') + sw('cb', 'Colourblind-Friendly Colours')
+    + `<div class="setH" style="margin-top:14px">KEYS <button class="btn sm" id="keysReset" style="float:right">Reset to defaults</button></div><div class="keyGrid">${KEY_ACTIONS.map(([c, n]) => `<div class="setRow"><label>${n}</label><button class="btn sm keyBtn${rebinding === c ? ' gold' : ''}" data-key="${c}">${rebinding === c ? 'Press a key…' : keyName(c)}</button></div>`).join('')}</div>`
     + `<div class="wipeBox" id="wipeBox"><div class="setRow" style="border:0"><label>Save Data<small>Story and sandbox saves, endings, achievements and settings</small></label><button class="btn red sm" id="wipeAsk">Delete All Save Data</button></div>
       <div class="wipeConfirm hidden" id="wipeConfirm"><b>Delete everything?</b> Both saved games, every ending and achievement you have discovered, and your settings will be erased from this browser. This cannot be undone.<div class="wipeBtns"><button class="btn red" id="wipeYes">Delete Everything</button><button class="btn" id="wipeNo">Cancel</button></div></div></div>`;
   $('wipeAsk').onclick = () => { $('wipeConfirm').classList.remove('hidden'); $('wipeAsk').disabled = true; SND.play('ui'); };
   $('wipeNo').onclick = () => { $('wipeConfirm').classList.add('hidden'); $('wipeAsk').disabled = false; SND.play('ui'); };
   $('wipeYes').onclick = wipeAllData;
+  b.querySelectorAll('.keyBtn').forEach(el => el.onclick = () => { rebinding = el.dataset.key; renderSettings(); });
+  $('keysReset').onclick = () => { settings.keys = {}; saveSettings(); applySettings(); renderSettings(); };
   b.querySelectorAll('input[type=range]').forEach(el => el.oninput = () => { settings[el.dataset.k] = el.value / 100; el.style.setProperty('--p', el.value + '%'); el.nextElementSibling.textContent = el.value; saveSettings(); SND.init(); SND.apply(); });
   b.querySelectorAll('.switch').forEach(el => el.onclick = () => { settings[el.dataset.k] = !settings[el.dataset.k]; el.classList.toggle('on'); saveSettings(); applySettings(); });
-  b.querySelectorAll('.seg button').forEach(el => el.onclick = () => { const k = el.dataset.k; settings[k] = k === 'uiScale' ? +el.dataset.v : el.dataset.v; saveSettings(); if (k === 'quality') chunkCache.clear(); applySettings(); renderSettings(); });
+  b.querySelectorAll('.seg button').forEach(el => el.onclick = () => { const k = el.dataset.k; settings[k] = k === 'uiScale' || k === 'textScale' ? +el.dataset.v : el.dataset.v; saveSettings(); if (k === 'quality') chunkCache.clear(); applySettings(); renderSettings(); });
 }
 
 function wipeAllData() {
@@ -6796,10 +6840,10 @@ function drawOverlays(g, e, t) {
   if (showBar) {
     const w = e.kind === 'leader' || e.kind === 'knight' || e.kind === 'bear' || e.boss ? 46 : 34; const f = clamp(e.hp / e.maxHp, 0, 1);
     g.fillStyle = 'rgba(0,0,0,.65)'; g.fillRect(e.x - w / 2 - 1, top - 1, w + 2, 6);
-    g.fillStyle = hostileP ? (f > .5 ? '#d8403a' : '#ff6a3a') : e.ally || e.role === 'traveler' ? '#5ab0e0' : '#b8b090'; g.fillRect(e.x - w / 2, top, w * f, 4);
+    g.fillStyle = hostileP ? (settings.cb ? (f > .5 ? '#ff8a1a' : '#ffc04a') : f > .5 ? '#d8403a' : '#ff6a3a') : e.ally || e.role === 'traveler' ? '#5ab0e0' : '#b8b090'; g.fillRect(e.x - w / 2, top, w * f, 4);
   }
   if ((e.kind === 'leader' || e.kind === 'knight' || e.boss || e.named || (e.role && e.role !== 'citizen' && e.role !== 'townsfolk' && e.role !== 'child')) && (CITY_ROLES[e.role] ? e === nearCityNpc() : near < 260)) {
-    g.font = `${e.role ? 'italic ' : ''}11px "EB Garamond", Georgia, serif`; g.textAlign = 'center';
+    g.font = `${e.role ? 'italic ' : ''}${Math.round(11 * (settings.textScale || 1))}px "EB Garamond", Georgia, serif`; g.textAlign = 'center';
     const nm = e.kind === 'knight' && e.k != null ? `Knight of ${KDATA[e.k].name}` : e.name;
     g.lineWidth = 3; g.strokeStyle = 'rgba(0,0,0,.8)'; g.strokeText(nm, e.x, top - 5); g.fillStyle = hostileP ? '#ffb0a0' : e.role === 'ruler' ? '#ffd76a' : '#f0e6cc'; g.fillText(nm, e.x, top - 5);
   }
@@ -6903,7 +6947,7 @@ function renderWorld(t) {
       g.strokeStyle = full ? '#ffd76a' : 'rgba(255,255,255,.6)'; g.lineWidth = 2.5; g.beginPath(); g.arc(P.x, P.y, 21, -Math.PI / 2, -Math.PI / 2 + TAU * P.draw); g.stroke();
     }
     if (P.blocking) { g.strokeStyle = 'rgba(200,220,255,.5)'; g.lineWidth = 3; g.beginPath(); g.arc(P.x, P.y, 22, P.face - 1.2, P.face + 1.2); g.stroke(); }
-    for (const tx of texts) { g.globalAlpha = clamp(tx.life * 1.6, 0, 1); g.font = `bold ${tx.size}px Cinzel, Georgia, serif`; g.textAlign = 'center'; g.lineWidth = 3; g.strokeStyle = 'rgba(0,0,0,.85)'; g.strokeText(tx.txt, tx.x, tx.y); g.fillStyle = tx.c; g.fillText(tx.txt, tx.x, tx.y); }
+    for (const tx of texts) { g.globalAlpha = clamp(tx.life * 1.6, 0, 1); g.font = `bold ${Math.round(tx.size * (settings.textScale || 1))}px Cinzel, Georgia, serif`; g.textAlign = 'center'; g.lineWidth = 3; g.strokeStyle = 'rgba(0,0,0,.85)'; g.strokeText(tx.txt, tx.x, tx.y); g.fillStyle = tx.c; g.fillText(tx.txt, tx.x, tx.y); }
     g.globalAlpha = 1;
   }
   g.restore();
@@ -7010,6 +7054,7 @@ function updateHUD(force) {
   }
   if (PAD.on) pr = pr.replace(/<kbd>E<\/kbd>/g, '<kbd>X</kbd>').replace(/<kbd>F<\/kbd>/g, '<kbd>B</kbd>');
   else if (TOUCH.on) pr = pr.replace(/press <kbd>E<\/kbd>/g, 'tap ✋').replace(/<kbd>E<\/kbd>/g, '<kbd>✋</kbd>');
+  else if (keyOf('KeyE') !== 'KeyE') pr = pr.replace(/<kbd>E<\/kbd>/g, `<kbd>${keyName('KeyE')}</kbd>`);
   setIf('hk', PAD.on, on => { const el = document.querySelector('#hud .hk'); if (!PAD.hk) PAD.hk = el.innerHTML; el.innerHTML = on ? PAD_HK : PAD.hk; });
   setIf('pr', pr, v => { $('prompt').innerHTML = v; $('prompt').classList.toggle('show', !!v); });
 }
@@ -7059,6 +7104,14 @@ function renderPause() {
 }
 function renderStats() { $('statBody').innerHTML = `<table class="statT">${statsRows().map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>`; }
 /* ---------------- Controller (standard gamepad mapping) ---------------- */
+function hkHTML() {
+  const mv = ['KeyW', 'KeyA', 'KeyS', 'KeyD'].every(c => keyOf(c) === c) ? 'WASD' : ['KeyW', 'KeyA', 'KeyS', 'KeyD'].map(keyName).join('');
+  return [[mv, 'Move'], ['LMB', 'Attack'], ['RMB', 'Block'], [keyName('Space'), 'Dodge'], [keyName('KeyE'), 'Interact'], [keyName('KeyF'), 'Horse'], [keyName('KeyQ'), '+Click Hit friendlies'], [keyName('ShiftLeft'), 'Sprint'], [keyName('KeyR'), 'Arrows'], [keyName('Tab'), 'Swap weapon'], [keyName('KeyC'), 'Special'], [keyName('KeyG'), 'Companions'], [keyName('KeyP'), 'Skills<b id="spBadge" style="color:#e7c35a"></b>'], [keyName('KeyJ'), 'Quests']].map(([k, t]) => `<span><kbd>${k}</kbd>${t}</span>`).join('');
+}
+function refreshKeyHints() {
+  const el = document.querySelector('#hud .hk'); if (el) { PAD.hk = hkHTML(); el.innerHTML = PAD.on ? PAD_HK : PAD.hk; }
+  document.querySelectorAll('#helpScreen kbd[data-k]').forEach(k => { k.textContent = k.dataset.k === 'move' ? (['KeyW', 'KeyA', 'KeyS', 'KeyD'].every(c => keyOf(c) === c) ? 'W A S D' : ['KeyW', 'KeyA', 'KeyS', 'KeyD'].map(keyName).join(' ')) : keyName(k.dataset.k); });
+}
 const PAD = { on: false, prev: [], held: {}, aim: null, hk: null };
 const PAD_HK = '<span><kbd>LS</kbd>Move</span><span><kbd>RS</kbd>Aim</span><span><kbd>RT</kbd>Attack / draw</span><span><kbd>LT</kbd>Block</span><span><kbd>A</kbd>Dodge</span><span><kbd>X</kbd>Interact</span><span><kbd>B</kbd>Horse</span><span><kbd>Y</kbd>Swap weapon</span><span><kbd>LB</kbd>Arrows</span><span><kbd>RB</kbd>Sprint</span><span><kbd>RS</kbd>Click: special</span><span><kbd>LS</kbd>Click: companions</span><span><kbd>Back</kbd>Map</span><span><kbd>Start</kbd>Pause</span>';
 function padKey(code, on) { if (on) { input.keys[code] = true; PAD.held[code] = true; } else if (PAD.held[code]) { input.keys[code] = false; PAD.held[code] = false; } }
@@ -7117,6 +7170,7 @@ function enableTouch() {
   TOUCH.scale = Math.min(innerWidth, innerHeight) < 520 ? .72 : Math.min(innerWidth, innerHeight) < 800 ? .86 : 1;
   let saved = null; try { saved = localStorage.getItem('fk_settings'); } catch (e) { }
   if (!saved && settings.quality === 'high') settings.quality = 'medium'; // phones run cooler at medium until told otherwise
+  if (!saved && navigator.getBattery) navigator.getBattery().then(b => { if (!b.charging) { settings.battery = true; applySettings(); } }).catch(() => { });
   applySettings(); SND.init();
 }
 addEventListener('touchstart', enableTouch, { passive: true });
@@ -7163,7 +7217,11 @@ document.addEventListener('click', e => { if (TOUCH.on && e.target.closest && e.
   }, 200);
 })();
 /* ---------------- Input ---------------- */
-addEventListener('keydown', e => {
+let rebinding = null;
+addEventListener('keydown', ev => {
+  if (rebinding) { ev.preventDefault(); if (ev.code !== 'Escape') { const other = KEY_ACTIONS.find(([c]) => c !== rebinding && keyOf(c) === ev.code); if (other) settings.keys[other[0]] = keyOf(rebinding); settings.keys[rebinding] = ev.code; saveSettings(); } rebinding = null; applySettings(); renderSettings(); return; }
+  const code = document.activeElement && document.activeElement.id === 'pinText' ? ev.code : mapKey(ev.code); if (code == null) return;
+  const e = { code, key: ev.key, repeat: ev.repeat, shiftKey: ev.shiftKey, preventDefault: () => ev.preventDefault() };
   if (document.activeElement && document.activeElement.id === 'pinText') { if (e.code === 'Enter') $('pinSave').click(); else if (e.code === 'Escape') $('pinCancel').click(); return; } // typing a pin note
   input.keys[e.code] = true; input.force = !!input.keys.KeyQ;
   if (e.code === 'Space' || e.code === 'Tab') { e.preventDefault(); if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }
@@ -7172,7 +7230,7 @@ addEventListener('keydown', e => {
   if (UI.isOpen('act') && (e.code === 'Enter' || e.code === 'Space')) { e.preventDefault(); UI.close(); return; }
   if (dialogOpen) { const n = parseInt(e.key); if (n >= 1) { const b = $('dOpts').children[n - 1]; if (b && !b.disabled) b.click(); } return; }
   if (G.state !== 'play' || e.repeat) return;
-  const tog = { KeyI: 'inv', KeyM: 'map', KeyK: 'dip', KeyJ: 'quests', KeyP: 'skills' }[e.code];
+  const tog = { KeyI: 'inv', KeyM: 'map', KeyK: 'dip', KeyJ: 'quests', KeyP: 'skills', KeyL: 'journal' }[e.code]; if (tog === 'journal' && !UI.ids.journal) return;
   if (tog) { if (tog === 'map' && G.under) { toast('Your map is no use down here. Find your way back to the ladder.'); return; } UI.toggle(tog); return; }
   if (UI.stack.length) return;
   if (e.code === 'Space') tryDodge();
@@ -7186,8 +7244,12 @@ addEventListener('keydown', e => {
   else if (e.code === 'Digit2') quickUse('potion');
   else if (e.code === 'Digit3') quickUse('band');
 });
-addEventListener('keyup', e => { input.keys[e.code] = false; input.force = !!input.keys.KeyQ; });
+addEventListener('keyup', ev => { const code = mapKey(ev.code); if (code == null) return; input.keys[code] = false; input.force = !!input.keys.KeyQ; });
 
+/* Save quietly whenever the tab is hidden or the page closes: phones often discard background tabs. */
+function quietSave() { if (P && !WIPED && !G.ironDead && G.state !== 'menu' && G.state !== 'dead') { try { saveGame(true, true); } catch (e) { } } }
+document.addEventListener('visibilitychange', () => { if (document.hidden) quietSave(); });
+addEventListener('pagehide', quietSave);
 /* ---------------- Pause / menus ---------------- */
 $('pauseScreen').addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if (!b) return; const a = b.dataset.act;
@@ -7195,18 +7257,70 @@ $('pauseScreen').addEventListener('click', e => {
   else if (['inv', 'map', 'dip', 'quests', 'skills', 'stats', 'ach'].includes(a)) UI.open(a);
   else if (a === 'settings') UI.open('settings');
   else if (a === 'save') { saveGame(); }
+  else if (a === 'download') { saveGame(true, true); downloadSave(readSlot(G.slot)); }
   else if (a === 'main') $('quitConfirm').classList.remove('hidden');
   else if (a === 'cancelQuit') $('quitConfirm').classList.add('hidden');
   else if (a === 'saveQuit') { saveGame(); toMainMenu(); }
   else if (a === 'quitNoSave') toMainMenu();
 });
 function toMainMenu() { if (G.under) leaveDungeon(true); newMenuCam(); UI.closeAll(); closeDialog(); G.state = 'menu'; G.shake = 0; $('hud').classList.add('off'); refreshMenu(); UI.show('mainMenu'); }
-const saveKey = (mode = G.mode) => mode === 'story' ? 'fk_story' : 'fk_save';
-function hasSave(mode = G.mode) { try { return !!localStorage.getItem(saveKey(mode)); } catch (e) { return false; } }
-function readSave(mode) { try { return JSON.parse(localStorage.getItem(saveKey(mode)) || 'null'); } catch (e) { return null; } }
+/* ---------------- Save slots: five, each holding a story or a sandbox game ---------------- */
+const SLOTS = 5, slotKey = n => 'fk_slot_' + n;
+const saveKey = () => slotKey(G.slot || 1);
+function readSlot(n) { try { return JSON.parse(localStorage.getItem(slotKey(n)) || 'null'); } catch (e) { return null; } }
+function slotsUsed() { const out = []; for (let n = 1; n <= SLOTS; n++) { const d = readSlot(n); if (d && d.seed) out.push({ n, d }); } return out; }
+function firstFreeSlot() { for (let n = 1; n <= SLOTS; n++) if (!readSlot(n)) return n; return 0; }
+function hasSave() { return !!readSlot(G.slot || 1); }
+function migrateSaves() { // saves from before slots move into the first free slots
+  ['fk_story', 'fk_save'].forEach(old => { let v = null; try { v = localStorage.getItem(old); } catch (e) { } if (!v) return; const n = firstFreeSlot(); if (!n) return; try { const d = JSON.parse(v); if (old === 'fk_story') d.mode = 'story'; else d.mode = d.mode || 'sandbox'; localStorage.setItem(slotKey(n), JSON.stringify(d)); localStorage.removeItem(old); } catch (e) { } });
+}
+const modeOf = d => d && d.mode === 'story' ? 'story' : 'sandbox';
+function slotCard(n, d, acts) {
+  const m = modeOf(d);
+  return `<div class="modeCard slotCard${d ? (m === 'story' ? ' story' : '') : ' empty'}" data-n="${n}"><div class="mcT">SLOT ${n}${d ? ` · ${m === 'story' ? 'STORY' : d.tutDone === false ? 'TUTORIAL' : 'SANDBOX'}` : ''}</div><div class="mcD">${d ? saveSummary(d) : '<i>Empty</i>'}</div>${acts && d ? `<div class="slotActs"><button class="btn sm" data-dl="${n}" title="Download this save">⬇ Download</button><button class="btn sm red" data-del="${n}">Delete</button></div>` : ''}</div>`;
+}
+function downloadSave(d) {
+  if (!d) return; const day = Math.floor((d.time || 0) / DAYLEN + .3) + 1;
+  try { const url = URL.createObjectURL(new Blob([JSON.stringify(d)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = `four-kingdoms-${modeOf(d)}-day${day}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000); toast('Save downloaded.', 'good'); } catch (e) { toast('Could not download the save.', 'bad'); }
+}
+let contMode = 'play', importData = null;
+function renderCont() {
+  const list = $('contList');
+  if (contMode === 'import') {
+    $('contTitle').textContent = 'IMPORT SAVE'; $('contNote').innerHTML = 'Choose a slot for the imported game. A filled slot will be <b>replaced</b>.';
+    list.innerHTML = [1, 2, 3, 4, 5].map(n => slotCard(n, readSlot(n), false)).join('');
+    list.querySelectorAll('.slotCard').forEach(el => el.onclick = () => {
+      const n = +el.dataset.n;
+      if (readSlot(n) && el.dataset.sure !== '1') { el.dataset.sure = '1'; el.querySelector('.mcD').innerHTML = '<b style="color:#ff9d8a">Tap again to replace this game</b>'; return; }
+      try { localStorage.setItem(slotKey(n), JSON.stringify(importData)); } catch (e) { toast('Could not store the save.', 'bad'); return; }
+      toast(`Save imported into slot ${n}.`, 'good'); contMode = 'play'; importData = null; refreshMenu(); renderCont();
+    });
+    return;
+  }
+  const used = slotsUsed().sort((a, b) => (b.d.savedAt || 0) - (a.d.savedAt || 0));
+  $('contTitle').textContent = 'CONTINUE'; $('contNote').textContent = used.length ? '' : 'No saved games yet.';
+  list.innerHTML = used.map(({ n, d }) => slotCard(n, d, true)).join('');
+  list.querySelectorAll('.slotCard').forEach(el => el.onclick = e => {
+    const n = +el.dataset.n, dl = e.target.closest('[data-dl]'), del = e.target.closest('[data-del]');
+    if (dl) { e.stopPropagation(); downloadSave(readSlot(n)); return; }
+    if (del) { e.stopPropagation(); if (del.dataset.sure !== '1') { del.dataset.sure = '1'; del.textContent = 'Really delete?'; return; } try { localStorage.removeItem(slotKey(n)); } catch (err) { } SND.play('close'); refreshMenu(); renderCont(); return; }
+    SND.play('ui'); UI.closeAll(); continueGame(n);
+  });
+}
+let pendingSlot = 0;
+function renderSlotPick() {
+  $('slotList').innerHTML = [1, 2, 3, 4, 5].map(n => slotCard(n, readSlot(n), false)).join('');
+  $('slotList').querySelectorAll('.slotCard').forEach(el => el.onclick = () => {
+    const n = +el.dataset.n, d = readSlot(n); pendingSlot = n; SND.play('ui');
+    if (!d) { beginNew(); return; }
+    $('newConfirmText').innerHTML = `Slot ${n} holds a <b>${modeOf(d)}</b> game (${saveSummary(d).replace(/<div[^>]*>.*<\/div>/, '')}). Starting a new game here will <b>erase</b> it.`;
+    $('slotBox').classList.add('hidden'); $('newConfirm').classList.remove('hidden');
+  });
+}
+function showSlotPick() { ['modePick', 'setupBox', 'newConfirm'].forEach(id => $(id).classList.add('hidden')); $('slotBox').classList.remove('hidden'); $('modeScreen').querySelector('.panel').classList.remove('wide'); $('modeTitle').textContent = 'CHOOSE A SLOT'; renderSlotPick(); }
 let pendingMode = 'sandbox';
 function refreshMenu() {
-  $('btnContinue').classList.toggle('hidden', !hasSave('sandbox') && !hasSave('story'));
+  $('btnContinue').classList.toggle('hidden', !slotsUsed().length);
   $('menuBanners').innerHTML = KDATA.map((k, i) => `<div><img src="${bannerURL(i)}" alt="">${k.name.toUpperCase()}</div>`).join('');
 }
 function saveSummary(d) {
@@ -7216,7 +7330,7 @@ function saveSummary(d) {
   return top + (when ? `<div class="mcS">Saved ${esc(when)}</div>` : '');
 }
 let newOpts = normOpts((() => { try { return JSON.parse(localStorage.getItem('fk_newopts') || 'null'); } catch (e) { return null; } })());
-function showModePick() { $('modeScreen').querySelector('.panel').classList.remove('wide'); ['setupBox', 'newConfirm'].forEach(id => $(id).classList.add('hidden')); $('modePick').classList.remove('hidden'); $('modeTitle').textContent = 'NEW GAME'; }
+function showModePick() { $('modeScreen').querySelector('.panel').classList.remove('wide'); ['setupBox', 'newConfirm', 'slotBox'].forEach(id => $(id).classList.add('hidden')); $('modePick').classList.remove('hidden'); $('modeTitle').textContent = 'NEW GAME'; }
 function renderSetup() {
   const o = newOpts, seg = (id, list, key, lab) => { $(id).innerHTML = list.map((x, i) => `<div class="sb ${o[key] === i ? 'on' : ''}" data-i="${i}">${lab ? lab(x, i) : x.name}</div>`).join(''); $(id).querySelectorAll('.sb').forEach(el => el.onclick = () => { o[key] = +el.dataset.i; SND.play('ui'); renderSetup(); }); };
   $('diffGrid').innerHTML = DIFFS.map((d, i) => `<div class="diffCard ${o.diff === i ? 'on' : ''}${d.ironman ? ' iron' : ''}" data-i="${i}"><div class="dcL">${d.ironman ? 'LEVEL ∞' : 'LEVEL ' + (i + 1)}</div><div class="dcN">${d.name.toUpperCase()}</div></div>`).join('');
@@ -7235,37 +7349,36 @@ function renderSetup() {
   ['wildSeg', 'exploredChk'].forEach(id => $(id).classList.toggle('setLocked', iron)); ['wildLock', 'exploredLock'].forEach(id => $(id).classList.toggle('hidden', !iron));
 }
 $('optExplored').onchange = e => { newOpts.explored = e.target.checked; };
-function beginNew() { if (pendingMode === 'tutorial') { UI.closeAll(); G.tutPending = true; startNew('sandbox', {}); return; } try { localStorage.setItem('fk_newopts', JSON.stringify(newOpts)); } catch (e) { } UI.closeAll(); startNew(pendingMode, Object.assign({}, newOpts)); }
+function beginNew() { G.slot = pendingSlot || firstFreeSlot() || 1; try { localStorage.removeItem(slotKey(G.slot)); } catch (e) { } if (pendingMode === 'tutorial') { UI.closeAll(); G.tutPending = true; startNew('sandbox', {}); return; } try { localStorage.setItem('fk_newopts', JSON.stringify(newOpts)); } catch (e) { } UI.closeAll(); startNew(pendingMode, Object.assign({}, newOpts)); }
 $('btnNew').onclick = () => { SND.init(); showModePick(); UI.open('mode'); };
 document.querySelectorAll('#modePick .modeCard').forEach(el => el.addEventListener('click', () => {
   pendingMode = el.dataset.mode; SND.play('ui');
-  if (pendingMode === 'tutorial') { // fixed settings, so straight to the lesson (confirming first if it would replace a sandbox save)
-    if (!hasSave('sandbox')) { beginNew(); return; }
-    $('modePick').classList.add('hidden'); $('newConfirmText').innerHTML = 'The tutorial continues as a sandbox game, so it uses your sandbox save slot. Your current sandbox game will be <b>overwritten</b> the next time you save.'; $('newConfirm').classList.remove('hidden'); return;
-  }
+  if (pendingMode === 'tutorial') { showSlotPick(); return; } // fixed settings, so straight to picking a slot
   $('modePick').classList.add('hidden'); $('setupBox').classList.remove('hidden'); $('modeScreen').querySelector('.panel').classList.add('wide');
   $('modeTitle').textContent = pendingMode === 'story' ? 'NEW STORY' : 'NEW SANDBOX'; renderSetup();
 }));
 $('btnSetupBack').onclick = () => { SND.play('ui'); showModePick(); };
 $('btnSetupGo').onclick = () => {
-  SND.play('ui'); if (!hasSave(pendingMode)) { beginNew(); return; }
-  $('newConfirmText').innerHTML = `You already have a ${pendingMode} game in progress. Starting a new one forges a fresh realm, and your old ${pendingMode} save will be <b>overwritten</b> the next time you save.`;
-  $('setupBox').classList.add('hidden'); $('newConfirm').classList.remove('hidden');
+  SND.play('ui'); try { localStorage.setItem('fk_newopts', JSON.stringify(newOpts)); } catch (e) { } showSlotPick();
 };
 $('btnNewYes').onclick = () => beginNew();
-$('btnNewNo').onclick = () => { if (pendingMode === 'tutorial') { showModePick(); return; } $('newConfirm').classList.add('hidden'); $('setupBox').classList.remove('hidden'); };
-$('btnContinue').onclick = () => {
-  SND.init(); const sb = readSave('sandbox'), st = readSave('story');
-  if (!sb || !st) { continueGame(st ? 'story' : 'sandbox'); return; }
-  $('contList').innerHTML = [['story', st, 'STORY MODE'], ['sandbox', sb, 'SANDBOX']].map(([m, d, t]) => `<div class="modeCard${m === 'story' ? ' story' : ''}" data-mode="${m}"><div class="mcT">${t}</div><div class="mcD">${saveSummary(d)}</div></div>`).join('');
-  $('contList').querySelectorAll('.modeCard').forEach(el => el.onclick = () => { SND.play('ui'); UI.closeAll(); continueGame(el.dataset.mode); });
-  UI.open('cont');
+$('btnNewNo').onclick = () => { $('newConfirm').classList.add('hidden'); showSlotPick(); };
+$('btnSlotBack').onclick = () => { SND.play('ui'); if (pendingMode === 'tutorial') { showModePick(); return; } $('slotBox').classList.add('hidden'); $('setupBox').classList.remove('hidden'); $('modeScreen').querySelector('.panel').classList.add('wide'); $('modeTitle').textContent = pendingMode === 'story' ? 'NEW STORY' : 'NEW SANDBOX'; };
+$('btnContinue').onclick = () => { SND.init(); contMode = 'play'; renderCont(); UI.open('cont'); };
+$('btnImport').onclick = $('btnMenuImport').onclick = () => { SND.init(); $('importFile').value = ''; $('importFile').click(); };
+$('importFile').onchange = e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  const rd = new FileReader(); rd.onload = () => {
+    let d = null; try { d = JSON.parse(rd.result); } catch (err) { }
+    if (!d || !d.seed || !d.P || !d.K || !d.Q) { toast('That file is not a Four Kingdoms save.', 'bad'); return; }
+    importData = d; contMode = 'import'; renderCont(); if (!UI.isOpen('cont')) UI.open('cont');
+  }; rd.readAsText(f);
 };
 $('btnMenuSettings').onclick = () => { SND.init(); UI.open('settings'); };
 $('btnHow').onclick = () => UI.open('help');
 $('btnAch').onclick = () => UI.open('ach');
 $('btnRespawn').onclick = () => respawnPlayer();
-$('btnLoadSave').onclick = () => { UI.hide('deathScreen'); if (hasSave()) continueGame(); else { toast('No save found — rising again instead.', 'bad'); respawnPlayer(); } };
+$('btnLoadSave').onclick = () => { UI.hide('deathScreen'); if (hasSave()) continueGame(G.slot); else { toast('No save found — rising again instead.', 'bad'); respawnPlayer(); } };
 $('btnDeathMenu').onclick = () => { UI.hide('deathScreen'); toMainMenu(); };
 $('btnEndSandbox').onclick = () => { UI.hide('endScreen'); G.state = 'play'; saveGame(true); toast('The tale is told, but the realm endures. The world is yours to roam.', 'gold'); };
 $('btnEndMenu').onclick = () => { UI.hide('endScreen'); toMainMenu(); };
@@ -7293,7 +7406,7 @@ function startNew(mode = 'sandbox', opts) {
     prepareWorld(Math.floor(Math.random() * 1e9), opts); resetState(); newPlayer(); applyNewGameOpts();
     const s = W.start; s.disc = true; W.places[opts.kingdom].disc = true; revealArea(s.tx, s.ty, 22);
     genVillageOffers(s); const easy = makeQuest('camp', s, s.owner); if (easy) s.offers[0] = easy;
-    beginPlay();
+    beginPlay(); saveGame(true, true);
     if (G.tutPending) { G.tutPending = false; tutBegin(0); return; }
     if (STORY) { storyBegin(); setTimeout(() => toast('Tip: press <kbd>J</kbd> for your quest journal. Main quests are marked with ✦.', ''), 9000); return; }
     const wpn = P.eq.weapon ? itemName(getItem(P.eq.weapon)).toLowerCase() : 'nothing but your fists';
@@ -7301,10 +7414,11 @@ function startNew(mode = 'sandbox', opts) {
     setTimeout(() => toast('Tip: press <kbd>K</kbd> for Diplomacy, <kbd>M</kbd> for the map, <kbd>I</kbd> for your pack.', ''), 5500);
   });
 }
-function continueGame(mode = G.mode) {
-  const d = readSave(mode);
+function continueGame(n = G.slot) {
+  const d = readSlot(n);
   if (!d) { toast('Save data could not be read.', 'bad'); return; }
   withLoading('RETURNING TO THE REALM…', () => {
+    G.slot = n; const mode = modeOf(d);
     const o = normOpts(d.opts); G.mode = mode; G.opts = o; DAYLEN = DAYS[o.day].len;
     if (!W || W.seed !== d.seed || W.size !== SIZES[o.size].n || W.startK !== o.kingdom) prepareWorld(d.seed, o);
     loadGame(d); beginPlay(); toast(`Welcome back. Day ${dayNum()}.`, 'gold');
@@ -7314,7 +7428,7 @@ function continueGame(mode = G.mode) {
 /* ---------------- Save / load ---------------- */
 function packBits(arr) { const out = new Uint8Array(Math.ceil(arr.length / 8)); for (let i = 0; i < arr.length; i++) if (arr[i]) out[i >> 3] |= 1 << (i & 7); let s = ''; for (let i = 0; i < out.length; i++) s += String.fromCharCode(out[i]); return btoa(s); }
 function unpackBits(str, n) { const s = atob(str); const a = new Uint8Array(n); for (let i = 0; i < n; i++) a[i] = (s.charCodeAt(i >> 3) >> (i & 7)) & 1; return a; }
-function saveGame(silent) {
+function saveGame(silent, quiet) {
   if (!P || G.state === 'menu' || G.ironDead) return;
   const qStrip = q => { const c = Object.assign({}, q); delete c.ent; delete c.foes; return c; };
   const data = {
@@ -7325,12 +7439,12 @@ function saveGame(silent) {
     K: { rel: K.rel, aff: K.aff, rep: K.rep, mil: K.mil, reasons: K.reasons, events: K.events, kev: K.kev, repWhy: K.repWhy, gifts: K.gifts, log: K.log, cd: {} },
     Q: { active: Q.active.filter(q => q.type !== 'raid' && q.type !== 'tut' && q.sid !== 'hraid').map(qStrip), done: Q.done.map(qStrip), tracked: Q.tracked, next: Q.next },
     places: W.places.map(p => ({ disc: p.disc, rumor: p.rumor, cleared: p.cleared, chestOpened: p.chestOpened, clearedAt: p.clearedAt, dead: p.dead, owner: p.owner, blessed: p.blessed, investigated: p.investigated, rumorUsed: p.rumorUsed, backerRevealed: p.backerRevealed, sboss: p.sboss, ddead: p.ddead, dchests: p.dchests, dcleared: p.dcleared, legendTaken: p.legendTaken })),
-    exp: packBits(EXP), settings,
+    exp: packBits(EXP),
   };
   data.opts = G.opts || normOpts(); data.stats = G.stats; data.tut = G.tut && !G.tut.done ? G.tut.step : null;
-  if (G.mode === 'story') { data.mode = 'story'; data.story = STORY; }
+  data.mode = G.mode; data.slot = G.slot || 1; if (G.mode === 'story') data.story = STORY;
   if (WIPED) return;
-  try { localStorage.setItem(saveKey(), JSON.stringify(data)); if (!silent) { toast('Game saved.', 'good'); SND.play('pickup'); } else toast('Autosaved.', ''); }
+  try { localStorage.setItem(saveKey(), JSON.stringify(data)); if (quiet) { } else if (!silent) { toast(`Game saved to slot ${G.slot || 1}.`, 'good'); SND.play('pickup'); } else toast('Autosaved.', ''); }
   catch (e) { toast('Could not save: browser storage is unavailable or full.', 'bad'); }
 }
 function loadGame(d) {
@@ -7357,7 +7471,7 @@ function loadGame(d) {
     if (q.type === 'story') { q.sp = 0; q.amb = 0; q.x0 = 0; }
   });
   G.mode = d.mode === 'story' ? 'story' : 'sandbox'; STORY = d.story || null;
-  if (d.settings) { settings = Object.assign({}, DEFAULT_SETTINGS, d.settings); saveSettings(); applySettings(); }
+  // settings belong to the device, not the save, so an imported game keeps this device's settings
 }
 
 /* =====================================================================
@@ -8952,7 +9066,9 @@ function update(dt) {
   }
   G.shake *= Math.pow(.004, dt);
 }
+let lastDraw = 0;
 function frame(now) {
+  if (settings.battery && now - lastDraw < 30) { requestAnimationFrame(frame); return; } lastDraw = now;
   const dt = Math.min(.05, (now - last) / 1000); last = now; const t = now / 1000;
   pollPad();
   fpsA = fpsA * .95 + (1 / Math.max(dt, .001)) * .05;
@@ -8984,9 +9100,10 @@ function frame(now) {
 (function boot() {
   resize();
   document.documentElement.style.setProperty('--ui-scale', TOUCH && TOUCH.on ? Math.min(settings.uiScale, TOUCH.scale) : settings.uiScale);
+  document.documentElement.style.setProperty('--text-scale', settings.textScale || 1); settings.keys = settings.keys || {}; buildKeyMap(); refreshKeyHints(); lastCb = !!settings.cb;
   $('mmWrap').classList.toggle('hidden', !settings.minimap);
   let seed = Math.floor(Math.random() * 1e9);
-  try { const d = JSON.parse(localStorage.getItem('fk_save') || 'null'); if (d && d.seed) seed = d.seed; } catch (e) { }
+  migrateSaves(); const recent = slotsUsed().sort((a, b) => (b.d.savedAt || 0) - (a.d.savedAt || 0))[0]; if (recent) seed = recent.d.seed;
   setTimeout(() => {
     prepareWorld(seed); resetState();
     refreshMenu(); UI.show('mainMenu');
