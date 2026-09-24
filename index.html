@@ -75,6 +75,10 @@ b,strong{font-weight:600}
 .slot img{width:38px;height:38px;border-radius:4px;background:radial-gradient(circle,#3a2b1c,#150e08);border:1px solid #6b5230}
 .slot .sn{font-family:var(--fh);font-size:11.5px;font-weight:700;color:var(--ink);white-space:nowrap}
 .slot .ss{font-size:11.5px;color:var(--ink2);white-space:nowrap}
+#slotW{position:relative}
+#slotW .sw2{position:absolute;right:-9px;top:-11px;width:25px;height:25px;border-radius:4px}
+#slotW .sw2.none{display:none}
+#specPip{position:absolute;left:-8px;top:-10px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 10px var(--fh);color:#1b140d;background:conic-gradient(#e7c35a var(--p,100%),rgba(20,14,8,.9) 0);border:1px solid #6b5230;box-shadow:0 0 6px rgba(0,0,0,.5)}
 .slot.mounted{border-color:var(--gold);box-shadow:0 0 10px rgba(216,178,90,.35)}
 #hudBR{position:absolute;right:12px;bottom:12px;padding:7px 10px;font-size:11.5px;color:var(--ink2);line-height:1.65;pointer-events:auto}
 #hudBR .hk{display:grid;grid-template-columns:auto auto;gap:0 10px}
@@ -164,7 +168,7 @@ kbd{display:inline-block;min-width:18px;padding:0 4px;height:17px;line-height:15
 #invScreen .panel{width:min(1080px,calc(96vw/var(--ui-scale)));height:min(700px,calc(92vh/var(--ui-scale)));display:flex;flex-direction:column}
 .invBody{display:grid;grid-template-columns:300px 1fr;gap:16px;flex:1;min-height:0}
 .doll{background:rgba(0,0,0,.28);border:1px solid rgba(154,117,54,.4);border-radius:6px;padding:12px;display:flex;flex-direction:column;align-items:center;overflow-y:auto;overflow-x:hidden}
-.dollGrid{display:grid;grid-template-columns:68px 118px 68px;grid-template-rows:auto auto;gap:6px;align-items:center;justify-items:center}
+.dollGrid{display:grid;grid-template-columns:68px 118px 68px;grid-template-rows:auto auto;gap:6px 6px;row-gap:18px;align-items:center;justify-items:center}
 #dollCanvas{width:118px;height:136px;grid-row:1/3;grid-column:2}
 .eslot{width:66px;height:66px;border-radius:6px;border:1px dashed #8a6a32;background:radial-gradient(circle,#2e2216,#120c07);display:flex;align-items:center;justify-content:center;position:relative;transition:all .15s;cursor:pointer}
 .eslot img{width:52px;height:52px}
@@ -416,7 +420,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div id="mmWrap"><canvas id="minimap" width="176" height="176"></canvas><div class="compass">N</div></div>
     </div>
     <div id="hudBC" class="hudbox scal">
-      <div class="slot" id="slotW"><img alt=""><div><div class="sn"></div><div class="ss"></div></div></div>
+      <div class="slot" id="slotW"><img alt=""><div><div class="sn"></div><div class="ss"></div></div><img class="sw2 none" id="slotW2" alt="" title="Tab: swap to sidearm"><span id="specPip" title="C: special move">C</span></div>
       <div class="slot" id="slotS"><img alt=""><div><div class="sn"></div><div class="ss"></div></div></div>
       <div class="slot" id="slotH"><img alt=""><div><div class="sn"></div><div class="ss"></div></div></div>
     </div>
@@ -425,7 +429,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <span><kbd>WASD</kbd>Move</span><span><kbd>LMB</kbd>Attack</span>
         <span><kbd>RMB</kbd>Block</span><span><kbd>Space</kbd>Dodge</span>
         <span><kbd>E</kbd>Interact</span><span><kbd>F</kbd>Horse</span>
-        <span><kbd>Q</kbd>+Click Hit friendlies</span><span><kbd>Shift</kbd>Sprint</span><span><kbd>R</kbd>Arrows</span><span><kbd>J</kbd>Quests</span>
+        <span><kbd>Q</kbd>+Click Hit friendlies</span><span><kbd>Shift</kbd>Sprint</span><span><kbd>R</kbd>Arrows</span><span><kbd>Tab</kbd>Swap weapon</span><span><kbd>C</kbd>Special</span><span><kbd>J</kbd>Quests</span>
       </div>
       <div class="hudbtns">
         <button class="hbtn" data-open="inv" title="Inventory (I)">I · Pack</button>
@@ -540,6 +544,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
             <div class="eslot" id="esS" data-slot="shield"><span class="el">SHIELD</span></div>
             <div class="eslot" id="esA" data-slot="armor"><span class="el">ARMOR</span></div>
             <div class="eslot" id="esH" data-slot="horse"><span class="el">HORSE</span></div>
+            <div class="eslot" id="esW2" data-slot="weapon2"><span class="el">SIDEARM</span></div>
           </div>
           <table class="statTbl" id="statTbl"></table>
         </div>
@@ -626,6 +631,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <div><kbd>W A S D</kbd> Move</div><div><kbd>Mouse</kbd> Aim</div>
         <div><kbd>LMB</kbd> Attack (hold to chain)</div><div><kbd>RMB</kbd> Block with shield</div>
         <div><kbd>LMB</kbd> With a bow: hold to draw, release to shoot. A full draw flies farthest and hits hardest</div><div><kbd>R</kbd> Switch arrow type (bows are two-handed: no blocking)</div>
+        <div><kbd>Tab</kbd> Swap to your sidearm (set one in the inventory)</div><div><kbd>C</kbd> Special move: sword whirlwind, axe crushing blow, spear lunge, piercing arrow; while blocking, a shield bash</div>
         <div><kbd>Space</kbd> Dodge: time it just as a blow lands to take no damage</div><div><kbd>E</kbd> Talk / loot / interact</div>
         <div><kbd>F</kbd> Mount, dismount, call horse</div><div><kbd>Shift</kbd> Sprint (hold; drains stamina)</div><div><kbd>Q</kbd>+<kbd>LMB</kbd> Hit friendly or neutral characters (villagers, guards, animals). Hurting people is a crime</div>
         <div><kbd>I</kbd> Inventory</div><div><kbd>M</kbd> Map</div>
@@ -807,6 +813,8 @@ const SND = {
       case 'arrow': this.noise(.15, .15, 'sfx', 2500, 3, .4); break;
       // archery
       case 'bowdraw': this.noise(.4, .05, 'sfx', 650, 5, 1.7); this.tone(150, .4, 'sawtooth', .015, 'sfx', 0, 1.35, .1); break;
+      case 'swap': this.noise(.12, .18, 'sfx', 2600, 2, .6); this.tone(700, .08, 'triangle', .06, 'sfx', .04); break;
+      case 'xbow': this.noise(.08, .3, 'sfx', 900, 1, .4); this.tone(210, .1, 'square', .05, 'sfx', 0, .5); break;
       case 'bowfull': this.tone(260, .07, 'triangle', .05); break;
       case 'bowshot': this.noise(.12, .28, 'sfx', 1700, 1.4, .45); this.tone(118, .16, 'triangle', .2, 'sfx', 0, .55); break;
       case 'thunk': this.noise(.06, .22 * v, 'sfx', 520, 1.2, .5, 'lowpass'); break;
@@ -1227,10 +1235,15 @@ const ITEMS = {
   oathkeeper: { name: 'Oathkeeper', type: 'weapon', wk: 'sword', dmg: 58, spd: 76, rng: 60, arc: 2.15, val: 2600, len: 43, col: '#fff2b8', glow: '#ffd76a', legend: true, tier: 5, desc: 'A legendary blade said to burn brighter in honest hands.' },
   short_bow: { name: 'Short Bow', type: 'weapon', wk: 'bow', dmg: 12, spd: 90, rng: 420, val: 45, len: 18, col: '#9a6a3a', tier: 0, desc: 'A light hunting bow. Quick to draw and gentle on the arm.' },
   hunting_bow: { name: 'Hunting Bow', type: 'weapon', wk: 'bow', dmg: 17, spd: 82, rng: 500, val: 130, len: 20, col: '#7a4a26', tier: 1, desc: "Ash and sinew. The woodsman's friend." },
-  recurve_bow: { name: 'Recurve Bow', type: 'weapon', wk: 'bow', dmg: 23, spd: 86, rng: 540, val: 320, len: 20, col: '#5a3a24', tier: 2, desc: 'Horn-backed limbs that snap forward fast. Good from the saddle.' },
+  recurve_bow: { name: 'Recurve Bow', type: 'weapon', wk: 'bow', dmg: 23, spd: 86, rng: 540, val: 320, len: 20, col: '#5a3a24', saddle: true, tier: 2, desc: 'Horn-backed limbs that snap forward fast. Built for the saddle: draws faster and hits harder on horseback.' },
   longbow: { name: 'Longbow', type: 'weapon', wk: 'bow', dmg: 31, spd: 66, rng: 680, val: 580, len: 26, col: '#8a5a2a', tier: 3, desc: 'Taller than a man. Slow to draw, deadly at range.' },
   war_bow: { name: 'Yew War Bow', type: 'weapon', wk: 'bow', dmg: 41, spd: 58, rng: 740, val: 880, len: 27, col: '#6a3a1a', tier: 4, desc: 'A heavy yew bow that punches through mail.' },
   rimewood_bow: { name: 'Rimewood Bow', type: 'weapon', wk: 'bow', dmg: 27, spd: 76, rng: 600, val: 620, len: 22, col: '#9ab8c8', frost: 3, tier: 3, desc: 'Carved from frost-killed rimewood in the high snowfields of Draven. Every arrow it looses chills the target.' },
+  emberbrand: { name: 'Emberbrand', type: 'weapon', wk: 'sword', dmg: 44, spd: 80, rng: 52, arc: 2.0, val: 2400, len: 38, col: '#ffb070', glow: '#ff8a3a', ench: 'fire', legend: true, tier: 5, desc: 'Forged in a dragon\'s last breath. Every cut sets the foe burning.' },
+  widows_kiss: { name: "Widow's Kiss", type: 'weapon', wk: 'sword', dmg: 30, spd: 95, rng: 40, arc: 1.6, val: 2100, len: 24, col: '#b8e0a0', glow: '#7ad04a', ench: 'venom', legend: true, tier: 5, desc: 'A slender Eldorian blade that weeps venom. Quick, quiet and cruel.' },
+  winters_edge: { name: "Winter's Edge", type: 'weapon', wk: 'sword', dmg: 46, spd: 72, rng: 58, arc: 2.1, val: 2500, len: 41, col: '#e0f4ff', glow: '#9fdcff', ench: 'frost', legend: true, tier: 5, desc: 'Ice that never melts, shaped into a longsword. Its bite slows the blood.' },
+  lifedrinker: { name: 'Lifedrinker', type: 'weapon', wk: 'axe', dmg: 50, spd: 60, rng: 44, arc: 1.7, val: 2300, len: 29, col: '#c0a0a8', glow: '#e04a5a', ench: 'life', legend: true, tier: 5, desc: 'A red-veined axe that drinks what it spills. Heals you for a tenth of the damage it deals.' },
+  stormcaller: { name: 'Stormcaller', type: 'weapon', wk: 'bow', dmg: 48, spd: 80, rng: 780, val: 2600, len: 25, col: '#4a5a8a', glow: '#bfe0ff', ench: 'storm', legend: true, tier: 5, desc: 'Strung with a thread of lightning. Fully drawn, its arrows fly faster and pierce through two foes.' },
   frostfang_bow: { name: 'Frostfang Greatbow', type: 'weapon', wk: 'bow', dmg: 38, spd: 62, rng: 720, val: 1150, len: 26, col: '#c8e4f0', glow: '#9fdcff', frost: 4.5, tier: 4, desc: 'Strung with the sinew of an ice bear. Its arrows freeze foes nearly solid.' },
   wooden_shield: { name: 'Wooden Shield', type: 'shield', block: .30, val: 5, sh: 'round', col: '#8a5a30', rim: '#5a3a1a', tier: 0, desc: 'Planks and hope.' },
   round_shield: { name: 'Round Shield', type: 'shield', block: .42, val: 75, sh: 'round', col: '#7a4a28', rim: '#9ba1a8', boss: true, tier: 1, desc: 'Iron-rimmed with a sturdy boss.' },
@@ -1287,8 +1300,9 @@ const ITEMS = {
   shard_2: { name: 'Draven Ember Shard', type: 'quest', val: 0, k: 2, desc: "A shard of Aurek's Ember Crown, kept by the house of Draven. It is warm to the touch." },
   shard_3: { name: 'Eldorian Ember Shard', type: 'quest', val: 0, k: 3, desc: "A shard of Aurek's Ember Crown, kept by the house of Eldoria. It is warm to the touch." },
 };
+const LEGENDS = ['emberbrand', 'widows_kiss', 'winters_edge', 'lifedrinker', 'stormcaller'];
 const AMMO = ['arrow', 'broadhead', 'bodkin', 'fire_arrow', 'venom_arrow', 'frost_arrow'];
-const ARMORED = ['knight', 'guard', 'soldier', 'bowman', 'hknight', 'hollow_king', 'champion', 'leader', 'wight'];
+const ARMORED = ['shieldbearer', 'knight', 'guard', 'soldier', 'bowman', 'hknight', 'hollow_king', 'champion', 'leader', 'wight'];
 const LOOT_TIERS = [
   ['iron_sword', 'short_bow', 'round_shield', 'leather', 'bread', 'meat', 'bandage', 'iron', 'furs', 'wine'],
   ['iron_sword', 'axe', 'spear', 'hunting_bow', 'round_shield', 'iron_shield', 'leather', 'chainmail', 'meat', 'potion', 'spices', 'old_horse'],
@@ -1315,12 +1329,12 @@ function itemValue(it) { const b = ITEMS[it.id]; return Math.max(1, Math.round(b
 /* ---------------- New-game options: difficulty and world ---------------- */
 // Knight is the original game, unchanged. Values are multipliers unless noted.
 const DIFFS = [
-  { name: 'Peasant', tag: 'Ideal for beginners and players who are here for the story.', dmgTaken: .5, dmgDealt: 1.3, enemyHp: .75, regen: 2.4, heal: 1.5, stRegen: 1.35, stCost: .75, goldLoss: .1, rel: 15, homeRep: 20, gold: 150, gear: ['iron_sword', 'round_shield', 'leather', 'old_horse'], items: [['bread', 6], ['bandage', 4], ['potion', 2]] },
-  { name: 'Squire', tag: 'A gentle challenge for players still learning to fight.', dmgTaken: .75, dmgDealt: 1.12, enemyHp: .88, regen: 1.4, heal: 1.2, stRegen: 1.15, stCost: .9, goldLoss: .2, rel: 8, homeRep: 15, gold: 80, gear: ['iron_sword', 'wooden_shield', 'padded'], items: [['bread', 4], ['bandage', 3], ['potion', 1]] },
-  { name: 'Knight', tag: 'The intended experience. Recommended for most players.', dmgTaken: 1, dmgDealt: 1, enemyHp: 1, regen: .8, heal: 1, stRegen: 1, stCost: 1, goldLoss: .25, rel: 0, homeRep: 10, gold: 25, gear: ['wooden_sword', 'wooden_shield', 'padded'], items: [['bread', 3], ['bandage', 2]] },
-  { name: 'Champion', tag: 'For seasoned fighters who have mastered blocking and dodging.', dmgTaken: 1.3, dmgDealt: .92, enemyHp: 1.15, regen: .45, heal: .85, stRegen: .9, stCost: 1.1, goldLoss: .35, rel: -8, homeRep: 5, gold: 10, gear: ['wooden_sword', 'wooden_shield', 'padded'], items: [['bread', 2], ['bandage', 1]] },
-  { name: 'Warlord', tag: 'For only the best of the best. Every fight could be your last.', dmgTaken: 1.65, dmgDealt: .85, enemyHp: 1.3, regen: .2, heal: .7, stRegen: .8, stCost: 1.2, goldLoss: .5, rel: -15, homeRep: 0, gold: 0, gear: ['wooden_sword', 'padded'], items: [['bread', 1]] },
-  { name: 'Forsaken', tag: 'Ironman. One life, and death erases your save. Verging on impossible.', ironman: true, dmgTaken: 2.3, dmgDealt: .75, enemyHp: 1.6, regen: 0, heal: .5, stRegen: .65, stCost: 1.35, goldLoss: 1, rel: -25, homeRep: -5, gold: 0, gear: [], items: [] },
+  { name: 'Peasant', tag: 'Ideal for beginners and players who are here for the story.', dmgTaken: .5, dmgDealt: 1.3, enemyHp: .75, regen: 2.4, heal: 1.5, stRegen: 1.35, stCost: .75, goldLoss: .1, arrowRec: .75, rel: 15, homeRep: 20, gold: 150, gear: ['iron_sword', 'round_shield', 'leather', 'old_horse'], items: [['bread', 6], ['bandage', 4], ['potion', 2]] },
+  { name: 'Squire', tag: 'A gentle challenge for players still learning to fight.', dmgTaken: .75, dmgDealt: 1.12, enemyHp: .88, regen: 1.4, heal: 1.2, stRegen: 1.15, stCost: .9, goldLoss: .2, arrowRec: .6, rel: 8, homeRep: 15, gold: 80, gear: ['iron_sword', 'wooden_shield', 'padded'], items: [['bread', 4], ['bandage', 3], ['potion', 1]] },
+  { name: 'Knight', tag: 'The intended experience. Recommended for most players.', dmgTaken: 1, dmgDealt: 1, enemyHp: 1, regen: .8, heal: 1, stRegen: 1, stCost: 1, goldLoss: .25, arrowRec: .45, rel: 0, homeRep: 10, gold: 25, gear: ['wooden_sword', 'wooden_shield', 'padded'], items: [['bread', 3], ['bandage', 2]] },
+  { name: 'Champion', tag: 'For seasoned fighters who have mastered blocking and dodging.', dmgTaken: 1.3, dmgDealt: .92, enemyHp: 1.15, regen: .45, heal: .85, stRegen: .9, stCost: 1.1, goldLoss: .35, arrowRec: .3, rel: -8, homeRep: 5, gold: 10, gear: ['wooden_sword', 'wooden_shield', 'padded'], items: [['bread', 2], ['bandage', 1]] },
+  { name: 'Warlord', tag: 'For only the best of the best. Every fight could be your last.', dmgTaken: 1.65, dmgDealt: .85, enemyHp: 1.3, regen: .2, heal: .7, stRegen: .8, stCost: 1.2, goldLoss: .5, arrowRec: .15, rel: -15, homeRep: 0, gold: 0, gear: ['wooden_sword', 'padded'], items: [['bread', 1]] },
+  { name: 'Forsaken', tag: 'Ironman. One life, and death erases your save. Verging on impossible.', ironman: true, dmgTaken: 2.3, dmgDealt: .75, enemyHp: 1.6, regen: 0, heal: .5, stRegen: .65, stCost: 1.35, goldLoss: 1, arrowRec: 0, rel: -25, homeRep: -5, gold: 0, gear: [], items: [] },
 ];
 const SIZES = [
   { name: 'Extra Small', n: 224, note: 'A compact realm with short journeys and few bandit camps.' },
@@ -1346,6 +1360,7 @@ function diffEffects(d) {
     ['Healing from food and potions', pct(d.heal), cmp(d.heal, false)],
     ['Stamina regeneration', pct(d.stRegen), cmp(d.stRegen, false)],
     ['Stamina cost of attacks, dodges and sprinting', pct(d.stCost), cmp(d.stCost, true)],
+    ['Missed arrows you can recover', pct(d.arrowRec), d.arrowRec === .45 ? '' : d.arrowRec > .45 ? 'g' : 'b'],
     ['Starting gear', gear, d.name === 'Knight' ? '' : DIFFS.indexOf(d) < 2 ? 'g' : 'b'],
     ['Starting gold', d.gold, d.gold === 25 ? '' : d.gold > 25 ? 'g' : 'b'],
     ['The four kingdoms', d.rel > 0 ? 'Friendlier than usual' : d.rel === 0 ? 'Uneasy, as usual' : d.rel <= -20 ? 'On the brink of war' : 'More hostile than usual', d.rel === 0 ? '' : d.rel > 0 ? 'g' : 'b'],
@@ -1377,6 +1392,8 @@ function applyNewGameOpts() {
 const ATYPES = {
   bandit: { name: 'Bandit', hp: 36, dmg: 6, spd: 84, range: 36, cd: 1.45, wind: .42, faction: 'bandit', xp: 14, gold: [3, 10], r: 11, weapon: 'axe' },
   archer: { name: 'Bandit Archer', hp: 30, dmg: 8, spd: 82, range: 250, cd: 2.2, wind: .6, faction: 'bandit', xp: 16, gold: [3, 10], r: 11, ranged: true, weapon: 'bow' },
+  xbowman: { name: 'Bandit Crossbowman', hp: 34, dmg: 15, spd: 76, range: 300, cd: 3.4, wind: .9, faction: 'bandit', xp: 20, gold: [4, 12], r: 11, ranged: true, weapon: 'xbow' },
+  shieldbearer: { name: 'Bandit Shieldbearer', hp: 56, dmg: 9, spd: 72, range: 40, cd: 1.6, wind: .5, faction: 'bandit', xp: 22, gold: [4, 12], r: 12, weapon: 'sword', guard: true },
   leader: { name: 'Bandit Chief', hp: 150, dmg: 14, spd: 84, range: 48, cd: 1.35, wind: .5, faction: 'bandit', xp: 70, gold: [30, 60], r: 13, weapon: 'great' },
   soldier: { name: 'Soldier', hp: 72, dmg: 11, spd: 88, range: 50, cd: 1.3, wind: .45, faction: 'k', xp: 22, gold: [5, 14], r: 11, weapon: 'spear' },
   guard: { name: 'Guard', hp: 95, dmg: 13, spd: 80, range: 46, cd: 1.25, wind: .45, faction: 'k', xp: 28, gold: [6, 16], r: 11, weapon: 'sword', leash: 300 },
@@ -1398,6 +1415,7 @@ const ATYPES = {
   cultist: { name: 'Ashen Cultist', hp: 44, dmg: 9, spd: 90, range: 38, cd: 1.25, wind: .4, faction: 'bandit', xp: 18, gold: [5, 14], r: 11, weapon: 'sword' },
   assassin: { name: 'Ashen Blade', hp: 64, dmg: 12, spd: 118, range: 40, cd: .95, wind: .3, faction: 'bandit', xp: 34, gold: [12, 26], r: 11, weapon: 'sword' },
   wight: { name: 'Hollow Dead', hp: 58, dmg: 10, spd: 72, range: 44, cd: 1.5, wind: .5, faction: 'hollow', xp: 22, gold: [0, 6], r: 11, weapon: 'sword' },
+  hollow_archer: { name: 'Hollow Bowman', hp: 44, dmg: 11, spd: 70, range: 320, cd: 2.4, wind: .7, faction: 'hollow', xp: 24, gold: [0, 6], r: 11, ranged: true, weapon: 'bow' },
   hknight: { name: 'Hollow Knight', hp: 190, dmg: 17, spd: 82, range: 56, cd: 1.5, wind: .55, faction: 'hollow', xp: 75, gold: [10, 30], r: 13, weapon: 'great' },
   hollow_king: { name: 'The Hollow King', hp: 1300, dmg: 24, spd: 80, range: 66, cd: 1.5, wind: .6, faction: 'hollow', xp: 700, gold: [250, 350], r: 16, weapon: 'great' },
   champion: { name: 'Champion', hp: 180, dmg: 16, spd: 98, range: 54, cd: 1.2, wind: .42, faction: 'civ', xp: 60, gold: [0, 0], r: 12, weapon: 'sword' },
@@ -1869,9 +1887,16 @@ function removeItem(uid, n = 1) {
   }
 }
 function removeItemById(id, n = 1) { const it = P.inv.find(i => i.id === id); if (it) removeItem(it.uid, n); }
+function swapWeapons() {
+  if (G.state !== 'play') return;
+  if (!P.eq.weapon2) { toast('No sidearm. Drag a second weapon onto the Sidearm slot in your inventory (I).'); return; }
+  [P.eq.weapon, P.eq.weapon2] = [P.eq.weapon2, P.eq.weapon]; P.swing = 0; P.spec = null; P.atkCd = Math.max(P.atkCd, .35);
+  recalc(); SND.play('swap'); const w = getItem(P.eq.weapon); if (w) addText(P.x, P.y - 34, itemName(w), itemColor(w), 12);
+}
 function slotOf(type) { return type === 'weapon' ? 'weapon' : type === 'shield' ? 'shield' : type === 'armor' ? 'armor' : type === 'horse' ? 'horse' : null; }
-function equip(uid, silent) {
-  const it = getItem(uid); if (!it) return; const s = slotOf(ITEMS[it.id].type); if (!s) return;
+function equip(uid, silent, slot) {
+  const it = getItem(uid); if (!it) return; const s = slot || slotOf(ITEMS[it.id].type); if (!s) return;
+  const other = s === 'weapon' ? 'weapon2' : s === 'weapon2' ? 'weapon' : null; if (other && P.eq[other] === uid) P.eq[other] = P.eq[s] || null; // moving between main and sidearm swaps them
   if (s === 'horse') {
     if (P.eq.horse === uid) return;
     const wasMounted = P.mounted; P.mounted = false; if (horseEnt) { removeEnt(horseEnt); horseEnt = null; }
@@ -1913,7 +1938,7 @@ function newPlayer() {
   P = {
     isPlayer: true, kind: 'player', name: 'You', x: s.x + TS * .5, y: s.y + TS * 2.6, r: 11, hp: 100, maxHp: 100, st: 100, maxSt: 100, gold: 25, xp: 0, lvl: 1, face: 0, faction: 'player',
     swing: 0, swingDur: .25, swingDir: 1, hitDone: true, atkCd: 0, blocking: false, dodge: 0, dodgeX: 0, dodgeY: 0, iframes: 0, stDelay: 0,
-    mounted: false, hface: 0, walk: 0, flash: 0, kbx: 0, kby: 0, inv: [], eq: { weapon: null, shield: null, armor: null, horse: null },
+    mounted: false, hface: 0, walk: 0, flash: 0, kbx: 0, kby: 0, inv: [], eq: { weapon: null, weapon2: null, shield: null, armor: null, horse: null },
     allegiance: null, bonusHp: 0, bonusSt: 0, stepT: 0, respawn: { x: s.x, y: s.y + TS * 2.6 }, visited: {}
   };
   const w = addItem('wooden_sword', 1, 1, true), sh = addItem('wooden_shield', 1, 1, true), a = addItem('padded', 1, 1, true);
@@ -1929,7 +1954,7 @@ function recalc() {
     dmg: ws.dmg * (1 + .03 * (P.lvl - 1)), spd: ws.spd, rng: ws.rng, arc: ws.arc, wk: w ? ITEMS[w.id].wk : 'fist', wid: w ? w.id : null, wq: w ? w.q : 1,
     block: ss.block, sid: s ? s.id : null, def: as.def, aid: a ? a.id : null, slow: (ss.slow || 0) + (as.slow || 0), hspd: h ? ITEMS[h.id].hspd : 1, horse: h ? ITEMS[h.id] : null, hid: h ? h.id : null
   };
-  P.S.bow = P.S.wk === 'bow'; P.S.frost = w ? ITEMS[w.id].frost || 0 : 0; P.S.drawT = .3 + (100 - P.S.spd) * .012; P.S.shotCost = 5 + ws.dmg * .12;
+  P.S.bow = P.S.wk === 'bow'; P.S.frost = w ? ITEMS[w.id].frost || 0 : 0; P.S.ench = w ? ITEMS[w.id].ench || null : null; P.S.saddle = !!(w && ITEMS[w.id].saddle); P.S.drawT = .3 + (100 - P.S.spd) * .012; P.S.shotCost = 5 + ws.dmg * .12;
   if (!P.S.bow) P.drawing = false;
   P.S.swingT = .17 + (100 - P.S.spd) * .0045; P.S.cool = .16 + (100 - P.S.spd) * .011; P.S.cost = 6 + ws.dmg * .16;
   P.maxHp = 100 + (P.lvl - 1) * 8 + P.bonusHp; P.maxSt = 100 + (P.lvl - 1) * 5 + P.bonusSt;
@@ -1981,8 +2006,70 @@ function tryDodge() {
   SND.play('dodge'); for (let i = 0; i < 6; i++) addPart(P.x, P.y + 8, rand(-40, 40), rand(-30, 0), '#b8a888', .4, 3);
 }
 function startAttack() {
-  const S = P.S; P.swing = P.swingDur = S.swingT; P.hitDone = false; P.atkCd = S.cool + S.swingT; P.st -= S.cost * DIFF().stCost; P.stDelay = .7; P.swingDir *= -1; P.blocking = false;
+  const S = P.S; P.swingArc = null; P.swing = P.swingDur = S.swingT; P.hitDone = false; P.atkCd = S.cool + S.swingT; P.st -= S.cost * DIFF().stCost; P.stDelay = .7; P.swingDir *= -1; P.blocking = false;
   SND.play(S.wk === 'great' || S.wk === 'axe' ? 'swingH' : 'swing');
+}
+/* Special moves (C): one per weapon type, on a cooldown. C while blocking bashes with the shield. */
+const SPECS = { sword: { n: 'Whirlwind', cd: 6, st: 30 }, axe: { n: 'Crushing Blow', cd: 7, st: 28 }, great: { n: 'Crushing Blow', cd: 7, st: 30 }, spear: { n: 'Lunge', cd: 5, st: 24 }, bow: { n: 'Piercing Shot', cd: 8, st: 18 }, bash: { n: 'Shield Bash', cd: 4, st: 16 } };
+function specKind() { return P.blocking ? 'bash' : SPECS[P.S.wk] ? P.S.wk : null; }
+function useSpecial() {
+  if (G.state !== 'play' || P.dodge > 0 || P.spec) return;
+  const k = specKind(); if (!k) { toast('Bare fists have no special move.'); return; }
+  const sp = SPECS[k], cdKey = k === 'bash' ? 'bashCd' : 'specCd';
+  if ((P[cdKey] || 0) > 0) return;
+  const cost = sp.st * DIFF().stCost; if (P.st < cost) { toast('Not enough stamina.'); return; }
+  P.st -= cost; P.stDelay = .9; P[cdKey] = sp.cd; if (k !== 'bash') P.specMax = sp.cd;
+  if (k === 'bash') { doBash(); return; }
+  if (k === 'bow') { P.pierceNext = true; addText(P.x, P.y - 34, 'Piercing shot ready', '#bfe0ff', 12); SND.play('bowfull'); return; }
+  P.spec = { k, t: 0, hit: false, dur: k === 'sword' ? .42 : k === 'spear' ? .32 : .72 };
+  P.blocking = false; P.drawing = false; P.swing = 0;
+  if (k === 'sword') { P.swing = P.swingDur = .42; P.swingArc = TAU; P.hitDone = true; }
+  SND.play(k === 'sword' ? 'swing' : k === 'spear' ? 'dodge' : 'swingH');
+}
+function updateSpecial(dt) {
+  P.specCd = Math.max(0, (P.specCd || 0) - dt); P.bashCd = Math.max(0, (P.bashCd || 0) - dt);
+  const s = P.spec; if (!s) return;
+  s.t += dt;
+  if (!s.hit && s.t >= (s.k === 'sword' ? .2 : s.k === 'spear' ? .16 : .5)) { s.hit = true; specialHit(s.k); if (s.k !== 'sword' && s.k !== 'spear') { P.swing = P.swingDur = .2; P.hitDone = true; } }
+  if (s.t >= s.dur) { P.spec = null; P.swingArc = null; }
+}
+function specialHit(k) {
+  const S = P.S; let hits = 0, n = 0;
+  const cand = ents.filter(e => !e.dead && e.kind !== 'horse' && !e.important && !e.perch && (playerHostileTo(e) || input.force))
+    .map(e => ({ e, d: dist(P.x, P.y, e.x, e.y), a: Math.abs(angDiff(P.face, Math.atan2(e.y - P.y, e.x - P.x))) })).sort((a, b) => a.d - b.d);
+  for (const { e, d, a } of cand) {
+    let mul = 1; const o = {};
+    if (k === 'sword') { if (d > S.rng + 16 + e.r) continue; mul = 1.3; o.kb = 1.6; }
+    else if (k === 'spear') { if (d > S.rng + 34 + e.r || a > .45 || n >= 2) continue; mul = 1.6; o.kb = 1.8; }
+    else { if (d > S.rng + 10 + e.r || a > .75) continue; mul = 2.2; o.kb = 2.6; o.heavy = true; o.crit = true; e.guardBroken = 2.5; }
+    n++;
+    const dmg = S.dmg * mul * rand(.95, 1.05) * DIFF().dmgDealt * (P.mounted ? 1.1 : 1);
+    damage(e, dmg, P, o); applyEnch(e, dmg);
+    if (o.heavy && !e.dead) { e.wind = 0; e.atkCd = Math.max(e.atkCd, 1.2); e.stun = .7; }
+    hits++;
+  }
+  if (k === 'sword') for (let i = 0; i < 16; i++) { const a = i / 16 * TAU; addPart(P.x + Math.cos(a) * 26, P.y + Math.sin(a) * 26, Math.cos(a) * 90, Math.sin(a) * 90, '#f4efe0', .3, 2); }
+  else if (k !== 'spear') { addShake(7); SND.play('hit'); for (let i = 0; i < 12; i++) addPart(P.x + Math.cos(P.face) * 40, P.y + Math.sin(P.face) * 40, rand(-100, 100), rand(-100, 30), '#b8a888', .45, 3); }
+  if (hits) { G.hitstop = .07; addShake(3 + hits); }
+}
+function doBash() {
+  SND.play('block'); let n = 0;
+  for (const e of ents) {
+    if (e.dead || e.kind === 'horse' || e.important || e.perch || !playerHostileTo(e)) continue;
+    if (dist(P.x, P.y, e.x, e.y) > 46 + e.r || Math.abs(angDiff(P.face, Math.atan2(e.y - P.y, e.x - P.x))) > 1.1) continue;
+    e.guardBroken = 2; damage(e, 4 * DIFF().dmgDealt, P, { kb: 2.2 });
+    if (!e.dead) { e.wind = 0; e.atkCd = Math.max(e.atkCd, 1.3); e.stun = 1; } n++;
+  }
+  if (n) { addShake(4); G.hitstop = .05; addText(P.x, P.y - 34, 'Bash!', '#ffe08a', 13); }
+}
+/* Enchanted weapons apply their effect on every hit */
+function applyEnch(e, dmg) {
+  const en = P.S.ench; if (!en) return;
+  if (en === 'life') { const h = dmg * .1; P.hp = Math.min(P.maxHp, P.hp + h); if (settings.dmgNums && h >= 1) addText(P.x + rand(-6, 6), P.y - 30, '+' + Math.round(h), '#8fe07a', 12); return; }
+  if (e.dead || e.important || e.kind === 'horse') return;
+  if (en === 'fire') { e.burn = 3; e.burnDps = 2 + dmg * .1; e.dotSrc = P; }
+  else if (en === 'venom') { e.poison = 6; e.poisonDps = 1.5 + dmg * .06; e.dotSrc = P; }
+  else if (en === 'frost') e.chill = Math.max(e.chill || 0, 2.5);
 }
 /* Bows: hold the attack button to draw, release to loose. A fuller draw flies farther and hits harder. */
 function curAmmo() {
@@ -1998,7 +2085,7 @@ function cycleAmmo() {
 function updateBow(dt) {
   if (P.drawing) {
     if (P.dodge > 0 || G.state !== 'play' || !curAmmo()) { P.drawing = false; P.draw = 0; return; }
-    P.drawT += dt; P.draw = Math.min(1, P.drawT / (P.S.drawT * (P.mounted ? 1.2 : 1)));
+    P.drawT += dt; P.draw = Math.min(1, P.drawT / (P.S.drawT * (P.mounted ? (P.S.saddle ? .9 : 1.2) : 1)));
     if (P.draw >= 1 && !P.fullDrawn) { P.fullDrawn = true; SND.play('bowfull'); }
     if (!input.lmb) { if (P.draw >= .2) loose(); P.drawing = false; P.draw = 0; }
     return;
@@ -2015,7 +2102,9 @@ function loose() {
   const spd = 520 + 380 * d, a = P.face + rand(-1, 1) * (1 - d) * .07;
   let dmg = S.dmg * (.3 + .7 * d * d) * (A.dmgM || 1) * DIFF().dmgDealt; const crit = d >= 1 && Math.random() < .15; if (crit) dmg *= 1.6;
   if (P.mounted && S.horse && S.horse.dmgB) dmg *= 1 + S.horse.dmgB;
-  projs.push({ x: P.x + Math.cos(a) * 16, y: P.y + Math.sin(a) * 16, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, dmg, crit, src: P, life: S.rng * (.45 + .55 * d) / spd, arrow: id, frost: S.frost, force: input.force });
+  if (P.mounted && S.saddle) dmg *= 1.15;
+  const storm = S.ench === 'storm' && d >= 1, pierce = P.pierceNext ? 3 : storm ? 2 : 0, v = spd * (storm ? 1.15 : 1); P.pierceNext = false;
+  projs.push({ x: P.x + Math.cos(a) * 16, y: P.y + Math.sin(a) * 16, vx: Math.cos(a) * v, vy: Math.sin(a) * v, dmg, crit, src: P, life: S.rng * (.45 + .55 * d) / spd, arrow: id, frost: S.frost, force: input.force, pierce });
   P.atkCd = .2; P.st -= S.shotCost * DIFF().stCost; P.stDelay = .6;
   SND.play('bowshot'); if (id === 'fire_arrow') SND.play('ignite');
 }
@@ -2028,7 +2117,7 @@ function doPlayerHit() {
     const a = Math.atan2(e.y - P.y, e.x - P.x); if (Math.abs(angDiff(P.face, a)) > S.arc / 2 + (d < e.r + 16 ? .9 : .12)) continue;
     let dmg = S.dmg * rand(.9, 1.1) * DIFF().dmgDealt; const crit = Math.random() < .1; if (crit) dmg *= 1.6;
     if (P.mounted) dmg *= 1.1 + (S.horse && S.horse.dmgB ? S.horse.dmgB : 0);
-    damage(e, dmg, P, { crit, kb: S.wk === 'great' || S.wk === 'axe' ? 1.6 : S.wk === 'spear' ? 1.2 : 1 }); hits++;
+    damage(e, dmg, P, { crit, kb: S.wk === 'great' || S.wk === 'axe' ? 1.6 : S.wk === 'spear' ? 1.2 : 1 }); applyEnch(e, dmg); hits++;
   }
   if (hits) { G.hitstop = .045; addShake(2 + hits); }
 }
@@ -2049,7 +2138,9 @@ function updatePlayer(dt) {
   P.sprinting = !!sprintKey && ml > 0 && !P.winded && !P.blocking && !P.drawing && P.dodge <= 0 && P.swing <= 0 && P.st > 0 && (P.st > 20 || P.sprinting);
   if (P.sprinting) spd *= P.mounted ? 1.2 : 1.35;
   if (P.swing > 0) spd *= P.mounted ? .9 : .65;
+  if (P.spec) spd *= P.spec.k === 'sword' ? .6 : .3;
   let vx = mx * spd, vy = my * spd;
+  if (P.spec && P.spec.k === 'spear' && P.spec.t < .18) { vx = Math.cos(P.face) * 390; vy = Math.sin(P.face) * 390; } // the lunge
   if (P.dodge > 0) { P.dodge -= dt; const ds = P.mounted ? 150 : 110; vx = P.dodgeX * ds; vy = P.dodgeY * ds; }
   if (P.kbx || P.kby) { vx += P.kbx; vy += P.kby; P.kbx *= Math.pow(.002, dt); P.kby *= Math.pow(.002, dt); if (Math.abs(P.kbx) + Math.abs(P.kby) < 4) P.kbx = P.kby = 0; }
   const ox = P.x, oy = P.y; moveEnt(P, vx * dt, vy * dt);
@@ -2058,7 +2149,9 @@ function updatePlayer(dt) {
   P.stepT -= moved; if (P.stepT < 0) { P.stepT = P.mounted ? 38 : 44; SND.play(P.mounted ? 'hoof' : t === T.TUNDRA ? 'crunch' : 'step', P.mounted ? .8 : 1); }
   if (P.sprinting) { P.st = Math.max(0, P.st - 16 * DIFF().stCost * dt); P.stDelay = .5; }
   if (P.stDelay > 0) P.stDelay -= dt; else P.st = Math.min(P.maxSt, P.st + (P.blocking ? 6 : P.mounted ? 30 : 26) * DIFF().stRegen * dt);
-  if (P.S.bow) updateBow(dt);
+  updateSpecial(dt);
+  if (P.spec) { }
+  else if (P.S.bow) updateBow(dt);
   else if ((input.lmb || input.clicked) && P.atkCd <= 0 && P.dodge <= 0 && P.st >= P.S.cost * .5) startAttack();
   input.clicked = false;
   if (P.swing > 0) { P.swing -= dt; const prog = 1 - P.swing / P.swingDur; if (!P.hitDone && prog >= .42) { P.hitDone = true; doPlayerHit(); } }
@@ -2095,7 +2188,7 @@ function mkActor(kind, x, y, opt = {}) {
     id: nextEid++, kind, x, y, r: b.r, hp: b.hp, maxHp: b.hp, dmg: b.dmg, spd: b.spd, range: b.range, cd: b.cd, windT: b.wind || .4, arc: 1.3, faction: b.faction,
     face: rand(0, TAU), atkCd: rand(.3, 1.2), wind: 0, swing: 0, flash: 0, kbx: 0, kby: 0, home: { x, y }, leash: b.leash || 460, aggro: kind === 'wolf' || kind === 'snow_wolf' ? 280 : 240,
     target: null, thinkT: rand(0, .3), name: b.name, wanderT: rand(0, 3), wx: x, wy: y, dead: false, deadT: 0, walk: rand(0, 10), xp: b.xp || 0,
-    civ: !!b.civ, animal: !!b.animal, ranged: !!b.ranged, weapon: b.weapon, cloth: pick(CLOTH), skin: pick(SKIN), stuckT: 0
+    civ: !!b.civ, animal: !!b.animal, ranged: !!b.ranged, guard: !!b.guard, weapon: b.weapon, cloth: pick(CLOTH), skin: pick(SKIN), stuckT: 0
   }, opt);
   if (opt.tier && TIER_MULT[opt.tier]) { const m = TIER_MULT[opt.tier]; e.hp = e.maxHp = Math.round(b.hp * m.hp); e.dmg = b.dmg * m.dmg; e.xp = Math.round(e.xp * (1 + (opt.tier - 1) * .5)); }
   if (b.faction !== 'civ' && !opt.ally && DIFF().enemyHp !== 1) e.hp = e.maxHp = Math.round(e.maxHp * DIFF().enemyHp);
@@ -2192,6 +2285,10 @@ function damage(t, amt, src, o = {}) {
   }
   if (t.important || t.kind === 'horse') return 0;
   const wasHostile = src === P ? playerHostileTo(t) : true;
+  if (t.guard && src && !o.dot && !o.heavy && !(t.guardBroken > 0) && !(t.stun > 0) && o.arrow !== 'bodkin' && Math.abs(angDiff(t.face, Math.atan2(src.y - t.y, src.x - t.x))) < 1.1) {
+    amt *= .3; SND.play('block', .7); if (settings.dmgNums) addText(t.x, t.y - 40, 'Blocked', '#d8d0b8', 12); // hit them from the side, from behind, or with a heavy blow
+    for (let i = 0; i < 5; i++) addPart(t.x + Math.cos(t.face) * 12, t.y + Math.sin(t.face) * 12, rand(-90, 90), rand(-90, 40), '#ffe8a0', .25, 2);
+  }
   t.hp -= amt; t.flash = .12;
   if (src && !o.dot && !t.perch) { const d = Math.hypot(t.x - src.x, t.y - src.y) || 1; const kb = (o.kb || 1) * (t.kind === 'bear' || t.kind === 'ice_bear' ? 50 : 125); t.kbx = (t.x - src.x) / d * kb; t.kby = (t.y - src.y) / d * kb; }
   const armored = t.faction && t.faction[0] === 'k';
@@ -2244,7 +2341,9 @@ function kill(t, src) {
     const p = t.kind === 'leader' ? .7 : t.kind === 'knight' ? .35 : .1;
     if (chance(p)) { const tier = Math.min(4, Math.max(0, (t.tier || 1) - (t.kind === 'leader' ? 0 : 1))); dropItem(t.x, t.y, pick(LOOT_TIERS[tier]), rollQual(tier)); }
     if (chance(.15)) dropItem(t.x + 8, t.y, pick(['bread', 'bandage', 'meat']));
-    if ((t.kind === 'archer' || t.kind === 'bowman') && chance(.65)) dropItem(t.x, t.y - (t.perch ? -40 : 0), 'arrow', 1, randi(3, 9));
+    if (t.kind === 'leader' && chance(.03)) dropItem(t.x, t.y, pick(LEGENDS));
+    if (t.kind === 'xbowman' && chance(.4)) dropItem(t.x, t.y, 'bodkin', 1, randi(2, 5));
+    if ((t.kind === 'archer' || t.kind === 'bowman' || t.kind === 'hollow_archer') && chance(.65)) dropItem(t.x, t.y - (t.perch ? -40 : 0), 'arrow', 1, randi(3, 9));
   }
   if (t.place != null && t.spec != null) { const pl = W.places[t.place]; pl.dead[t.spec] = true; checkPlaceCleared(pl); }
   if (t.faction && t.faction[0] === 'k') {
@@ -2273,10 +2372,10 @@ function dropItem(x, y, id, q = 1, n = 1) { pickups.push({ x: x + rand(-8, 8), y
 function enemyStrike(e, tg) {
   if (!tg || tg.dead) return;
   if (e.ranged) {
-    const ey = e.y - (e.elev || 0), d = dist(e.x, ey, tg.x, tg.y), tt = d / 430; const px = tg.x + (tg.vx || 0) * tt * .5, py = tg.y + (tg.vy || 0) * tt * .5;
+    const ey = e.y - (e.elev || 0), d = dist(e.x, ey, tg.x, tg.y), vs = e.kind === 'xbowman' ? 640 : 430, tt = d / vs; const px = tg.x + (tg.vx || 0) * tt * .5, py = tg.y + (tg.vy || 0) * tt * .5;
     const a = Math.atan2(py - ey, px - e.x) + rand(-.06, .06);
-    projs.push({ x: e.x + Math.cos(a) * 14, y: ey + Math.sin(a) * 14, vx: Math.cos(a) * 430, vy: Math.sin(a) * 430, dmg: e.dmg, src: e, life: Math.max(1.1, e.range / 380), lob: e.perch ? .35 : 0 });
-    if (dist(e.x, e.y, P.x, P.y) < 600) SND.play('arrow'); return;
+    projs.push({ x: e.x + Math.cos(a) * 14, y: ey + Math.sin(a) * 14, vx: Math.cos(a) * vs, vy: Math.sin(a) * vs, dmg: e.dmg, src: e, life: Math.max(1.1, e.range / 380), lob: e.perch ? .35 : 0, bolt: e.kind === 'xbowman' });
+    if (dist(e.x, e.y, P.x, P.y) < 600) SND.play(e.kind === 'xbowman' ? 'xbow' : 'arrow'); return;
   }
   if (dist(e.x, e.y, P.x, P.y) < 500) SND.play(e.kind === 'scorpion' ? 'sting' : e.kind === 'bear' || e.kind === 'ice_bear' || e.kind === 'leader' ? 'swingH' : 'swing', .5);
   const d = dist(e.x, e.y, tg.x, tg.y); const a = Math.atan2(tg.y - e.y, tg.x - e.x);
@@ -2317,6 +2416,8 @@ function updateActor(e, dt) {
   e.flash -= dt; e.atkCd -= dt * (e.chill > 0 ? .5 : 1); if (e.swing > 0) e.swing -= dt;
   if (e.say) { e.say.t -= dt; if (e.say.t <= 0) e.say = null; }
   if ((e.kbx || e.kby) && !e.perch) { moveEnt(e, e.kbx * dt, e.kby * dt); const f = Math.pow(.004, dt); e.kbx *= f; e.kby *= f; if (Math.abs(e.kbx) + Math.abs(e.kby) < 5) e.kbx = e.kby = 0; }
+  if (e.guardBroken > 0) e.guardBroken -= dt;
+  if (e.stun > 0) { e.stun -= dt; e.wind = 0; return; } // staggered by a bash or heavy blow
   e.thinkT -= dt; if (e.thinkT <= 0) { e.thinkT = .22 + Math.random() * .2; think(e); }
   let gx = null, gy = null, sm = 1, face = null;
   if (e.kind === 'horse') {
@@ -2413,7 +2514,7 @@ function arrowHit(p, t) {
     if (p.arrow === 'broadhead' && !armored) dmg *= 1.5;
     if (p.arrow === 'bodkin' && armored) dmg *= 1.5;
   }
-  damage(t, dmg, p.src, { proj: true, crit: p.crit, kb: .5 });
+  damage(t, dmg, p.src, { proj: true, crit: p.crit, kb: .5, arrow: p.arrow });
   if (t.isPlayer || t.dead || t.important || t.kind === 'horse') return;
   if (p.arrow === 'fire_arrow') { t.burn = 4; t.burnDps = 2 + p.dmg * .12; t.dotSrc = p.src; }
   if (p.arrow === 'venom_arrow') { t.poison = 8; t.poisonDps = 1.5 + p.dmg * .07; t.dotSrc = p.src; }
@@ -2422,9 +2523,13 @@ function arrowHit(p, t) {
     SND.play('frost'); for (let i = 0; i < 8 * QMUL(); i++) addPart(t.x, t.y - (t.elev || 0), rand(-70, 70), rand(-70, 40), Math.random() < .5 ? '#ffffff' : '#9fdcff', .45, 2.5);
   }
 }
+function tryRecover(p) { if (p.arrow && !p.hitSet && Math.random() < Math.min(.9, DIFF().arrowRec)) { p.rec = true; p.life = 20; } } // arrows that hit a foe are never recovered
 function updateProjs(dt) {
   for (let i = projs.length - 1; i >= 0; i--) {
     const p = projs[i]; p.life -= dt;
+    if (p.stuck && p.rec && G.state === 'play' && Math.abs(P.x - p.x) < 26 && Math.abs(P.y - p.y) < 26) { // walk over a missed arrow to pick it back up
+      const id = p.arrow === 'fire_arrow' ? 'arrow' : p.arrow; addItem(id, 1, 1, true); SND.play('pickup', .5); addText(P.x, P.y - 30, '+1 ' + ITEMS[id].name, '#e8dcb8', 11); projs.splice(i, 1); continue;
+    }
     if (p.stuck) { if (p.life <= 0) projs.splice(i, 1); else if (p.arrow === 'fire_arrow' && p.life > 1 && Math.random() < .25) addPart(p.x, p.y - 2, rand(-6, 6), rand(-30, -12), Math.random() < .5 ? '#ffb040' : '#ff6a1a', .35, 2.2); continue; }
     p.x += p.vx * dt; p.y += p.vy * dt; if (p.lob > 0) p.lob -= dt;
     if (p.arrow === 'fire_arrow' && Math.random() < .7 * QMUL()) addPart(p.x, p.y, rand(-15, 15), rand(-25, 5), Math.random() < .5 ? '#ffb040' : '#ff6a1a', .28, 2.5);
@@ -2432,16 +2537,20 @@ function updateProjs(dt) {
     else if (p.arrow === 'venom_arrow' && Math.random() < .35 * QMUL()) addPart(p.x, p.y, rand(-6, 6), rand(0, 20), '#6ad04a', .35, 1.8);
     let hit = false;
     for (const t of [P, ...ents]) {
-      if (!arrowCanHit(p, t)) continue;
+      if ((p.hitSet && p.hitSet.has(t)) || !arrowCanHit(p, t)) continue;
       const hy = t.y - (t.elev || 0), rr = t.r + (t.perch ? 8 : 4);
-      if (Math.abs(t.x - p.x) < rr && Math.abs(hy - p.y) < rr) { arrowHit(p, t); hit = true; break; }
+      if (Math.abs(t.x - p.x) < rr && Math.abs(hy - p.y) < rr) {
+        arrowHit(p, t);
+        if (p.pierce > 1) { p.pierce--; (p.hitSet || (p.hitSet = new Set())).add(t); p.dmg *= .85; } else hit = true; // a piercing arrow flies on
+        break;
+      }
     }
     if (!hit && !(p.lob > 0) && blockedPx(p.x, p.y) && !isWaterT(terAtPx(p.x, p.y))) {
       const pe = ents.find(e => e.perch && !e.dead && dist(e.x, e.y, p.x, p.y) < 60 && arrowCanHit(p, e)); // an arrow into a tower can still find the archer on it
       if (pe) { arrowHit(p, pe); hit = true; }
-      else { p.stuck = true; p.vx = p.vy = 0; p.life = p.arrow === 'fire_arrow' ? 2.5 : 3; if (p.src === P) SND.play('thunk', .6); continue; }
+      else { p.stuck = true; p.vx = p.vy = 0; p.life = p.arrow === 'fire_arrow' ? 2.5 : 3; if (p.src === P) { SND.play('thunk', .6); tryRecover(p); } continue; }
     }
-    if (!hit && p.life <= 0 && p.src === P) { p.stuck = true; p.vx = p.vy = 0; p.life = 2.2; continue; } // falls short and sticks in the ground
+    if (!hit && p.life <= 0 && p.src === P) { p.stuck = true; p.vx = p.vy = 0; p.life = 2.2; if (!isWaterT(terAtPx(p.x, p.y))) tryRecover(p); continue; } // falls short and sticks in the ground
     if (hit || p.life <= 0) projs.splice(i, 1);
   }
 }
@@ -2635,8 +2744,13 @@ function placeSpecs(pl) {
     for (let i = 0; i < nb; i++) s.push({ kind: 'bandit', dx: R(-3.5, 3.5), dy: R(-3.5, 3.5) });
     for (let i = 0; i < na; i++) s.push({ kind: 'archer', dx: R(-4, 4), dy: R(-4, 4) });
     if (t >= 2) s.push({ kind: 'leader', dx: .5, dy: -1.6 });
+    // appended later, so the kill flags saved for the foes above keep their indices
+    if (t >= 2) s.push({ kind: 'shieldbearer', dx: R(-3, 3), dy: R(1, 3.5) });
+    if (t >= 3) s.push({ kind: 'xbowman', dx: R(-4, 4), dy: R(-4, -2) });
+    if (t >= 4) s.push({ kind: 'shieldbearer', dx: R(-3, 3), dy: R(1, 3.5) });
   } else if (pl.type === 'ruin' && pl.guarded) {
     const n = 2 + Math.floor(r() * 2); for (let i = 0; i < n; i++) s.push({ kind: 'bandit', dx: R(-2.5, 2.5), dy: R(-2, 2), tier: pl.fort ? 2 : 1 });
+    if (pl.fort) s.push({ kind: 'xbowman', dx: R(-2.5, 2.5), dy: R(-2, 2), tier: 2 });
   } else if (pl.type === 'hidden') {
     const g = HIDDEN_DEFS[pl.def].guard;
     if (g === 'bear') s.push({ kind: 'bear', dx: 2, dy: 2 }, { kind: 'bear', dx: -2, dy: 2 });
@@ -2956,7 +3070,7 @@ function evRaid() {
   if (!v) return evCaravan();
   const q = { id: Q.next++, type: 'raid', title: `Defend ${v.name}`, desc: `Bandits are raiding ${v.name}! Drive them off before the village burns.`, obj: `Drive the bandits from ${v.name}`, target: v.id, giver: v.id, giverName: v.name, k: v.owner, loc: { x: v.x, y: v.y }, started: G.time, limit: 240, stage: 0, reward: { gold: 70 + P.lvl * 10, xp: 70, rep: { [v.owner]: 12 }, rel: [], items: [] }, foes: [] };
   const n = 3 + Math.min(4, Math.floor(P.lvl / 2)); const tier = Math.min(3, 1 + Math.floor(P.lvl / 3));
-  for (let i = 0; i < n; i++) { const f = findFree(v.x + rand(-6, 6) * TS, v.y + rand(-6, 6) * TS); q.foes.push(mkActor(i === 0 && P.lvl >= 3 ? 'leader' : 'bandit', f.x, f.y, { tier, quest: q.id, roam: true, home: { x: v.x, y: v.y }, leash: 600, chief: 'Raider Captain', aggro: 320 })); }
+  for (let i = 0; i < n; i++) { const f = findFree(v.x + rand(-6, 6) * TS, v.y + rand(-6, 6) * TS); q.foes.push(mkActor(i === 0 && P.lvl >= 3 ? 'leader' : i === 1 && P.lvl >= 4 ? 'xbowman' : i === 2 && P.lvl >= 5 ? 'shieldbearer' : 'bandit', f.x, f.y, { tier, quest: q.id, roam: true, home: { x: v.x, y: v.y }, leash: 600, chief: 'Raider Captain', aggro: 320 })); }
   Q.active.push(q); if (!Q.tracked) Q.tracked = q.id;
   toast(`🔥 Bandits are raiding <b>${v.name}</b>, ${dirTo(P, v)} of you!`, 'war', bannerURL(v.owner)); SND.play('horn');
   logEvent(`Bandits raided ${v.name} in ${KDATA[v.owner].name}.`, [v.owner]);
@@ -3051,7 +3165,7 @@ function makeShop(kind, pl, k) {
     s.name = 'Traveling Caravan'; ['iron', 'wine', 'furs', 'spices', 'silk'].forEach(g => add(g, 1, randi(3, 7))); add('arrow', 1, 30); add(pick(['fire_arrow', 'broadhead', 'bodkin']), 1, 12); add('bread', 1, 8); add('potion', 1, 2); add('bandage', 1, 4);
   } else if (kind === 'trader') {
     s.name = "Ysolde's Curiosities"; for (let i = 0; i < 4; i++) add(pick(LOOT_TIERS[randi(3, 4)].filter(id => ['weapon', 'shield', 'armor'].includes(ITEMS[id].type))), 3);
-    add(pick(['fast_horse', 'war_horse'])); add('treasure_map', 1, 2); add('potion', 1, 4);
+    add(pick(['fast_horse', 'war_horse'])); add('treasure_map', 1, 2); add('potion', 1, 4); if (chance(.25)) add(pick(LEGENDS));
   }
   return s;
 }
@@ -3479,6 +3593,11 @@ function drawWeaponShape(g, wk, len, col, icon, wooden, draw, arrowCol) {
     g.fillStyle = '#7a5430'; g.fillRect(0, -1.1 * W2, len - 8, 2.2 * W2);
     g.fillStyle = col; g.beginPath(); g.moveTo(len - 12 * W2 * .8, 0); g.lineTo(len - 8 * W2 * .8, -3.4 * W2); g.lineTo(len + 2, 0); g.lineTo(len - 8 * W2 * .8, 3.4 * W2); g.closePath(); g.fill();
     g.fillStyle = '#c03a2a'; g.fillRect(len - 13 * W2 * .8, -2 * W2, 2, 4 * W2);
+  } else if (wk === 'xbow') {
+    g.fillStyle = '#5a3a22'; g.fillRect(-9, -1.6, 22, 3.2); g.fillStyle = '#3a2a1a'; g.fillRect(-9, -2.2, 5, 4.4);
+    g.strokeStyle = '#7a7e86'; g.lineWidth = 2.2; g.beginPath(); g.moveTo(12, -10); g.quadraticCurveTo(15, 0, 12, 10); g.stroke();
+    g.strokeStyle = '#ddd'; g.lineWidth = .8; g.beginPath(); g.moveTo(12, -10); g.lineTo(draw ? 2 : 8, 0); g.lineTo(12, 10); g.stroke();
+    if (draw) { g.fillStyle = '#4a3a2a'; g.fillRect(2, -.8, 16, 1.6); }
   } else if (wk === 'bow') {
     const Rr = len * .65 * (icon ? 1.5 : 1), ex = -6 + Math.cos(1.2) * Rr, ey = Math.sin(1.2) * Rr, pull = ex - (draw || 0) * Rr * .75;
     g.strokeStyle = col; g.lineWidth = icon ? 4.2 : 2.4; g.beginPath(); g.arc(-6, 0, Rr, -1.2, 1.2); g.stroke();
@@ -3831,6 +3950,9 @@ function lookFor(e) {
   switch (e.kind) {
     case 'bandit': L = { body: e.cloth, head: 'hood', hood: shade(e.cloth, -.25), skin: e.skin, weapon: { wk: pick(['axe', 'sword', 'sword']), len: 26, col: '#8a8e94' }, shield: e.tier >= 3 && chance(.5) ? { b: ITEMS.round_shield } : null }; break;
     case 'bowman': L = { body: '#7a6a50', mail: 1, head: 'coif', skin: e.skin, tabard: kc, weapon: { wk: 'bow', len: 22, col: '#6a4424' } }; break;
+    case 'xbowman': L = { body: e.cloth, head: 'hood', hood: shade(e.cloth, -.3), skin: e.skin, weapon: { wk: 'xbow', len: 18, col: '#5a3a22' } }; break;
+    case 'shieldbearer': L = { body: shade(e.cloth, -.1), head: 'helm', skin: e.skin, weapon: { wk: 'sword', len: 24, col: '#8a8e94' }, shield: { b: ITEMS.iron_shield, col: '#6a5a44' } }; break;
+    case 'hollow_archer': L = { body: '#5a6260', mail: 1, head: 'helm', skin: '#aebcb6', weapon: { wk: 'bow', len: 20, col: '#4a4640' } }; break;
     case 'archer': L = { body: '#4a5a3a', head: 'hood', hood: '#3a4a2a', skin: e.skin, weapon: { wk: 'bow', len: 20, col: '#6a4424' } }; break;
     case 'leader': L = { body: '#5a4a3a', head: 'helm', skin: e.skin, cape: '#8a1a14', pauld: 1, weapon: { wk: 'great', len: 40, col: '#b8bec4' } }; break;
     case 'soldier': L = { body: '#9ba1a8', mail: 1, head: 'helm', skin: e.skin, tabard: kc, weapon: { wk: 'spear', len: 48, col: '#b8bec4' }, shield: { b: ITEMS.iron_shield, col: kc } }; break;
@@ -3875,8 +3997,9 @@ function drawHuman(g, x, y, face, L, o) {
     let ang = .35, fwd = 0;
     if (o.swing) {
       const p = o.swing.p; if (L.weapon.wk === 'spear') { fwd = Math.sin(p * Math.PI) * 16; ang = .05; } else ang = o.swing.dir * (o.swing.arc / 2) * (1 - 2 * p) + .1;
-    } else if (o.wind > 0 && L.weapon.wk !== 'bow') ang = 1.2;
-    if (L.weapon.wk === 'bow') { g.translate(9, 2); if (L.weapon.glow) { g.shadowColor = L.weapon.glow; g.shadowBlur = 8; } drawWeaponShape(g, 'bow', L.weapon.len || 20, L.weapon.col || '#6a4424', false, false, o.draw != null ? o.draw : o.wind > 0 ? 1 : 0, o.arrowCol); }
+    } else if (o.wind > 0 && L.weapon.wk !== 'bow' && L.weapon.wk !== 'xbow') ang = 1.2;
+    if (L.weapon.wk === 'xbow') { g.translate(9, 2); drawWeaponShape(g, 'xbow', 18, L.weapon.col, false, false, o.wind > 0 ? 1 : 0); }
+    else if (L.weapon.wk === 'bow') { g.translate(9, 2); if (L.weapon.glow) { g.shadowColor = L.weapon.glow; g.shadowBlur = 8; } drawWeaponShape(g, 'bow', L.weapon.len || 20, L.weapon.col || '#6a4424', false, false, o.draw != null ? o.draw : o.wind > 0 ? 1 : 0, o.arrowCol); }
     else { g.translate(hx + fwd, hy); g.rotate(ang); if (L.weapon.glow) { g.shadowColor = L.weapon.glow; g.shadowBlur = 10; } drawWeaponShape(g, L.weapon.wk, L.weapon.len, L.weapon.col, false, L.weapon.wooden); }
     g.restore();
   }
@@ -4162,15 +4285,15 @@ function renderInventory() {
     el.ondragstart = ev => { ev.dataTransfer.setData('text/plain', String(uid)); ev.dataTransfer.effectAllowed = 'move'; };
   });
   // slots
-  [['esW', 'weapon'], ['esS', 'shield'], ['esA', 'armor'], ['esH', 'horse']].forEach(([id, slot]) => {
-    const el = $(id); const uid = P.eq[slot]; const it = uid ? getItem(uid) : null;
+  [['esW', 'weapon'], ['esW2', 'weapon2'], ['esS', 'shield'], ['esA', 'armor'], ['esH', 'horse']].forEach(([id, slot]) => {
+    const el = $(id); const uid = P.eq[slot]; const it = uid ? getItem(uid) : null; const lbl = slot === 'weapon2' ? 'sidearm' : slot;
     el.classList.toggle('filled', !!it);
-    el.innerHTML = (it ? `<img src="${itemIcon(it.id)}" alt="">` : '') + `<span class="el">${slot.toUpperCase()}</span>`;
-    el.dataset.tip = it ? `<h4 style="color:${itemColor(it)}">${itemName(it)}</h4>${statSummary(it)}<div class="tsub">Click to unequip · drag items here to equip</div>` : `<h4>${slot}</h4><div class="tsub">Empty — drag an item here</div>`;
-    el.onclick = () => { if (it) { unequip(slot); renderInventory(); } else { invTab = slot; renderInventory(); } };
+    el.innerHTML = (it ? `<img src="${itemIcon(it.id)}" alt="">` : '') + `<span class="el">${lbl.toUpperCase()}</span>`;
+    el.dataset.tip = it ? `<h4 style="color:${itemColor(it)}">${itemName(it)}</h4>${statSummary(it)}<div class="tsub">${slot === 'weapon2' ? 'Press Tab to swap it with your main weapon · ' : ''}Click to unequip · drag items here to equip</div>` : `<h4>${lbl}</h4><div class="tsub">${slot === 'weapon2' ? 'Drag a second weapon here, then press Tab to swap mid-fight' : 'Empty — drag an item here'}</div>`;
+    el.onclick = () => { if (it) { unequip(slot); renderInventory(); } else { invTab = slot === 'weapon2' ? 'weapon' : slot; renderInventory(); } };
     el.ondragover = ev => { ev.preventDefault(); el.classList.add('drop'); };
     el.ondragleave = () => el.classList.remove('drop');
-    el.ondrop = ev => { ev.preventDefault(); el.classList.remove('drop'); const u = +ev.dataTransfer.getData('text/plain'); const di = getItem(u); if (di && slotOf(ITEMS[di.id].type) === slot) { equip(u); renderInventory(); } else toast('That item does not fit this slot.', 'bad'); };
+    el.ondrop = ev => { ev.preventDefault(); el.classList.remove('drop'); const u = +ev.dataTransfer.getData('text/plain'); const di = getItem(u); if (di && (slot === 'weapon2' ? ITEMS[di.id].type === 'weapon' : slotOf(ITEMS[di.id].type) === slot)) { equip(u, false, slot); renderInventory(); } else toast('That item does not fit this slot.', 'bad'); };
   });
   drawDoll();
   // stats
@@ -4194,10 +4317,12 @@ function renderInventory() {
   const eq = isEquipped(it.uid);
   const acts = [];
   if (slot) acts.push(`<button class="btn sm gold" id="actEq">${eq ? 'Unequip' : 'Equip'}</button>`);
+  if (b.type === 'weapon' && P.eq.weapon2 !== it.uid) acts.push(`<button class="btn sm" id="actSide">Set as sidearm</button>`);
   if (b.heal || b.use) acts.push(`<button class="btn sm gold" id="actUse">${b.heal ? 'Consume' : b.use === 'nock' ? (P.ammo === it.id ? 'Nocked' : 'Nock') : 'Read'}</button>`);
   if (b.type !== 'quest' && !eq) acts.push(`<button class="btn sm red" id="actDrop">${discardArm === it.uid ? 'Click again to discard' : 'Discard'}</button>`);
   det.innerHTML = `<img src="${itemIcon(it.id)}" alt=""><div style="flex:1"><h3 style="color:${itemColor(it)}">${itemName(it)}${it.n > 1 ? ' ×' + it.n : ''}${eq ? ' <span class="chip" style="color:#e7c35a">EQUIPPED</span>' : ''}</h3><div class="desc">${b.desc || ''}</div><div class="statline">${st}</div><div class="iacts">${acts.join('')}</div></div>`;
-  const ae = $('actEq'); if (ae) ae.onclick = () => { eq ? unequip(slot) : equip(it.uid); renderInventory(); };
+  const ae = $('actEq'); if (ae) ae.onclick = () => { eq ? unequip(P.eq.weapon2 === it.uid ? 'weapon2' : slot) : equip(it.uid); renderInventory(); };
+  const as2 = $('actSide'); if (as2) as2.onclick = () => { equip(it.uid, false, 'weapon2'); renderInventory(); };
   const au = $('actUse'); if (au) au.onclick = () => { useItem(it.uid); if (!getItem(it.uid)) invSel = null; renderInventory(); };
   const ad = $('actDrop'); if (ad) ad.onclick = () => { if (discardArm === it.uid) { removeItem(it.uid, it.n); invSel = null; discardArm = null; toast(`Discarded ${itemName(it)}.`); } else discardArm = it.uid; renderInventory(); };
 }
@@ -4459,7 +4584,7 @@ function drawEntity(g, e, t) {
   if (e.isPlayer) {
     if (P.dodge > 0) g.globalAlpha = .75;
     if (P.mounted) drawHorse(g, P.x, P.y + 2, P.hface, P.S.horse, P.walk, true, P.allegiance);
-    drawHuman(g, P.x, P.y - (P.mounted ? 3 : 0), P.face, lookFor(P), { walk: P.walk, mounted: P.mounted, flash: P.flash, blocking: P.blocking, draw: P.S.bow ? (P.drawing ? P.draw : 0) : undefined, arrowCol: P.S.bow && curAmmo() ? ITEMS[curAmmo()].col : null, swing: P.swing > 0 ? { p: 1 - P.swing / P.swingDur, dir: P.swingDir, arc: P.S.arc } : null, trail: true, trailR: P.S.rng * .72 });
+    drawHuman(g, P.x, P.y - (P.mounted ? 3 : 0), P.face, lookFor(P), { walk: P.walk, mounted: P.mounted, flash: P.flash, blocking: P.blocking, draw: P.S.bow ? (P.drawing ? P.draw : 0) : undefined, arrowCol: P.S.bow && curAmmo() ? ITEMS[curAmmo()].col : null, swing: P.swing > 0 ? { p: 1 - P.swing / P.swingDur, dir: P.swingDir, arc: P.swingArc || P.S.arc } : null, trail: true, trailR: P.S.rng * .72 });
     g.globalAlpha = 1; return;
   }
   if (e.dead) { if (e.perch) return; if (e.animal) drawAnimal(g, e); else if (e.kind !== 'horse') drawCorpse(g, e); return; }
@@ -4474,7 +4599,7 @@ function drawEntityBody(g, e, t) {
   if (e.animal) { drawAnimal(g, e); statusTint(g, e); return; }
   if (e.cart) drawCart(g, e);
   if (e.ally) { g.strokeStyle = 'rgba(106,208,255,.7)'; g.lineWidth = 2; g.beginPath(); g.ellipse(e.x, e.y + 8, 14, 6, 0, 0, TAU); g.stroke(); }
-  const ho = { walk: e.walk, flash: e.flash, swing: e.swing > 0 ? { p: 1 - e.swing / .22, dir: 1, arc: 1.8 } : null, wind: e.wind };
+  const ho = { walk: e.walk, flash: e.flash, swing: e.swing > 0 ? { p: 1 - e.swing / .22, dir: 1, arc: 1.8 } : null, wind: e.wind, blocking: e.guard && !(e.guardBroken > 0) && !(e.stun > 0) && !(e.swing > 0) };
   if (e.scale) { g.save(); g.translate(e.x, e.y); g.scale(e.scale, e.scale); drawHuman(g, 0, 0, e.face, lookFor(e), ho); g.restore(); }
   else drawHuman(g, e.x, e.y, e.face, lookFor(e), ho);
   statusTint(g, e);
@@ -4483,6 +4608,7 @@ function statusTint(g, e) {
   if (e.chill > 0) { g.fillStyle = 'rgba(170,225,255,.28)'; circ(g, e.x, e.y, e.r + 3); g.strokeStyle = 'rgba(220,245,255,.6)'; g.lineWidth = 1.5; g.beginPath(); g.arc(e.x, e.y, e.r + 3, 0, TAU); g.stroke(); }
   if (e.poison > 0) { g.fillStyle = 'rgba(110,210,70,.18)'; circ(g, e.x, e.y, e.r + 2); }
   if (e.burn > 0) { g.fillStyle = 'rgba(255,130,40,.2)'; circ(g, e.x, e.y, e.r + 2); }
+  if (e.stun > 0) { const tt = performance.now() / 300; g.fillStyle = '#ffe08a'; for (let i = 0; i < 3; i++) { const a = tt + i * TAU / 3; circ(g, e.x + Math.cos(a) * 9, e.y - 20 + Math.sin(a) * 3, 1.8); } }
 }
 function drawOverlays(g, e, t) {
   if (e.dead || e.kind === 'horse') return;
@@ -4577,7 +4703,9 @@ function renderWorld(t) {
   g.lineWidth = 2;
   for (const p of projs) {
     const a = Math.atan2(p.vy, p.vx) || p.a || 0; if (!p.stuck) p.a = a; const aa = p.stuck ? p.a : a, ca = Math.cos(aa), sa = Math.sin(aa);
-    g.strokeStyle = '#d8c8a0'; g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(p.x - ca * 14, p.y - sa * 14); g.stroke(); g.fillStyle = '#eee'; g.fillRect(p.x - ca * 14 - 1, p.y - sa * 14 - 1, 3, 3);
+    if (p.bolt) { g.strokeStyle = '#4a3a2a'; g.lineWidth = 3; g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(p.x - ca * 10, p.y - sa * 10); g.stroke(); g.lineWidth = 2; continue; }
+    g.strokeStyle = p.pierce > 0 ? '#e8f4ff' : '#d8c8a0'; g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(p.x - ca * 14, p.y - sa * 14); g.stroke(); g.fillStyle = '#eee'; g.fillRect(p.x - ca * 14 - 1, p.y - sa * 14 - 1, 3, 3);
+    if (p.rec && (t * 1.3 + p.x * .01) % 1.6 < .18) { g.fillStyle = 'rgba(255,248,210,.95)'; circ(g, p.x - ca * 7, p.y - sa * 7, 2.6); }
     if (p.arrow) { g.fillStyle = ITEMS[p.arrow].col; circ(g, p.x, p.y, 1.8); if (p.arrow === 'fire_arrow' && (!p.stuck || p.life > 1)) { g.fillStyle = 'rgba(255,170,50,.8)'; circ(g, p.x, p.y, 3 + Math.random() * 1.5); } }
   }
   // particles
@@ -4673,6 +4801,10 @@ function updateHUD(force) {
   const S = P.S;
   const ammoId = S.bow ? curAmmo() : null, ammoN = ammoId ? countItem(ammoId) : 0;
   setIf('sw', S.wid + '|' + S.wq + '|' + Math.round(S.dmg) + '|' + ammoId + '|' + ammoN, () => { const it = getItem(P.eq.weapon); const sl = $('slotW'); sl.querySelector('img').src = it ? itemIcon(it.id) : itemIcon('wooden_sword'); sl.querySelector('.sn').innerHTML = it ? `<span style="color:${itemColor(it)}">${itemName(it)}</span>` : 'Bare Fists'; sl.querySelector('.ss').textContent = S.bow ? (ammoId ? `${ITEMS[ammoId].name} ×${ammoN} · [R] switch` : 'No arrows!') : `${Math.round(S.dmg)} dmg · ${S.spd} spd · ${S.rng} rng`; });
+  const w2 = P.eq.weapon2 ? getItem(P.eq.weapon2) : null;
+  setIf('sw2', w2 ? w2.id : '', () => { const el = $('slotW2'); el.classList.toggle('none', !w2); if (w2) { el.src = itemIcon(w2.id); el.title = `Tab: swap to ${itemName(w2)}`; } });
+  const sk = specKind(), cdv = sk === 'bash' ? P.bashCd : P.specCd, cmx = sk === 'bash' ? SPECS.bash.cd : (P.specMax || 1), pp = sk ? Math.round((1 - (cdv || 0) / cmx) * 20) * 5 : 0;
+  setIf('pip', pp + '|' + sk, () => { const el = $('specPip'); el.style.setProperty('--p', pp + '%'); el.style.opacity = sk ? 1 : .35; el.title = sk ? `C: ${SPECS[sk].n}${pp < 100 ? ' (recharging)' : ''}` : 'No special move with bare fists'; });
   setIf('ss', S.sid + '|' + P.blocking + '|' + S.bow, () => { const it = getItem(P.eq.shield); const sl = $('slotS'); sl.querySelector('img').src = it ? itemIcon(it.id) : itemIcon('wooden_shield'); sl.querySelector('img').style.opacity = it ? 1 : .3; sl.querySelector('.sn').innerHTML = it ? `<span style="color:${itemColor(it)}">${itemName(it)}</span>` : 'No Shield'; sl.querySelector('.ss').textContent = it ? (S.bow ? 'Stowed: bow needs both hands' : P.blocking ? 'Blocking!' : `Block ${Math.round(S.block * 100)}%`) : '—'; sl.classList.toggle('mounted', P.blocking); });
   setIf('sh', S.hid + '|' + P.mounted + '|' + !!horseEnt, () => { const sl = $('slotH'); sl.querySelector('img').src = S.hid ? itemIcon(S.hid) : itemIcon('old_horse'); sl.querySelector('img').style.opacity = S.hid ? 1 : .3; sl.querySelector('.sn').textContent = S.horse ? S.horse.name : 'No Horse'; sl.querySelector('.ss').textContent = S.horse ? (P.mounted ? `Riding · ×${S.hspd} speed` : 'Dismounted · [F] to ride') : 'On foot'; sl.classList.toggle('mounted', P.mounted); });
   // quest tracker
@@ -4710,6 +4842,8 @@ addEventListener('keydown', e => {
   else if (e.code === 'KeyE') doInteract();
   else if (e.code === 'KeyF') toggleMount();
   else if (e.code === 'KeyR') cycleAmmo();
+  else if (e.code === 'Tab') swapWeapons();
+  else if (e.code === 'KeyC') useSpecial();
   else if (e.code === 'Digit1') quickUse('food');
   else if (e.code === 'Digit2') quickUse('potion');
   else if (e.code === 'Digit3') quickUse('band');
@@ -4801,7 +4935,7 @@ function resetState() {
   newKingdoms(); newQuests(); newFog();
 }
 function beginPlay() {
-  G.state = 'play'; G.ironDead = false; if (P) { P.drawing = false; P.draw = 0; } UI.hide('mainMenu'); UI.hide('endScreen'); UI.closeAll(); $('hud').classList.remove('off');
+  G.state = 'play'; G.ironDead = false; if (P) { P.drawing = false; P.draw = 0; P.spec = null; P.swingArc = null; } UI.hide('mainMenu'); UI.hide('endScreen'); UI.closeAll(); $('hud').classList.remove('off');
   $('btnRespawn').classList.remove('hidden'); $('btnLoadSave').classList.remove('hidden');
   cam.x = P.x; cam.y = P.y; updateDiscovery(); updateHUD(true);
 }
@@ -5839,8 +5973,8 @@ SQ.fin = {
   reward: { gold: 500, xp: 900 },
   steps: [
     S_FIGHT(() => `Defeat the Hollow King at ${B().name}`, () => B(), [
-      [['wight', 5, { tier: 3 }], ['hknight', 1, { tier: 2 }]],
-      [['wight', 4, { tier: 3 }], ['hknight', 2, { tier: 3 }]],
+      [['wight', 5, { tier: 3 }], ['hknight', 1, { tier: 2 }], ['hollow_archer', 2, { tier: 2 }]],
+      [['wight', 4, { tier: 3 }], ['hknight', 2, { tier: 3 }], ['hollow_archer', 2, { tier: 3 }]],
       [['hollow_king', 1, { name: 'Aurek, the Hollow King', boss: true, hp: 1350, dmg: 24, o: { scale: 1.3 } }], ['wight', 3, { tier: 3 }]],
     ], { near: 18, sfx: 'seal', msg: "The earth splits open. The Hollow King's host pours out of the barrow!", waveMsg: ['', 'Hollow Knights rise from the grave-mist!', 'AUREK, THE HOLLOW KING, RISES!'], allies: sFinAllies, won: () => deed('Struck down Aurek, the Hollow King.') }),
     S_TALK('Decide the fate of the Ember Crown', sFinNpc, sFinalChoice, { skip: () => STORY.path === 'conspiracy' }),
@@ -5853,7 +5987,7 @@ SQ.hraid = {
   side: true, quiet: true, title: q => `The Hollow at ${W.places[q.v].name}`, giver: q => W.places[q.v].name, k: q => W.places[q.v].owner,
   desc: q => `The dead have come to ${W.places[q.v].name}. Destroy them before the village is overrun.`,
   reward: q => ({ gold: 60 + P.lvl * 12, xp: 90 + P.lvl * 5, rep: { [W.places[q.v].owner]: 10 } }),
-  steps: [S_FIGHT(q => `Destroy the Hollow at ${W.places[q.v].name}`, q => W.places[q.v], () => [[['wight', 3 + Math.min(4, Math.floor(P.lvl / 2)), { tier: 1, r: 5 }], ...(P.lvl >= 6 ? [['hknight', 1, { tier: 1 }]] : [])]], {
+  steps: [S_FIGHT(q => `Destroy the Hollow at ${W.places[q.v].name}`, q => W.places[q.v], () => [[['wight', 3 + Math.min(4, Math.floor(P.lvl / 2)), { tier: 1, r: 5 }], ['hollow_archer', P.lvl >= 5 ? 2 : 1, { tier: 1, r: 6 }], ...(P.lvl >= 6 ? [['hknight', 1, { tier: 1 }]] : [])]], {
     near: 9999, limit: 240,
     fail: q => { const v = W.places[q.v]; STORY.lost++; STORY.lostV.push(v.id); failQuest(q, `${v.name} fell to the Hollow.`); addRep(v.owner, -4, 'Failed to save a village from the Hollow', true); deed(`${v.name} fell to the Hollow.`); },
   })],

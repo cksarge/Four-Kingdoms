@@ -33,6 +33,8 @@ Before a new game you can set:
 | Left click | Attack (hold to chain). With a bow: hold to draw, release to shoot |
 | Right click | Block (not with a bow, which needs both hands) |
 | R | Switch arrow type |
+| Tab | Swap to your sidearm (drag a second weapon onto the Sidearm slot) |
+| C | Special move: sword whirlwind, axe or greatsword crushing blow, spear lunge, piercing arrow. While blocking: shield bash |
 | Space | Dodge (time it just as a blow lands to take no damage) |
 | E | Interact |
 | F | Mount / dismount / call horse |
@@ -51,7 +53,9 @@ Before a new game you can set:
 - Each kingdom has its own landscape: Albion's green countryside, Valoria's plains broken by desert (with cacti, scorpions, jackals and camels), Draven's mountain-walled forests with snowfields in its high country (snow pines, snowfall, snow wolves, ice bears and mountain goats), and Eldoria's swamps.
 - Kingdom relations change on their own over time, and your actions affect them. The Diplomacy screen shows a live relationship graph and offers actions such as gifts, alliances, peace talks and swearing allegiance.
 - Real-time combat with blocking, stamina and dodging, plus gear, horses and loot that change both your stats and how your knight looks.
-- Bows, from the Short Bow to the Yew War Bow. Draw longer for more range and damage. Six arrow types: standard, broadhead (strong against beasts and bandits), bodkin (strong against armor), fire (burns), venom (poisons and slows) and frost (chills). The frost villages of Draven's snowfields make rimewood bows and frost arrows.
+- Bows, from the Short Bow to the Yew War Bow. Draw longer for more range and damage. Six arrow types: standard, broadhead (strong against beasts and bandits), bodkin (strong against armor), fire (burns), venom (poisons and slows) and frost (chills). The frost villages of Draven's snowfields make rimewood bows and frost arrows. Missed arrows can sometimes be picked back up (more often on easier difficulties); arrows that hit are lost. The Recurve Bow is built for horse archery.
+- Tougher bandits: crossbowmen, and shieldbearers who block blows from the front (flank them, use a heavy blow or bodkin arrows).
+- Legendary enchanted weapons, including a burning sword, a venom blade, a frost longsword, a life-draining axe and a lightning bow.
 - Watchtowers guard the roads into each castle and the border crossings. Bowmen on the towers and castle walls shoot at bandits, enemy soldiers and outlaws.
 - Quests, random world events and a day/night cycle.
 - About 45 music tracks, all generated in code: rotating day and night overworld songs, combat and boss themes, a village, castle and fort theme for each kingdom, and story-mode themes. The music changes with where you are and what you're doing.
