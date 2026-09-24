@@ -819,6 +819,8 @@ const SND = {
       case 'thunder': this.noise(2.8, .45, 'fx', 110, .6, .5, 'lowpass'); this.noise(.35, .28, 'fx', 700, .8, .4); break;
       case 'cast': this.noise(.25, .12, 'sfx', 3000, 2, .4); this.noise(.1, .1, 'sfx', 600, 1, .5, 'lowpass', .35); break;
       case 'splash': this.noise(.3, .22, 'sfx', 900, .6, .4, 'lowpass'); this.noise(.2, .1, 'sfx', 3500, 1.5, .5, 'bandpass', .05); break;
+      case 'drip': this.tone(rand(1500, 2200), .09, 'sine', .035, 'fx', 0, .45); break;
+      case 'door': this.noise(.6, .3, 'sfx', 180, .6, .5, 'lowpass'); this.tone(90, .6, 'sawtooth', .05, 'sfx', 0, .7); break;
       case 'bowfull': this.tone(260, .07, 'triangle', .05); break;
       case 'bowshot': this.noise(.12, .28, 'sfx', 1700, 1.4, .45); this.tone(118, .16, 'triangle', .2, 'sfx', 0, .55); break;
       case 'thunk': this.noise(.06, .22 * v, 'sfx', 520, 1.2, .5, 'lowpass'); break;
@@ -894,7 +896,9 @@ const SND = {
       case 'camp': if (!best.cleared) return 'camp'; break;
       case 'ruin': return STORY && STORY.path && best.id === STORY.refs.barrow ? 'barrow' : 'ruins';
       case 'hidden': return ['grove', 'shrine', 'chapel'].includes(HIDDEN_DEFS[best.def].kind) ? 'sacred' : 'ruins';
+      case 'dungeon': return 'ruins';
     }
+    if (G.under) return G.under.theme === 'crypt' ? 'crypt' : 'cave';
     if (inDesert()) return 'desert';
     if (inSnow()) return isNight() ? 'frost_night' : 'frost';
     return this.overworld(dt);
@@ -1133,6 +1137,8 @@ const SONGS = {
   sacred: { title: 'The Old Gods', root: 52, mode: 'lyd', bpm: 70, prog: [0, 1, 0, 1, 5, 1, 4, 0], seed: 301, lead: { i: 'flute', o: 0, r: R_CALM, alt: { i: 'hum' } }, arp: { i: 'harp', p: '0.1.2.1.' }, pad: { i: 'hum', v: .03 }, counter: { i: 'bell', o: 0, r: R_LONG, v: .045 } },
   frost: { title: 'The Frozen Reaches', vol: 3.4, root: 49, mode: 'aeo', bpm: 68, prog: [0, 5, 3, 4, 0, 5, 6, 0], seed: 371, lead: { i: 'flute', o: 0, r: R_SPARSE, alt: { i: 'bell', o: 12 } }, arp: { i: 'bell', p: '0...2...', v: .04 }, pad: { i: 'hum', v: .03 }, drone: { n: [0, 7], o: -12, v: .04, t: 'triangle' }, bass: { p: '0.......', d: 8 } },
   frost_night: { title: 'White Silence', vol: 4, root: 44, mode: 'aeo', mel: 'mpent', bpm: 56, prog: [0, 0, 5, 5, 6, 6, 4, 4], seed: 381, lead: { i: 'bell', o: 0, r: R_LONG, v: .1 }, pad: { i: 'hum', v: .035 }, arp: { i: 'harp', p: '0.......', v: .045 }, drone: { n: [0], v: .04, t: 'triangle' } },
+  cave: { title: 'Into the Deep', vol: 3.8, root: 45, mode: 'phr', bpm: 58, prog: [0, 1, 0, 6, 0, 1, 5, 0], seed: 391, lead: { i: 'bell', o: 0, r: R_SPARSE, v: .09 }, pad: { i: 'hum', v: .035 }, drone: { n: [0, 7], o: -12, v: .05, t: 'triangle' }, arp: { i: 'harp', p: '0.......', v: .04 } },
+  crypt: { title: 'The Silent Tombs', vol: 3.8, root: 43, mode: 'hmin', bpm: 52, prog: [0, 0, 5, 5, 3, 3, 4, 4], seed: 401, lead: { i: 'hum', o: 0, r: R_LONG, v: .12 }, counter: { i: 'bell', o: 0, r: R_LONG, v: .04 }, drone: { n: [0], o: -12, v: .06, t: 'triangle' }, pad: { i: 'organ', v: .02 } },
   desert: { title: 'Sands of Valoria', root: 50, mode: 'phrd', bpm: 96, prog: [0, 1, 0, 1, 3, 1, 0, 0], seed: 361, lead: { i: 'flute', r: ['x.x.xxx.', 'x...x.x.', 'xx.x.x..', 'x.......'], alt: { i: 'lute', o: 0 } }, arp: { i: 'lute', p: '0..1..0.' }, bass: { p: '0..0....' }, drone: { n: [0, 7], v: .035 }, drums: { t: 'x..x.x..', m: '..x...x.' } },
   // story mode
   barrow: { title: 'The Barrow', root: 50, mode: 'phr', bpm: 58, prog: [0, 0, 1, 1, 0, 0, 6, 1], seed: 311, lead: { i: 'hum', r: R_SPARSE, v: .1 }, counter: { i: 'bell', o: 0, r: R_LONG, v: .045 }, drone: { n: [0, 7], v: .055 }, drums: { k: 'x.x.....', v: .5 } },
@@ -1151,7 +1157,7 @@ const URGENT_SONGS = ['menu', 'end_good', 'end_dark', 'fallen', 'combat1', 'comb
 const END_DARK = ['ashes', 'grey_throne', 'hollow_crown', 'long_night', 'conqueror', 'usurper', 'puppet', 'outlaw'];
 function inSnow() { const tx = Math.floor(P.x / TS), ty = Math.floor(P.y / TS); let n = 0; for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) if (terAt(tx + dx, ty + dy) === T.TUNDRA) n++; return n >= 18; }
 function inDesert() { const tx = Math.floor(P.x / TS), ty = Math.floor(P.y / TS); let n = 0; for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) if (terAt(tx + dx, ty + dy) === T.DESERT) n++; return n >= 22; }
-const PLACE_R = { castle: 20, village: 13, outpost: 10, camp: 13, ruin: 10, hidden: 8 };
+const PLACE_R = { castle: 20, village: 13, outpost: 10, camp: 13, ruin: 10, hidden: 8, dungeon: 7 };
 
 /* ---------------- Canvas & input ---------------- */
 const cv = $('game');
@@ -1273,6 +1279,9 @@ const ITEMS = {
   fish: { name: 'River Trout', type: 'misc', heal: 26, val: 6, stack: 1, food: 1, desc: 'Restores 26 health. [1]' },
   salmon: { name: 'Silver Salmon', type: 'misc', heal: 45, val: 18, stack: 1, food: 1, desc: 'Restores 45 health. A fine catch. [1]' },
   golden_carp: { name: 'Golden Carp', type: 'misc', val: 140, stack: 1, desc: 'A fish of legend, scaled like coin. Collectors pay handsomely.' },
+  ember_core: { name: 'Ember Core', type: 'misc', val: 220, stack: 1, desc: 'A coal that never cools, pried from the deep mines. A master smith could bind its fire into a blade.' },
+  venom_gland: { name: 'Venom Gland', type: 'misc', val: 180, stack: 1, desc: 'Taken from the Broodmother. A master smith could bind its venom into a blade.' },
+  frost_heart: { name: 'Frost Heart', type: 'misc', val: 240, stack: 1, desc: 'The still-cold heart of Rimeheart. A master smith could bind its frost into a blade.' },
   bread: { name: 'Bread', type: 'misc', heal: 22, val: 4, stack: 1, food: 1, desc: 'Restores 22 health. [1]' },
   meat: { name: 'Roast Meat', type: 'misc', heal: 40, val: 10, stack: 1, food: 1, desc: 'Restores 40 health. [1]' },
   potion: { name: 'Healing Draught', type: 'misc', heal: 85, val: 45, stack: 1, potion: 1, desc: 'Restores 85 health. [2]' },
@@ -1417,6 +1426,8 @@ const ATYPES = {
   snow_wolf: { name: 'Snow Wolf', hp: 42, dmg: 8, spd: 152, range: 28, cd: .95, wind: .3, faction: 'wild', xp: 13, gold: [0, 0], r: 10, animal: true },
   ice_bear: { name: 'Ice Bear', hp: 230, dmg: 25, spd: 96, range: 40, cd: 1.9, wind: .6, faction: 'wild', xp: 75, gold: [0, 0], r: 17, animal: true },
   goat: { name: 'Mountain Goat', hp: 40, dmg: 9, spd: 140, range: 26, cd: 1.3, wind: .3, faction: 'wild', xp: 8, gold: [0, 0], r: 10, animal: true, passive: true },
+  spider: { name: 'Giant Spider', hp: 46, dmg: 9, spd: 130, range: 30, cd: 1.2, wind: .35, faction: 'wild', xp: 16, gold: [0, 0], r: 12, animal: true },
+  rimeheart: { name: 'Rimeheart', hp: 950, dmg: 22, spd: 70, range: 62, cd: 1.7, wind: .6, faction: 'hollow', xp: 450, gold: [200, 300], r: 16, weapon: 'great' },
   camel: { name: 'Camel', hp: 90, dmg: 10, spd: 110, range: 30, cd: 1.6, wind: .4, faction: 'wild', xp: 12, gold: [0, 0], r: 13, animal: true, passive: true },
   horse: { name: 'Horse', hp: 999, dmg: 0, spd: 190, range: 0, cd: 9, faction: 'civ', r: 12, civ: true },
   // story mode
@@ -1437,7 +1448,7 @@ const SKIN = ['#e8c49a', '#d8a878', '#c08858', '#9a6a44', '#f0d0b0'];
 const TS = 32, CH = 16;
 let WW = 360, WH = 360, CW = Math.ceil(WW / CH), CHH = Math.ceil(WH / CH);
 function setWorldSize(n) { WW = WH = n; CW = Math.ceil(WW / CH); CHH = Math.ceil(WH / CH); EW = WW / EC; EH = WH / EC; }
-const T = { SEA: 0, WATER: 1, FORD: 2, SAND: 3, GRASS: 4, PLAINS: 5, FOREST: 6, DENSE: 7, HILL: 8, MOUNT: 9, PASS: 10, ROAD: 11, BRIDGE: 12, FARM: 13, SWAMP: 14, SNOW: 15, FLOOR: 16, DIRT: 17, DESERT: 18, TUNDRA: 19 };
+const T = { SEA: 0, WATER: 1, FORD: 2, SAND: 3, GRASS: 4, PLAINS: 5, FOREST: 6, DENSE: 7, HILL: 8, MOUNT: 9, PASS: 10, ROAD: 11, BRIDGE: 12, FARM: 13, SWAMP: 14, SNOW: 15, FLOOR: 16, DIRT: 17, DESERT: 18, TUNDRA: 19, CAVE: 20, ROCK: 21, CRYPT: 22, ICE: 23, ICEWALL: 24, BRICK: 25 };
 const TINFO = [
   { n: 'Sea', c: '#24507e', spd: 0, block: 1, mm: '#1f4674' },
   { n: 'River', c: '#3170aa', spd: 0, block: 1, mm: '#3a7cc0' },
@@ -1459,6 +1470,12 @@ const TINFO = [
   { n: 'Campground', c: '#7c6647', spd: 1, mm: '#86704e' },
   { n: 'Desert', c: '#d6b976', spd: .88, mm: '#dcc07c' },
   { n: 'Snowfield', c: '#d3dce4', spd: .8, mm: '#dbe3ea' },
+  { n: 'Cave Floor', c: '#5e564c', spd: 1, mm: '#5e564c' },
+  { n: 'Rock', c: '#1c1816', spd: 0, block: 1, mm: '#1c1816' },
+  { n: 'Crypt Floor', c: '#5a564e', spd: 1.05, mm: '#5a564e' },
+  { n: 'Ice Floor', c: '#a9c6d4', spd: 1.05, mm: '#a9c6d4' },
+  { n: 'Ice Wall', c: '#3e5666', spd: 0, block: 1, mm: '#3e5666' },
+  { n: 'Crypt Wall', c: '#221e1a', spd: 0, block: 1, mm: '#221e1a' },
 ];
 let W = null;
 function terAt(tx, ty) { if (tx < 0 || ty < 0 || tx >= WW || ty >= WH) return T.SEA; return W.ter[ty * WW + tx]; }
@@ -1818,6 +1835,26 @@ function genWorld(seed) {
     addObj({ k: 'hut', tx: tx - 1, ty: ty - 1, tw: 2, th: 2, v: prr() });
     W.hermits.push({ tx, ty, x: tx * TS, y: (ty + 1.9) * TS, name: HERMIT_N[W.hermits.length % HERMIT_N.length] });
   }
+  // ---------- Dungeons: caves, crypts, mines and an ice cave (own random stream, appended to the places list) ----------
+  const drr = mulberry32(seed * 113 + 3), dri = (a, b) => a + Math.floor(drr() * (b - a + 1));
+  const DN = { cave: ["Smugglers' Grotto", 'Blackwater Cave', "The Thieves' Hole"], spider: ['Spider Hollow', 'The Webbed Deep', 'Silkfang Cave'], crypt: ['Crypt of Saint Oswin', 'The Nameless Barrow', 'Tomb of the Grey Kings'], mine: ['Old Copperdeep Mine', 'Hollowdelve Mine', 'The Sunken Shafts'], ice: ['Rimeheart Hollow'] };
+  const nearMount = (tx, ty, r) => { for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (isMountT(terAt(tx + dx, ty + dy))) return true; return false; };
+  const dunOK = (tx, ty) => { if (!freeRect(tx - 1, ty - 1, 3, 3) || W.places.some(p => Math.hypot(p.tx - tx, p.ty - ty) < 16)) return false; for (let y = ty - 2; y <= ty + 2; y++) for (let x = tx - 2; x <= tx + 2; x++) if (W.clear[y * WW + x]) return false; return true; };
+  const addDungeon = (theme, test, want) => {
+    for (let a = 0, made = 0; a < 40000 && made < want; a++) {
+      const tx = dri(10, WW - 11), ty = dri(10, WH - 11), i = ty * WW + tx; if (!test(ter[i], tx, ty) || !dunOK(tx, ty)) continue;
+      setSolid(tx - 1, ty - 1, 2, 1); for (let y = ty - 2; y <= ty + 2; y++) for (let x = tx - 2; x <= tx + 2; x++) W.clear[y * WW + x] = 1;
+      const pl = P_({ type: 'dungeon', theme, k: W.own[i], owner: W.own[i], name: DN[theme][made % DN[theme].length], tx, ty, r: 6 });
+      pl.tier = clamp(1 + Math.floor(Math.hypot(tx - caps[0][0], ty - caps[0][1]) / sc(75)), 1, 4);
+      addObj({ k: 'dentrance', theme, tx: tx - 1, ty: ty - 1, tw: 2, th: 2 });
+      W.interacts.push({ type: 'dungeon', x: (tx + .5) * TS, y: (ty + 1.2) * TS, place: pl.id }); made++;
+    }
+  };
+  addDungeon('ice', (t, x, y) => t === T.TUNDRA && nearMount(x, y, 5), 1);
+  addDungeon('cave', (t, x, y) => (t === T.FOREST || t === T.HILL || t === T.GRASS) && nearMount(x, y, 3), Math.max(1, sc(1.5)));
+  addDungeon('spider', (t, x, y) => (t === T.DENSE || t === T.FOREST || t === T.SWAMP) && W.own[y * WW + x] !== 1, Math.max(1, sc(1.5)));
+  addDungeon('crypt', t => t === T.GRASS || t === T.PLAINS || t === T.HILL, Math.max(1, sc(1.5)));
+  addDungeon('mine', t => t === T.HILL || t === T.PASS, Math.max(1, sc(1.5)));
   // ---------- Trees ----------
   for (let i = 0; i < CW * CHH; i++) { W.chunkTrees.push([]); W.chunkObjs.push([]); }
   for (let ty = 1; ty < WH - 1; ty++) for (let tx = 1; tx < WW - 1; tx++) {
@@ -2018,6 +2055,7 @@ function dismount() {
   SND.play('mount');
 }
 function toggleMount() {
+  if (G.under) { toast('Your horse waits for you outside.'); return; }
   if (!P.eq.horse) { toast('You have no horse. Loot or buy one from a stable master.'); return; }
   if (P.mounted) { dismount(); return; }
   if (!horseEnt) spawnHorse(P.x + 40, P.y);
@@ -2164,6 +2202,8 @@ function updatePlayer(dt) {
   if (curSeason === 3 && t !== T.ROAD && t !== T.BRIDGE && t !== T.DESERT && t !== T.FLOOR && ownerAtPx(P.x, P.y) !== 1) spd *= .92; // winter snow
   P.blocking = input.rmb && P.S.block > 0 && !P.S.bow && !P.mounted && P.st > 1 && P.dodge <= 0 && P.swing <= 0;
   if (P.blocking) spd *= .45;
+  if (P.webbed > 0) { P.webbed -= dt; spd *= .5; }
+  if (P.chillT > 0) { P.chillT -= dt; spd *= .6; }
   if (P.drawing) spd *= P.mounted ? .8 : .55;
   const sprintKey = input.keys.ShiftLeft || input.keys.ShiftRight;
   if (!sprintKey) P.winded = false; else if (P.st <= 0) P.winded = true;
@@ -2205,6 +2245,7 @@ function playerDie() {
   }, 900);
 }
 function respawnPlayer() {
+  if (G.under) leaveDungeon(true);
   const lost = Math.floor(P.gold * DIFF().goldLoss); P.gold -= lost;
   P.x = P.respawn.x; P.y = P.respawn.y; const f = findFree(P.x, P.y); P.x = f.x; P.y = f.y;
   P.hp = Math.round(P.maxHp * .6); P.st = P.maxSt; P.mounted = false; P.kbx = P.kby = 0; P.dodge = 0;
@@ -2330,7 +2371,7 @@ function damage(t, amt, src, o = {}) {
   if (!o.dot) SND.play('hit', src === P ? 1 : .4);
   if (t.kind === 'camel' && Math.random() < .6) SND.play('grunt');
   if (src) {
-    if (!t.civ && !(src.perch && !t.ranged)) { t.target = src; t.returning = false; }
+    if (!t.civ && !src.isTrap && !(src.perch && !t.ranged)) { t.target = src; t.returning = false; }
     if (src === P) { if (!wasHostile && !o.dot) crime(t); if (t.place != null) alertPlace(t.place, P); }
     if (t.civ) { t.flee = 3; t.fleeFrom = src; }
   }
@@ -2384,6 +2425,7 @@ function kill(t, src) {
     K.mil[t.k] = Math.max(300, K.mil[t.k] - (t.kind === 'knight' ? 25 : 8));
   }
   if (t === horseEnt) horseEnt = null;
+  if (t.dspec != null && G.under) { const pl = G.under; (pl.ddead || (pl.ddead = [])).push(t.dspec); if (t.dboss) { pl.dcleared = true; SND.play('quest'); gainXP(120 + (pl.tier || 1) * 40); toast(`<b>${pl.name} cleared!</b> The guardian's hoard is unsealed.`, 'gold'); } }
   questOnKill(t);
 }
 function checkPlaceCleared(pl) {
@@ -2412,7 +2454,7 @@ function enemyStrike(e, tg) {
   }
   if (dist(e.x, e.y, P.x, P.y) < 500) SND.play(e.kind === 'scorpion' ? 'sting' : e.kind === 'bear' || e.kind === 'ice_bear' || e.kind === 'leader' ? 'swingH' : 'swing', .5);
   const d = dist(e.x, e.y, tg.x, tg.y); const a = Math.atan2(tg.y - e.y, tg.x - e.x);
-  if (d <= e.range + tg.r + 3 && Math.abs(angDiff(e.face, a)) < 1.4) damage(tg, e.dmg * rand(.85, 1.15), e);
+  if (d <= e.range + tg.r + 3 && Math.abs(angDiff(e.face, a)) < 1.4) { damage(tg, e.dmg * rand(.85, 1.15), e); if (tg === P && e.kind === 'spider') P.webbed = Math.max(P.webbed || 0, 1.2); if (tg === P && e.kind === 'rimeheart') { P.chillT = 2.5; SND.play('frost'); } }
 }
 function nearestHostile(e, r) {
   let best = null, bd = r;
@@ -2616,7 +2658,7 @@ function addShake(v) { if (settings.shake) G.shake = Math.min(18, G.shake + v); 
 let DAYLEN = 480;
 const dayNum = () => Math.floor(G.time / DAYLEN + .3) + 1;
 const tod = () => (G.time / DAYLEN + .3) % 1;
-function darkness() { const t = tod(); if (t > .27 && t < .73) return 0; const d = t <= .27 ? .27 - t : t - .73; return Math.min(.58, d * 4.2); }
+function darkness() { if (G.under) return settings.quality === 'low' ? .55 : .86; const t = tod(); if (t > .27 && t < .73) return 0; const d = t <= .27 ? .27 - t : t - .73; return Math.min(.58, d * 4.2); }
 /* ---------------- Seasons & weather ---------------- */
 const SEASON_DAYS = 6, SEASONS = ['Spring', 'Summer', 'Autumn', 'Winter'];
 let curSeason = 0;
@@ -2896,6 +2938,7 @@ function spawnPlace(pl) {
 function despawnPlace(pl) { pl.spawned = false; ents = ents.filter(e => e.place !== pl.id || e.follow || e.persistent); }
 function updateSpawns(dt) {
   G.spawnT -= dt; if (G.spawnT > 0) return; G.spawnT = .5;
+  if (G.under) { ents = ents.filter(e => !(e.dead && e.deadT > 10)); return; }
   for (const pl of W.places) {
     const d = dist(P.x, P.y, pl.x, pl.y);
     if (!pl.spawned && d < 1500) spawnPlace(pl); else if (pl.spawned && d > 2300) despawnPlace(pl);
@@ -3305,6 +3348,8 @@ function interactLabel(b) {
   switch (it.type) {
     case 'chest': return pl.chestOpened ? 'Empty stash' : pl.type === 'camp' ? (pl.cleared ? 'Loot the bandit stash' : 'Bandit stash (guarded)') : 'Search the chest';
     case 'sign': return 'Signpost, bounty board and carriages'; case 'well': return 'Drink from the well'; case 'fish': return G.fishing ? 'Reel in' : 'Fish here';
+    case 'dungeon': return `Enter ${pl.name}${pl.dcleared ? ' (cleared)' : ''}`; case 'dexit': return 'Climb back outside';
+    case 'dchest': return G.under && (G.under.dchests || []).includes(it.idx) ? 'Empty chest' : it.boss ? 'Open the guardian\'s hoard' : 'Open the chest';
     case 'shrine': return pl.blessed ? 'The shrine is silent' : 'Pray at the shrine';
   }
   return 'Interact';
@@ -3317,6 +3362,9 @@ function doInteract() {
   if (it.type === 'chest') openChest(it, pl);
   else if (it.type === 'sign') readSign(pl);
   else if (it.type === 'fish') startFishing(it);
+  else if (it.type === 'dungeon') enterDungeon(pl);
+  else if (it.type === 'dexit') leaveDungeon();
+  else if (it.type === 'dchest') openDChest(it);
   else if (it.type === 'well') { if ((pl.wellT || -999) > G.time - 60) { toast('You have drunk your fill for now.'); return; } pl.wellT = G.time; P.st = P.maxSt; P.hp = Math.min(P.maxHp, P.hp + Math.round(12 * DIFF().heal)); SND.play('eat'); toast(`The cool water refreshes you. (+${Math.round(12 * DIFF().heal)} health, stamina restored)`, 'good'); }
   else if (it.type === 'shrine') {
     if (pl.blessed) { toast('The stones are silent. Their gift has been given.'); return; }
@@ -3359,6 +3407,136 @@ function signDest(pl) {
   if (pl.type === 'castle') return [...near(p => p.type === 'village', 1), ...near(p => p.type === 'castle', 3)];
   const home = W.places[pl.owner];
   return [home, ...near(p => (p.type === 'village' || p.type === 'castle') && p !== home, 3)];
+}
+/* ---------------- Dungeons ----------------
+   A dungeon is a small world of its own. Entering stashes the overworld (its W, entities, projectiles and
+   pickups) and swaps the dungeon in, so collision, AI, combat and rendering all work unchanged. */
+const D4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+const DUN_TH = {
+  cave: { n: "Smugglers' cave", floor: T.CAVE, wall: T.ROCK, mode: 'cave', foes: t => ['bandit', 'bandit', 'archer', ...(t >= 2 ? ['xbowman', 'shieldbearer'] : [])], boss: { kind: 'leader', o: { chief: 'the Smuggler King', boss: true, named: true, scale: 1.2 }, hpM: 2.6 } },
+  spider: { n: 'Spider cave', floor: T.CAVE, wall: T.ROCK, mode: 'cave', webs: true, foes: () => ['spider'], boss: { kind: 'spider', o: { name: 'The Broodmother', boss: true, named: true, scale: 1.9 }, hpM: 7, dmgM: 1.8 } },
+  crypt: { n: 'Crypt', floor: T.CRYPT, wall: T.BRICK, mode: 'rooms', foes: t => ['wight', 'wight', 'hollow_archer', ...(t >= 3 ? ['hknight'] : [])], boss: { kind: 'hknight', o: { name: 'The Barrow Lord', boss: true, named: true, scale: 1.35 }, hpM: 3 } },
+  mine: { n: 'Abandoned mine', floor: T.CAVE, wall: T.ROCK, mode: 'rooms', supports: true, foes: t => ['bandit', 'xbowman', 'spider', ...(t >= 2 ? ['shieldbearer'] : [])], boss: { kind: 'leader', o: { chief: 'Warlord Ghast', boss: true, named: true, scale: 1.25 }, hpM: 2.8 } },
+  ice: { n: 'Ice cave', floor: T.ICE, wall: T.ICEWALL, mode: 'cave', crystals: true, foes: t => ['snow_wolf', 'snow_wolf', ...(t >= 2 ? ['ice_bear'] : [])], boss: { kind: 'rimeheart', o: { name: 'Rimeheart', boss: true, named: true, scale: 1.6 }, hpM: 1 } },
+};
+const DUN_LEGEND = { cave: 'stormcaller', spider: 'widows_kiss', crypt: 'lifedrinker', mine: 'emberbrand', ice: 'winters_edge' };
+const DUN_MAT = { mine: 'ember_core', spider: 'venom_gland', ice: 'frost_heart', crypt: 'relic', cave: 'gem' };
+const TRAP = { faction: 'bandit', x: 0, y: 0, dead: false, isTrap: true, name: 'a trap' };
+function genDungeon(pl) {
+  const th = DUN_TH[pl.theme], n = 64, N = n * n, r = mulberry32(W.seed * 131 + pl.id * 7919), RI = (a, b) => a + Math.floor(r() * (b - a + 1));
+  const ter = new Uint8Array(N).fill(th.wall), at = (x, y) => y * n + x, inb = (x, y) => x > 1 && y > 1 && x < n - 2 && y < n - 2, floor = i => ter[i] === th.floor;
+  if (th.mode === 'cave') { // cellular-automaton caverns, keeping the largest open region
+    let m = new Uint8Array(N); for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) m[at(x, y)] = !inb(x, y) || r() < .44 ? 1 : 0;
+    for (let it = 0; it < 5; it++) { const m2 = new Uint8Array(N); for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { if (!inb(x, y)) { m2[at(x, y)] = 1; continue; } let c = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) c += m[at(x + dx, y + dy)]; m2[at(x, y)] = c >= 5 ? 1 : 0; } m = m2; }
+    const lab = new Int32Array(N).fill(-1); let best = -1, bestN = 0, id = 0;
+    for (let i = 0; i < N; i++) { if (m[i] || lab[i] >= 0) continue; const st = [i]; lab[i] = id; let cnt = 0; while (st.length) { const c = st.pop(); cnt++; const x = c % n, y = (c - x) / n; for (const [dx, dy] of D4) { const j = at(x + dx, y + dy); if (!m[j] && lab[j] < 0) { lab[j] = id; st.push(j); } } } if (cnt > bestN) { bestN = cnt; best = id; } id++; }
+    for (let i = 0; i < N; i++) if (!m[i] && lab[i] === best) ter[i] = th.floor;
+  } else { // rooms joined by corridors
+    const rooms = [];
+    for (let a = 0; a < 300 && rooms.length < 11; a++) { const w = RI(5, 10), h = RI(5, 9), x = RI(3, n - w - 3), y = RI(3, n - h - 3); if (rooms.some(o => x < o.x + o.w + 2 && x + w + 2 > o.x && y < o.y + o.h + 2 && y + h + 2 > o.y)) continue; rooms.push({ x, y, w, h, cx: x + (w >> 1), cy: y + (h >> 1) }); }
+    rooms.forEach(o => { for (let y = o.y; y < o.y + o.h; y++) for (let x = o.x; x < o.x + o.w; x++) ter[at(x, y)] = th.floor; });
+    const seg = (ax, ay, bx, by) => { for (let x = Math.min(ax, bx); x <= Math.max(ax, bx); x++) for (let y = Math.min(ay, by); y <= Math.max(ay, by); y++) for (let d = 0; d < 2; d++) { const xx = ax === bx ? x + d : x, yy = ay === by ? y + d : y; if (inb(xx, yy)) ter[at(xx, yy)] = th.floor; } };
+    const carve = (a, b) => { if (r() < .5) { seg(a.cx, a.cy, b.cx, a.cy); seg(b.cx, a.cy, b.cx, b.cy); } else { seg(a.cx, a.cy, a.cx, b.cy); seg(a.cx, b.cy, b.cx, b.cy); } };
+    for (let i = 1; i < rooms.length; i++) { let bj = 0, bd = 1e9; for (let j = 0; j < i; j++) { const d = Math.hypot(rooms[i].cx - rooms[j].cx, rooms[i].cy - rooms[j].cy); if (d < bd) { bd = d; bj = j; } } carve(rooms[i], rooms[bj]); }
+    for (let k = 0; k < 2 && rooms.length > 3; k++) { const a2 = rooms[RI(0, rooms.length - 1)], b2 = rooms[RI(0, rooms.length - 1)]; if (a2 !== b2) carve(a2, b2); }
+  }
+  // the entrance is the lowest open spot near the middle; everything is measured from there
+  let ent = -1, es = -1e9;
+  for (let i = 0; i < N; i++) if (floor(i)) { const x = i % n, y = (i - x) / n, sc2 = y * 2 - Math.abs(x - n / 2); if (sc2 > es && floor(at(x, y - 1)) && floor(at(x - 1, y)) && floor(at(x + 1, y))) { es = sc2; ent = i; } }
+  const dd = new Int32Array(N).fill(-1), open = [ent]; dd[ent] = 0;
+  for (let qi = 0; qi < open.length; qi++) { const c = open[qi], x = c % n, y = (c - x) / n; for (const [dx, dy] of D4) { const j = at(x + dx, y + dy); if (floor(j) && dd[j] < 0) { dd[j] = dd[c] + 1; open.push(j); } } }
+  for (let i = 0; i < N; i++) if (floor(i) && dd[i] < 0) ter[i] = th.wall;
+  const tx = i => i % n, ty = i => Math.floor(i / n), px = i => ({ x: (tx(i) + .5) * TS, y: (ty(i) + .5) * TS }), far2 = (a, b) => Math.hypot(tx(a) - tx(b), ty(a) - ty(b));
+  const roomy = i => { for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (!floor(at(tx(i) + dx, ty(i) + dy))) return false; return true; };
+  const bossI = [...open].reverse().find(roomy) ?? open[open.length - 1];
+  const far = open.filter(i => dd[i] > 9 && roomy(i)); for (let i = far.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [far[i], far[j]] = [far[j], far[i]]; }
+  const picks = []; for (const i of far) { if (far2(i, bossI) < 7) continue; if (picks.every(j => far2(i, j) >= 7)) picks.push(i); if (picks.length >= 14) break; }
+  const tier = pl.tier || 2, spawns = [], chests = [], spikes = [], darts = [], webs = [], objs = [], ints = [];
+  const chestPicks = picks.filter((_, i) => i % 4 === 1).slice(0, 3), foePicks = picks.filter(i => !chestPicks.includes(i)); // chests spread among the foes
+  foePicks.forEach(i => { const p0 = px(i), pool = th.foes(tier), k = 1 + RI(0, tier >= 3 ? 2 : 1); for (let j = 0; j < k; j++) spawns.push({ kind: pool[RI(0, pool.length - 1)], x: p0.x + (r() - .5) * 60, y: p0.y + (r() - .5) * 60, tier }); });
+  const bp = px(bossI); spawns.push({ kind: th.boss.kind, x: bp.x, y: bp.y, tier: Math.min(4, tier + 1), boss: true, o: th.boss.o, hpM: th.boss.hpM, dmgM: th.boss.dmgM });
+  chestPicks.forEach((i, k) => chests.push(Object.assign(px(i), { idx: k })));
+  const bc = open.filter(i => i !== bossI && roomy(i) && far2(i, bossI) < 5).sort((a, b) => dd[b] - dd[a])[0] ?? bossI; chests.push(Object.assign(px(bc), { idx: 99, boss: true }));
+  chests.forEach(c => { objs.push({ k: 'dchest', x: c.x - 12, y: c.y - 10, w: 24, h: 18, idx: c.idx, boss: c.boss }); ints.push({ type: 'dchest', x: c.x, y: c.y, idx: c.idx, boss: c.boss }); });
+  // light: torches on walls (crystals in the ice cave)
+  const lights = [];
+  for (const i of open) { if (floor(at(tx(i), ty(i) - 1)) || r() > .09 || lights.some(j => far2(i, j) < 6)) continue; lights.push(i); const p0 = px(i); objs.push(th.crystals ? { k: 'crystal', x: p0.x - 14, y: p0.y - 30, w: 28, h: 30 } : { k: 'torch', x: p0.x - 8, y: p0.y - 22, w: 16, h: 18, sy: p0.y - 10 }); }
+  // traps along the narrow ways
+  const narrow = open.filter(i => dd[i] > 6 && !roomy(i) && i !== ent); for (let i = narrow.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [narrow[i], narrow[j]] = [narrow[j], narrow[i]]; }
+  narrow.slice(0, 6).forEach((i, k) => { const p0 = px(i); spikes.push({ x: p0.x, y: p0.y, ph: r() * 2.4 }); objs.push({ k: 'spikes', x: p0.x - 14, y: p0.y - 14, w: 28, h: 28, sy: p0.y - 40, sidx: k }); });
+  for (const i of narrow) { if (darts.length >= 3) break; for (const [dx, dy] of D4) { if (floor(at(tx(i) - dx, ty(i) - dy))) continue; let run = 0; while (run < 6 && floor(at(tx(i) + dx * (run + 1), ty(i) + dy * (run + 1)))) run++; if (run < 5) continue; const p0 = px(i), a = Math.atan2(dy, dx); darts.push({ x: p0.x - dx * 12, y: p0.y - dy * 12, a, cd: r() * 2 }); objs.push({ k: 'dart', x: p0.x - dx * 14, y: p0.y - dy * 14, w: 1, h: 1, a }); break; } }
+  // decoration
+  const deco = (k, count, o = {}) => { for (let c = 0; c < count; c++) { const i = open[RI(8, open.length - 1)]; if (!i) continue; const p0 = px(i); objs.push(Object.assign({ k, x: p0.x - 16, y: p0.y - 16, w: 32, h: 32, sy: p0.y - 30, v: r() * 3 }, o)); if (k === 'web') webs.push(p0); } };
+  deco('bones', 10); if (th.webs) deco('web', 16); if (pl.theme === 'cave') deco('web', 4);
+  if (th.supports) for (const i of narrow.slice(6, 20)) { const p0 = px(i); objs.push({ k: 'support', x: p0.x - 16, y: p0.y - 20, w: 32, h: 36 }); }
+  const ep = px(ent); objs.push({ k: 'dexit', x: ep.x - 18, y: ep.y - 20, w: 36, h: 40, sy: ep.y - 40 }); ints.push({ type: 'dexit', x: ep.x, y: ep.y });
+  const cw = Math.ceil(n / CH), DW = { size: n, seed: W.seed, ter, own: new Uint8Array(N), solid: new Uint8Array(N), wall: new Uint8Array(N), clear: new Uint8Array(N).fill(1), bord: new Uint8Array(N), hgt: new Float32Array(N), places: W.places, objs, chunkTrees: [], chunkObjs: [], interacts: ints, caps: W.caps, rivers: [], landCount: [0, 0, 0, 0], towers: [], fish: [], hermits: [], start: W.start };
+  for (let i = 0; i < cw * cw; i++) { DW.chunkTrees.push([]); DW.chunkObjs.push([]); }
+  objs.forEach(o => { o.sy = o.sy ?? (o.y + o.h); const ci = Math.floor((o.y + o.h / 2) / (CH * TS)) * cw + Math.floor((o.x + o.w / 2) / (CH * TS)); if (DW.chunkObjs[ci]) DW.chunkObjs[ci].push(o); });
+  return { W: DW, n, tier, entry: { x: ep.x, y: ep.y - TS }, spawns, spikes, darts, webs };
+}
+function enterDungeon(pl) {
+  if (G.under) return;
+  if (ents.some(e => !e.dead && playerHostileTo(e) && dist(e.x, e.y, P.x, P.y) < 300)) { toast('Not with enemies at your back!', 'bad'); return; }
+  if (P.mounted) dismount(); G.fishing = null;
+  withLoading(`Descending into ${pl.name}…`, () => {
+    const D = pl._dun || (pl._dun = genDungeon(pl));
+    const party = ents.filter(e => e.follow && e.ally && !e.dead && !e.caravan);
+    G.over = { W, ents: ents.filter(e => !party.includes(e)), projs, pickups, px: P.x, py: P.y };
+    W = D.W; setWorldSize(D.n); ents = party; projs = []; pickups = []; parts = []; texts = []; chunkCache.clear();
+    P.x = D.entry.x; P.y = D.entry.y; P.kbx = P.kby = 0; cam.x = P.x; cam.y = P.y;
+    party.forEach(e => { const f = findFree(P.x + rand(-40, 40), P.y - rand(10, 50)); e.x = f.x; e.y = f.y; });
+    G.under = pl; spawnDungeon(pl, D); $('mmWrap').classList.add('hidden');
+    showAreaTitle(pl.name.toUpperCase(), pl.dcleared ? 'Its halls are quiet now' : `${DUN_TH[pl.theme].n} · Danger ${'I II III IV'.split(' ')[D.tier - 1]}`);
+    SND.play('door');
+  });
+}
+function leaveDungeon(silent) {
+  if (!G.under) return;
+  const go = () => {
+    const O = G.over, party = ents.filter(e => e.follow && e.ally && !e.dead);
+    W = O.W; setWorldSize(W.size); ents = O.ents.concat(party); projs = O.projs; pickups = O.pickups; parts = []; texts = []; chunkCache.clear();
+    P.x = O.px; P.y = O.py + 18; P.kbx = P.kby = 0; cam.x = P.x; cam.y = P.y;
+    party.forEach(e => { const f = findFree(P.x + rand(-40, 40), P.y + rand(10, 50)); e.x = f.x; e.y = f.y; });
+    G.under = null; G.over = null; $('mmWrap').classList.toggle('hidden', !settings.minimap);
+  };
+  if (silent) go(); else withLoading('Climbing back into the daylight…', go);
+}
+function spawnDungeon(pl, D) {
+  const dead = pl.ddead || [];
+  D.spawns.forEach((sp, i) => {
+    if (dead.includes(i) || (sp.boss && pl.dcleared)) return;
+    const f = findFree(sp.x, sp.y), e = mkActor(sp.kind, f.x, f.y, Object.assign({ dspec: i, tier: sp.tier, home: { x: f.x, y: f.y }, leash: 380, wanderR: 40, aggro: 250 }, sp.o || {}));
+    if (sp.boss) { e.hp = e.maxHp = Math.round(e.maxHp * sp.hpM); e.dmg *= sp.dmgM || 1; e.dboss = true; e.aggro = 320; }
+  });
+}
+function openDChest(it) {
+  const pl = G.under, D = pl._dun; pl.dchests = pl.dchests || [];
+  if (pl.dchests.includes(it.idx)) { toast('Empty.'); return; }
+  if (it.boss && !pl.dcleared) { toast('A heavy lock of old iron. Its guardian still lives somewhere in the dark.', 'bad'); return; }
+  pl.dchests.push(it.idx); SND.play('chest');
+  for (let i = 0; i < 26; i++) addPart(it.x, it.y, rand(-80, 80), rand(-180, -40), i % 2 ? '#ffd24a' : '#fff4c0', rand(.5, 1), 3, 260);
+  const found = [], give = (id, q = 1, n = 1) => { addItem(id, q, n, true); found.push(`<b style="color:${itemColor({ id, q })}">${n > 1 ? n + '× ' : ''}${itemName({ id, q })}</b>`); };
+  const t = D.tier; let gold;
+  if (it.boss) {
+    gold = randi(250, 500) + t * 60; const leg = DUN_LEGEND[pl.theme];
+    if (!W.places.some(p => p.type === 'dungeon' && p.theme === pl.theme && p.legendTaken)) { pl.legendTaken = true; give(leg); } else give(pick(LOOT_TIERS[4]), 3);
+    give(DUN_MAT[pl.theme]); give('potion', 1, 2); if (G.stats) G.stats.dungeons = (G.stats.dungeons || 0) + 1;
+  } else {
+    gold = randi(25, 60) * t; for (let i = 0; i < 1 + (Math.random() < .5 ? 1 : 0); i++) { const id = pick(LOOT_TIERS[Math.min(4, t)]); give(id, rollQual(t), ITEMS[id].stack ? randi(1, 3) : 1); }
+    if (chance(.5)) give(pick(['arrow', 'broadhead', 'bodkin']), 1, randi(6, 14));
+  }
+  P.gold += gold; toast(`You found <b>${gold} gold</b>${found.length ? ', ' + found.join(', ') : ''}.`, 'gold');
+}
+function updateTraps(dt) {
+  const D = G.under._dun; P.trapCd = Math.max(0, (P.trapCd || 0) - dt);
+  for (const sp of D.spikes) { sp.up = (G.time + sp.ph) % 2.4 < .8; if (sp.up && P.trapCd <= 0 && P.dodge <= 0 && Math.abs(P.x - sp.x) < 15 && Math.abs(P.y - sp.y) < 15) { damage(P, 8 + D.tier * 4, null, { proj: true }); P.trapCd = .9; } }
+  for (const d of D.darts) {
+    d.cd -= dt; if (d.cd > 0) continue;
+    const dx = P.x - d.x, dy = P.y - d.y, along = dx * Math.cos(d.a) + dy * Math.sin(d.a), perp = Math.abs(-dx * Math.sin(d.a) + dy * Math.cos(d.a));
+    if (along > 0 && along < 340 && perp < 24) { projs.push({ x: d.x, y: d.y, vx: Math.cos(d.a) * 520, vy: Math.sin(d.a) * 520, dmg: 7 + D.tier * 3, src: TRAP, life: .9, bolt: true, lob: .08 }); SND.play('xbow', .7); d.cd = 2.2; }
+  }
+  for (const w of D.webs) if (Math.abs(P.x - w.x) < 18 && Math.abs(P.y - w.y) < 18) P.webbed = Math.max(P.webbed || 0, .2);
 }
 /* ---------------- Fast travel ---------------- */
 function travelDests(from) {
@@ -3834,7 +4012,7 @@ function buildPalette() {
   }
 }
 const chunkCache = new Map(); let chunkFrame = 0, chunksBuilt = 0;
-function blobGroup(t) { if (t === T.SEA || t === T.WATER) return 2; if (t === T.ROAD) return 3; if (t === T.BRIDGE || t === T.FARM || t === T.FLOOR) return 9; if (t === T.FORD) return 2; if (t === T.MOUNT || t === T.SNOW) return 1; return 0; }
+function blobGroup(t) { if (t === T.SEA || t === T.WATER) return 2; if (t === T.ROAD) return 3; if (t === T.BRIDGE || t === T.FARM || t === T.FLOOR) return 9; if (t === T.FORD) return 2; if (t === T.MOUNT || t === T.SNOW || t === T.ROCK || t === T.ICEWALL) return 1; if (t === T.CRYPT || t === T.BRICK) return 9; return 0; }
 function getChunk(cx, cy) {
   const key = cy * CW + cx; let ch = chunkCache.get(key);
   if (ch) { ch.used = chunkFrame; return ch.c; }
@@ -3898,6 +4076,15 @@ function renderChunk(g, cx, cy) {
         g.fillStyle = '#ffffff'; for (let i = 0; i < 2; i++) g.fillRect(px + hash2(i + 7, tx * 3) * 30, py + hash2(ty * 3, i + 7) * 30, 1.2, 1.2);
         break;
       }
+      case T.ROCK: case T.ICEWALL: case T.BRICK: {
+        if (t === T.BRICK) { g.strokeStyle = shade(col, -.3); g.lineWidth = 1; for (let r2 = 0; r2 < 4; r2++) { g.beginPath(); g.moveTo(px, py + r2 * 8); g.lineTo(px + 32, py + r2 * 8); g.stroke(); for (let c2 = 0; c2 < 2; c2++) { const bxx = px + (r2 % 2) * 8 + c2 * 16; g.beginPath(); g.moveTo(bxx, py + r2 * 8); g.lineTo(bxx, py + r2 * 8 + 8); g.stroke(); } } }
+        else { g.fillStyle = shade(col, .1); for (let i = 0; i < 3; i++) circ(g, px + 2 + hash2(i, tx * 5) * 28, py + 2 + hash2(ty * 5, i) * 26, 2 + h * 2.5); }
+        if (!TINFO[terAt(tx, ty + 1)].block) { g.fillStyle = shade(col, t === T.ICEWALL ? .35 : .3); g.fillRect(px, py + 21, 32, 11); g.fillStyle = shade(col, t === T.ICEWALL ? .5 : .42); g.fillRect(px, py + 21, 32, 2); g.fillStyle = 'rgba(0,0,0,.4)'; g.fillRect(px, py + 31, 32, 2); } // lit face of the wall
+        break;
+      }
+      case T.CAVE: g.fillStyle = shade(col, -.18); for (let i = 0; i < 4; i++) circ(g, px + hash2(i, tx * 3) * 30, py + hash2(ty * 3, i) * 30, 1.2 + h); if (h2 < .05) { g.fillStyle = 'rgba(80,120,160,.35)'; ell(g, px + 16, py + 16, 8, 4); } break;
+      case T.CRYPT: g.strokeStyle = shade(col, -.22); g.lineWidth = 1; g.strokeRect(px + .5, py + .5, 31, 31); if (h < .12) { g.beginPath(); g.moveTo(px + 6, py + 10); g.lineTo(px + 14, py + 18); g.lineTo(px + 12, py + 26); g.stroke(); } break;
+      case T.ICE: g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 1; g.beginPath(); g.moveTo(px + h * 20, py + 6 + h2 * 16); g.lineTo(px + 10 + h * 20, py + 2 + h2 * 16); g.stroke(); break;
       case T.SAND: g.fillStyle = shade(col, -.08); for (let i = 0; i < 3; i++) circ(g, px + hash2(i, tx) * 30, py + hash2(ty, i + 3) * 30, 1); break;
       case T.DIRT: g.fillStyle = shade(col, -.15); for (let i = 0; i < 3; i++) circ(g, px + hash2(i, tx * 3) * 30, py + hash2(ty * 3, i) * 30, 1.5); break;
       case T.PASS: g.fillStyle = shade(col, -.2); for (let i = 0; i < 5; i++) circ(g, px + hash2(i, tx) * 30, py + hash2(ty, i) * 30, 1.2 + h * 1.5); break;
@@ -4073,6 +4260,45 @@ function drawStruct(g, o, t) {
     case 'stall': { g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(x + 4, y + 6, w, h); g.fillStyle = '#7a5530'; g.fillRect(x, y + h - 14, w, 14); ['#d8a040', '#c04a3a', '#6aa040', '#e0d0a0'].forEach((c, i) => { g.fillStyle = c; circ(g, x + 8 + i * 13, y + h - 12, 4); }); for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? '#f0e8d8' : kd.color; g.fillRect(x - 2 + i * (w + 4) / 6, y - 14, (w + 4) / 6 + .5, 16); } g.fillStyle = '#3a2a1a'; g.fillRect(x, y, 2, h); g.fillRect(x + w - 2, y, 2, h); break; }
     case 'hay': g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, x + 20, y + 26, 16, 7); g.fillStyle = '#c8a840'; circ(g, x + 16, y + 16, 14); g.fillStyle = '#e0c860'; circ(g, x + 13, y + 12, 8); break;
     case 'sign': drawSignpost(g, o); break;
+    case 'dentrance': {
+      const cx = x + w / 2, by = y + h, th = o.theme;
+      if (th === 'crypt') {
+        g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(x - 2, by - 4, w + 12, 8);
+        g.fillStyle = '#6e695e'; g.fillRect(x - 10, by - 8, w + 20, 8); g.fillStyle = '#8a8478'; g.fillRect(x - 6, y + 6, w + 12, h - 14);
+        g.fillStyle = '#a09a8e'; g.beginPath(); g.moveTo(x - 10, y + 8); g.lineTo(cx, y - 14); g.lineTo(x + w + 10, y + 8); g.closePath(); g.fill();
+        g.fillStyle = '#b8b2a4'; [x - 2, x + w - 4].forEach(px2 => g.fillRect(px2, y + 8, 6, h - 16));
+        g.fillStyle = '#0a0806'; rrect(g, cx - 10, y + 16, 20, h - 24, 8); g.fill();
+      } else if (th === 'mine') {
+        g.fillStyle = '#6e6458'; ell(g, cx, by - 12, w * .8, 28); g.fillStyle = '#0a0806'; rrect(g, cx - 13, y + 8, 26, h - 10, 4); g.fill();
+        g.fillStyle = '#6a4424'; g.fillRect(cx - 17, y + 4, 5, h - 4); g.fillRect(cx + 12, y + 4, 5, h - 4); g.fillRect(cx - 20, y + 1, 40, 6);
+        g.strokeStyle = '#7a7e86'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(cx - 6, by); g.lineTo(cx - 8, by + 14); g.moveTo(cx + 6, by); g.lineTo(cx + 8, by + 14); g.stroke();
+        g.fillStyle = '#ffd070'; circ(g, cx + 22, y + 10, 3);
+      } else {
+        const rock = th === 'ice' ? '#8fb0c0' : '#6e665e', dark = th === 'ice' ? '#5a7888' : '#4a443e';
+        g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, cx + 6, by - 2, w * .8, 12);
+        g.fillStyle = dark; ell(g, cx, by - 16, w * .85, 34); g.fillStyle = rock; ell(g, cx - 4, by - 22, w * .7, 28);
+        g.fillStyle = '#080604'; g.beginPath(); g.ellipse(cx, by - 2, 16, 22, 0, Math.PI, 0); g.fill();
+        if (th === 'ice') { g.fillStyle = '#e8f6ff'; for (let i = 0; i < 5; i++) { const ix = cx - 13 + i * 6.5, iy = by - 22 + Math.abs(i - 2) * 3; g.beginPath(); g.moveTo(ix - 2, iy); g.lineTo(ix + 2, iy); g.lineTo(ix, iy + 9 + (i % 2) * 3); g.fill(); } }
+        if (th === 'spider') { g.strokeStyle = 'rgba(235,235,230,.7)'; g.lineWidth = .8; for (let i = 0; i < 6; i++) { const a = Math.PI + i / 5 * Math.PI; g.beginPath(); g.moveTo(cx, by - 4); g.lineTo(cx + Math.cos(a) * 16, by - 2 + Math.sin(a) * 22); g.stroke(); } for (let rr = 6; rr < 20; rr += 5) { g.beginPath(); g.ellipse(cx, by - 3, rr * .8, rr, 0, Math.PI, 0); g.stroke(); } }
+      }
+      break;
+    }
+    case 'torch': { const cx = x + 8, cy = y + 6; g.fillStyle = '#4a3018'; g.fillRect(cx - 1.5, cy, 3, 12); g.fillStyle = '#6a6e76'; g.fillRect(cx - 3, cy + 8, 6, 2); for (let i = 0; i < 3; i++) { const f = Math.sin(t * 13 + i * 2 + x) * 1.5; g.fillStyle = ['#ff6a1a', '#ffa030', '#ffe080'][i]; ell(g, cx + f * .4, cy - 2 - i * 2, 4.5 - i * 1.2, 7 - i * 1.8); } if (Math.random() < .15 * QMUL()) addPart(cx, cy - 8, rand(-6, 6), rand(-30, -15), '#ffb040', .4, 2); break; }
+    case 'dexit': { const cx = x + w / 2; g.fillStyle = 'rgba(255,240,200,.12)'; g.beginPath(); g.moveTo(cx - 10, y - 34); g.lineTo(cx + 10, y - 34); g.lineTo(cx + 24, y + h); g.lineTo(cx - 24, y + h); g.fill(); g.strokeStyle = '#6a4424'; g.lineWidth = 3; g.beginPath(); g.moveTo(cx - 9, y + h); g.lineTo(cx - 7, y - 6); g.moveTo(cx + 9, y + h); g.lineTo(cx + 7, y - 6); g.stroke(); g.lineWidth = 2; for (let i = 0; i < 7; i++) { const yy = y + h - 4 - i * 7; g.beginPath(); g.moveTo(cx - 8.5 + i * .3, yy); g.lineTo(cx + 8.5 - i * .3, yy); g.stroke(); } break; }
+    case 'dchest': {
+      const open = G.under && (G.under.dchests || []).includes(o.idx);
+      g.fillStyle = 'rgba(0,0,0,.3)'; ell(g, x + 14, y + 17, 14, 4);
+      g.fillStyle = o.boss ? '#7a4a1a' : '#6a4424'; g.fillRect(x, y + 4, w, h - 4); g.fillStyle = o.boss ? '#e8c050' : '#c8a040'; g.fillRect(x, y + 4, w, 2); g.fillRect(x + w / 2 - 2, y + 6, 4, 5);
+      if (open) { g.fillStyle = '#1a0e06'; g.fillRect(x + 2, y + 2, w - 4, 5); g.fillStyle = '#6a4424'; g.fillRect(x, y - 6, w, 7); }
+      else { g.fillStyle = o.boss ? '#9a6a28' : '#7a5030'; g.fillRect(x, y - 2, w, 7); g.fillStyle = o.boss ? '#e8c050' : '#c8a040'; g.fillRect(x, y - 2, w, 1.5); if (Math.sin(t * 3 + x) > .75) { g.fillStyle = 'rgba(255,240,160,.8)'; circ(g, x + w - 4, y, 2); } }
+      break;
+    }
+    case 'spikes': { const sp = G.under && G.under._dun && G.under._dun.spikes[o.sidx], up = sp && sp.up; g.fillStyle = '#3a3632'; g.fillRect(x, y, w, h); g.strokeStyle = '#26221e'; g.lineWidth = 1; g.strokeRect(x + .5, y + .5, w - 1, h - 1); g.fillStyle = up ? '#c8ccd4' : '#5a5650'; for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) { const sx2 = x + 5 + i * 9, sy2 = y + 5 + j * 9; if (up) { g.beginPath(); g.moveTo(sx2 - 3, sy2 + 3); g.lineTo(sx2, sy2 - 6); g.lineTo(sx2 + 3, sy2 + 3); g.fill(); } else circ(g, sx2, sy2, 1.5); } break; }
+    case 'dart': { g.fillStyle = '#4a4640'; circ(g, x, y, 6); g.fillStyle = '#1a1612'; circ(g, x + Math.cos(o.a) * 3, y + Math.sin(o.a) * 3, 2.5); break; }
+    case 'web': { g.strokeStyle = 'rgba(230,230,225,.45)'; g.lineWidth = .8; const cx = x + w / 2, cy = y + h / 2; for (let i = 0; i < 8; i++) { const a = i / 8 * TAU + o.v; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(a) * 18, cy + Math.sin(a) * 18); g.stroke(); } for (let rr = 5; rr < 18; rr += 4) { g.beginPath(); g.arc(cx, cy, rr, 0, TAU); g.stroke(); } break; }
+    case 'crystal': { const cx = x + w / 2, by = y + h; g.fillStyle = 'rgba(160,220,255,.22)'; circ(g, cx, by - 10, 16); [[-6, 20], [0, 30], [6, 16]].forEach(([dx, hh]) => { g.fillStyle = '#bfe8ff'; g.beginPath(); g.moveTo(cx + dx - 4, by); g.lineTo(cx + dx, by - hh); g.lineTo(cx + dx + 4, by); g.fill(); g.fillStyle = 'rgba(255,255,255,.6)'; g.fillRect(cx + dx - 1, by - hh + 6, 1.5, hh - 10); }); break; }
+    case 'bones': { g.fillStyle = '#d8d0c0'; ell(g, x + 10, y + 12, 5, 4); g.fillStyle = '#1a1612'; circ(g, x + 8.5, y + 11.5, 1.2); circ(g, x + 11.5, y + 11.5, 1.2); g.strokeStyle = '#d8d0c0'; g.lineWidth = 2; g.beginPath(); g.moveTo(x + 16, y + 16); g.lineTo(x + 28, y + 12); g.moveTo(x + 18, y + 20); g.lineTo(x + 26, y + 22); g.stroke(); break; }
+    case 'support': { g.fillStyle = '#5a3a1e'; g.fillRect(x, y, 5, h); g.fillRect(x + w - 5, y, 5, h); g.fillRect(x - 2, y, w + 4, 5); break; }
     case 'jetty': {
       const cx = x + w / 2, cy = y + h / 2, ex = cx + o.dx * 30, ey = cy + o.dy * 30;
       g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(Math.min(cx, ex) - 8 + 3, Math.min(cy, ey) - 8 + 4, Math.abs(ex - cx) + 16, Math.abs(ey - cy) + 16);
@@ -4193,6 +4419,7 @@ function lookFor(e) {
     case 'bowman': L = { body: '#7a6a50', mail: 1, head: 'coif', skin: e.skin, tabard: kc, weapon: { wk: 'bow', len: 22, col: '#6a4424' } }; break;
     case 'xbowman': L = { body: e.cloth, head: 'hood', hood: shade(e.cloth, -.3), skin: e.skin, weapon: { wk: 'xbow', len: 18, col: '#5a3a22' } }; break;
     case 'shieldbearer': L = { body: shade(e.cloth, -.1), head: 'helm', skin: e.skin, weapon: { wk: 'sword', len: 24, col: '#8a8e94' }, shield: { b: ITEMS.iron_shield, col: '#6a5a44' } }; break;
+    case 'rimeheart': L = { body: '#bfe4f4', shiny: 1, head: 'great', plume: '#9fdcff', pauld: 1, skin: '#dff4ff', cape: '#6e8a9a', weapon: { wk: 'great', len: 50, col: '#e8f8ff', glow: '#9fdcff' } }; break;
     case 'hollow_archer': L = { body: '#5a6260', mail: 1, head: 'helm', skin: '#aebcb6', weapon: { wk: 'bow', len: 20, col: '#4a4640' } }; break;
     case 'archer': L = { body: '#4a5a3a', head: 'hood', hood: '#3a4a2a', skin: e.skin, weapon: { wk: 'bow', len: 20, col: '#6a4424' } }; break;
     case 'leader': L = { body: '#5a4a3a', head: 'helm', skin: e.skin, cape: '#8a1a14', pauld: 1, weapon: { wk: 'great', len: 40, col: '#b8bec4' } }; break;
@@ -4287,6 +4514,17 @@ function drawHorse(g, x, y, face, hb, walk, rider, allegiance) {
   if (rider) { g.fillStyle = '#6a3a1a'; rrect(g, -7, -8, 12, 16, 3); g.fill(); g.fillStyle = allegiance != null ? KDATA[allegiance].color : '#5a4a3a'; g.fillRect(-9, -9, 3, 18); }
   g.restore();
 }
+function drawSpider(g, e) {
+  g.save(); g.translate(e.x, e.y); const sc = e.scale || 1; g.scale(sc, sc);
+  g.fillStyle = 'rgba(0,0,0,.3)'; ell(g, 2, 7, 15, 6);
+  g.rotate(e.face); if (e.flash > 0) g.filter = 'brightness(2.2)'; if (e.dead) g.globalAlpha = Math.max(0, 1 - (e.deadT - 7) / 3);
+  const w = Math.sin(e.walk * 2) * 3; g.strokeStyle = '#1e1814'; g.lineWidth = 2; g.lineCap = 'round';
+  for (let s2 = -1; s2 <= 1; s2 += 2) for (let i = 0; i < 4; i++) { const a = (i - 1.5) * .5, ph = (i % 2 ? w : -w) * s2; g.beginPath(); g.moveTo(Math.cos(a) * 4, s2 * 3); g.quadraticCurveTo(Math.cos(a) * 10 + ph, s2 * 12, Math.cos(a) * 15 + ph, s2 * (15 + Math.abs(ph))); g.stroke(); }
+  g.fillStyle = '#2a221c'; ell(g, -7, 0, 9, 7.5); g.fillStyle = '#8a1a14'; ell(g, -8, 0, 3.5, 2);
+  g.fillStyle = '#3a2e26'; ell(g, 5, 0, 5.5, 4.5); g.fillStyle = '#e04a3a'; circ(g, 9, -1.8, 1); circ(g, 9, 1.8, 1); circ(g, 10, -.6, .7); circ(g, 10, .6, .7);
+  if (e.wind > 0) { g.fillStyle = '#d8d0c0'; g.fillRect(10, -2.5, 3, 1); g.fillRect(10, 1.5, 3, 1); }
+  g.restore();
+}
 function drawGoat(g, e) {
   g.save(); g.translate(e.x, e.y);
   g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, 3, 8, 15, 5.5);
@@ -4304,6 +4542,7 @@ function drawGoat(g, e) {
 function drawAnimal(g, e) {
   if (e.kind === 'scorpion' || e.kind === 'camel') return drawDesertAnimal(g, e);
   if (e.kind === 'goat') return drawGoat(g, e);
+  if (e.kind === 'spider') return drawSpider(g, e);
   const kind = e.kind === 'snow_wolf' ? 'wolf' : e.kind === 'ice_bear' ? 'bear' : e.kind, snowy = kind !== e.kind;
   g.save(); g.translate(e.x, e.y);
   const big = e.kind === 'ice_bear' ? 1.65 : kind === 'bear' ? 1.5 : kind === 'boar' ? 1.05 : kind === 'jackal' ? .85 : 1;
@@ -4422,11 +4661,13 @@ function placeIcon(g, p, x, y, s) {
     case 'outpost': g.fillStyle = kc; g.fillRect(-s * .35, -s * .7, s * .7, s * 1.3); g.strokeRect(-s * .35, -s * .7, s * .7, s * 1.3); g.fillStyle = '#f5e6bd'; g.beginPath(); g.moveTo(s * .35, -s * .7); g.lineTo(s * .95, -s * .5); g.lineTo(s * .35, -s * .3); g.fill(); break;
     case 'camp': g.fillStyle = p.cleared ? '#6a6458' : '#c0302a'; g.beginPath(); g.moveTo(-s * .8, s * .6); g.lineTo(0, -s * .8); g.lineTo(s * .8, s * .6); g.closePath(); g.fill(); g.stroke(); g.fillStyle = '#f5e6bd'; g.font = `bold ${s * .9}px Cinzel, Georgia, serif`; g.textAlign = 'center'; g.fillText(p.cleared ? '✓' : ['', 'I', 'II', 'III', 'IV'][p.tier], 0, s * .5); break;
     case 'ruin': g.fillStyle = '#9a948a'; g.fillRect(-s * .7, -s * .2, s * .4, s * .8); g.fillRect(-s * .1, -s * .6, s * .4, s * 1.2); g.fillRect(s * .45, 0, s * .3, s * .6); break;
+    case 'dungeon': g.fillStyle = p.dcleared ? '#6a6458' : { cave: '#8a7a5a', spider: '#6a4a6a', crypt: '#9a948a', mine: '#8a6a3a', ice: '#9fd0e8' }[p.theme]; g.beginPath(); g.moveTo(-s * .8, s * .6); g.lineTo(-s * .8, -s * .05); g.ellipse(0, -s * .05, s * .8, s * .7, 0, Math.PI, 0); g.lineTo(s * .8, s * .6); g.closePath(); g.fill(); g.stroke(); g.fillStyle = '#120c07'; g.beginPath(); g.ellipse(0, s * .6, s * .38, s * .55, 0, Math.PI, 0); g.fill(); break;
     case 'hidden': g.fillStyle = '#ffd24a'; g.beginPath(); for (let i = 0; i < 10; i++) { const a = i / 10 * TAU - Math.PI / 2, r = i % 2 ? s * .4 : s; g.lineTo(Math.cos(a) * r, Math.sin(a) * r); } g.closePath(); g.fill(); g.stroke(); break;
   }
   g.restore();
 }
 function drawMinimap() {
+  if (G.under) return;
   const mc = $('minimap'); const g = mc.getContext('2d'); const S = mc.width; const span = 90; const sc = S / span;
   const ptx = P.x / TS, pty = P.y / TS; const sx = ptx - span / 2, sy = pty - span / 2;
   g.fillStyle = '#1a130c'; g.fillRect(0, 0, S, S);
@@ -4600,7 +4841,7 @@ function drawBigMap() {
   g.imageSmoothingEnabled = true; dl(fogCv);
   const vg = g.createRadialGradient(w / 2, h / 2, Math.min(w, h) * .3, w / 2, h / 2, Math.max(w, h) * .75); vg.addColorStop(0, 'rgba(40,25,10,0)'); vg.addColorStop(1, 'rgba(40,25,10,.45)'); g.fillStyle = vg; g.fillRect(0, 0, w, h);
   const toS = (x, y) => [ox + x / TS * z, oy + y / TS * z];
-  const show = p => (p.type === 'castle' && MAPF.castles) || (p.type === 'village' && MAPF.villages) || (p.type === 'camp' && MAPF.camps) || ((p.type === 'outpost' || p.type === 'ruin' || p.type === 'hidden') && MAPF.other);
+  const show = p => (p.type === 'castle' && MAPF.castles) || (p.type === 'village' && MAPF.villages) || (p.type === 'camp' && MAPF.camps) || ((p.type === 'outpost' || p.type === 'ruin' || p.type === 'hidden' || p.type === 'dungeon') && MAPF.other);
   const s = clamp(mapView.z * 2.6, 6, 16) * dpr;
   g.textAlign = 'center';
   for (const p of W.places) {
@@ -4826,7 +5067,10 @@ function drawEntity(g, e, t) {
     if (P.dodge > 0) g.globalAlpha = .75;
     if (P.mounted) drawHorse(g, P.x, P.y + 2, P.hface, P.S.horse, P.walk, true, P.allegiance);
     drawHuman(g, P.x, P.y - (P.mounted ? 3 : 0), P.face, lookFor(P), { walk: P.walk, mounted: P.mounted, flash: P.flash, blocking: P.blocking, draw: P.S.bow ? (P.drawing ? P.draw : 0) : undefined, arrowCol: P.S.bow && curAmmo() ? ITEMS[curAmmo()].col : null, swing: P.swing > 0 ? { p: 1 - P.swing / P.swingDur, dir: P.swingDir, arc: P.swingArc || P.S.arc } : null, trail: true, trailR: P.S.rng * .72 });
-    g.globalAlpha = 1; return;
+    g.globalAlpha = 1;
+    if (P.chillT > 0) { g.strokeStyle = 'rgba(200,240,255,.7)'; g.lineWidth = 2; g.beginPath(); g.arc(P.x, P.y, 15, 0, TAU); g.stroke(); }
+    if (P.webbed > 0) { g.strokeStyle = 'rgba(230,230,225,.5)'; g.lineWidth = 1; for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; g.beginPath(); g.moveTo(P.x, P.y); g.lineTo(P.x + Math.cos(a) * 16, P.y + Math.sin(a) * 16); g.stroke(); } }
+    return;
   }
   if (e.dead) { if (e.perch) return; if (e.animal) drawAnimal(g, e); else if (e.kind !== 'horse') drawCorpse(g, e); return; }
   if (e.elev) { g.save(); g.translate(0, -e.elev); drawEntityBody(g, e, t); g.restore(); return; }
@@ -4901,7 +5145,7 @@ function renderWorld(t) {
   }
   const playing = P && G.state !== 'menu';
   // ground markers
-  if (playing) {
+  if (playing && !G.under) {
     Q.active.forEach(q => { const tg = questTarget(q); if (tg && tg.r && q.type !== 'hidden') { g.strokeStyle = 'rgba(255,210,74,.5)'; g.setLineDash([10, 8]); g.lineWidth = 2; g.beginPath(); g.arc(tg.x, tg.y, tg.r, 0, TAU); g.stroke(); g.setLineDash([]); } });
     if (G.mapWaypoint) { const w = G.mapWaypoint; g.strokeStyle = 'rgba(106,208,255,.8)'; g.lineWidth = 3; g.beginPath(); g.arc(w.x, w.y, 16 + Math.sin(t * 3) * 3, 0, TAU); g.stroke(); }
   }
@@ -4969,14 +5213,14 @@ function renderWorld(t) {
   const d = darkness();
   if (d > .02) {
     const lw = lightCv.width, lh = lightCv.height, s = lw / VW; const lc = lightCtx;
-    lc.globalCompositeOperation = 'source-over'; lc.clearRect(0, 0, lw, lh); lc.fillStyle = `rgba(8,12,38,${d})`; lc.fillRect(0, 0, lw, lh);
+    lc.globalCompositeOperation = 'source-over'; lc.clearRect(0, 0, lw, lh); lc.fillStyle = G.under ? `rgba(6,4,3,${d})` : `rgba(8,12,38,${d})`; lc.fillRect(0, 0, lw, lh);
     if (settings.quality !== 'low') {
       lc.globalCompositeOperation = 'destination-out';
       const light = (x, y, r, i) => { const sx = (x - vx) * s, sy = (y - vy) * s, rr = r * s; if (sx < -rr || sy < -rr || sx > lw + rr || sy > lh + rr) return; const gr = lc.createRadialGradient(sx, sy, 0, sx, sy, rr); gr.addColorStop(0, `rgba(0,0,0,${i})`); gr.addColorStop(1, 'rgba(0,0,0,0)'); lc.fillStyle = gr; lc.fillRect(sx - rr, sy - rr, rr * 2, rr * 2); };
       if (playing) light(P.x, P.y, 190, .85);
       for (const e of ents) if (e.burn > 0 && !e.dead) light(e.x, e.y, 110, .8);
       for (const p of projs) if (p.arrow === 'fire_arrow' && (!p.stuck || p.life > 1)) light(p.x, p.y, 70, .7);
-      for (const it of list) { const o = it.o; if (!o) continue; if (o.k === 'campfire') light(o.x + 16, o.y + 14, 210 + Math.sin(t * 9) * 8, 1); else if (o.k === 'house' || o.k === 'barracks' || o.k === 'smithy' || o.k === 'chapel' || o.k === 'stable' || o.k === 'hut') light(o.x + o.w / 2, o.y + o.h, 80, .7); else if (o.k === 'keep') light(o.x + o.w / 2, o.y + o.h, 200, .8); else if (o.k === 'tower' || o.k === 'wtower' || o.k === 'bannerpole') light(o.x + o.w / 2, o.y + o.h / 2, 110, .6); else if (o.k === 'hidden' && (o.kind === 'grove' || o.kind === 'shrine')) light(o.x + o.w / 2, o.y + o.h / 2, 160, .8); }
+      for (const it of list) { const o = it.o; if (!o) continue; if (o.k === 'campfire') light(o.x + 16, o.y + 14, 210 + Math.sin(t * 9) * 8, 1); else if (o.k === 'house' || o.k === 'barracks' || o.k === 'smithy' || o.k === 'chapel' || o.k === 'stable' || o.k === 'hut') light(o.x + o.w / 2, o.y + o.h, 80, .7); else if (o.k === 'keep') light(o.x + o.w / 2, o.y + o.h, 200, .8); else if (o.k === 'tower' || o.k === 'wtower' || o.k === 'bannerpole') light(o.x + o.w / 2, o.y + o.h / 2, 110, .6); else if (o.k === 'hidden' && (o.kind === 'grove' || o.kind === 'shrine')) light(o.x + o.w / 2, o.y + o.h / 2, 160, .8); else if (o.k === 'torch') light(o.x + 8, o.y + 6, 200 + Math.sin(t * 9 + o.x) * 8, 1); else if (o.k === 'crystal') light(o.x + 14, o.y + 18, 150, .8); else if (o.k === 'dexit') light(o.x + 18, o.y + 10, 170, .9); }
     }
     ctx.drawImage(lightCv, 0, 0, VW, VH);
     if (settings.quality !== 'low') {
@@ -4986,9 +5230,9 @@ function renderWorld(t) {
     }
   }
   // weather: rain, snow, fog, sandstorms
-  if (playing) drawWeather(ctx, VW, VH, vx, vy, t);
+  if (playing && !G.under) drawWeather(ctx, VW, VH, vx, vy, t);
   // edge indicators
-  if (playing && G.state === 'play') {
+  if (playing && G.state === 'play' && !G.under) {
     const tq = Q.active.find(q => q.id === Q.tracked); const marks = [];
     if (tq) { const tg = questTarget(tq); if (tg) marks.push({ x: tg.x, y: tg.y, c: '#ffd24a', label: tq.title }); }
     if (G.mapWaypoint) marks.push({ x: G.mapWaypoint.x, y: G.mapWaypoint.y, c: '#6ad0ff', label: 'Waypoint' });
@@ -5031,8 +5275,9 @@ function updateHUD(force) {
   const wt = G.wx && G.wx.type !== 'clear' && G.wx.amt > .3 ? G.wx.type : null, ic = wt === 'rain' ? '☂' : wt === 'snow' || wt === 'blizzard' ? '❄' : wt === 'fog' ? '≋' : wt === 'sand' ? '≈' : isNight() ? '☾' : '☀';
   setIf('clk', `${ic} ${SEASONS[curSeason]} · Day ${dayNum()} · ${tn}${wt ? ' · ' + WX[wt] : ''}`, v => $('clock').textContent = v);
   const own = ownerAtPx(P.x, P.y); const rs = statusOf(K.rep[own]);
-  setIf('terr', own, v => { $('terrBanner').src = bannerURL(v); $('terrName').textContent = KDATA[v].full; });
-  setIf('terrRep', `${repTitle(own)}|${Math.round(K.rep[own])}|${rs.c}`, () => $('terrRep').innerHTML = `<span style="color:${K.rep[own] <= -40 ? '#ff5a3a' : rs.c}">${repTitle(own)}</span> · Rep ${sgn(K.rep[own])}`);
+  if (G.under) { setIf('terr', 'u' + G.under.id, () => { $('terrBanner').src = bannerURL(G.under.owner); $('terrName').textContent = G.under.name; }); setIf('terrRep', 'u', () => $('terrRep').innerHTML = 'Underground'); }
+  else setIf('terr', own, v => { $('terrBanner').src = bannerURL(v); $('terrName').textContent = KDATA[v].full; });
+  if (!G.under) setIf('terrRep', `${repTitle(own)}|${Math.round(K.rep[own])}|${rs.c}`, () => $('terrRep').innerHTML = `<span style="color:${K.rep[own] <= -40 ? '#ff5a3a' : rs.c}">${repTitle(own)}</span> · Rep ${sgn(K.rep[own])}`);
   const S = P.S;
   const ammoId = S.bow ? curAmmo() : null, ammoN = ammoId ? countItem(ammoId) : 0;
   setIf('sw', S.wid + '|' + S.wq + '|' + Math.round(S.dmg) + '|' + ammoId + '|' + ammoN, () => { const it = getItem(P.eq.weapon); const sl = $('slotW'); sl.querySelector('img').src = it ? itemIcon(it.id) : itemIcon('wooden_sword'); sl.querySelector('.sn').innerHTML = it ? `<span style="color:${itemColor(it)}">${itemName(it)}</span>` : 'Bare Fists'; sl.querySelector('.ss').textContent = S.bow ? (ammoId ? `${ITEMS[ammoId].name} ×${ammoN} · [R] switch` : 'No arrows!') : `${Math.round(S.dmg)} dmg · ${S.spd} spd · ${S.rng} rng`; });
@@ -5044,7 +5289,7 @@ function updateHUD(force) {
   setIf('sh', S.hid + '|' + P.mounted + '|' + !!horseEnt, () => { const sl = $('slotH'); sl.querySelector('img').src = S.hid ? itemIcon(S.hid) : itemIcon('old_horse'); sl.querySelector('img').style.opacity = S.hid ? 1 : .3; sl.querySelector('.sn').textContent = S.horse ? S.horse.name : 'No Horse'; sl.querySelector('.ss').textContent = S.horse ? (P.mounted ? `Riding · ×${S.hspd} speed` : 'Dismounted · [F] to ride') : 'On foot'; sl.classList.toggle('mounted', P.mounted); });
   // quest tracker
   const qs = Q.active.slice().sort((a, b) => (b.id === Q.tracked) - (a.id === Q.tracked)).slice(0, 3);
-  const qd = q => { const tg = questTarget(q); return tg ? `${leagues(dist(P.x, P.y, tg.x, tg.y))} leagues ${compass(tg.x - P.x, tg.y - P.y)}` : ''; };
+  const qd = q => { if (G.under) return ''; const tg = questTarget(q); return tg ? `${leagues(dist(P.x, P.y, tg.x, tg.y))} leagues ${compass(tg.x - P.x, tg.y - P.y)}` : ''; };
   const qh = qs.map(q => `<div class="qt hudbox ${q.id === Q.tracked ? 'tracked' : ''}${q.type === 'story' && q.main ? ' story' : ''}"><div class="qn">${esc(q.title)}</div><div class="qo">${esc(questObjective(q, true))}<span class="qtm"></span></div><div class="qd"${qd(q) ? '' : ' hidden'}></div></div>`).join('') + (Q.active.length > 3 ? `<div class="qd" style="padding-left:10px;color:var(--muted);font-style:italic;font-size:12px">+${Q.active.length - 3} more — press J</div>` : '');
   setIf('qt', qh, v => $('questTracker').innerHTML = v); // rebuilt only when quests or objectives change, so cards don't re-animate
   const qdEls = $('questTracker').querySelectorAll('.qt .qd'), qtmEls = $('questTracker').querySelectorAll('.qt .qtm');
@@ -5056,7 +5301,7 @@ function updateHUD(force) {
   let pr = '';
   if (G.state === 'play' && !paused()) {
     const b = findInteract(); if (b) pr = `<kbd>E</kbd> ${interactLabel(b)}`;
-    if (!P.mounted && horseEnt && dist(P.x, P.y, horseEnt.x, horseEnt.y) < 70) pr += (pr ? ' &nbsp; ' : '') + '<kbd>F</kbd> Mount horse';
+    if (!P.mounted && horseEnt && !G.under && dist(P.x, P.y, horseEnt.x, horseEnt.y) < 70) pr += (pr ? ' &nbsp; ' : '') + '<kbd>F</kbd> Mount horse';
     if (G.fishing) pr = G.fishing.st === 'bite' ? '<span style="color:#ffe08a">A bite! </span><kbd>E</kbd> Reel in!' : 'Fishing… wait for a bite, then press <kbd>E</kbd>';
     if (input.force) pr = '<span style="color:#ff9a7a">⚠ Holding Q: your attacks will hit friendly and neutral characters</span>' + (pr ? ' &nbsp; ' + pr : '');
   }
@@ -5072,7 +5317,7 @@ addEventListener('keydown', e => {
   if (dialogOpen) { const n = parseInt(e.key); if (n >= 1) { const b = $('dOpts').children[n - 1]; if (b && !b.disabled) b.click(); } return; }
   if (G.state !== 'play' || e.repeat) return;
   const tog = { KeyI: 'inv', KeyM: 'map', KeyK: 'dip', KeyJ: 'quests' }[e.code];
-  if (tog) { UI.toggle(tog); return; }
+  if (tog) { if (tog === 'map' && G.under) { toast('Your map is no use down here. Find your way back to the ladder.'); return; } UI.toggle(tog); return; }
   if (UI.stack.length) return;
   if (e.code === 'Space') tryDodge();
   else if (e.code === 'KeyE') doInteract();
@@ -5098,7 +5343,7 @@ $('pauseScreen').addEventListener('click', e => {
   else if (a === 'saveQuit') { saveGame(); toMainMenu(); }
   else if (a === 'quitNoSave') toMainMenu();
 });
-function toMainMenu() { UI.closeAll(); closeDialog(); G.state = 'menu'; G.shake = 0; $('hud').classList.add('off'); refreshMenu(); UI.show('mainMenu'); }
+function toMainMenu() { if (G.under) leaveDungeon(true); UI.closeAll(); closeDialog(); G.state = 'menu'; G.shake = 0; $('hud').classList.add('off'); refreshMenu(); UI.show('mainMenu'); }
 const saveKey = (mode = G.mode) => mode === 'story' ? 'fk_story' : 'fk_save';
 function hasSave(mode = G.mode) { try { return !!localStorage.getItem(saveKey(mode)); } catch (e) { return false; } }
 function readSave(mode) { try { return JSON.parse(localStorage.getItem(saveKey(mode)) || 'null'); } catch (e) { return null; } }
@@ -5164,8 +5409,9 @@ $('btnEndMenu').onclick = () => { UI.hide('endScreen'); toMainMenu(); };
 function withLoading(text, fn) { $('loadText').textContent = text; $('loading').classList.remove('done'); setTimeout(() => { try { fn(); } finally { $('loading').classList.add('done'); } }, 60); }
 function prepareWorld(seed, opts = normOpts()) { setWorldSize(SIZES[opts.size].n); genWorld(seed); applyStartKingdom(opts.kingdom); buildPalette(); buildTreeSprites(); buildMapLayers(); chunkCache.clear(); }
 function resetState() {
+  G.under = null; G.over = null;
   ents = []; pickups = []; projs = []; parts = []; texts = []; horseEnt = null; uidCounter = 1; nextEid = 1;
-  W.places.forEach(p => { p.disc = false; p.rumor = false; p.spawned = false; p.dead = []; p.cleared = false; p.chestOpened = false; p.clearedAt = 0; p.offers = null; p.request = false; p.blessed = false; p.investigated = false; p.rumorUsed = false; p.backerRevealed = false; p.wellT = -999; if (p.type === 'outpost') p.owner = p.baseOwner; for (const k in p) if (k.startsWith('_shop_')) delete p[k]; });
+  W.places.forEach(p => { p.disc = false; p.rumor = false; p.spawned = false; p.dead = []; p.cleared = false; p.chestOpened = false; p.clearedAt = 0; p.offers = null; p.request = false; p.blessed = false; p.investigated = false; p.rumorUsed = false; p.backerRevealed = false; p.wellT = -999; p.ddead = null; p.dchests = null; p.dcleared = false; p.legendTaken = false; if (p.type === 'outpost') p.owner = p.baseOwner; for (const k in p) if (k.startsWith('_shop_')) delete p[k]; });
   (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false;
   Object.assign(G, { time: 0, dipT: 0, eventT: 50, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, questT: 0 });
   newKingdoms(); newQuests(); newFog();
@@ -5208,11 +5454,11 @@ function saveGame(silent) {
   const qStrip = q => { const c = Object.assign({}, q); delete c.ent; delete c.foes; return c; };
   const data = {
     v: 1, seed: W.seed, time: G.time, kills: G.kills, uid: uidCounter, waypoint: G.mapWaypoint, savedAt: Date.now(),
-    P: { x: P.x, y: P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
+    P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
     horse: horseEnt ? { x: horseEnt.x, y: horseEnt.y } : null,
     K: { rel: K.rel, aff: K.aff, rep: K.rep, mil: K.mil, reasons: K.reasons, events: K.events, kev: K.kev, repWhy: K.repWhy, gifts: K.gifts, log: K.log, cd: {} },
     Q: { active: Q.active.filter(q => q.type !== 'raid' && q.sid !== 'hraid').map(qStrip), done: Q.done.map(qStrip), tracked: Q.tracked, next: Q.next },
-    places: W.places.map(p => ({ disc: p.disc, rumor: p.rumor, cleared: p.cleared, chestOpened: p.chestOpened, clearedAt: p.clearedAt, dead: p.dead, owner: p.owner, blessed: p.blessed, investigated: p.investigated, rumorUsed: p.rumorUsed, backerRevealed: p.backerRevealed })),
+    places: W.places.map(p => ({ disc: p.disc, rumor: p.rumor, cleared: p.cleared, chestOpened: p.chestOpened, clearedAt: p.clearedAt, dead: p.dead, owner: p.owner, blessed: p.blessed, investigated: p.investigated, rumorUsed: p.rumorUsed, backerRevealed: p.backerRevealed, ddead: p.ddead, dchests: p.dchests, dcleared: p.dcleared, legendTaken: p.legendTaken })),
     exp: packBits(EXP), settings,
   };
   data.opts = G.opts || normOpts();
@@ -6294,27 +6540,30 @@ function storyBegin() {
 /* ---------------- Loop ---------------- */
 let last = performance.now(), mmT = 0, ambT = 0, fpsA = 0;
 function update(dt) {
-  G.time += dt; updateWeather(dt);
+  G.time += dt; if (!G.under) updateWeather(dt);
   input.wx = cam.x + (input.mx - VW / 2) / ZOOM; input.wy = cam.y + (input.my - VH / 2) / ZOOM;
   updatePlayer(dt);
-  if (STORY) storyTick(dt);
+  if (STORY && !G.under) storyTick(dt);
+  if (G.under) updateTraps(dt);
   for (const e of ents) { if (Math.abs(e.x - P.x) > 2600 || Math.abs(e.y - P.y) > 2600) { if (!e.follow) continue; } updateActor(e, dt); }
   separate(); updateProjs(dt); updatePickups(dt); updateFX(dt); updateSpawns(dt);
-  if ((G.fogT -= dt) <= 0) { G.fogT = .25; updateDiscovery(); }
+  if ((G.fogT -= dt) <= 0) { G.fogT = .25; if (!G.under) updateDiscovery(); }
   if ((G.questT -= dt) <= 0) {
-    G.questT = .5; questUpdate();
+    G.questT = .5; if (!G.under) questUpdate();
     ents.forEach(e => { if (e.expire && G.time > e.expire) { e.expire = 0; if (e.ally) { e.ally = false; e.follow = false; e.transient = true; e.roam = true; e.home = { x: e.x + rand(-2000, 2000), y: e.y + rand(-2000, 2000) }; e.say = { text: 'We must return to our posts.', t: 3 }; } else if (e.role === 'trader') { e.dead = true; e.deadT = 99; toast('Ysolde the Far-Wanderer has packed up and moved on.'); } } });
   }
   if ((G.dipT += dt) >= 40) { G.dipT = 0; dipTick(); }
-  if ((G.eventT -= dt) <= 0) { G.eventT = rand(60, 115); worldEvent(); }
+  if ((G.eventT -= dt) <= 0) { G.eventT = rand(60, 115); if (!G.under) worldEvent(); }
   if ((G.autosaveT += dt) >= 180) { G.autosaveT = 0; saveGame(true); }
   if ((ambT -= dt) <= 0) {
     ambT = rand(1.5, 4);
     const amb = terAtPx(P.x, P.y);
+    if (G.under) { if (Math.random() < .6) SND.play('drip'); } else {
     if (wxOf('rain') > .2) { SND.play('rain'); ambT = Math.min(ambT, 3); } if (wxOf('sand') > .3) SND.play('wind'); if (wxOf('blizzard') > .3) SND.play('gale');
     if (amb === T.TUNDRA) { if (Math.random() < .45) SND.play('gale'); else if (isNight() && Math.random() < .12) SND.play('howl'); }
     else if (amb === T.DESERT) { if (!isNight()) { if (Math.random() < .4) SND.play('wind'); } else if (Math.random() < .12) SND.play('yip'); else SND.play('cricket'); }
     else if (isNight()) SND.play('cricket'); else if ([T.FOREST, T.DENSE, T.GRASS, T.HILL].includes(amb)) SND.play('bird');
+    }
     if (W.objs.some(o => o.k === 'campfire' && dist(o.x, o.y, P.x, P.y) < 260)) SND.play('fire');
   }
   G.shake *= Math.pow(.004, dt);

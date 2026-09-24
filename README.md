@@ -62,6 +62,7 @@ Before a new game you can set:
 - Regional weather: rain and thunderstorms, morning fog in the marshes, sandstorms in the desert and blizzards in the snowfields. Fog and storms shorten how far enemies see and archers shoot; rain puts out fires.
 - Carriages for fast travel between towns you have discovered (the castle coachman or any village signpost), for a fee by the league.
 - Bounty boards on every signpost: bandit captains, wanted outlaws and dangerous beasts.
+- Dungeons to explore underground: smugglers' caves, spider caves, crypts, abandoned mines and an ice cave in the snowfields. Each is a torch-lit maze with traps (spike plates, dart launchers, webs), side chests and a boss guarding a hoard. The first boss of each kind drops a legendary weapon. Saving underground returns you to the entrance.
 - Fishing at little jetties on rivers, lakes and the coast (buy a rod at a village market), and hermits in the wilds who sell tonics, training and secrets.
 - About 45 music tracks, all generated in code: rotating day and night overworld songs, combat and boss themes, a village, castle and fort theme for each kingdom, and story-mode themes. The music changes with where you are and what you're doing.
 
