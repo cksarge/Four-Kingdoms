@@ -106,7 +106,17 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 - Bounty boards on every signpost: bandit captains, wanted outlaws and dangerous beasts.
 - Dungeons to explore underground: smugglers' caves, spider caves, crypts, abandoned mines and an ice cave in the snowfields. Each is a torch-lit maze with traps (spike plates, dart launchers, webs), side chests and a boss guarding a hoard. The first boss of each kind drops a legendary weapon. Saving underground returns you to the entrance.
 - Live sieges: when a war would take a fort near you, or your liege is involved, armies march and fight for it while a capture meter fills. Fight for either side to earn reputation. Bandits may also raid a fort you own.
-- Tournaments (sandbox): every eight days a castle holds a tourney. Win three bouts to the yield for gold, a rare prize and renown.
+- Tournaments (sandbox): every eight days a castle holds a tourney. Win three bouts for gold, a rare prize and renown.
+  - The second bout is a mounted joust over three passes.
+  - Hold attack to lower your lance and let go as you meet: early for a shield strike (1 point), late for a helm strike (2), or at the last moment to unhorse your opponent and win outright.
+- **Horse races:** the royal stablemaster runs races to the next castle along the road, against three riders.
+  - Entry costs 20 gold, and you need a horse.
+  - Ride through every checkpoint flag. The top three win prizes, and the winner also gets a cup for the trophy room.
+- **Ferries and ships:**
+  - Ferrymen pole you across wide rivers far from any bridge, for 3 gold.
+  - Seaside towns have a harbour, where merchant ships sail to other harbours for a fare.
+  - Voyages take a day or more. Beware storms that wash supplies overboard, and pirates waiting at the docks.
+  - Both are marked on the map.
 - Fiefs: sworn knights with reputation 80 can ask their ruler for a village to hold. Set its taxes, keep its people loyal (feasts help, raids hurt) and collect its income every week.
 - Skills: a point every level for Swordsmanship, Archery, Riding, Leadership and Trade.
 - Companions and soldiers: hire spearmen, bowmen and knights from castle captains (daily pay), or recruit four named sellswords found in the villages, including a healer and a venom archer. Named companions are knocked down, never killed.

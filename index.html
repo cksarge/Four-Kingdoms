@@ -2239,6 +2239,42 @@ function genWorld(seed) {
     for (let y = cy - 10; y <= cy + 9; y++) for (let x = cx - 11; x <= cx + 11; x++) { const i = y * WW + x, t = ter[i]; if (!TINFO[t].block && t !== T.FORD && t !== T.BRIDGE && t !== T.SEA && t !== T.FLOOR) { ter[i] = T.FLOOR; W.clear[i] = 1; } }
     pl.city = city;
   });
+  // ---------- Ferries and harbours ----------
+  // Ferry landings on wide rivers far from any bridge, and a dock with a ship at seaside towns.
+  // Own random stream after everything else; adds objects and interactions only.
+  W.ferries = []; W.harbors = [];
+  const hrr = mulberry32(seed * 151 + 19), landT = (x, y) => { const t = terAt(x, y); return !TINFO[t].block && t !== T.FORD && t !== T.BRIDGE && t !== T.SEA && !W.solid[y * WW + x]; };
+  const nearCross = (x, y, r) => { for (let dy = -r; dy <= r; dy += 2) for (let dx = -r; dx <= r; dx += 2) { const t = terAt(x + dx, y + dy); if (t === T.BRIDGE || t === T.FORD) return true; } return false; };
+  for (let a = 0; a < 6000 && W.ferries.length < Math.max(2, sc(6)); a++) {
+    const x = 4 + Math.floor(hrr() * (WW - 8)), y = 4 + Math.floor(hrr() * (WH - 8)); if (terAt(x, y) !== T.WATER) continue;
+    for (const [dx, dy] of hrr() < .5 ? [[1, 0], [0, 1]] : [[0, 1], [1, 0]]) {
+      let l = 0, r = 0; while (l < 8 && terAt(x - dx * (l + 1), y - dy * (l + 1)) === T.WATER) l++; while (r < 8 && terAt(x + dx * (r + 1), y + dy * (r + 1)) === T.WATER) r++;
+      const w0 = l + r + 1; if (w0 < 2 || w0 > 7) continue;
+      const ax = x - dx * (l + 1), ay = y - dy * (l + 1), bx = x + dx * (r + 1), by = y + dy * (r + 1);
+      if (!landT(ax, ay) || !landT(bx, by) || nearCross(x, y, 25) || W.ferries.some(f => Math.hypot(f.a.tx - x, f.a.ty - y) < 40) || W.places.some(p => Math.hypot(p.tx - x, p.ty - y) < 8)) continue;
+      const A = { tx: ax, ty: ay, x: ax * TS + 16, y: ay * TS + 16 }, B = { tx: bx, ty: by, x: bx * TS + 16, y: by * TS + 16 };
+      [[A, B, dx, dy], [B, A, -dx, -dy]].forEach(([p0, p1, ddx, ddy]) => {
+        addObj({ k: 'jetty', x: p0.tx * TS, y: p0.ty * TS, w: TS, h: TS, dx: ddx, dy: ddy, sy: p0.ty * TS + 4 });
+        addObj({ k: 'ferryboat', x: (p0.tx + ddx * 1.6) * TS + 2, y: (p0.ty + ddy * 1.6) * TS + 4, w: 28, h: 22, v: hrr(), sy: (p0.ty + ddy * 1.6) * TS + 20 });
+        W.interacts.push({ type: 'ferry', x: p0.x - ddx * 10, y: p0.y - ddy * 10 + 6, to: { x: p1.x - ddx * -22, y: p1.y - ddy * -22 } });
+        for (let yy = p0.ty - 1; yy <= p0.ty + 1; yy++) for (let xx = p0.tx - 1; xx <= p0.tx + 1; xx++) W.clear[yy * WW + xx] = 1;
+      });
+      W.ferries.push({ a: A, b: B }); break;
+    }
+  }
+  W.places.filter(p => p.type === 'village' || p.type === 'castle').forEach(pl => {
+    let best = null, bd = 1e9;
+    for (let dy = -24; dy <= 24; dy++) for (let dx = -24; dx <= 24; dx++) {
+      const x = pl.tx + dx, y = pl.ty + dy; if (x < 3 || y < 3 || x >= WW - 3 || y >= WH - 3 || !landT(x, y)) continue;
+      for (const [sx, sy2] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (terAt(x + sx, y + sy2) === T.SEA && terAt(x + sx * 2, y + sy2 * 2) === T.SEA && terAt(x + sx * 3, y + sy2 * 3) === T.SEA) { const d = Math.hypot(dx, dy); if (d < bd) { bd = d; best = { x, y, sx, sy: sy2 }; } }
+    }
+    if (!best || W.harbors.some(h => Math.hypot(h.x / TS - best.x, h.y / TS - best.y) < 18)) return;
+    addObj({ k: 'jetty', x: best.x * TS, y: best.y * TS, w: TS, h: TS, dx: best.sx, dy: best.sy, sy: best.y * TS + 4 });
+    addObj({ k: 'ship', x: (best.x + best.sx * 2.5) * TS - 30, y: (best.y + best.sy * 2.5) * TS - 20, w: 60, h: 40, owner: pl.owner, v: hrr(), sy: (best.y + best.sy * 2.5) * TS + 20 });
+    W.interacts.push({ type: 'harbor', x: best.x * TS + 16 - best.sx * 12, y: best.y * TS + 22 - best.sy * 12, place: pl.id });
+    W.harbors.push({ place: pl.id, x: best.x * TS + 16 - best.sx * 30, y: best.y * TS + 16 - best.sy * 30 });
+    for (let yy = best.y - 1; yy <= best.y + 1; yy++) for (let xx = best.x - 1; xx <= best.x + 1; xx++) W.clear[yy * WW + xx] = 1;
+  });
   // ---------- Trees ----------
   for (let i = 0; i < CW * CHH; i++) { W.chunkTrees.push([]); W.chunkObjs.push([]); }
   for (let ty = 1; ty < WH - 1; ty++) for (let tx = 1; tx < WW - 1; tx++) {
@@ -2596,6 +2632,7 @@ function doPlayerHit() {
   if (hits) { G.hitstop = settings.noFlash ? 0 : .045; addShake(2 + hits); }
 }
 function updatePlayer(dt) {
+  if (G.joust && joustTick(dt)) return;
   P.flash -= dt; P.iframes -= dt; P.atkCd -= dt; if (P.blessT > 0) P.blessT -= dt; if (P.luckT > 0) P.luckT -= dt; if (P.restT > 0) P.restT -= dt;
   P.face = PAD.on && PAD.aim != null ? PAD.aim : TOUCH.on ? touchFace() : Math.atan2(input.wy - P.y, input.wx - P.x);
   let mx = (input.keys.KeyD ? 1 : 0) - (input.keys.KeyA ? 1 : 0), my = (input.keys.KeyS ? 1 : 0) - (input.keys.KeyW ? 1 : 0);
@@ -2961,6 +2998,7 @@ function think(e) {
 }
 function updateActor(e, dt) {
   if (e.dead) { e.deadT += dt; return; }
+  if (e.racer || e.jouster) { if (e.say) { e.say.t -= dt; if (e.say.t <= 0) e.say = null; } return; } // driven by raceTick / joustTick
   if (e.downed > 0) { e.downed -= dt; if (e.downed <= 0) { e.hp = Math.round(e.maxHp * .35); e.say = { text: 'Still breathing…', t: 2.5 }; } return; }
   if (e.burn > 0 || e.poison > 0 || e.chill > 0) tickStatus(e, dt);
   if (e.kind === 'wyvern' && e.target && !e.dead) { // fire breath
@@ -3796,6 +3834,8 @@ function questTarget(q) {
     case 'escort': case 'supplies': case 'deliver': case 'message': { const p = W.places[q.target]; return { x: p.x, y: p.y }; }
     case 'assist': case 'raid': return q.loc;
     case 'tut': return tutTarget(q);
+    case 'race': { if (!G.race) return null; const cp = G.race.cps[G.race.ci]; return cp ? { x: cp[0], y: cp[1] } : null; }
+    case 'guild': return q.loc || null;
     case 'bounty': if (q.bk === 'captain') { const p = W.places[q.place]; return { x: p.x, y: p.y }; } return { x: q.loc.x, y: q.loc.y, r: 6 * TS };
     case 'story': return storyTarget(q);
   }
@@ -4225,7 +4265,7 @@ function interactLabel(b) {
   const it = b.it, pl = W.places[it.place];
   switch (it.type) {
     case 'chest': return pl.chestOpened ? 'Empty stash' : pl.type === 'camp' ? (pl.cleared ? 'Loot the bandit stash' : 'Bandit stash (guarded)') : 'Search the chest';
-    case 'door': return 'Knock on the door'; case 'enter': return (!cityOpen() && it.shop.kind !== 'tavern' && it.shop.kind !== 'inn' ? 'Locked: ' : 'Enter ') + it.shop.name; case 'iexit': return 'Go back outside'; case 'ibed': return G.under && G.under.kind === 'house' ? 'Sleep until morning' : 'Bed'; case 'istash': return 'Open your stash'; case 'irooms': return 'Go up to the rooms'; case 'ibox': return 'Offerings box'; case 'istrong': return 'Force the strongbox'; case 'itrophy': { const tr = (P.trophies || [])[it.idx]; return tr ? `Trophy: ${tr.n}` : 'An empty pedestal'; } case 'fountain': return 'Toss a coin into the fountain'; case 'statue': return 'Read the inscription'; case 'cathedral': return `Enter the ${pl.city && pl.city.cath ? pl.city.cath.name : 'cathedral'}`;
+    case 'door': return 'Knock on the door'; case 'enter': return (!cityOpen() && it.shop.kind !== 'tavern' && it.shop.kind !== 'inn' ? 'Locked: ' : 'Enter ') + it.shop.name; case 'iexit': return 'Go back outside'; case 'ibed': return G.under && G.under.kind === 'house' ? 'Sleep until morning' : 'Bed'; case 'istash': return 'Open your stash'; case 'irooms': return 'Go up to the rooms'; case 'ibox': return 'Offerings box'; case 'istrong': return 'Force the strongbox'; case 'ferry': return 'Take the ferry across (3 gold)'; case 'harbor': return `Board a ship at ${pl.name}`; case 'itrophy': { const tr = (P.trophies || [])[it.idx]; return tr ? `Trophy: ${tr.n}` : 'An empty pedestal'; } case 'fountain': return 'Toss a coin into the fountain'; case 'statue': return 'Read the inscription'; case 'cathedral': return `Enter the ${pl.city && pl.city.cath ? pl.city.cath.name : 'cathedral'}`;
     case 'sign': return 'Signpost, bounty board and carriages'; case 'well': return 'Drink from the well'; case 'fish': return G.fishing ? 'Reel in' : 'Fish here';
     case 'dungeon': return `Enter ${pl.name}${pl.dcleared ? ' (cleared)' : ''}`; case 'home': return 'Enter your house'; case 'fort': return pl.playerFort ? `Your fort: ${pl.name}` : `Look over the ruined fort`; case 'dexit': return 'Climb back outside';
     case 'dchest': return G.under && (G.under.dchests || []).includes(it.idx) ? 'Empty chest' : it.boss ? 'Open the guardian\'s hoard' : 'Open the chest';
@@ -4260,6 +4300,8 @@ function doInteract() {
   else if (it.type === 'irooms') { const inn = ents.find(e => e.role === 'hotelier'); if (inn) innDialog(inn); }
   else if (it.type === 'ibox') { const cp = W.places[G.under.place]; priestDialog(ents.find(e => e.role === 'priest') || null, cp); }
   else if (it.type === 'itrophy') readTrophy(it.idx);
+  else if (it.type === 'ferry') ferryDialog(it);
+  else if (it.type === 'harbor') harborDialog(pl);
   else if (it.type === 'istrong') { W.interacts = W.interacts.filter(x => x !== it); const g0 = randi(30, 90); P.gold += g0; let msg = `${g0} gold`; if (P.guild && P.guild.stage === 3 && !countItem('merchant_ledger')) { addItem('merchant_ledger', 1, 1, true); msg += ' and the merchant\'s ledger'; } else if (chance(.5)) { const id = pick(['silver_ring', 'gold_locket', 'jeweled_brooch']); addItem(id, 1, 1, true); msg += ` and a ${ITEMS[id].name}`; } SND.play('chest'); toast(`You force the strongbox: ${msg}.`, 'gold'); }
   else if (it.type === 'well') { if ((pl.wellT || -999) > G.time - 60) { toast('You have drunk your fill for now.'); return; } pl.wellT = G.time; P.st = P.maxSt; P.hp = Math.min(P.maxHp, P.hp + Math.round(12 * DIFF().heal)); SND.play('eat'); toast(`The cool water refreshes you. (+${Math.round(12 * DIFF().heal)} health, stamina restored)`, 'good'); }
   else if (it.type === 'shrine') {
@@ -4486,6 +4528,29 @@ function breakInDialog(it, pl) {
   openDialog({ name: it.shop.name, role: 'Shut for the night', portrait: 'sign', text: 'The shutters are closed and the door is locked. Your lockpicks are in your pocket.', options: [
     { t: '<span class="dn">PICK</span>Pick the lock', fn: () => { closeDialog(); const seen = ents.some(e => !e.dead && e.faction && e.faction[0] === 'k' && e.k === pl.owner && dist(e.x, e.y, P.x, P.y) < 420); if (seen && chance(.5)) addBounty(pl.owner, 80, 'Breaking and entering'); enterInterior({ kind: INTERIOR_OF[it.shop.kind] || 'shop', shopKind: it.shop.kind, place: pl.id, owner: pl.owner, name: it.shop.name, key: it.shop.key, door: { x: it.x, y: it.y }, breakIn: true }); } },
     { t: 'Leave it', fn: closeDialog }] });
+}
+/* ---------------- Ferries and ships ---------------- */
+function ferryDialog(it) {
+  if (P.gold < 3) { toast('The ferryman wants 3 gold.'); return; }
+  if (ents.some(e => !e.dead && playerHostileTo(e) && dist(e.x, e.y, P.x, P.y) < 300)) { toast('Not with enemies at your back!', 'bad'); return; }
+  P.gold -= 3; SND.play('coin'); withLoading('The ferryman poles you across…', () => { G.time += 20; const f = findFree(it.to.x, it.to.y); P.x = f.x; P.y = f.y; cam.x = P.x; cam.y = P.y; if (horseEnt) { horseEnt.x = P.x + 30; horseEnt.y = P.y; } ents.filter(e => e.follow && e.ally).forEach(e => { const f2 = findFree(P.x + rand(-30, 30), P.y + rand(-30, 30)); e.x = f2.x; e.y = f2.y; }); });
+}
+function harborDialog(pl) {
+  const here = W.harbors.find(h => h.place === pl.id), others = W.harbors.filter(h => h.place !== pl.id).map(h => ({ h, p: W.places[h.place], d: dist(here.x, here.y, h.x, h.y) })).sort((a, b) => a.d - b.d).slice(0, 6);
+  if (!others.length) { toast('No ships sail from here today.'); return; }
+  openDialog({ name: `The ${pick(['Gull', 'Swan', 'Seawolf', 'Kestrel', 'Maiden'])}`, role: `A merchant ship at ${pl.name}`, portrait: 'sign', text: 'The captain leans on the rail. "Where to? Coin up front, and pray for a fair wind."', options: [
+    ...others.map(o => { const cost = Math.round(20 + o.d / TS * .15), days = Math.max(1, Math.round(o.d / TS / 120)); return { t: `Sail to <b>${o.p.name}</b> <span class="dn">${cost}g · ${days} day${days > 1 ? 's' : ''}</span>`, dis: P.gold < cost, fn: () => { closeDialog(); P.gold -= cost; SND.play('coin'); voyage(o, days); } }; }),
+    { t: 'Stay ashore', fn: closeDialog }] });
+}
+function voyage(o, days) {
+  withLoading(`Sailing for ${o.p.name}…`, () => {
+    G.time += days * DAYLEN * .6; if (P.mounted) dismount(); const f = findFree(o.h.x, o.h.y); P.x = f.x; P.y = f.y; cam.x = P.x; cam.y = P.y; o.p.disc = true;
+    if (horseEnt) { horseEnt.x = P.x + 30; horseEnt.y = P.y; } ents.filter(e => e.follow && e.ally).forEach(e => { const f2 = findFree(P.x + rand(-30, 30), P.y + rand(-30, 30)); e.x = f2.x; e.y = f2.y; });
+    const r = Math.random();
+    if (r < .08) { const food = P.inv.filter(i => ITEMS[i.id].food || ITEMS[i.id].good); if (food.length) { const it = pick(food); removeItem(it.uid, Math.max(1, Math.ceil((it.n || 1) / 2))); } setTimeout(() => toast('⛈ A storm battered the ship! Some of your supplies were washed overboard.', 'bad'), 400); }
+    else if (r < .15) { setTimeout(() => { toast('☠ Pirates were waiting at the docks!', 'war'); for (let i = 0; i < 3 + Math.floor(P.lvl / 3); i++) { const f2 = findFree(P.x + rand(-120, 120), P.y + rand(-120, 120)); const e = mkActor('bandit', f2.x, f2.y, { name: 'Pirate', tier: Math.min(3, 1 + Math.floor(P.lvl / 3)), aggroPlayer: true, transient: true }); e.target = P; } SND.play('horn'); }, 600); }
+    else setTimeout(() => toast(`Fair winds carried you to <b>${o.p.name}</b>.`, 'good'), 400);
+  });
 }
 function enterInterior(b) {
   if (G.under) return;
@@ -4832,12 +4897,87 @@ function heraldDialog(e) {
 }
 function tourneyRound(r) {
   const T = G.tourney, c = W.places[T.castle]; T.round = r; T.fighting = true; T.ring = { x: c.x, y: c.y + 17 * TS };
+  if (r === 2) { startJoust(T, c); return; }
   const f = findFree(T.ring.x + 60, T.ring.y), k = pick([0, 1, 2, 3].filter(j => j !== c.owner));
   const e = mkActor('champion', f.x, f.y, { name: `${pick(['Sir', 'Dame'])} ${pick(NAMES.first)} ${pick(T_EPI)}`, k, _look: knightLook(k, pick(['sword', 'sword', 'axe', 'spear'])), aggroPlayer: true, boss: true, tourney: true, home: { x: T.ring.x, y: T.ring.y }, leash: 600, aggro: 600 });
   e.hp = e.maxHp = Math.round(180 * [1, 1.3, 1.75][r - 1] * (1 + P.lvl * .06)); e.dmg *= [1, 1.2, 1.45][r - 1] * (1 + P.lvl * .04); e.target = P;
   const g2 = findFree(T.ring.x - 60, T.ring.y); P.x = g2.x; P.y = g2.y; cam.x = P.x; cam.y = P.y;
   if (!ents.some(x => x.tourneyCrowd)) for (let i = 0; i < 8; i++) { const a = i / 8 * TAU, cf = findFree(T.ring.x + Math.cos(a) * 7 * TS, T.ring.y + Math.sin(a) * 5 * TS); mkActor('villager', cf.x, cf.y, { tourneyCrowd: true, stand: true, standFace: a + Math.PI, transient: true }); }
   showAreaTitle(`BOUT ${['I', 'II', 'III'][r - 1]}`, e.name); SND.play('duel'); SND.play('crowd');
+}
+/* Jousting: the second bout is a mounted charge. Hold attack to lower the lance and let go as you meet:
+   early is a safe shield strike, late a helm strike, and a perfect strike unhorses your opponent. */
+function startJoust(T, c) {
+  const k = pick([0, 1, 2, 3].filter(j => j !== c.owner)), ly = T.ring.y, lx0 = T.ring.x - 8 * TS, lx1 = T.ring.x + 8 * TS;
+  const opp = mkActor('champion', lx1, ly, { name: `${pick(['Sir', 'Dame'])} ${pick(NAMES.first)} ${pick(T_EPI)}`, k, _look: Object.assign(knightLook(k, 'spear'), {}), stand: true, faction: 'civ', civ: true, jouster: true, horse: pick(['riding_horse', 'fast_horse', 'old_horse']), transient: true, tourney: false });
+  G.joust = { T, opp, lx0, lx1, y: ly, pass: 0, ps: 0, os: 0, phase: 'ready', t: 1.8, rel: null, holding: false, lance: 0 };
+  if (P.mounted) dismount(); P.x = lx0; P.y = ly; cam.x = T.ring.x; cam.y = ly;
+  showAreaTitle('BOUT II · THE JOUST', opp.name); SND.play('crowd');
+  toast('Hold attack as you charge to lower your lance, and let go as you meet: early for the shield, late for the helm.', 'gold');
+}
+function joustTick(dt) {
+  const J = G.joust; if (!J) return false; const o = J.opp, sp = 170; input.clicked = false;
+  P.face = 0; o.face = Math.PI; P.hface = 0; P.walk += dt * (J.phase === 'charge' ? 14 : 0); o.walk = (o.walk || 0) + dt * (J.phase === 'charge' ? 14 : 0);
+  if (J.phase === 'ready') { J.t -= dt; P.x = J.lx0; P.y = J.y; o.x = J.lx1; o.y = J.y; if (J.t <= 0) { J.phase = 'charge'; J.rel = null; J.lance = 0; J.pass++; SND.play('horn'); } }
+  else if (J.phase === 'charge') {
+    P.x += sp * dt; o.x -= sp * dt; const gap = o.x - P.x;
+    if (input.lmb && J.rel == null) J.lance = Math.min(1, J.lance + dt * 2.5);
+    if (!input.lmb && J.lance > .3 && J.rel == null) J.rel = gap;
+    if (gap <= 20) {
+      const g0 = J.rel; let pts = 0; if (g0 != null) pts = g0 < 30 ? 0 : g0 < 50 ? 3 : g0 < 95 ? 2 : g0 < 150 ? 1 : 0;
+      const diff = [0, .45, .55][Math.min(2, J.T.round - 1)] + P.lvl * .01, rr = Math.random(), opts = rr < .45 - diff * .3 ? 0 : rr < .85 ? 1 : 2;
+      J.ps += pts; J.os += opts; SND.play(pts || opts ? 'hit' : 'swing'); addShake(pts ? 6 : 3);
+      const say = ['Missed!', 'Shield strike! (1)', 'Helm strike! (2)', 'UNHORSED! (3)'][pts];
+      toast(`Pass ${J.pass}: you — ${say}; ${o.name.split(' ')[1]} — ${['a miss', 'a shield strike', 'a helm strike'][opts]}.`, pts > opts ? 'good' : pts < opts ? 'bad' : '');
+      if (opts) { P.hp = Math.max(1, P.hp - [0, 8, 16][opts] * DIFF().dmgTaken); P.flash = .2; }
+      if (pts === 3) return endJoust(true), true;
+      if (J.pass >= 3 && J.ps !== J.os) return endJoust(J.ps > J.os), true;
+      J.phase = 'ready'; J.t = 2.2; // riders wheel back to their ends for the next pass
+    }
+  }
+  cam.x += (J.T.ring.x - cam.x) * Math.min(1, dt * 3); cam.y += (J.y - cam.y) * Math.min(1, dt * 3);
+  return true;
+}
+function endJoust(win) {
+  const J = G.joust; G.joust = null; removeEnt(J.opp); SND.play('crowd');
+  if (win) { toast(`You win the joust, ${J.ps} to ${J.os}! On to the final bout.`, 'gold'); P.hp = Math.min(P.maxHp, P.hp + P.maxHp * .5); P.st = P.maxSt; setTimeout(() => { if (G.tourney && G.state === 'play') tourneyRound(3); }, 3000); }
+  else { toast(`Beaten in the joust, ${J.ps} to ${J.os}.`, 'bad'); tourneyLose(); }
+}
+/* Horse races: from a royal stable to the next castle along the road, through checkpoint flags, against three riders. */
+function raceOffer(e) {
+  const c = W.places[e.place], to = W.places.filter(p => p.type === 'castle' && p !== c).sort((a, b) => dist(c.x, c.y, a.x, a.y) - dist(c.x, c.y, b.x, b.y))[0];
+  openDialog({ name: e.name, role: `Royal Stables of ${KDATA[c.owner].name}`, portrait: e, text: `The riders are saddling up for the race to ${to.name}. Twenty gold to enter; the winner takes the purse. You'll need a horse under you.`, options: [
+    { t: `<span class="dn">RACE</span>Enter the race to ${to.name} (20 gold)`, dis: P.gold < 20 || !P.eq.horse || !!G.race, fn: () => { closeDialog(); P.gold -= 20; startRace(c, to); } },
+    { t: 'Browse the stables', fn: () => { closeDialog(); openShop(getShop(e), e); } }, { t: 'Farewell', fn: closeDialog }] });
+}
+function startRace(from, to) {
+  const pts = roadPath({ x: from.gate[0] * TS, y: from.gate[1] * TS }, { x: to.gate[0] * TS, y: to.gate[1] * TS }); if (!pts || pts.length < 6) { toast('The road is washed out; no race today.'); return; }
+  const cps = []; for (let i = 8; i < pts.length - 1; i += Math.max(8, Math.floor(pts.length / 6))) cps.push(pts[i]); cps.push(pts[pts.length - 1]);
+  const start = { x: pts[0][0], y: pts[0][1] }; const f = findFree(start.x, start.y); P.x = f.x; P.y = f.y; cam.x = P.x; cam.y = P.y; if (!P.mounted) mount();
+  const riders = [0, 1, 2].map(i => { const f2 = findFree(start.x + (i - 1) * 40, start.y + 30); const e = mkActor('npc', f2.x, f2.y, { name: `${pick(NAMES.first)} ${pick(['the Swift', 'of the Downs', 'Fleetfoot', 'the Bold'])}`, racer: true, horse: pick(['riding_horse', 'fast_horse', 'war_horse']), stand: true, transient: true, k: randi(0, 3), spd0: 0 }); e.spd0 = 150 * ITEMS[e.horse].hspd * rand(.9, 1.02); e.pi = 0; return e; });
+  G.race = { pts, cps, ci: 0, riders, to: to.id, t: -3, done: [], started: false, sx: P.x, sy: P.y };
+  const q = { id: Q.next++, type: 'race', title: `The Race to ${to.name}`, desc: 'Ride through every checkpoint flag to the finish.', obj: `Checkpoint 1 of ${cps.length}`, giverName: 'The stablemaster', reward: { gold: 0, xp: 0, rep: {}, rel: [], items: [] }, started: G.time }; Q.active.push(q); Q.tracked = q.id;
+  showAreaTitle('THE RACE', `To ${to.name}`); SND.play('horn');
+}
+function raceTick(dt) {
+  const R2 = G.race; if (!R2) return; R2.t += dt; const q = Q.active.find(x => x.type === 'race');
+  if (R2.t < 0) { P.x = R2.sx; P.y = R2.sy; if (q) q.obj = `Starting in ${Math.ceil(-R2.t)}…`; return; }
+  if (!R2.started) { R2.started = true; toast('GO!', 'gold'); SND.play('horn'); }
+  for (const e of R2.riders) {
+    if (e.fin) continue; const tg = R2.pts[Math.min(e.pi, R2.pts.length - 1)], d = dist(e.x, e.y, tg[0], tg[1]), v = e.spd0 * (1 + Math.sin(R2.t * .7 + e.id) * .08);
+    if (d < 20) { e.pi++; if (e.pi >= R2.pts.length) { e.fin = true; R2.done.push(e.name); e.say = { text: 'Ha! Finished!', t: 3 }; } continue; }
+    e.x += (tg[0] - e.x) / d * v * dt; e.y += (tg[1] - e.y) / d * v * dt; e.face = Math.atan2(tg[1] - e.y, tg[0] - e.x); e.walk = (e.walk || 0) + dt * 12;
+  }
+  const cp = R2.cps[R2.ci]; if (dist(P.x, P.y, cp[0], cp[1]) < 110) { R2.ci++; SND.play('ui'); if (R2.ci >= R2.cps.length) { const place = R2.done.length + 1; endRace(place); return; } toast(`Checkpoint ${R2.ci} of ${R2.cps.length}!`, 'good'); }
+  if (q) q.obj = `Checkpoint ${R2.ci + 1} of ${R2.cps.length} · ${R2.done.length ? R2.done.length + ' rider' + (R2.done.length > 1 ? 's' : '') + ' finished' : 'ride!'}`;
+  if (R2.t > 480) endRace(0);
+}
+function endRace(place) {
+  const R2 = G.race; G.race = null; Q.active = Q.active.filter(q => q.type !== 'race'); setTimeout(() => R2.riders.forEach(e => removeEnt(e)), 5000);
+  if (!place) { toast('The race is over. You did not finish.', 'bad'); return; }
+  const prize = [0, 250, 100, 40, 0][place], to = W.places[R2.to]; if (prize) { P.gold += prize; SND.play('coin'); }
+  if (place === 1) { addRep(to.owner, 5, 'Won a horse race'); addTrophy(`The race cup of ${to.name}`, 'tourney', P.x, P.y); SND.play('mainquest'); }
+  showAreaTitle(['', 'FIRST PLACE!', 'SECOND PLACE', 'THIRD PLACE', 'LAST PLACE'][place], `The Race to ${to.name}`); toast(`You finish ${['', 'first', 'second', 'third', 'last'][place]}!${prize ? ` +${prize} gold.` : ''}`, place === 1 ? 'gold' : '');
 }
 function tourneyYield(e) {
   const T = G.tourney; Object.assign(e, { boss: false, target: null, aggroPlayer: false, faction: 'civ', civ: true, transient: true, tourney: false, home: { x: e.x, y: e.y + 400 } }); e.say = { text: 'I yield! Well fought.', t: 3 }; SND.play('crowd');
@@ -5074,6 +5214,7 @@ function talkTo(e) {
   if (canPickpocket(e)) return pickpocket(e, k);
   if (e.role === 'guild') return guildDialog(e);
   if (e.role === 'enc') return encDialog(e);
+  if (e.role === 'stable' && W.places[e.place] && W.places[e.place].type === 'castle') return raceOffer(e);
   if (e.role === 'encdone' || e.role === 'encmute') { e.say = { text: pick(['Safe travels.', 'Hmph.', 'Move along.']), t: 2 }; return; }
   if (e.role === 'gamesmaster') return gamesDialog(e);
   if (e.role === 'taxcart') { e.say = { text: 'Keep your distance!', t: 2 }; return; }
@@ -5893,6 +6034,8 @@ function drawStruct(g, o, t) {
       break;
     }
     case 'wtower': drawWatchtower(g, o, t, k, kd, towerPart(o)); break;
+    case 'ferryboat': { const bob = Math.sin(t * 1.6 + o.v * 9) * 1.2; g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, x + w / 2 + 2, y + h / 2 + 5, w / 2, h / 3); g.fillStyle = '#6a4424'; g.beginPath(); g.moveTo(x, y + 6 + bob); g.lineTo(x + w, y + 6 + bob); g.lineTo(x + w - 4, y + h + bob); g.lineTo(x + 4, y + h + bob); g.closePath(); g.fill(); g.fillStyle = '#8a6036'; g.fillRect(x + 2, y + 6 + bob, w - 4, 4); g.strokeStyle = '#4a2f18'; g.lineWidth = 2; g.beginPath(); g.moveTo(x + w - 6, y - 8 + bob); g.lineTo(x + w - 10, y + h + bob); g.stroke(); break; }
+    case 'ship': { const bob = Math.sin(t * 1.2 + o.v * 9) * 1.5; g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, x + w / 2 + 3, y + h - 4, w / 2, 8); g.fillStyle = '#5a3a1e'; g.beginPath(); g.moveTo(x, y + 18 + bob); g.lineTo(x + w, y + 18 + bob); g.lineTo(x + w - 8, y + h + bob); g.lineTo(x + 6, y + h + bob); g.closePath(); g.fill(); g.fillStyle = '#7a5030'; g.fillRect(x + 2, y + 18 + bob, w - 4, 5); g.fillStyle = '#3a2412'; g.fillRect(x + w / 2 - 1.5, y - 30 + bob, 3, 50); g.fillStyle = '#efe6d0'; g.beginPath(); g.moveTo(x + w / 2 + 2, y - 28 + bob); g.quadraticCurveTo(x + w / 2 + 26 + Math.sin(t) * 2, y - 8 + bob, x + w / 2 + 2, y + 12 + bob); g.closePath(); g.fill(); g.fillStyle = kd.color; g.fillRect(x + w / 2 + 4, y - 16 + bob, 10, 8); g.fillStyle = kd.color; g.beginPath(); g.moveTo(x + w / 2, y - 32 + bob); g.lineTo(x + w / 2 + 12, y - 29 + bob); g.lineTo(x + w / 2, y - 26 + bob); g.fill(); break; }
     case 'cathedral': drawCathedral(g, o, t, k, kd); break;
     case 'f_mat': case 'f_shelf': case 'f_hearth': case 'f_bar': case 'f_stage': case 'f_table': case 'f_stool': case 'f_barrel': case 'f_crate': case 'f_stairs': case 'f_rug': case 'f_plant': case 'f_window': case 'f_altar': case 'f_candle': case 'f_pew': case 'f_box': case 'f_bed': case 'f_chest': case 'f_pedestal': case 'f_banner': drawFurniture(g, o, t, kd); break;
     case 'fountain': drawFountain(g, o, t, kd); break;
@@ -7106,6 +7249,8 @@ function drawBigMap() {
   }
   if (MAPF.quests) Q.active.forEach(q => { const t = questTarget(q); if (!t) return; const [sx, sy] = toS(t.x, t.y); if (t.r) { g.strokeStyle = 'rgba(255,210,74,.8)'; g.setLineDash([6 * dpr, 5 * dpr]); g.lineWidth = 2 * dpr; g.beginPath(); g.arc(sx, sy, t.r / TS * z, 0, TAU); g.stroke(); g.setLineDash([]); } g.save(); g.translate(sx, sy); g.rotate(Math.PI / 4); g.fillStyle = Q.tracked === q.id ? '#ffd24a' : '#c8a040'; g.fillRect(-6 * dpr, -6 * dpr, 12 * dpr, 12 * dpr); g.strokeStyle = '#000'; g.lineWidth = 1.5 * dpr; g.strokeRect(-6 * dpr, -6 * dpr, 12 * dpr, 12 * dpr); g.restore(); });
   if (G.mapWaypoint) { const [sx, sy] = toS(G.mapWaypoint.x, G.mapWaypoint.y); g.strokeStyle = '#6ad0ff'; g.lineWidth = 3 * dpr; g.beginPath(); g.arc(sx, sy, 8 * dpr, 0, TAU); g.stroke(); g.beginPath(); g.moveTo(sx, sy - 14 * dpr); g.lineTo(sx, sy + 14 * dpr); g.moveTo(sx - 14 * dpr, sy); g.lineTo(sx + 14 * dpr, sy); g.stroke(); }
+  (W.harbors || []).forEach(h => { const [hx, hy] = toS(h.x, h.y); g.fillStyle = 'rgba(15,10,5,.8)'; circ(g, hx, hy, 7 * dpr); g.fillStyle = '#9fd0ff'; g.font = `bold ${10 * dpr}px Georgia`; g.textAlign = 'center'; g.fillText('⚓', hx, hy + 4 * dpr); });
+  (W.ferries || []).forEach(f => { const [ax, ay] = toS(f.a.x, f.a.y), [bx2, by2] = toS(f.b.x, f.b.y); g.strokeStyle = 'rgba(200,230,255,.8)'; g.setLineDash([3 * dpr, 3 * dpr]); g.lineWidth = 1.5 * dpr; g.beginPath(); g.moveTo(ax, ay); g.lineTo(bx2, by2); g.stroke(); g.setLineDash([]); });
   if (G.wboss) { const [bx, by] = toS(G.wboss.x, G.wboss.y); const pul = 1 + Math.sin(performance.now() / 300) * .15; g.fillStyle = 'rgba(255,60,30,.25)'; circ(g, bx, by, 16 * dpr * pul); g.fillStyle = '#1a0e08'; circ(g, bx, by, 10 * dpr); g.fillStyle = '#ff5a2a'; g.font = `bold ${13 * dpr}px Georgia`; g.textAlign = 'center'; g.fillText(G.wboss.kind === 'wyvern' ? '⚡' : '⛰', bx, by + 5 * dpr); g.font = `italic ${11 * dpr}px 'EB Garamond', Georgia, serif`; g.lineWidth = 3 * dpr; g.strokeStyle = 'rgba(15,10,5,.85)'; g.strokeText(G.wboss.name, bx, by + 24 * dpr); g.fillStyle = '#ffb0a0'; g.fillText(G.wboss.name, bx, by + 24 * dpr); }
   if (P && P.grave && !G.under) { const [gx, gy] = toS(P.grave.x, P.grave.y); g.fillStyle = 'rgba(15,10,5,.8)'; circ(g, gx, gy, 9 * dpr); g.fillStyle = '#b8b4ac'; g.beginPath(); g.moveTo(gx - 4.5 * dpr, gy + 5 * dpr); g.lineTo(gx - 4.5 * dpr, gy - 1.5 * dpr); g.arc(gx, gy - 1.5 * dpr, 4.5 * dpr, Math.PI, 0); g.lineTo(gx + 4.5 * dpr, gy + 5 * dpr); g.closePath(); g.fill(); if (mapView.z >= 2.2) { g.font = `italic ${11 * dpr}px 'EB Garamond', Georgia, serif`; g.textAlign = 'center'; g.lineWidth = 3 * dpr; g.strokeStyle = 'rgba(15,10,5,.85)'; g.strokeText('Your last grave', gx, gy + 20 * dpr); g.fillStyle = '#d8d0c0'; g.fillText('Your last grave', gx, gy + 20 * dpr); } }
   (P.pins || []).forEach(pn => { const [sx, sy] = toS(pn.x, pn.y), [ic, col] = PIN_ICONS[pn.icon]; g.fillStyle = 'rgba(15,10,5,.8)'; circ(g, sx, sy, 11 * dpr); g.fillStyle = col; g.font = `bold ${14 * dpr}px Georgia`; g.fillText(ic, sx, sy + 5 * dpr); if (pn.text && mapView.z >= 2.2) { g.font = `italic ${11 * dpr}px 'EB Garamond', Georgia, serif`; g.lineWidth = 3 * dpr; g.strokeStyle = 'rgba(15,10,5,.85)'; g.strokeText(pn.text, sx, sy + 22 * dpr); g.fillStyle = '#f5e6bd'; g.fillText(pn.text, sx, sy + 22 * dpr); } });
@@ -7358,11 +7503,15 @@ function drawCorpse(g, e) {
   g.fillStyle = L.body; ell(g, 0, 0, 11, 7); g.fillStyle = L.skin || '#caa'; circ(g, 12, 0, 5.5);
   g.restore();
 }
+function drawLance(g, x, y, face, low) { g.save(); g.translate(x, y); g.rotate(face - (1 - (low || 0)) * .9); g.strokeStyle = '#d8c8a0'; g.lineWidth = 3.5; g.beginPath(); g.moveTo(-6, 0); g.lineTo(64, 0); g.stroke(); g.fillStyle = '#c8302a'; g.fillRect(6, -4, 8, 8); g.fillStyle = '#9ba1a8'; g.beginPath(); g.moveTo(64, -2.5); g.lineTo(72, 0); g.lineTo(64, 2.5); g.fill(); g.restore(); }
 function drawEntity(g, e, t) {
+  if ((e.jouster || e.racer) && !e.dead) { drawHorse(g, e.x, e.y + 2, e.face, ITEMS[e.horse || 'war_horse'], e.walk || 0, true, e.k); }
+  if (e.jouster) drawLance(g, e.x, e.y - 6, e.face, .8);
   if (e.isPlayer) {
     if (P.dodge > 0) g.globalAlpha = .75;
-    if (P.mounted) drawHorse(g, P.x, P.y + 2, P.hface, P.S.horse, P.walk, true, P.allegiance);
-    drawHuman(g, P.x, P.y - (P.mounted ? 3 : 0), P.face, lookFor(P), { walk: P.walk, mounted: P.mounted, flash: P.flash, blocking: P.blocking, draw: P.S.bow ? (P.drawing ? P.draw : 0) : undefined, arrowCol: P.S.bow && curAmmo() ? ITEMS[curAmmo()].col : null, swing: P.swing > 0 ? { p: 1 - P.swing / P.swingDur, dir: P.swingDir, arc: P.swingArc || P.S.arc } : null, trail: true, trailR: P.S.rng * .72 });
+    if (P.mounted || G.joust) drawHorse(g, P.x, P.y + 2, G.joust ? 0 : P.hface, P.S.horse || ITEMS.riding_horse, P.walk, true, P.allegiance);
+    if (G.joust) drawLance(g, P.x, P.y - 6, 0, G.joust.lance);
+    drawHuman(g, P.x, P.y - (P.mounted || G.joust ? 3 : 0), P.face, lookFor(P), { walk: P.walk, mounted: P.mounted || !!G.joust, flash: P.flash, blocking: P.blocking, draw: P.S.bow ? (P.drawing ? P.draw : 0) : undefined, arrowCol: P.S.bow && curAmmo() ? ITEMS[curAmmo()].col : null, swing: P.swing > 0 ? { p: 1 - P.swing / P.swingDur, dir: P.swingDir, arc: P.swingArc || P.S.arc } : null, trail: true, trailR: P.S.rng * .72 });
     g.globalAlpha = 1;
     if (P.chillT > 0) { g.strokeStyle = 'rgba(200,240,255,.7)'; g.lineWidth = 2; g.beginPath(); g.arc(P.x, P.y, 15, 0, TAU); g.stroke(); }
     if (P.webbed > 0) { g.strokeStyle = 'rgba(230,230,225,.5)'; g.lineWidth = 1; for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; g.beginPath(); g.moveTo(P.x, P.y); g.lineTo(P.x + Math.cos(a) * 16, P.y + Math.sin(a) * 16); g.stroke(); } }
@@ -7382,9 +7531,9 @@ function drawEntityBody(g, e, t) {
   if (e.animal) { drawAnimal(g, e); statusTint(g, e); return; }
   if (e.cart) drawCart(g, e);
   if (e.ally) { g.strokeStyle = 'rgba(106,208,255,.7)'; g.lineWidth = 2; g.beginPath(); g.ellipse(e.x, e.y + 8, 14, 6, 0, 0, TAU); g.stroke(); }
-  const ho = { walk: e.walk, flash: e.flash, swing: e.swing > 0 ? { p: 1 - e.swing / .22, dir: 1, arc: 1.8 } : null, wind: e.wind, blocking: e.guard && !(e.guardBroken > 0) && !(e.stun > 0) && !(e.swing > 0) };
+  const ho = { walk: e.walk, flash: e.flash, swing: e.swing > 0 ? { p: 1 - e.swing / .22, dir: 1, arc: 1.8 } : null, wind: e.wind, blocking: e.guard && !(e.guardBroken > 0) && !(e.stun > 0) && !(e.swing > 0), mounted: !!(e.jouster || e.racer) };
   if (e.scale) { g.save(); g.translate(e.x, e.y); g.scale(e.scale, e.scale); drawHuman(g, 0, 0, e.face, lookFor(e), ho); g.restore(); }
-  else drawHuman(g, e.x, e.y, e.face, lookFor(e), ho);
+  else drawHuman(g, e.x, e.y - (ho.mounted ? 3 : 0), e.face, lookFor(e), ho);
   statusTint(g, e);
 }
 function statusTint(g, e) {
@@ -7467,6 +7616,7 @@ function renderWorld(t) {
   const dead = [];
   for (const e of ents) { if (e.x < vx - 60 || e.x > vx + VW + 60 || e.y < vy - 60 || e.y > vy + VH + 80) continue; if (e.dead) dead.push(e); else list.push({ y: e.perch ? e.y + 120 : e.y, e }); }
   if (playing && G.state !== 'dead') list.push({ y: P.y, e: P });
+  if (playing && G.race) G.race.cps.forEach((c, i) => { if (i >= G.race.ci && Math.abs(c[0] - cam.x) < VW && Math.abs(c[1] - cam.y) < VH) list.push({ y: c[1], flag: { x: c[0], y: c[1], n: i + 1, last: i === G.race.cps.length - 1, next: i === G.race.ci } }); });
   if (playing && G.festival && !G.under) for (const pl of W.places) if (pl.type === 'castle' && pl.city && dist(P.x, P.y, pl.x, pl.y) < 1400) festDeco(pl).forEach(d => list.push({ y: d.y + (d.k === 'bunting' ? -400 : 0), fd: d }));
   if (playing && P.grave && !G.under && Math.abs(P.grave.x - cam.x) < VW && Math.abs(P.grave.y - cam.y) < VH) list.push({ y: P.grave.y + 8, grave: 1 });
   dead.forEach(e => drawEntity(g, e, t));
@@ -7485,6 +7635,7 @@ function renderWorld(t) {
     } else if (it.o) { drawStruct(g, it.o, t); if (it.o.home) { const o = it.o; g.fillStyle = '#3a2a1a'; g.fillRect(o.x + o.w - 10, o.y - 30, 2, 26); g.fillStyle = '#e7c35a'; g.beginPath(); g.moveTo(o.x + o.w - 8, o.y - 30); g.lineTo(o.x + o.w + 8, o.y - 25); g.lineTo(o.x + o.w - 8, o.y - 20); g.fill(); } }
     else if (it.grave) drawGrave(g, P.grave, t);
     else if (it.fd) drawFestDeco(g, it.fd, t);
+    else if (it.flag) { const f0 = it.flag; g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, f0.x + 3, f0.y + 2, 8, 3); g.fillStyle = '#3a2a1a'; g.fillRect(f0.x - 1.5, f0.y - 44, 3, 44); g.fillStyle = f0.last ? '#f4f0e0' : f0.next ? '#e8c040' : '#c83a2a'; g.beginPath(); g.moveTo(f0.x + 1.5, f0.y - 44); g.lineTo(f0.x + 26 + Math.sin(t * 6) * 2, f0.y - 37); g.lineTo(f0.x + 1.5, f0.y - 30); g.fill(); if (f0.last) { g.fillStyle = '#1a1612'; for (let i = 0; i < 3; i++) g.fillRect(f0.x + 3 + i * 7, f0.y - 43 + (i % 2) * 5, 4, 4); } g.font = 'bold 11px Cinzel, Georgia'; g.textAlign = 'center'; g.fillStyle = '#fff4dc'; g.strokeStyle = '#000'; g.lineWidth = 3; g.strokeText(f0.last ? 'FINISH' : f0.n, f0.x, f0.y - 48); g.fillText(f0.last ? 'FINISH' : f0.n, f0.x, f0.y - 48); }
     else drawEntity(g, it.e, t);
   }
   signQueue.forEach(o => drawSignPlanks(g, o)); signQueue.length = 0;
@@ -7620,7 +7771,8 @@ function updateHUD(force) {
     if (G.fishing) pr = G.fishing.st === 'bite' ? '<span style="color:#ffe08a">A bite! </span><kbd>E</kbd> Reel in!' : 'Fishing… wait for a bite, then press <kbd>E</kbd>';
     if (input.force) pr = '<span style="color:#ff9a7a">⚠ Holding Q: your attacks will hit friendly and neutral characters</span>' + (pr ? ' &nbsp; ' + pr : '');
   }
-  if (G.contest) { const C = G.contest; pr = C.kind === 'archery' ? `🎯 Archery contest · ${C.hits} hits · ${Math.ceil(C.t)}s` : C.kind === 'pie' ? `🥧 EAT! Mash <kbd>E</kbd> · ${C.n} pies · ${Math.ceil(C.t)}s` : `🔔 Strike with <kbd>E</kbd> when full: <span style="display:inline-block;width:120px;height:10px;background:#2a1a10;border:1px solid #d8b25a;vertical-align:middle"><span style="display:block;height:100%;width:${Math.round((Math.sin(C.ph) + 1) * 50)}%;background:linear-gradient(90deg,#d8b25a,#ff5a3a)"></span></span> · ${C.tries} left`; }
+  if (G.joust) { const J = G.joust; pr = J.phase === 'ready' ? `🐎 Pass ${J.pass + 1} of 3 · You ${J.ps} – ${J.os} ${J.opp.name.split(' ')[1]} · Ready…` : `🐎 Hold attack to lower your lance, let go as you meet! <span style="display:inline-block;width:90px;height:8px;background:#2a1a10;border:1px solid #d8b25a;vertical-align:middle"><span style="display:block;height:100%;width:${Math.round(J.lance * 100)}%;background:#e8c060"></span></span>`; }
+  else if (G.contest) { const C = G.contest; pr = C.kind === 'archery' ? `🎯 Archery contest · ${C.hits} hits · ${Math.ceil(C.t)}s` : C.kind === 'pie' ? `🥧 EAT! Mash <kbd>E</kbd> · ${C.n} pies · ${Math.ceil(C.t)}s` : `🔔 Strike with <kbd>E</kbd> when full: <span style="display:inline-block;width:120px;height:10px;background:#2a1a10;border:1px solid #d8b25a;vertical-align:middle"><span style="display:block;height:100%;width:${Math.round((Math.sin(C.ph) + 1) * 50)}%;background:linear-gradient(90deg,#d8b25a,#ff5a3a)"></span></span> · ${C.tries} left`; }
   if (PAD.on) pr = pr.replace(/<kbd>E<\/kbd>/g, '<kbd>X</kbd>').replace(/<kbd>F<\/kbd>/g, '<kbd>B</kbd>');
   else if (TOUCH.on) pr = pr.replace(/press <kbd>E<\/kbd>/g, 'tap ✋').replace(/<kbd>E<\/kbd>/g, '<kbd>✋</kbd>');
   else if (keyOf('KeyE') !== 'KeyE') pr = pr.replace(/<kbd>E<\/kbd>/g, `<kbd>${keyName('KeyE')}</kbd>`);
@@ -7959,7 +8111,7 @@ function resetState() {
   ents = []; pickups = []; projs = []; parts = []; texts = []; horseEnt = null; uidCounter = 1; nextEid = 1;
   W.places.forEach(p => { p.disc = false; p.rumor = false; p.spawned = false; p.dead = []; p.cleared = false; p.chestOpened = false; p.clearedAt = 0; p.offers = null; p.request = false; p.blessed = false; p.investigated = false; p.rumorUsed = false; p.backerRevealed = false; p.wellT = -999; p.sboss = null; p.ddead = null; p.dchests = null; p.dcleared = false; p.legendTaken = false; if (p.type === 'outpost') p.owner = p.baseOwner; for (const k in p) if (k.startsWith('_shop_')) delete p[k]; });
   (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false; G.lastPay = null; G.siege = null; G.tourney = null; G.stats = newStats(); G.tut = null;
-  G.bounty = [0, 0, 0, 0]; G.contest = null; G.festival = null; G.wboss = null; G.wbossNext = 0; G.wbossCount = 0; G.enc = null; G.encT = null;
+  G.bounty = [0, 0, 0, 0]; G.contest = null; G.festival = null; G.wboss = null; G.wbossNext = 0; G.wbossCount = 0; G.enc = null; G.encT = null; G.race = null; G.joust = null;
   Object.assign(G, { time: 0, dipT: 0, eventT: 50, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, questT: 0 });
   newKingdoms(); newQuests(); newFog();
 }
@@ -8007,7 +8159,7 @@ function saveGame(silent, quiet) {
       party: partyNow().filter(e => !e.comp || true).map(e => ({ comp: e.comp, kind: e.kind, name: e.name, hp: Math.round(Math.max(1, e.hp)), k: e.k })), mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
     horse: horseEnt ? { x: horseEnt.x, y: horseEnt.y } : null,
     K: { rel: K.rel, aff: K.aff, rep: K.rep, mil: K.mil, reasons: K.reasons, events: K.events, kev: K.kev, repWhy: K.repWhy, gifts: K.gifts, log: K.log, cd: {} },
-    Q: { active: Q.active.filter(q => q.type !== 'raid' && q.type !== 'tut' && q.sid !== 'hraid').map(qStrip), done: Q.done.map(qStrip), tracked: Q.tracked, next: Q.next },
+    Q: { active: Q.active.filter(q => q.type !== 'raid' && q.type !== 'tut' && q.type !== 'race' && q.sid !== 'hraid').map(qStrip), done: Q.done.map(qStrip), tracked: Q.tracked, next: Q.next },
     places: W.places.map(p => ({ disc: p.disc, rumor: p.rumor, cleared: p.cleared, chestOpened: p.chestOpened, clearedAt: p.clearedAt, dead: p.dead, owner: p.owner, blessed: p.blessed, investigated: p.investigated, rumorUsed: p.rumorUsed, backerRevealed: p.backerRevealed, sboss: p.sboss, ddead: p.ddead, dchests: p.dchests, dcleared: p.dcleared, legendTaken: p.legendTaken })),
     exp: packBits(EXP),
   };
@@ -8022,7 +8174,7 @@ function loadGame(d) {
   newPlayer();
   Object.assign(P, d.P); P.inv = d.P.inv; P.eq = d.P.eq; P.mounted = false; uidCounter = d.uid || (Math.max(0, ...P.inv.map(i => i.uid)) + 1);
   recalc();
-  G.bounty = d.bounty || [0, 0, 0, 0]; G.contest = null; G.festival = null; G.wboss = d.wboss || null; G.wbossNext = d.wbossNext || 0; G.wbossCount = d.wbossCount || 0; G.enc = null;
+  G.bounty = d.bounty || [0, 0, 0, 0]; G.contest = null; G.festival = null; G.wboss = d.wboss || null; G.wbossNext = d.wbossNext || 0; G.wbossCount = d.wbossCount || 0; G.enc = null; G.race = null; G.joust = null;
   G.time = d.time || 0; G.kills = d.kills || 0; G.mapWaypoint = d.waypoint || null; G.stats = Object.assign(newStats(), d.stats || {});
   Object.assign(K, d.K); K.cd = {};
   Q.active = d.Q.active || []; Q.done = d.Q.done || []; Q.tracked = d.Q.tracked; Q.next = d.Q.next || 1;
@@ -9623,7 +9775,7 @@ function update(dt) {
   if ((G.dipT += dt) >= 40) { G.dipT = 0; dipTick(); }
   const dnow = dayNum(); if (G.lastPay == null) G.lastPay = dnow; else if (dnow !== G.lastPay) { G.lastPay = dnow; dailyTick(); }
   if ((G.lawT = (G.lawT || 0) - dt) <= 0) { G.lawT = .25; thiefTick(); if ((G.law2 = (G.law2 || 0) - 1) <= 0) { G.law2 = 4; lawTick(); cityTick(); guildTick(); festivalTick(); encounterTick(); wbossTick(1); if (G.bounty) G.bounty = G.bounty.map(v => v > 1 ? v * Math.pow(.9, 1 / (DAYLEN / 1)) : 0); } }
-  contestTick(dt);
+  contestTick(dt); raceTick(dt);
   if ((G.eventT -= dt) <= 0) { G.eventT = rand(60, 115); if (!G.under && !G.tut) worldEvent(); } // no raids or ambushes mid-lesson
   if ((G.autosaveT += dt) >= 180) { G.autosaveT = 0; saveGame(true); }
   if ((ambT -= dt) <= 0) {
