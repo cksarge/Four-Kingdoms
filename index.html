@@ -416,6 +416,16 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .modeCard .mcD{font-size:14px;color:var(--ink2);line-height:1.3;margin-top:3px}
 .modeCard.story .mcT::before{content:'✦ ';color:#ffcf4a}
 .modeCard.tut .mcT::before{content:'⚑ ';color:#8fd0ff}
+#actScreen{background:radial-gradient(ellipse at center,rgba(46,30,10,.72),rgba(0,0,0,.95))}
+#actScreen .panel{width:min(560px,calc(92vw/var(--ui-scale)));text-align:center;padding:34px 34px 26px}
+.actKicker{font-family:var(--fh);font-weight:700;letter-spacing:.6em;font-size:15px;color:var(--gold);margin-left:.6em}
+.actNum{font-family:var(--fh);font-weight:900;font-size:96px;line-height:1;color:var(--gold-l);text-shadow:0 0 28px rgba(231,195,90,.45),0 3px 0 #2a1a08;margin:6px 0 4px}
+.actName{font-family:var(--fh);font-weight:900;font-size:30px;letter-spacing:.12em;color:#f3e6c4;text-transform:uppercase}
+.actTag{font-style:italic;font-size:17px;line-height:1.5;color:#d9c8a0;margin:0 auto 22px;max-width:430px}
+#btnActGo:focus{outline:none;box-shadow:0 0 0 2px #1a1109,0 0 0 4px var(--gold-l)}
+.actHint{font-size:12px;color:rgba(230,210,170,.45);margin-top:10px}
+#actScreen.show .actNum{animation:actIn 1.1s cubic-bezier(.2,.85,.25,1)}
+@keyframes actIn{from{opacity:0;transform:scale(1.35);letter-spacing:.3em}to{opacity:1;transform:none;letter-spacing:0}}
 #endScreen{background:radial-gradient(ellipse at center,rgba(40,26,8,.55),rgba(0,0,0,.93))}
 #endScreen .panel{width:min(760px,calc(94vw/var(--ui-scale)));text-align:center}
 #endScreen .endBody{max-height:calc(92vh/var(--ui-scale) - 290px);overflow-y:auto;overflow-x:hidden;padding-right:8px}
@@ -761,6 +771,17 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   </div>
 
   <!-- THE END (story mode) -->
+  <div id="actScreen" class="screen">
+    <div class="panel rv actCard">
+      <div class="actKicker" id="actKicker">ACT</div>
+      <div class="actNum" id="actNum">I</div>
+      <div class="actName" id="actName"></div>
+      <div class="orn">✦</div>
+      <div class="actTag" id="actTag"></div>
+      <button class="btn gold" id="btnActGo">Continue</button>
+      <div class="actHint">Enter or Space to continue</div>
+    </div>
+  </div>
   <div id="endScreen" class="screen">
     <div class="panel rv">
       <div class="endKicker">THE END</div>
@@ -5561,7 +5582,7 @@ function drawMinimap() {
    ===================================================================== */
 const UI = {
   stack: [],
-  ids: { ach: 'achScreen', stats: 'statScreen', skills: 'skillScreen', mode: 'modeScreen', cont: 'contScreen', pause: 'pauseScreen', inv: 'invScreen', map: 'mapScreen', dip: 'dipScreen', quests: 'questScreen', settings: 'settingsScreen', help: 'helpScreen', shop: 'shopScreen' },
+  ids: { act: 'actScreen', ach: 'achScreen', stats: 'statScreen', skills: 'skillScreen', mode: 'modeScreen', cont: 'contScreen', pause: 'pauseScreen', inv: 'invScreen', map: 'mapScreen', dip: 'dipScreen', quests: 'questScreen', settings: 'settingsScreen', help: 'helpScreen', shop: 'shopScreen' },
   open(n) {
     if (dialogOpen) closeDialog();
     if (this.isOpen(n)) return;
@@ -5570,8 +5591,8 @@ const UI = {
     if (n === 'inv') renderInventory(); else if (n === 'skills') renderSkills(); else if (n === 'ach') renderAch(); else if (n === 'stats') renderStats(); else if (n === 'map') openMap(); else if (n === 'dip') renderDiplomacy(); else if (n === 'quests') renderQuests(); else if (n === 'settings') renderSettings(); else if (n === 'pause') renderPause();
     tipHide();
   },
-  close() { const n = this.stack.pop(); if (n) { $(this.ids[n]).classList.remove('show'); SND.play('close'); } tipHide(); },
-  closeAll() { while (this.stack.length) $(this.ids[this.stack.pop()]).classList.remove('show'); tipHide(); },
+  close() { const n = this.stack.pop(); if (n) { $(this.ids[n]).classList.remove('show'); SND.play('close'); } tipHide(); if (n === 'act') actFinish(); },
+  closeAll() { const a = this.stack.includes('act'); while (this.stack.length) $(this.ids[this.stack.pop()]).classList.remove('show'); tipHide(); if (a) actFinish(); },
   toggle(n) { if (this.isOpen(n)) this.close(); else this.open(n); },
   isOpen(n) { return this.stack.includes(n); },
   show(id) { $(id).classList.add('show'); }, hide(id) { $(id).classList.remove('show'); },
@@ -6250,7 +6271,7 @@ function renderPause() {
   const k = ownerAtPx(P.x, P.y), al = P.allegiance != null ? `${repTitle(P.allegiance)} of ${KDATA[P.allegiance].name}` : 'Wandering knight';
   const pl = !G.under && nearestPlace(P.x, P.y, p => p.disc && (p.type === 'village' || p.type === 'castle' || p.type === 'outpost'));
   const where = G.under ? `${G.under.name}, underground` : pl && dist(P.x, P.y, pl.x, pl.y) < 14 * TS ? `${pl.name}, ${KDATA[k].full}` : `The wilds of ${KDATA[k].name}`;
-  $('pauseHero').innerHTML = `<canvas id="pausePort" width="128" height="128"></canvas><div style="flex:1;min-width:0"><div class="ph1">Level ${P.lvl} · ${al}${P.fief ? ` · Warden of ${W.places[P.fief.v].name}` : ''}</div><div class="ph2">${where}</div><div class="ph2">${SEASONS[curSeason]}, day ${dayNum()} · ${G.mode === 'story' ? 'Story' : 'Sandbox'} · ${DIFF().name}</div><div class="phChips"><span>${fmt(P.gold)} gold</span><span>${Math.ceil(P.hp)} / ${P.maxHp} health</span><span>${fmt(G.kills)} foes slain</span><span>${Object.keys(ACHS).length} / ${ACH.length} achievements</span></div></div>`;
+  $('pauseHero').innerHTML = `<canvas id="pausePort" width="128" height="128"></canvas><div style="flex:1;min-width:0"><div class="ph1">Level ${P.lvl} · ${al}${P.fief ? ` · Warden of ${W.places[P.fief.v].name}` : ''}</div><div class="ph2">${where}</div><div class="ph2">${SEASONS[curSeason]}, day ${dayNum()} · ${G.mode === 'story' ? (STORY && !STORY.done ? `Story · Act ${ROMAN[storyAct()]}` : 'Story') : 'Sandbox'} · ${DIFF().name}</div><div class="phChips"><span>${fmt(P.gold)} gold</span><span>${Math.ceil(P.hp)} / ${P.maxHp} health</span><span>${fmt(G.kills)} foes slain</span><span>${Object.keys(ACHS).length} / ${ACH.length} achievements</span></div></div>`;
   drawPortrait($('pausePort'), P);
   document.querySelectorAll('#pauseScreen [data-icon]').forEach(img => { const id = img.dataset.icon; img.src = id === 'banner' ? bannerURL(P.allegiance ?? k) : itemIcon(id); });
   $('pauseSp').textContent = P.sp || ''; $('pauseSp').classList.toggle('hidden', !P.sp);
@@ -6295,6 +6316,7 @@ addEventListener('keydown', e => {
   if (e.code === 'Space' || e.code === 'Tab') { e.preventDefault(); if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }
   if (G.state === 'menu') { if (e.code === 'Escape' && UI.stack.length) UI.close(); return; }
   if (e.code === 'Escape') { if (dialogOpen) closeDialog(); else if (UI.stack.length) UI.close(); else if (G.state === 'play') UI.open('pause'); return; }
+  if (UI.isOpen('act') && (e.code === 'Enter' || e.code === 'Space')) { e.preventDefault(); UI.close(); return; }
   if (dialogOpen) { const n = parseInt(e.key); if (n >= 1) { const b = $('dOpts').children[n - 1]; if (b && !b.disabled) b.click(); } return; }
   if (G.state !== 'play' || e.repeat) return;
   const tog = { KeyI: 'inv', KeyM: 'map', KeyK: 'dip', KeyJ: 'quests', KeyP: 'skills' }[e.code];
@@ -7604,12 +7626,12 @@ function sAct2(next) {
   STORY.act2next = next;
   if (SF('wA') == null) { let best = PAIRS[0], bv = 999; PAIRS.forEach(p2 => { if (getRel(p2[0], p2[1]) < bv) { bv = getRel(p2[0], p2[1]); best = p2; } }); SF('wA', best[0]); SF('wB', best[1]); }
   sStart('w1');
-  sSoon(() => sChat(NARR, ['Winter comes early this year. Beacons burn along the borders, and the roads fill with frightened people.', `Word spreads from village to village: <b>${KDATA[SF('wA')].name}</b> and <b>${KDATA[SF('wB')].name}</b> are at war.`], [{ t: 'Continue', fn: closeDialog }]));
+  sSoon(() => showAct(2, () => sChat(NARR, ['Winter comes early this year. Beacons burn along the borders, and the roads fill with frightened people.', `Word spreads from village to village: <b>${KDATA[SF('wA')].name}</b> and <b>${KDATA[SF('wB')].name}</b> are at war.`], [{ t: 'Continue', fn: closeDialog }])));
 }
 function sAct2Done() {
   STORY.act2done = true; deed('Saw the realm through the Long War.');
   const nx = STORY.act2next || []; nx.forEach(id => sStart(id));
-  if (nx.length > 1) sSoon(() => toast('The Long War is over, but your own road goes on. Several main quests await; do them in any order.', 'gold'));
+  sSoon(() => showAct(3, nx.length > 1 ? () => toast('The Long War is over, but your own road goes on. Several main quests await; do them in any order.', 'gold') : null));
 }
 const wA = () => SF('wA') ?? 1, wB = () => SF('wB') ?? 2;
 const wS = () => SF('war') === 'B' ? wB() : wA(), wE = () => SF('war') === 'B' ? wA() : wB();
@@ -8012,12 +8034,33 @@ function storyEnding() {
   G.state = 'ending'; closeDialog(); UI.closeAll(); UI.show('endScreen'); SND.play('ending');
   saveGame(true);
 }
+/* ---------------- Act title cards ---------------- */
+const ROMAN = ['', 'I', 'II', 'III', 'IV'];
+const ACTS = {
+  1: () => ({ n: 'A Knight of No Name', t: 'A dying courier, a sealed letter, and a road that leads somewhere dark.' }),
+  2: () => ({ n: 'The Long War', t: 'Beacons burn along the borders. Two crowns go to war, and the realm will not be the same when it ends.' }),
+  3: () => ({
+    conspiracy: { n: 'Knives in the Dark', t: "The Circle's web runs through every court. Cut it, thread by thread, before the rite is done." },
+    ancient: { n: 'The Four Shards', t: 'Four shards of a broken crown lie in four courts. Gather them before the Hollow King wakes.' },
+    rise: { n: 'A Throne for the Taking', t: 'You have a title and the ear of a king. Now reach for more.' },
+  }[STORY.path] || { n: 'The Hollow King', t: 'The dead are stirring. It is time to end this.' }),
+};
+const storyAct = () => STORY ? STORY.act || (STORY.act2done ? 3 : STORY.act2next ? 2 : 1) : 0;
+let actThen = null;
+function showAct(n, then) {
+  STORY.act = n; const A = ACTS[n]();
+  $('actNum').textContent = ROMAN[n]; $('actName').textContent = A.n; $('actTag').textContent = A.t;
+  actThen = then || null; UI.open('act'); SND.play('mainquest');
+  setTimeout(() => $('btnActGo').focus(), 50);
+}
+function actFinish() { const f = actThen; actThen = null; if (f) sSoon(f); }
+$('btnActGo').onclick = () => { if (UI.isOpen('act')) UI.close(); };
 function storyBegin() {
   sStart('p1');
-  sSoon(() => sChat(NARR, [
+  sSoon(() => showAct(1, () => sChat(NARR, [
     'Four hundred years ago, Aurek the First ruled every land from the Greywater to the Thornwood. When he died, his Ember Crown was broken into four shards, and four kingdoms rose from the pieces: Albion, Valoria, Draven and Eldoria.',
     `They have warred ever since. You are a hedge knight of Albion, with a wooden sword, a padded coat, ${P.gold} coins and no name worth remembering. Yet.`,
-  ], [{ t: 'Begin', fn: closeDialog }]));
+  ], [{ t: 'Begin', fn: closeDialog }])));
 }
 
 /* ---------------- Loop ---------------- */
