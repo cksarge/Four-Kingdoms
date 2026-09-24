@@ -2653,12 +2653,16 @@ function questTarget(q) {
   }
   return null;
 }
-function questObjective(q) {
-  if (q.type === 'story') return storyObjective(q);
+function questTimer(q) {
+  const secs = q.type === 'raid' ? q.limit - (G.time - q.started) : q.type === 'story' ? storyTimeLeft(q) : null;
+  return secs == null ? '' : ` (${Math.max(0, Math.ceil(secs))}s)`;
+}
+function questObjective(q, bare) {
+  if (q.type === 'story') return storyObjective(q, bare);
   if (q.type === 'find') return q.stage === 0 ? q.obj : `Return the ${q.thing} to ${q.giverName}`;
   if (q.type === 'investigate') return q.stage === 0 ? q.obj : q.stage === 1 ? 'Defeat the ruin\'s occupants' : 'Search the ruin for clues';
   if (q.type === 'assist') return q.stage === 0 ? `Ride to the battle` : q.obj;
-  if (q.type === 'raid') return q.obj + ` (${Math.max(0, Math.ceil(q.limit - (G.time - q.started)))}s)`;
+  if (q.type === 'raid') return q.obj + (bare ? '' : questTimer(q));
   return q.obj;
 }
 function questUpdate() {
@@ -4359,10 +4363,13 @@ function updateHUD(force) {
   // quest tracker
   const qs = Q.active.slice().sort((a, b) => (b.id === Q.tracked) - (a.id === Q.tracked)).slice(0, 3);
   const qd = q => { const tg = questTarget(q); return tg ? `${leagues(dist(P.x, P.y, tg.x, tg.y))} leagues ${compass(tg.x - P.x, tg.y - P.y)}` : ''; };
-  const qh = qs.map(q => `<div class="qt hudbox ${q.id === Q.tracked ? 'tracked' : ''}${q.type === 'story' && q.main ? ' story' : ''}"><div class="qn">${esc(q.title)}</div><div class="qo">${esc(questObjective(q))}</div><div class="qd"${qd(q) ? '' : ' hidden'}></div></div>`).join('') + (Q.active.length > 3 ? `<div class="qd" style="padding-left:10px;color:var(--muted);font-style:italic;font-size:12px">+${Q.active.length - 3} more — press J</div>` : '');
+  const qh = qs.map(q => `<div class="qt hudbox ${q.id === Q.tracked ? 'tracked' : ''}${q.type === 'story' && q.main ? ' story' : ''}"><div class="qn">${esc(q.title)}</div><div class="qo">${esc(questObjective(q, true))}<span class="qtm"></span></div><div class="qd"${qd(q) ? '' : ' hidden'}></div></div>`).join('') + (Q.active.length > 3 ? `<div class="qd" style="padding-left:10px;color:var(--muted);font-style:italic;font-size:12px">+${Q.active.length - 3} more — press J</div>` : '');
   setIf('qt', qh, v => $('questTracker').innerHTML = v); // rebuilt only when quests or objectives change, so cards don't re-animate
-  const qdEls = $('questTracker').querySelectorAll('.qt .qd');
-  qs.forEach((q, i) => { const el = qdEls[i]; if (el) { const t = qd(q); if (el.textContent !== t) { el.textContent = t; el.hidden = !t; } } });
+  const qdEls = $('questTracker').querySelectorAll('.qt .qd'), qtmEls = $('questTracker').querySelectorAll('.qt .qtm');
+  qs.forEach((q, i) => {
+    const el = qdEls[i]; if (el) { const t = qd(q); if (el.textContent !== t) { el.textContent = t; el.hidden = !t; } }
+    const tm = qtmEls[i]; if (tm) { const t = questTimer(q); if (tm.textContent !== t) tm.textContent = t; }
+  });
   // prompt
   let pr = '';
   if (G.state === 'play' && !paused()) {
@@ -4682,10 +4689,10 @@ function sFinish(q) {
   const def = SQ[q.sid]; if (def.done) def.done(q);
 }
 function sSubDone(q, id) { q.m = q.m || {}; q.m[id] = 1; updateHUD(true); }
-function storyObjective(q) {
+function storyTimeLeft(q) { const st = sStep(q); return st && st.limit && q.sp && q.t0 ? st.limit - (G.time - q.t0) : null; }
+function storyObjective(q, bare) {
   const st = sStep(q); if (!st) return '';
-  let o = sObj(st, q); if (st.limit && q.sp && q.t0) o += ` (${Math.max(0, Math.ceil(st.limit - (G.time - q.t0)))}s)`;
-  return o;
+  return sObj(st, q) + (bare ? '' : questTimer(q));
 }
 function storyTarget(q) {
   const st = sStep(q); if (!st) return null;
