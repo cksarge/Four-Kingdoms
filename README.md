@@ -87,6 +87,12 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
   - The inn has rooms upstairs; the cathedral has pews, choristers and the priest at the altar.
   - The bakery, apothecary and jeweller are walk-in shops.
   - Your own house has a bed, your stash, a hearth and a trophy room displaying relics of the bosses and champions you have defeated.
+- **Cities by day and night:** at dusk the shops shut and the streets empty, the night watch patrols with torches, the tavern fills up, and cutpurses come out.
+- **Crime and justice:**
+  - Assault, murder, pickpocketing and breaking in earn a bounty in that kingdom, shown on the HUD.
+  - Guards who spot you offer three choices: pay the fine, serve a day or more in the cells (losing stolen goods and a little XP), or resist.
+  - A thieves' guild recruits in taverns after dark. Its four jobs lead to lockpicks, a guild cloak, a fence for stolen goods, and a heist on the crown's tax wagon, unless you betray the guild to the captain.
+- **Festivals:** a spring fair, a harvest market and a winter solstice fill the royal cities with decorations, stalls and games (an archery contest, pie eating, the strongman bell), with prizes to win.
 - Watchtowers guard the roads into each castle and the border crossings. Bowmen on the towers and castle walls shoot at bandits, enemy soldiers and outlaws.
 - Quests, random world events and a day/night cycle.
 - Seasons that change every six days: spring blossom, summer, golden autumn (cheap food) and snowy winter (slower travel off the roads, dear bread).
