@@ -426,6 +426,8 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .endBody h4{font-family:var(--fh);color:var(--gold);font-size:12px;letter-spacing:.14em;margin:16px 0 6px}
 .endBody ul{margin:0;padding-left:20px;color:var(--ink2);font-size:14.5px;line-height:1.4}
 .endStats{margin:14px 0 6px;color:var(--muted);font-style:italic;font-size:14px}
+.epiNav{display:flex;align-items:center;justify-content:center;gap:12px;margin:10px 0 4px}.epiDots{display:flex;gap:6px}.epiDots i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2)}.epiDots i.on{background:#e7c35a}
+.fates li{margin-bottom:6px}
 .endPips{display:flex;gap:5px;justify-content:center;align-items:center;flex-wrap:wrap;margin:4px 0 14px}
 .endPips span{width:12px;height:12px;border-radius:50%;border:1px solid #9a7536;background:rgba(0,0,0,.3)}
 .endPips span.on{background:radial-gradient(circle,#ffe08a,#c8902a);box-shadow:0 0 6px rgba(255,200,90,.6)}
@@ -532,6 +534,9 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
           <div><div class="setH">WILDLIFE</div><div class="choice" id="wildSeg"></div><div class="lockNote hidden" id="wildLock">Forsaken: always abundant</div></div>
           <div><div class="setH">DAY LENGTH</div><div class="choice" id="daySeg"></div></div>
         </div>
+        <div class="setH">STARTING SEASON</div>
+        <div class="choice" id="seasonSeg"></div>
+        <div class="segNote" id="seasonNote"></div>
         <label class="setChk" id="exploredChk"><input type="checkbox" id="optExplored"> Start with the whole map explored <span>(hidden places stay secret)</span></label>
         <div class="lockNote hidden" id="exploredLock">Forsaken: you must discover the realm yourself</div>
         <div class="setBtns"><button class="btn sm" id="btnSetupBack">Back</button><button class="btn gold" id="btnSetupGo">Forge the Realm</button></div>
@@ -762,6 +767,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div class="ptitle" id="endTitle"></div>
       <div class="orn">✦</div>
       <div class="endBody" id="endBody"></div>
+      <div class="epiNav" id="epiNav"></div>
       <div class="endStats" id="endStats"></div>
       <div class="endPips" id="endPips"></div>
       <div class="endBtns"><button class="btn gold" id="btnEndSandbox">Continue in Sandbox</button><button class="btn" id="btnEndMenu">Main Menu</button></div>
@@ -1239,7 +1245,7 @@ const SONGS = {
 });
 const OW_SONGS = ['wander', 'road', 'fields', 'hills', 'oldroads', 'pilgrim', 'starlit', 'moon', 'embers'];
 const URGENT_SONGS = ['menu', 'end_good', 'end_dark', 'fallen', 'combat1', 'combat2', 'hollow_fight', 'circle_fight', 'boss', 'duel', 'tourney', 'greymother', 'hollowking', 'last_stand'];
-const END_DARK = ['ashes', 'grey_throne', 'hollow_crown', 'long_night', 'conqueror', 'usurper', 'puppet', 'outlaw'];
+const END_DARK = ['ashes', 'grey_throne', 'hollow_crown', 'long_night', 'conqueror', 'usurper', 'puppet', 'outlaw', 'iron_peace', 'shadow_broker', 'wyrm_blooded', 'broken_realm'];
 function inSnow() { const tx = Math.floor(P.x / TS), ty = Math.floor(P.y / TS); let n = 0; for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) if (terAt(tx + dx, ty + dy) === T.TUNDRA) n++; return n >= 18; }
 function inDesert() { const tx = Math.floor(P.x / TS), ty = Math.floor(P.y / TS); let n = 0; for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) if (terAt(tx + dx, ty + dy) === T.DESERT) n++; return n >= 22; }
 const PLACE_R = { castle: 20, village: 13, outpost: 10, camp: 13, ruin: 10, hidden: 8, dungeon: 7 };
@@ -1400,6 +1406,10 @@ const ITEMS = {
   maelis_letters: { name: "Maelis's Letters", type: 'quest', val: 0, desc: "Chancellor Maelis's orders from the Ashen Circle." },
   ulfar_letters: { name: "Ulfar's Letters", type: 'quest', val: 0, desc: 'Orders from the Ashen Circle, and a purse of Albion silver.' },
   wren_seal: { name: 'Grey Wax Seal', type: 'quest', val: 0, desc: 'Grey wax pressed with a small bird: a wren.' },
+  circle_helm: { name: 'Grey-Flame Helm', type: 'quest', val: 0, desc: 'A soldier\'s helm with a grey flame scratched inside. Circle agents wore stolen colors to start this war.' },
+  pale_orders: { name: 'Bloodied Orders', type: 'quest', val: 0, desc: 'Orders in a cramped hand, and a map to the Pale Hand\'s hideout.' },
+  grandmaster_letter: { name: "The Grandmaster's Letter", type: 'quest', val: 0, desc: 'Sealed in grey wax. It names every hidden lord of the Ashen Circle.' },
+  wyrm_heart: { name: 'Wyrm Heart', type: 'misc', val: 600, stack: 1, desc: 'The cold, beating heart of the Bone Wyrm. A master smith could bind its hunger into a blade.' },
   seal_shard: { name: 'Fragment of the Seal', type: 'quest', val: 0, desc: 'Cold as a grave. Runes of the First King circle its edge.' },
   shard_0: { name: 'Albion Ember Shard', type: 'quest', val: 0, k: 0, desc: "A shard of Aurek's Ember Crown, kept by the house of Albion. It is warm to the touch." },
   shard_1: { name: 'Valorian Ember Shard', type: 'quest', val: 0, k: 1, desc: "A shard of Aurek's Ember Crown, kept by the house of Valoria. It is warm to the touch." },
@@ -1452,7 +1462,7 @@ const SIZES = [
 ];
 const DAYS = [{ name: 'Short', len: 300 }, { name: 'Normal', len: 480 }, { name: 'Long', len: 780 }];
 const WILDS = [{ name: 'Scarce', cap: 2, every: 7 }, { name: 'Normal', cap: 5, every: 4 }, { name: 'Abundant', cap: 9, every: 2.5 }];
-const normOpts = o => Object.assign({ diff: 2, size: 2, kingdom: 0, explored: false, day: 1, wild: 1 }, o || {});
+const normOpts = o => Object.assign({ diff: 2, size: 2, kingdom: 0, explored: false, day: 1, wild: 1, season: 0 }, o || {});
 const DIFF = () => DIFFS[G.opts ? G.opts.diff : 2];
 function sizeCounts(n) { const f = n / 360; return { vil: Math.round(20 * Math.pow(f, 1.5)), camp: Math.round(18 * f * f) }; }
 function diffEffects(d) {
@@ -1519,6 +1529,7 @@ const ATYPES = {
   spider: { name: 'Giant Spider', hp: 46, dmg: 9, spd: 130, range: 30, cd: 1.2, wind: .35, faction: 'wild', xp: 16, gold: [0, 0], r: 12, animal: true },
   rimeheart: { name: 'Rimeheart', hp: 950, dmg: 22, spd: 70, range: 62, cd: 1.7, wind: .6, faction: 'hollow', xp: 450, gold: [200, 300], r: 16, weapon: 'great' },
   dummy: { name: 'Training Dummy', hp: 9999, dmg: 0, spd: 0, range: 0, cd: 99, faction: 'civ', xp: 0, gold: [0, 0], r: 12 },
+  bone_wyrm: { name: 'The Bone Wyrm', hp: 1800, dmg: 26, spd: 88, range: 72, cd: 1.7, wind: .75, faction: 'hollow', xp: 800, gold: [300, 500], r: 26, animal: true },
   camel: { name: 'Camel', hp: 90, dmg: 10, spd: 110, range: 30, cd: 1.6, wind: .4, faction: 'wild', xp: 12, gold: [0, 0], r: 13, animal: true, passive: true },
   horse: { name: 'Horse', hp: 999, dmg: 0, spd: 190, range: 0, cd: 9, faction: 'civ', r: 12, civ: true },
   // story mode
@@ -2486,7 +2497,7 @@ function damage(t, amt, src, o = {}) {
     for (let i = 0; i < 5; i++) addPart(t.x + Math.cos(t.face) * 12, t.y + Math.sin(t.face) * 12, rand(-90, 90), rand(-90, 40), '#ffe8a0', .25, 2);
   }
   t.hp -= amt; t.flash = .12;
-  if (src && !o.dot && !t.perch) { const d = Math.hypot(t.x - src.x, t.y - src.y) || 1; const kb = (o.kb || 1) * (t.kind === 'bear' || t.kind === 'ice_bear' ? 50 : 125); t.kbx = (t.x - src.x) / d * kb; t.kby = (t.y - src.y) / d * kb; }
+  if (src && !o.dot && !t.perch) { const d = Math.hypot(t.x - src.x, t.y - src.y) || 1; const kb = (o.kb || 1) * (t.kind === 'bone_wyrm' ? 12 : t.kind === 'bear' || t.kind === 'ice_bear' ? 50 : 125); t.kbx = (t.x - src.x) / d * kb; t.kby = (t.y - src.y) / d * kb; }
   const armored = t.faction && t.faction[0] === 'k';
   for (let i = 0; i < (o.dot ? 1 : 7) * QMUL(); i++) addPart(t.x, t.y - (t.elev || 0), rand(-110, 110), rand(-120, 30), armored && Math.random() < .5 ? '#ffe8a0' : '#9a1a12', rand(.3, .6), 2.5, 220);
   if (settings.dmgNums) addText(t.x + rand(-8, 8), t.y - 26 - (t.elev || 0), Math.max(1, Math.round(amt)) + (o.crit ? '!' : ''), o.dot === 'fire' ? '#ffa24a' : o.dot === 'venom' ? '#8fe07a' : o.crit ? '#ffd24a' : '#fff4e0', o.dot ? 12 : o.crit ? 19 : 14);
@@ -2617,6 +2628,11 @@ function updateActor(e, dt) {
   if (e.dead) { e.deadT += dt; return; }
   if (e.downed > 0) { e.downed -= dt; if (e.downed <= 0) { e.hp = Math.round(e.maxHp * .35); e.say = { text: 'Still breathing…', t: 2.5 }; } return; }
   if (e.burn > 0 || e.poison > 0 || e.chill > 0) tickStatus(e, dt);
+  if (e.kind === 'bone_wyrm' && e.target && !e.dead) { // frost breath
+    e.breathT = (e.breathT ?? 4) - dt; if (e.breathing > 0) e.breathing -= dt;
+    const tg = e.target, d = dist(e.x, e.y, tg.x, tg.y);
+    if (e.breathT <= 0 && d < 400) { e.breathT = rand(5, 7); e.breathing = .6; const a0 = Math.atan2(tg.y - e.y, tg.x - e.x); for (let i = -4; i <= 4; i++) { const a = a0 + i * .1; projs.push({ x: e.x + Math.cos(a0) * 50, y: e.y + Math.sin(a0) * 50, vx: Math.cos(a) * 300, vy: Math.sin(a) * 300, dmg: e.dmg * .4, src: e, life: 1.4, breath: true }); } SND.play('frost'); SND.play('roar'); }
+  }
   if (e.healer && P.hp < P.maxHp && dist(e.x, e.y, P.x, P.y) < 160) { P.hp = Math.min(P.maxHp, P.hp + 1.6 * dt); if (Math.random() < 2 * dt) addPart(P.x + rand(-8, 8), P.y - rand(0, 16), 0, -30, '#8fe07a', .6, 2.5); }
   if (e.comp && !e.target && (e.bantT = (e.bantT ?? rand(40, 90)) - dt) <= 0) { e.bantT = rand(70, 150); const c = COMPANIONS.find(cc => cc.id === e.comp); if (c) e.say = { text: pick(c.lines), t: 3.5 }; }
   e.flash -= dt; e.atkCd -= dt * (e.chill > 0 ? .5 : 1); if (e.swing > 0) e.swing -= dt;
@@ -2721,6 +2737,7 @@ function arrowHit(p, t) {
     if (p.arrow === 'bodkin' && armored) dmg *= 1.5;
   }
   damage(t, dmg, p.src, { proj: true, crit: p.crit, kb: .5, arrow: p.arrow });
+  if (p.breath && t === P) P.chillT = 2;
   if (t.isPlayer || t.dead || t.important || t.kind === 'horse') return;
   if (p.arrow === 'fire_arrow') { t.burn = 4; t.burnDps = 2 + p.dmg * .12; t.dotSrc = p.src; }
   if (p.arrow === 'venom_arrow') { t.poison = 8; t.poisonDps = 1.5 + p.dmg * .07; t.dotSrc = p.src; }
@@ -2793,7 +2810,8 @@ function darkness() { if (G.under) return settings.quality === 'low' ? .55 : .86
 /* ---------------- Seasons & weather ---------------- */
 const SEASON_DAYS = 6, SEASONS = ['Spring', 'Summer', 'Autumn', 'Winter'];
 let curSeason = 0;
-const seasonOf = () => Math.floor((dayNum() - 1) / SEASON_DAYS) % 4;
+const seasonStart = () => (G.opts && G.opts.season) || 0;
+const seasonOf = () => (Math.floor((dayNum() - 1) / SEASON_DAYS) + seasonStart()) % 4;
 function applySeason(announce) {
   curSeason = seasonOf(); buildPalette(); buildTreeSprites(); chunkCache.clear();
   if (announce) { toast(['🌱 <b>Spring</b> has come. The roads are muddy and the fields green.', '☀ <b>Summer</b> arrives, long days and dry roads.', '🍂 <b>Autumn</b>. The harvest is in, and food is cheap in the markets.', '❄ <b>Winter</b> has come. Snow on the fields, slow travel, dear bread.'][curSeason], 'gold'); SND.play('bell'); }
@@ -3472,7 +3490,7 @@ function openImprove() {
     options: [...list.map(it => { const c = cost(it); return { t: `${itemName(it)} → ${QUAL[it.q + 1].n || 'Standard'} <span class="dn">${c.gold}g + ${c.iron} Iron Ingots (${countItem('iron')})</span>`, dis: !hasAll([['iron', c.iron]], c.gold), fn: () => { P.gold -= c.gold; removeItemById('iron', c.iron); it.q++; recalc(); SND.play('block'); toast(`The smiths hand back your <b style="color:${itemColor(it)}">${itemName(it)}</b>.`, 'gold'); openImprove(); } }; }), { t: 'Done', fn: () => openCraft(true) }] });
 }
 function openEnchant(mat) {
-  const MATS = { ember_core: 'fire', venom_gland: 'venom', frost_heart: 'frost' };
+  const MATS = { ember_core: 'fire', venom_gland: 'venom', frost_heart: 'frost', wyrm_heart: 'life' };
   if (!mat) {
     const have = Object.keys(MATS).filter(id => countItem(id));
     openDialog({ name: 'The Royal Forge', role: 'Enchant', portrait: curShopE || 'sign', text: have.length ? 'Which relic shall the master smith bind? It costs 500 gold, and the relic is spent.' : 'You need a relic from the deep places: an Ember Core from a mine, a Venom Gland from a spider cave, or a Frost Heart from the ice cave.',
@@ -3681,8 +3699,9 @@ function spawnDungeon(pl, D) {
   const dead = pl.ddead || [];
   D.spawns.forEach((sp, i) => {
     if (dead.includes(i) || (sp.boss && pl.dcleared)) return;
-    const f = findFree(sp.x, sp.y), e = mkActor(sp.kind, f.x, f.y, Object.assign({ dspec: i, tier: sp.tier, home: { x: f.x, y: f.y }, leash: 380, wanderR: 40, aggro: 250 }, sp.o || {}));
-    if (sp.boss) { e.hp = e.maxHp = Math.round(e.maxHp * sp.hpM); e.dmg *= sp.dmgM || 1; e.dboss = true; e.aggro = 320; }
+    const sb = sp.boss && pl.sboss; // a story boss takes the guardian's place
+    const f = findFree(sp.x, sp.y), e = mkActor(sb && sb.kind || sp.kind, f.x, f.y, Object.assign({ dspec: i, tier: sp.tier, home: { x: f.x, y: f.y }, leash: 380, wanderR: 40, aggro: 250 }, sb ? Object.assign({ boss: true, named: true }, sb.o || {}, { name: sb.name, chief: sb.name }) : sp.o || {}));
+    if (sp.boss) { e.hp = e.maxHp = Math.round(e.maxHp * (sb ? sb.hpM : sp.hpM)); e.dmg *= (sb ? sb.dmgM : sp.dmgM) || 1; e.dboss = true; e.aggro = 320; }
   });
 }
 function openDChest(it) {
@@ -5303,6 +5322,30 @@ function drawHorse(g, x, y, face, hb, walk, rider, allegiance) {
   if (rider) { g.fillStyle = '#6a3a1a'; rrect(g, -7, -8, 12, 16, 3); g.fill(); g.fillStyle = allegiance != null ? KDATA[allegiance].color : '#5a4a3a'; g.fillRect(-9, -9, 3, 18); }
   g.restore();
 }
+function drawWyrm(g, e) {
+  const t = performance.now() / 1000, sc = (e.scale || 1) * 1.6, ivory = '#e4dcc8', dark = '#a89c82', glow = '#8fd8ff';
+  g.save(); g.translate(e.x, e.y); g.fillStyle = 'rgba(0,0,0,.3)'; ell(g, 4, 14 * sc, 36 * sc, 14 * sc);
+  g.rotate(e.face); g.scale(sc, sc); if (e.flash > 0) g.filter = 'brightness(2)'; if (e.dead) g.globalAlpha = Math.max(0, 1 - (e.deadT - 7) / 3);
+  const w = Math.sin(e.walk * 1.2) * 4, sway = Math.sin(t * 2 + e.walk * .3) * 5;
+  g.fillStyle = 'rgba(120,200,255,.12)'; ell(g, 0, 0, 30, 20); // ghost-fire aura
+  // tattered wings folded back
+  [-1, 1].forEach(sg => { g.fillStyle = 'rgba(40,50,60,.55)'; g.beginPath(); g.moveTo(6, sg * 5); g.lineTo(-10, sg * 26); g.lineTo(-24, sg * 22); g.lineTo(-18, sg * 14); g.lineTo(-26, sg * 12); g.lineTo(-8, sg * 6); g.closePath(); g.fill(); g.strokeStyle = dark; g.lineWidth = 2; g.beginPath(); g.moveTo(6, sg * 5); g.lineTo(-10, sg * 26); g.lineTo(-24, sg * 22); g.moveTo(-10, sg * 26); g.lineTo(-26, sg * 12); g.stroke(); });
+  // legs
+  g.strokeStyle = ivory; g.lineWidth = 2.6; g.lineCap = 'round'; [[8, -9], [8, 9], [-10, -9], [-10, 9]].forEach(([lx, ly], i) => { const o = (i % 3 ? w : -w); g.beginPath(); g.moveTo(lx, ly * .6); g.lineTo(lx + o + 3, ly * 1.5); g.lineTo(lx + o + 7, ly * 1.5); g.stroke(); });
+  // tail
+  g.strokeStyle = ivory; for (let i = 0; i < 9; i++) { const tx = -16 - i * 4.5, ty = Math.sin(i * .5 + t * 2) * sway * .25; g.fillStyle = ivory; ell(g, tx, ty, 3 - i * .25, 2.5 - i * .2); }
+  // ribcage and spine
+  for (let i = -3; i <= 3; i++) { g.strokeStyle = ivory; g.lineWidth = 2.2; g.beginPath(); g.moveTo(i * 3.2, 0); g.quadraticCurveTo(i * 3.2 - 3, -9, i * 3.2 + 1, -11); g.moveTo(i * 3.2, 0); g.quadraticCurveTo(i * 3.2 - 3, 9, i * 3.2 + 1, 11); g.stroke(); }
+  g.fillStyle = 'rgba(140,210,255,.35)'; ell(g, 0, 0, 7, 5); // cold heart-light
+  for (let i = -5; i <= 5; i++) { g.fillStyle = ivory; ell(g, i * 2.6, 0, 1.8, 1.5); }
+  // neck and skull
+  const nx = 16, ny = sway * .15; g.strokeStyle = ivory; g.lineWidth = 3; g.beginPath(); g.moveTo(10, 0); g.quadraticCurveTo(14, ny * .5, nx + 4, ny); g.stroke();
+  g.fillStyle = ivory; g.beginPath(); g.moveTo(nx, ny - 5); g.quadraticCurveTo(nx + 12, ny - 6, nx + 20, ny - 2); g.lineTo(nx + 20, ny + 2); g.quadraticCurveTo(nx + 12, ny + 6, nx, ny + 5); g.closePath(); g.fill(); g.strokeStyle = dark; g.lineWidth = 1; g.stroke();
+  g.strokeStyle = ivory; g.lineWidth = 2; g.beginPath(); g.moveTo(nx + 2, ny - 4); g.quadraticCurveTo(nx - 4, ny - 12, nx - 8, ny - 14); g.moveTo(nx + 2, ny + 4); g.quadraticCurveTo(nx - 4, ny + 12, nx - 8, ny + 14); g.stroke();
+  g.shadowColor = glow; g.shadowBlur = 8; g.fillStyle = e.wind > 0 || e.breathing > 0 ? '#e8fbff' : glow; circ(g, nx + 7, ny - 2.5, 1.6); circ(g, nx + 7, ny + 2.5, 1.6); g.shadowBlur = 0;
+  if (e.breathing > 0) { g.fillStyle = 'rgba(190,235,255,.5)'; ell(g, nx + 26, ny, 8, 5); }
+  g.restore();
+}
 function drawSpider(g, e) {
   g.save(); g.translate(e.x, e.y); const sc = e.scale || 1; g.scale(sc, sc);
   g.fillStyle = 'rgba(0,0,0,.3)'; ell(g, 2, 7, 15, 6);
@@ -5366,6 +5409,7 @@ function drawAnimal(g, e) {
   if (e.kind === 'scorpion' || e.kind === 'camel') return drawDesertAnimal(g, e);
   if (e.kind === 'goat') return drawGoat(g, e);
   if (e.kind === 'spider') return drawSpider(g, e);
+  if (e.kind === 'bone_wyrm') return drawWyrm(g, e);
   const kind = e.kind === 'snow_wolf' ? 'wolf' : e.kind === 'ice_bear' ? 'bear' : e.kind, snowy = kind !== e.kind;
   if (kind === 'wolf' || kind === 'jackal') return drawCanine(g, e, kind, snowy);
   if (kind === 'boar') return drawBoar(g, e);
@@ -6040,6 +6084,7 @@ function renderWorld(t) {
   g.lineWidth = 2;
   for (const p of projs) {
     const a = Math.atan2(p.vy, p.vx) || p.a || 0; if (!p.stuck) p.a = a; const aa = p.stuck ? p.a : a, ca = Math.cos(aa), sa = Math.sin(aa);
+    if (p.breath) { g.fillStyle = 'rgba(200,240,255,.75)'; circ(g, p.x, p.y, 5); g.fillStyle = 'rgba(140,210,255,.35)'; circ(g, p.x - ca * 8, p.y - sa * 8, 7); continue; }
     if (p.bolt) { g.strokeStyle = '#4a3a2a'; g.lineWidth = 3; g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(p.x - ca * 10, p.y - sa * 10); g.stroke(); g.lineWidth = 2; continue; }
     g.strokeStyle = p.pierce > 0 ? '#e8f4ff' : '#d8c8a0'; g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(p.x - ca * 14, p.y - sa * 14); g.stroke(); g.fillStyle = '#eee'; g.fillRect(p.x - ca * 14 - 1, p.y - sa * 14 - 1, 3, 3);
     if (p.rec && (t * 1.3 + p.x * .01) % 1.6 < .18) { g.fillStyle = 'rgba(255,248,210,.95)'; circ(g, p.x - ca * 7, p.y - sa * 7, 2.6); }
@@ -6183,7 +6228,7 @@ const ACH = [
   ['fief', '♛', 'Warden', 'Be granted a fief', () => !!P.fief], ['house', '⌂', 'Hearth and Home', 'Buy a house', () => (P.houses || []).length >= 1], ['fort', '♜', 'Castellan', 'Restore a ruined fort', () => (P.forts || []).length >= 1],
   ['fellowship', '☗', 'Fellowship', 'Travel with all four companions', () => (P.comps || []).length >= 4], ['masterwork', '⚒', 'Masterwork', 'Own a masterwork weapon or armor', () => P.inv.some(i => i.q === 3 && ['weapon', 'shield', 'armor'].includes(ITEMS[i.id].type))],
   ['enchant', '✧', 'Runesmith', 'Enchant a weapon at a royal forge', () => G.stats.enchants >= 1], ['sworn', '⚑', 'Sworn Sword', 'Swear allegiance to a crown', () => P.allegiance != null],
-  ['rich', '💰', 'Coffers Overflowing', 'Hold 10,000 gold at once', () => P.gold >= 10000], ['winter', '❄', 'Survived the Winter', 'Live to see a second spring', () => dayNum() > SEASON_DAYS * 4],
+  ['rich', '💰', 'Coffers Overflowing', 'Hold 10,000 gold at once', () => P.gold >= 10000], ['winter', '❄', 'Survived the Winter', 'Live to see a second spring', () => dayNum() > SEASON_DAYS * ((4 - seasonStart()) % 4 || 4)],
   ['forsaken', '☠', 'Forsaken', 'Reach level 10 on Forsaken difficulty', () => DIFF().ironman && P.lvl >= 10],
   ['endings5', '📜', 'Many Roads', 'Discover 5 story endings', () => endingsSeen() >= 5], ['endings_all', '📜', 'Every Ending', 'Discover all 15 story endings', () => endingsSeen() >= 15],
 ];
@@ -6309,6 +6354,8 @@ function renderSetup() {
   seg('kingSeg', KDATA, 'kingdom', k => `<img src="${bannerURL(KDATA.indexOf(k))}" alt="">${k.name}`);
   const iron = !!DIFFS[o.diff].ironman; if (iron) { o.wild = 2; o.explored = false; }
   seg('wildSeg', WILDS, 'wild'); seg('daySeg', DAYS, 'day');
+  seg('seasonSeg', SEASONS, 'season', x => ['🌱 ', '☀ ', '🍂 ', '❄ '][SEASONS.indexOf(x)] + x);
+  $('seasonNote').textContent = ['Mild weather and green fields.', 'Long, bright days, and dust storms in the south.', 'Golden woods, cheap food after the harvest.', 'Snow on every road, dear bread and slow travel. For the hardy.'][o.season];
   $('optExplored').checked = !!o.explored; $('optExplored').disabled = iron;
   ['wildSeg', 'exploredChk'].forEach(id => $(id).classList.toggle('setLocked', iron)); ['wildLock', 'exploredLock'].forEach(id => $(id).classList.toggle('hidden', !iron));
 }
@@ -6353,7 +6400,7 @@ function prepareWorld(seed, opts = normOpts()) { setWorldSize(SIZES[opts.size].n
 function resetState() {
   G.under = null; G.over = null;
   ents = []; pickups = []; projs = []; parts = []; texts = []; horseEnt = null; uidCounter = 1; nextEid = 1;
-  W.places.forEach(p => { p.disc = false; p.rumor = false; p.spawned = false; p.dead = []; p.cleared = false; p.chestOpened = false; p.clearedAt = 0; p.offers = null; p.request = false; p.blessed = false; p.investigated = false; p.rumorUsed = false; p.backerRevealed = false; p.wellT = -999; p.ddead = null; p.dchests = null; p.dcleared = false; p.legendTaken = false; if (p.type === 'outpost') p.owner = p.baseOwner; for (const k in p) if (k.startsWith('_shop_')) delete p[k]; });
+  W.places.forEach(p => { p.disc = false; p.rumor = false; p.spawned = false; p.dead = []; p.cleared = false; p.chestOpened = false; p.clearedAt = 0; p.offers = null; p.request = false; p.blessed = false; p.investigated = false; p.rumorUsed = false; p.backerRevealed = false; p.wellT = -999; p.sboss = null; p.ddead = null; p.dchests = null; p.dcleared = false; p.legendTaken = false; if (p.type === 'outpost') p.owner = p.baseOwner; for (const k in p) if (k.startsWith('_shop_')) delete p[k]; });
   (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false; G.lastPay = null; G.siege = null; G.tourney = null; G.stats = newStats(); G.tut = null;
   Object.assign(G, { time: 0, dipT: 0, eventT: 50, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, questT: 0 });
   newKingdoms(); newQuests(); newFog();
@@ -6402,7 +6449,7 @@ function saveGame(silent) {
     horse: horseEnt ? { x: horseEnt.x, y: horseEnt.y } : null,
     K: { rel: K.rel, aff: K.aff, rep: K.rep, mil: K.mil, reasons: K.reasons, events: K.events, kev: K.kev, repWhy: K.repWhy, gifts: K.gifts, log: K.log, cd: {} },
     Q: { active: Q.active.filter(q => q.type !== 'raid' && q.type !== 'tut' && q.sid !== 'hraid').map(qStrip), done: Q.done.map(qStrip), tracked: Q.tracked, next: Q.next },
-    places: W.places.map(p => ({ disc: p.disc, rumor: p.rumor, cleared: p.cleared, chestOpened: p.chestOpened, clearedAt: p.clearedAt, dead: p.dead, owner: p.owner, blessed: p.blessed, investigated: p.investigated, rumorUsed: p.rumorUsed, backerRevealed: p.backerRevealed, ddead: p.ddead, dchests: p.dchests, dcleared: p.dcleared, legendTaken: p.legendTaken })),
+    places: W.places.map(p => ({ disc: p.disc, rumor: p.rumor, cleared: p.cleared, chestOpened: p.chestOpened, clearedAt: p.clearedAt, dead: p.dead, owner: p.owner, blessed: p.blessed, investigated: p.investigated, rumorUsed: p.rumorUsed, backerRevealed: p.backerRevealed, sboss: p.sboss, ddead: p.ddead, dchests: p.dchests, dcleared: p.dcleared, legendTaken: p.legendTaken })),
     exp: packBits(EXP), settings,
   };
   data.opts = G.opts || normOpts(); data.stats = G.stats; data.tut = G.tut && !G.tut.done ? G.tut.step : null;
@@ -6535,6 +6582,15 @@ const S_ITEM = (obj, at, item, x) => Object.assign({ t: 'item', obj, at, item },
 const S_COND = (obj, test, x) => Object.assign({ t: 'cond', obj, test }, x);
 const S_ESCORT = (obj, npc, at, x) => Object.assign({ t: 'escort', obj, npc, at }, x);
 const S_MULTI = (obj, subs, x) => Object.assign({ t: 'multi', obj, subs }, x);
+// wait some in-game days (sleeping at an inn or your house passes the time)
+const S_WAIT = (obj, days, x) => Object.assign({ t: 'cond', obj: q => { const u = q['u' + q.stage]; const d = u ? Math.max(1, Math.ceil((u - G.time) / DAYLEN)) : days; return `${fv(obj, q)} (${d} day${d === 1 ? '' : 's'})`; }, test: q => { const k = 'u' + q.stage; if (!q[k]) q[k] = G.time + days * DAYLEN; return G.time >= q[k]; } }, x);
+// clear a dungeon (optionally with a story boss in place of its usual guardian), then climb back out
+const S_DUNGEON = (obj, place, boss, x) => Object.assign({ t: 'cond', obj, at: place, test: q => {
+  const pl = place(q); if (!q['d' + q.stage]) { q['d' + q.stage] = 1; if (pl.dcleared) { pl.dcleared = false; pl.ddead = []; pl.dchests = []; } if (boss) pl.sboss = boss; pl.rumor = true; pl.disc = true; }
+  if (boss && !pl.sboss && !pl.dcleared) pl.sboss = boss;
+  return pl.dcleared && !G.under;
+} }, x);
+const dunRef = (key, theme, near) => sref(key, () => { const used = Object.values(STORY.refs); const n = near(); return nearestPlace(n.x, n.y, p => p.type === 'dungeon' && p.theme === theme && !used.includes(p.id)) || nearestPlace(n.x, n.y, p => p.type === 'dungeon' && !used.includes(p.id)) || nearestPlace(n.x, n.y, p => p.type === 'dungeon'); });
 
 /* ---------------- Engine ---------------- */
 const SQ = {};
@@ -6601,7 +6657,7 @@ function storyUpdate(q) {
     case 'cond': if (st.test(q)) sAdvance(q); break;
     case 'fight': case 'duel': sFight(q, st, tg); break;
     case 'escort': sEscort(q, st, tg); break;
-    case 'multi': if (st.subs(q).every(s => q.m && q.m[s.id])) sAdvance(q); break;
+    case 'multi': st.subs(q).forEach(s2 => { if (!s2.talk && s2.at && !(q.m && q.m[s2.id])) { const a = s2.at(q); if (dist(P.x, P.y, a.x, a.y) < 7 * TS) { sSubDone(q, s2.id); toast(SF('blight') === 'burned' ? `${a.name} burns.` : `You bring the cure to ${a.name}.`, SF('blight') === 'burned' ? 'bad' : 'good'); } } }); if (st.need ? Object.keys(q.m || {}).length >= st.need : st.subs(q).every(s => q.m && q.m[s.id])) sAdvance(q); break;
   }
 }
 function storyPickup(q, p) { const st = sStep(q); if (st && st.t === 'item' && p.id === st.item) sAdvance(q); }
@@ -6744,7 +6800,7 @@ function storyTick(dt) {
   ents.filter(e => !e.dead && ((e.role === 'story' && !e.prot && (!want.has(e.skey) || (!e.follow && dist(P.x, P.y, e.x, e.y) > 2600))) || (e.leaveAt && G.time > e.leaveAt && dist(P.x, P.y, e.x, e.y) > 600))).forEach(removeEnt);
   if (STORY.raids && !Q.active.some(q => q.sid === 'hraid' || q.sid === 'fin' || q.sid === 'coup')) {
     STORY.raidT -= .5;
-    if (STORY.raidT <= 0) { STORY.raidT = rand(360, 520); sRaid(); }
+    if (STORY.raidT <= 0) { STORY.raidT = rand(360, 520) * (SF('raidSlow') ? 1.8 : 1); sRaid(); }
   }
 }
 function sRaid() {
@@ -6868,6 +6924,7 @@ SQ.c1 = {
       `Go to Valoria, Draven and Eldoria, in whatever order you please. I'll keep our friend comfortable.`,
     ], [{ t: 'I will bring you proof.', fn: () => { const c = sEnt('corvin'); if (c) removeEnt(c); deed('Delivered Corvin to Lady Wren. He named three agents of the Circle.'); sAdvance(q); closeDialog(); } }]); },
     { npcs: () => [N.corvin(soff(W.places[0], -.5, 3.2))] }),
+    S_WAIT('Lady Wren questions Corvin through the night', 1),
   ],
   done: () => { sStart('c2v'); sStart('c2d'); sStart('c2e'); sSoon(() => toast('Three main quests await in <b>Valoria</b>, <b>Draven</b> and <b>Eldoria</b>. Complete them in any order.', 'gold')); },
 };
@@ -6972,7 +7029,7 @@ SQ.c3 = {
       `When you face her, my knights will ride with you. Bring her back alive if you can. Albion will judge its own.`,
     ], [{ t: 'It will be done, Your Majesty.', fn: () => { removeItemById('wren_seal'); SF('told', 'yes'); addRep(0, 10, 'Uncovered treason at court'); deed("Revealed Lady Wren's treachery to King Aldric."); sAdvance(q); closeDialog(); } }])),
   ],
-  done: () => sStart('c4'),
+  done: () => sAct2(['c4']),
 };
 function sSummitPair() {
   if (SF('sumA') == null) { let best = PAIRS[0], bv = 999; PAIRS.forEach(p => { if (getRel(p[0], p[1]) < bv) { bv = getRel(p[0], p[1]); best = p; } }); SF('sumA', best[0]); SF('sumB', best[1]); }
@@ -7004,7 +7061,7 @@ SQ.c4 = {
       { t: '<span class="dn">KILL</span>No more bargains with the Circle.', fn: () => { SF('vesper', 'dead'); deed("Executed Vesper, the Circle's blade."); Object.assign(e, { dead: true, deadT: 0 }); sAdvance(q); sChat(NARR, ["Vesper's last breath is a laugh. On her body you find a map of the barrow, with a ring of acolytes drawn around the seal."]); } },
     ]), { skip: () => !sEnt('vesper') }),
   ],
-  done: () => sStart('c5'),
+  done: () => sStart('c4b'),
 };
 SQ.c5 = {
   title: 'The Ember Rite', giver: () => SF('vesper') === 'spared' ? 'Vesper' : 'A map from Vesper\'s body', k: 0,
@@ -7026,7 +7083,7 @@ SQ.c5 = {
       { t: '<span class="dn">EXECUTE</span>Draw your blade.', fn: () => { SF('wren', 'dead'); deed('Executed Lady Wren at the barrow.'); Object.assign(e, { dead: true, deadT: 0 }); sAdvance(q); sChat(NARR, ['It is quick. But the rite was already done.', 'The seal splits with a sound like thunder under the world, and the Hollow King rises.']); } },
     ]), { skip: () => !sEnt('wren') }),
   ],
-  done: () => { if (!SF('wren')) SF('wren', 'dead'); sStart('fin'); },
+  done: () => { if (!SF('wren')) SF('wren', 'dead'); sStart(SF('wren') === 'arrested' ? 'c6' : 'fin'); },
 };
 
 /* ---------------- Path II: The Hollow King (ancient threat) ---------------- */
@@ -7057,8 +7114,9 @@ SQ.b2 = {
       `Now he will hunt the shards. If he gathers them, he rises whole. If you gather them first, the crown can be forged again to bind him. Or perhaps to end him; the old texts disagree.`,
       `The four rulers each keep a shard. They won't hand them over for a pretty smile.`,
     ], [{ t: 'Then I will earn them.', fn: () => { removeItemById('seal_shard'); deed('Learned the legend of Aurek and the Ember Crown from Brother Caddock.'); sAdvance(q); closeDialog(); } }])),
+    S_WAIT('Brother Caddock studies the seal fragment', 1),
   ],
-  done: () => { ['sa', 'sv', 'sd', 'se', 'blore'].forEach(s => sStart(s)); sSoon(() => toast('Four shards, four crowns. The shard quests can be done in any order.', 'gold')); },
+  done: () => sAct2(['sa', 'sv', 'sd', 'se', 'blore']),
 };
 const battle = () => SP.hidden('battle'), chapel = () => SP.hidden('chapel');
 SQ.blore = {
@@ -7161,7 +7219,7 @@ function sShardGot(k) {
   SF('sh' + k, 1); SND.play('shard');
   const n = [0, 1, 2, 3].filter(j => SF('sh' + j)).length;
   if (n < 4) { toast(`Ember shards gathered: <b>${n} / 4</b>`, 'gold'); return; }
-  sStart(STORY.path === 'ancient' ? 'b6' : 'r7');
+  sStart(STORY.path === 'ancient' ? 'b5' : 'r6b');
 }
 const sRallyN = q => Object.keys(q.m || {}).length;
 function sRallyTalk(q, e, k, id) {
@@ -7192,7 +7250,7 @@ SQ.b6 = {
       `Go to ${B().name}. I will meet you there.`,
     ], goOn(q, 'To the barrow.')); }),
   ],
-  done: () => sStart('fin'),
+  done: () => sStart('b5b'),
 };
 
 /* ---------------- Path III: The Ember Throne (rise to power) ---------------- */
@@ -7264,7 +7322,7 @@ SQ.r4 = {
       `Rise, Castellan of ${holding().name}.`,
     ], [{ t: 'Rise.', fn: () => { SF('title', holding().name); addRep(liege(), 10, 'Granted a holding'); deed(`Was named Castellan of ${holding().name} by ${KDATA[liege()].ruler}.`); sAdvance(q); closeDialog(); } }])),
   ],
-  done: () => sStart('r5'),
+  done: () => sAct2(['r5']),
 };
 const envoySpot = () => sspot('envoyR', () => { const a = W.places[liege()], b = W.places[rivalOf()]; return randomLandSpot(lerp(a.x, b.x, .3), lerp(a.y, b.y, .3), 0, 8); });
 const harrowLook = () => Object.assign(knightLook(liege()), { head: 'hair', hair: '#8a6a3a', shiny: 0, body: '#5a4a6a', plume: null });
@@ -7298,7 +7356,7 @@ SQ.r5 = {
       { t: '<span class="dn">NO MERCY</span>Finish it.', fn: () => { SF('ruthless', 1); addRep(liege(), -5, 'Killed a noble in a duel'); deed('Killed Lord Harrowgate before the court.'); Object.assign(e, { dead: true, deadT: 0 }); sAdvance(q); sChat(NARR, ['The court falls silent. Nobody will challenge you again.']); } },
     ]), { skip: () => SF('patron') === 'circle' || !sEnt('harrow') }),
   ],
-  done: () => sStart('r6'),
+  done: () => sStart('r5b'),
 };
 function rivalOutpost() {
   if (STORY.refs.rOut == null) { const c = W.places[liege()], o = nearestPlace(c.x, c.y, p => p.type === 'outpost' && p.owner === rivalOf()); STORY.refs.rOut = o ? o.id : -1; }
@@ -7355,6 +7413,123 @@ SQ.coup = {
   done: () => sSoon(storyEnding),
 };
 
+/* ---------------- Longer roads: extra quests in each path ---------------- */
+const cellV = i => sref('cell' + i, () => nearestPlace(W.places[i + 1].x, W.places[i + 1].y, p => p.type === 'village' && p.owner === i + 1) || W.places[i + 1]);
+const bromN = () => ({ key: 'brom', name: 'Gaoler Brom', role: `Gaoler of ${W.places[0].name}`, look: LK.brom, at: soff(W.places[0], -2, 2.5), k: 0 });
+SQ.c4b = {
+  title: 'The Grey Network', giver: 'Gaoler Brom', k: 0,
+  desc: () => `Lady Wren's agents are hidden in three villages. Cut them out before the rite, or they will open the barrow's gates from within.`,
+  reward: { gold: 320, xp: 520 },
+  steps: [
+    S_TALK(() => `Speak with Gaoler Brom at ${W.places[0].name}`, bromN, (q, e) => sChat(SPK(e), [
+      `Sir! We searched Lady Wren's rooms. Coded letters, all of them, and three names that keep coming back: ${cellV(0).name}, ${cellV(1).name} and ${cellV(2).name}.`,
+      `Cells of the Circle, the King's clerks say. Waiting for her signal.`,
+    ], goOn(q, 'Then I will cut the strings.'))),
+    S_FIGHT(() => `Root out the Circle cell in ${cellV(0).name}`, () => cellV(0), [[['cultist', 4, { tier: 2 }], ['assassin', 1, { tier: 2 }]]], { near: 10, msg: 'Grey robes throw off their disguises!' }),
+    S_FIGHT(() => `Root out the Circle cell in ${cellV(1).name}`, () => cellV(1), [[['cultist', 4, { tier: 3 }], ['assassin', 2, { tier: 2 }]]], { near: 10, msg: 'The cell was waiting for you!' }),
+    S_FIGHT(() => `Root out the Circle cell in ${cellV(2).name}`, () => cellV(2), [[['cultist', 3, { tier: 3 }], ['assassin', 2, { tier: 3 }]], [['cultist', 1, { name: 'The Ashen Seneschal', boss: true, hp: 900, dmg: 18, yieldAt: .25, key: 'seneschal', yname: 'The Ashen Seneschal', ysay: 'Mercy! I will tell you everything!', o: { _look: LK.corvin } }], ['cultist', 2, { tier: 3 }]]], { near: 10, msg: 'The last cell fights like cornered wolves!', waveMsg: ['', 'The Ashen Seneschal, Wren\'s right hand, joins the fight!'] }),
+    S_TALK("Decide the Seneschal's fate", () => ({ key: 'seneschal', name: 'The Ashen Seneschal', role: 'Defeated', look: LK.corvin, at: soff(cellV(2), 0, 1) }), (q, e) => sChat(SPK(e), [
+      'Hundreds of us, knight. Farmers, clerks, soldiers. Most of us joined because Wren promised the wars would end.',
+      'Let them lay down their grey robes and go home, and I will tell you every word of the rite.',
+    ], [
+      { t: '<span class="dn">AMNESTY</span>Tell them to go home. No more blood.', fn: () => { SF('amnesty', 1); deed('Offered amnesty to the rank and file of the Circle.'); sAdvance(q); closeDialog(); } },
+      { t: '<span class="dn">PURGE</span>Every one of them answers for it.', fn: () => { SF('purge', 1); addRep(0, 6, 'Purged the Circle'); deed('Purged the Circle\'s cells without mercy.'); Object.assign(e, { dead: true, deadT: 0 }); sAdvance(q); closeDialog(); } },
+    ]), { skip: () => !sEnt('seneschal') }),
+  ],
+  done: () => sStart('c5'),
+};
+SQ.c6 = {
+  title: 'Trial of the Grey Mother', giver: 'King Aldric', k: 0,
+  desc: () => `Lady Wren will stand trial before envoys of all four crowns at ${W.places[0].name}. You found her out. Your testimony will decide her fate.`,
+  reward: { gold: 250, xp: 400, rep: { 0: 6 } },
+  steps: [
+    S_RULER('Speak with King Aldric about the trial', 0, q => sChat(rulerSpk(0), ['The envoys are riding in from every court. When they arrive, Albion will try its own traitor, and the realm will watch.'], goOn(q, 'I will be ready.'))),
+    S_WAIT('The four courts gather for the trial', 1),
+    S_RULER('Testify at the trial of Lady Wren', 0, q => sChat(rulerSpk(0), [
+      [NARR, 'The great hall is packed to the rafters. Lady Wren stands in chains, calm as a winter lake.'],
+      [{ name: 'Lady Wren', role: 'On trial', portrait: fakeP(LK.wren) }, 'Tell them what you like, knight. The Hollow King is still in his barrow. Nothing I did was for myself.'],
+      'Knight, you know her crimes better than anyone. What sentence should the four courts pass?',
+    ], [
+      { t: '<span class="dn">DEATH</span>Hang her. The realm must see the Circle end.', fn: () => { SF('trial', 'death'); addRep(0, 4, 'Justice for treason'); deed('Testified for Lady Wren\'s execution.'); sAdvance(q); closeDialog(); } },
+      { t: '<span class="dn">EXILE</span>Send her beyond the Greywater, forever.', fn: () => { SF('trial', 'exile'); deed('Argued for Lady Wren\'s exile.'); sAdvance(q); closeDialog(); } },
+      { t: '<span class="dn">SERVICE</span>Let her serve the crown she betrayed, under watch.', fn: () => { SF('trial', 'service'); addRep(0, -3, 'Mercy for a traitor'); deed('Argued that Lady Wren should serve the crown she betrayed.'); sAdvance(q); closeDialog(); } },
+    ])),
+  ],
+  done: () => sStart('fin'),
+};
+const iceCave = () => dunRef('b_ice', 'ice', () => W.places[2]);
+SQ.b5 = {
+  title: 'The Undying Flame', giver: 'Brother Caddock', k: 2,
+  desc: () => `The Ember Crown was forged in a flame that never dies. Caddock believes the last of it burns in the heart of Rimeheart, deep in ${iceCave().name}.`,
+  reward: { gold: 300, xp: 520 },
+  steps: [
+    S_TALK('Bring the four shards to Brother Caddock', () => N.caddock(), (q, e) => sChat(SPK(e), [
+      'Four shards. Gods. I never thought I would hold them together.',
+      'But they will not fuse in any common forge. Aurek\'s smiths used the undying flame, a cold fire that burns without heat. The old texts say the last of it sleeps in the chest of Rimeheart, the ice-thing of Draven\'s snowfields.',
+      `Go to ${iceCave().name}. Bring me its Frost Heart.`,
+    ], goOn(q, 'Into the ice, then.'))),
+    S_DUNGEON(() => `Slay Rimeheart in ${iceCave().name}`, iceCave, null),
+    S_TALK('Bring the Frost Heart to Brother Caddock', () => N.caddock(), (q, e) => sChat(SPK(e), ['Show me.'], [
+      { t: `Give him the Frost Heart.${countItem('frost_heart') ? '' : ' (You need a Frost Heart; Rimeheart\'s hoard holds one)'}`, dis: !countItem('frost_heart'), fn: () => { removeItemById('frost_heart'); deed('Brought the undying flame out of the ice.'); sAdvance(q); sChat(SPK(e), ['Cold as a star. Yes. Now we can forge.']); } },
+      { t: 'Not yet.', fn: closeDialog },
+    ])),
+  ],
+  done: () => sStart('b6'),
+};
+SQ.b5b = {
+  title: 'The Dead Road', giver: 'Brother Caddock', k: null,
+  desc: () => `Caddock must reach ${B().name} alive to forge the crown. Every Hollow thing in the land will try to stop him.`,
+  reward: { gold: 250, xp: 480 },
+  steps: [
+    S_ESCORT(() => `Escort Brother Caddock to ${B().name}`, () => N.caddock(), () => soff(B(), 2, 3), { ambush: [['wight', 5, { tier: 3 }], ['hknight', 1, { tier: 2 }], ['hollow_archer', 2, { tier: 2 }]], amsg: 'The dead rise from the ditches to stop Caddock!' }),
+  ],
+  done: () => sStart('fin'),
+};
+const feastN = (key, name, role, dx, look) => () => ({ key, name, role, look, at: soff(W.places[liege()], dx, 4), k: liege() });
+const SUSPECTS = [
+  feastN('cupbearer', 'Oswin the Cupbearer', 'Royal cupbearer', -3, { body: '#6a4a6a', head: 'hair', hair: '#2a1a10', skin: '#e0b890' }),
+  feastN('cook', 'Hilde the Cook', 'Royal cook', 0, { body: '#e8e0cc', head: 'cap', skin: '#d8a878' }),
+  feastN('fenvoy', 'The Foreign Envoy', 'A guest at the feast', 3, { body: '#5a5a7a', head: 'hair', hair: '#8a6a3a', skin: '#f0d0b0', cape: '#c8a040' }),
+];
+SQ.r5b = {
+  title: 'The Poisoned Feast', giver: () => KDATA[liege()].ruler, k: () => liege(),
+  desc: () => `A feast in your honor at ${W.places[liege()].name} ends with the royal taster dead. Someone meant that cup for you.`,
+  reward: { gold: 300, xp: 480 },
+  steps: [
+    S_RULER(() => `Attend the feast at ${W.places[liege()].name}`, () => liege(), q => sChat(rulerSpk(liege()), [
+      'A toast to the Castellan! To...',
+      [NARR, 'The royal taster clutches his throat and falls across the table. The hall erupts.'],
+      'Poison! Meant for you, Castellan. Question the servants and my guests before they scatter. Find me the poisoner.',
+    ], goOn(q, 'Seal the doors.'))),
+    S_TALK('Question the cupbearer', SUSPECTS[0], (q, e) => sChat(SPK(e), ['I poured from the same flagon for everyone, sir! Everyone! ...Why do you look at my gloves like that? They are grey because I work in the cellar.'], goOn(q, 'We will see.'))),
+    S_TALK('Question the cook', SUSPECTS[1], (q, e) => sChat(SPK(e), ['My food never killed anyone! The wine comes up from the cellar. Ask the cupbearer; he was down there alone for an hour.'], goOn(q, 'I will.'))),
+    S_TALK('Question the foreign envoy', SUSPECTS[2], (q, e) => sChat(SPK(e), ['You suspect me? I drank from the same cup a moment before the taster. If I wanted you dead, knight, I would not have poisoned myself as well.'], goOn(q, 'Noted.'))),
+    S_RULER('Name the poisoner', () => liege(), q => sChat(rulerSpk(liege()), ['Well, Castellan? Who poisoned the cup?'], [
+      { t: 'The cupbearer. His grey gloves hide a Circle brand.', fn: () => { SF('poisoner', 'right'); addRep(liege(), 8, 'Caught a poisoner'); deed('Unmasked a Circle poisoner at the royal feast.'); sAdvance(q); closeDialog(); } },
+      { t: 'The cook. She had every chance.', fn: () => { SF('poisoner', 'wrong'); SF('ruthless', 1); deed('Accused an innocent cook of poisoning the royal feast.'); sAdvance(q, 2); sChat(rulerSpk(liege()), ['Hang her, then.', [NARR, 'Three days later, a second attempt is made on your life. The cook, it seems, was innocent.']]); } },
+      { t: 'The foreign envoy. This is an act of war.', fn: () => { SF('poisoner', 'wrong'); addRel(liege(), rivalOf(), -20, 'Envoy accused of poisoning'); deed('Accused a foreign envoy of poisoning the royal feast.'); sAdvance(q, 2); sChat(rulerSpk(liege()), [`${KDATA[rivalOf()].name} will answer for this!`, [NARR, 'The real poisoner slips away in the uproar.']]); } },
+    ])),
+    S_FIGHT("Fight off the poisoner's accomplices", () => soff(W.places[liege()], 0, 12), [[['assassin', 3, { tier: 3 }], ['cultist', 2, { tier: 3 }]]], { near: 12, msg: 'The cupbearer\'s friends draw their knives!', skip: () => SF('poisoner') !== 'right' }),
+  ],
+  done: () => sStart('r6'),
+};
+SQ.r6b = {
+  title: 'The Crown Council', giver: () => KDATA[liege()].ruler, k: () => liege(),
+  desc: 'You hold the four shards. Whoever forges the crown will claim a right to rule, and the four crowns will not stand for it unless they are persuaded first.',
+  reward: { gold: 300, xp: 480 },
+  steps: [
+    S_MULTI(q => `Win the support of three crowns to forge the crown (${Object.keys(q.m || {}).length}/3)`, () => [0, 1, 2, 3].map(k => ({ id: 'k' + k, k, talk: (q, e, id) => {
+      const rep = K.rep[k], ok = rep >= 35 || k === liege();
+      sChat(rulerSpk(k), [k === liege() ? 'You have my voice, Castellan, of course.' : ok ? 'You have earned the right to try. My voice is yours.' : 'Why should I trust an ambitious knight with the Ember Crown?'], [
+        { t: `<span class="dn">PERSUADE</span>Stand with me.${ok ? '' : ' (Reputation 35)'}`, dis: !ok, fn: () => { SF('vote' + k, 1); sSubDone(q, id); closeDialog(); } },
+        { t: '<span class="dn">GOLD</span>A gift for your treasury. (600 gold)', dis: P.gold < 600 || k === liege(), fn: () => { P.gold -= 600; SF('vote' + k, 'bought'); deed(`Bought ${KDATA[k].name}'s voice at the crown council.`); sSubDone(q, id); closeDialog(); } },
+        { t: 'I will return.', fn: closeDialog },
+      ]);
+    } })), { need: 3 }),
+  ],
+  done: () => sStart('r7'),
+};
+
 /* ---------------- Finale (all paths) ---------------- */
 function sFinAllies(q, x, y) {
   const p = STORY.path, out = [];
@@ -7367,11 +7542,19 @@ function sFinAllies(q, x, y) {
     if (circle()) out.push(sNamedAlly('assassin', 'Vesper', LK.vesper, x, y));
   }
   if (SF('thessaly') === 'ally') out.push(sThessAlly(x, y));
+  // the Long War decides who else comes
+  if (SF('council') === 'alliance') [0, 1, 2, 3].forEach(k => out.push(...sKAllies(k, x, y, 2, 0)));
+  else if (SF('council') === 'dominion') out.push(...sKAllies(SF('domK') ?? 0, x, y, 3, 1));
+  if (SF('edric') === 'alive') out.push(sNamedAlly('knight', 'Sir Edric Vale', LK2.edric, x, y));
+  if (SF('kaelen') === 'spared') out.push(sNamedAlly('soldier', 'Kaelen the Red', Object.assign(knightLook(wE(), 'axe'), { head: 'hair', hair: '#a83a1a', shiny: 0, body: '#6a3a2a' }), x, y, { k: wE() }));
+  if (['returned', 'rescued'].includes(SF('heir'))) out.push(...sKAllies(heirK(), x, y, 0, 2));
   return out;
 }
-const sFinNpc = () => rise() && circle() ? N.vesper(soff(B(), 2, 2)) : N.caddock(soff(B(), 2, 2));
+const sFinNpc = () => rise() && circle() ? N.vesper(soff(B(), 2, 2)) : STORY.path === 'conspiracy' ? (SF('edric') === 'alive' ? N2.edric(soff(B(), 2, 2)) : N.caddock(soff(B(), 2, 2))) : N.caddock(soff(B(), 2, 2));
 function sFinalChoice(q, e) {
   const pick = id => () => { SF('end', id); ['shard_0', 'shard_1', 'shard_2', 'shard_3'].forEach(s => removeItemById(s)); sAdvance(q); closeDialog(); };
+  const walk = { t: '<span class="dn">WALK AWAY</span>Leave it all behind you, and ride on.', fn: pick('wanderer') };
+  if (STORY.path === 'conspiracy') { sChat(SPK(e), ['He is ash. The barrow is quiet at last.', 'The courts will want you back, knight. Titles, lands, a seat at every table. Or you could just... go.'], [{ t: 'Return to court. There is work left to do.', fn: pick(null) }, walk]); return; }
   if (STORY.path === 'ancient') {
     const n = [0, 1, 2, 3].filter(k => SF('ral' + k) && SF('ral' + k) !== 'no').length;
     sChat(SPK(e), [
@@ -7382,6 +7565,7 @@ function sFinalChoice(q, e) {
       { t: '<span class="dn">SACRIFICE</span>Wear the crown, and bind him inside yourself forever.', fn: pick('last_oath') },
       { t: `<span class="dn">SHATTER</span>Break the shards and burn him with his own crown.${SF('lore') ? '' : ' (Requires the truth of Aurek)'}`, dis: !SF('lore'), fn: pick('shattered') },
       { t: '<span class="dn">CLAIM</span>Forge the crown... and take his power as your own.', fn: pick('hollow_crown') },
+      walk,
     ]);
     return;
   }
@@ -7393,6 +7577,7 @@ function sFinalChoice(q, e) {
     { t: `<span class="dn">USURP</span>Take the crown to ${W.places[liege()].name}, and take the throne by force.`, fn: pick('usurper') },
   ];
   if (circle()) opts.unshift({ t: '<span class="dn">THE CIRCLE</span>Let Vesper crown you, as the Circle promised.', fn: pick('puppet') });
+  opts.push(walk);
   sChat(SPK(e), circle()
     ? ['It is done. He is ash, and the shards are yours. The Circle kept its promise, Castellan. Now keep yours.', 'Let me crown you. The Circle will handle the rest.']
     : ['It is done, knight. He is ash.', 'The shards are warm in your hands. By the old law, whoever forges the crown rules all four lands. What will you do?'], opts);
@@ -7406,10 +7591,293 @@ SQ.fin = {
       [['wight', 5, { tier: 3 }], ['hknight', 1, { tier: 2 }], ['hollow_archer', 2, { tier: 2 }]],
       [['wight', 4, { tier: 3 }], ['hknight', 2, { tier: 3 }], ['hollow_archer', 2, { tier: 3 }]],
       [['hollow_king', 1, { name: 'Aurek, the Hollow King', boss: true, hp: 1350, dmg: 24, o: { scale: 1.3 } }], ['wight', 3, { tier: 3 }]],
-    ], { near: 18, sfx: 'seal', msg: "The earth splits open. The Hollow King's host pours out of the barrow!", waveMsg: ['', 'Hollow Knights rise from the grave-mist!', 'AUREK, THE HOLLOW KING, RISES!'], allies: sFinAllies, won: () => deed('Struck down Aurek, the Hollow King.') }),
-    S_TALK('Decide the fate of the Ember Crown', sFinNpc, sFinalChoice, { skip: () => STORY.path === 'conspiracy' }),
+      [['hollow_king', 1, { name: 'Aurek Unbound', boss: true, hp: 1600, dmg: 29, o: { scale: 1.55 } }], ['hknight', 2, { tier: 3 }], ['hollow_archer', 2, { tier: 3 }]],
+    ], { near: 18, sfx: 'seal', msg: "The earth splits open. The Hollow King's host pours out of the barrow!", waveMsg: ['', 'Hollow Knights rise from the grave-mist!', 'AUREK, THE HOLLOW KING, RISES!', 'Aurek falls... and rises again, UNBOUND!'], allies: sFinAllies, won: () => deed('Struck down Aurek, the Hollow King.') }),
+    S_TALK(() => STORY.path === 'conspiracy' ? 'Decide what comes next' : 'Decide the fate of the Ember Crown', sFinNpc, sFinalChoice),
   ],
   done: () => { if (SF('end') === 'usurper') sStart('coup'); else sSoon(storyEnding); },
+};
+
+/* ---------------- Act II: The Long War (shared by every path) ----------------
+   The Hollow King's stirring, and the Circle's knives, drag two crowns into open war. */
+function sAct2(next) {
+  STORY.act2next = next;
+  if (SF('wA') == null) { let best = PAIRS[0], bv = 999; PAIRS.forEach(p2 => { if (getRel(p2[0], p2[1]) < bv) { bv = getRel(p2[0], p2[1]); best = p2; } }); SF('wA', best[0]); SF('wB', best[1]); }
+  sStart('w1');
+  sSoon(() => sChat(NARR, ['Winter comes early this year. Beacons burn along the borders, and the roads fill with frightened people.', `Word spreads from village to village: <b>${KDATA[SF('wA')].name}</b> and <b>${KDATA[SF('wB')].name}</b> are at war.`], [{ t: 'Continue', fn: closeDialog }]));
+}
+function sAct2Done() {
+  STORY.act2done = true; deed('Saw the realm through the Long War.');
+  const nx = STORY.act2next || []; nx.forEach(id => sStart(id));
+  if (nx.length > 1) sSoon(() => toast('The Long War is over, but your own road goes on. Several main quests await; do them in any order.', 'gold'));
+}
+const wA = () => SF('wA') ?? 1, wB = () => SF('wB') ?? 2;
+const wS = () => SF('war') === 'B' ? wB() : wA(), wE = () => SF('war') === 'B' ? wA() : wB();
+const heirK = () => SF('war') === 'peace' ? wA() : wE();
+const burntV = () => sref('w_burnt', () => { const a = W.places[wA()], b = W.places[wB()]; return nearestPlace((a.x + b.x) / 2, (a.y + b.y) / 2, p => p.type === 'village' && (p.owner === wA() || p.owner === wB())) || W.places[wB()]; });
+const crossSpot = () => sspot('w_cross', () => { const a = W.places[wA()], b = W.places[wB()]; return randomLandSpot((a.x + b.x) / 2, (a.y + b.y) / 2, 0, 10); });
+const truceV = () => sref('w_truce', () => { const a = W.places[wA()], b = W.places[wB()]; return nearestPlace((a.x + b.x) / 2, (a.y + b.y) / 2, p => p.type === 'village' && p.owner !== wA() && p.owner !== wB()) || nearestPlace((a.x + b.x) / 2, (a.y + b.y) / 2, p => p.type === 'village' && p.id !== burntV().id) || W.places[wA()]; });
+const eOut = () => { if (STORY.refs.wOut == null) { const c = W.places[wS()], o = nearestPlace(c.x, c.y, p => p.type === 'outpost' && p.owner === wE()); STORY.refs.wOut = o ? o.id : -1; } return STORY.refs.wOut >= 0 ? W.places[STORY.refs.wOut] : null; };
+const eFortSpot = () => eOut() || sspot('wCamp', () => { const a = W.places[wS()], b = W.places[wE()]; return randomLandSpot(lerp(a.x, b.x, .6), lerp(a.y, b.y, .6), 0, 8); });
+const fenV = () => sref('w_fen', () => nearestPlace(W.places[3].x, W.places[3].y, p => p.type === 'village' && p.owner === 3 && p.id !== truceV().id && p.id !== burntV().id) || W.places[3]);
+const fenVs = () => { if (!STORY.refs.fens) STORY.refs.fens = W.places.filter(p => p.type === 'village' && p.owner === 3 && p.id !== fenV().id).sort((a, b) => dist(a.x, a.y, fenV().x, fenV().y) - dist(b.x, b.y, fenV().x, fenV().y)).slice(0, 3).map(p => p.id); return STORY.refs.fens.map(id => W.places[id]); };
+const rotCave = () => dunRef('w_rot', 'spider', () => W.places[3]);
+const heirCave = () => dunRef('w_heir', 'cave', () => W.places[wA()]);
+const paleCrypt = () => dunRef('w_pale', 'crypt', () => P);
+const bonesP = () => SP.hidden('bones');
+const siegeK = () => { if (SF('siegeK') == null) { let k = P.allegiance ?? (SF('war') === 'peace' ? wA() : wS()); if (K.rep[k] < -20) k = [0, 1, 2, 3].sort((a, b) => K.rep[b] - K.rep[a])[0]; SF('siegeK', k); } return SF('siegeK'); };
+const LK2 = {
+  edric: { body: '#8a8e94', mail: 1, head: 'hair', hair: '#9a9088', beard: 1, skin: '#e0b48a', cape: '#4a4a52', tabard: '#d8d0b8', weapon: { wk: 'sword', len: 32, col: '#d6dce2' }, shield: { b: ITEMS.iron_shield, col: '#4a4a52' } },
+  merrit: { body: '#6a5a44', head: 'hair', hair: '#d8d8d0', beard: 1, skin: '#d8b090' },
+  sorrel: { body: '#3a6a4a', head: 'hood', hood: '#2a5a3a', skin: '#e0c0a0', cape: '#5a4a30' },
+  pale: { body: '#d8d8dc', head: 'hood', hood: '#e8e8ec', skin: '#f4f4f4', cape: '#b8b8c0', weapon: { wk: 'sword', len: 24, col: '#e8eef4' } },
+  morrow: { body: '#2a2e34', head: 'great', plume: '#6a8a8a', pauld: 1, skin: '#8e9c9a', cape: '#101418', weapon: { wk: 'great', len: 54, col: '#9ab8c0', glow: '#8fd8ff' } },
+};
+const kestrelLook = k => ({ body: KDATA[k].color, head: 'hair', hair: '#2a1a10', skin: '#f0d0b0', cape: KDATA[k].accent, weapon: { wk: 'sword', len: 22, col: '#c8ced4' } });
+const N2 = {
+  merrit: () => ({ key: 'merrit', name: 'Old Merrit', role: `Survivor of ${burntV().name}`, look: LK2.merrit, at: soff(burntV(), 1.5, 2.5), k: burntV().owner }),
+  edric: at => ({ key: 'edric', name: 'Sir Edric Vale', role: 'Warden of the Roads', look: LK2.edric, at: at || crossSpot() }),
+  kestrel: at => ({ key: 'kestrel', name: 'Kestrel', role: `Heir of ${KDATA[heirK()].name}`, look: kestrelLook(heirK()), at, k: heirK() }),
+  sorrel: () => ({ key: 'sorrel', name: 'Mother Sorrel', role: `Healer of ${fenV().name}`, look: LK2.sorrel, at: soff(fenV(), -1.5, 2.5), k: 3 }),
+  kaelen: at => ({ key: 'kaelen', name: 'Kaelen the Red', role: `Champion of ${KDATA[wE()].name}`, look: Object.assign(knightLook(wE(), 'axe'), { head: 'hair', hair: '#a83a1a', shiny: 0, body: '#6a3a2a' }), at, k: wE() }),
+};
+SIDLE.merrit = 'They burned it all. All of it.'; SIDLE.edric = 'The roads remember every army that marches them.'; SIDLE.sorrel = 'Wash your hands before you touch my herbs.'; SIDLE.kestrel = 'I am not a prize to be traded.'; SIDLE.kaelen = 'I fought well. That is all a champion owes anyone.';
+SQ.w1 = {
+  title: 'Smoke on the Horizon', giver: 'A rider in torn colors', k: () => burntV().owner,
+  desc: () => `${KDATA[wA()].name} and ${KDATA[wB()].name} are at war, and ${burntV().name} is burning. Find out what happened.`,
+  reward: { gold: 150, xp: 260 },
+  steps: [
+    S_GO(() => `Ride to the burning village of ${burntV().name}`, () => burntV(), 10),
+    S_FIGHT(() => `Drive the raiders out of ${burntV().name}`, () => burntV(), () => [[['soldier', 3, { tier: 2, name: `${KDATA[wA()].name} Raider`, o: { k: wA(), questFoe: true } }], ['bandit', 2, { tier: 2, name: 'Looter' }]], [['assassin', 2, { tier: 2, name: 'Grey Cloak' }]]], { near: 12, msg: 'Soldiers loot the smoking ruins!', waveMsg: ['', 'Grey-cloaked blades slip out of the smoke!'] }),
+    S_TALK('Speak with the survivor', N2.merrit, (q, e) => sChat(SPK(e), [
+      `They came at dawn wearing ${KDATA[wA()].name}'s colors. Burned the granary, the chapel, my daughter's house...`,
+      `But one of them lost his helm in the fighting. I saw his face, knight. A grey flame was inked on his neck.`,
+      `${KDATA[wA()].name} did not do this. Someone wants these two crowns at each other's throats.`,
+    ], [{ t: 'Show me where the helm fell.', fn: () => { deed(`Found the survivors of burnt ${burntV().name}.`); sAdvance(q); closeDialog(); } }])),
+    S_ITEM('Take the fallen helm', () => soff(burntV(), 3, 1), 'circle_helm'),
+  ],
+  done: () => { SF('wStart', dayNum()); sStart('w2'); },
+};
+SQ.w2 = {
+  title: 'Two Crowns, One Knight', giver: 'Old Merrit', k: () => wA(),
+  desc: () => `The war between ${KDATA[wA()].name} and ${KDATA[wB()].name} was started by the Circle in stolen colors. Hear both crowns before you decide what to do.`,
+  reward: { gold: 120, xp: 240 },
+  steps: [
+    S_MULTI(q => `Hear both crowns (${Object.keys(q.m || {}).length}/2)`, () => [wA(), wB()].map(k => ({ id: 'k' + k, k, talk: (q, e, id) => sChat(rulerSpk(k), [
+      k === wA() ? `${KDATA[wB()].name} burned our border farms a month ago, and now they cry murder over one village? Let them bleed.` : `${KDATA[wA()].name} butchered ${burntV().name} in the night. We will answer fire with fire.`,
+      [NARR, 'You show the grey-flame helm.'],
+      k === wA() ? 'A Circle mark... Clever. But my soldiers have already marched, knight, and so have theirs.' : 'Forgeries are easy to make, knight. Graves are not.',
+      `If you want this war ended, you had better choose how.`,
+    ], [{ t: 'I understand.', fn: () => { sSubDone(q, id); closeDialog(); } }]) }))),
+    S_TALK('Meet Sir Edric Vale at the crossroads', () => N2.edric(), (q, e) => { const okPeace = K.rep[wA()] >= 15 && K.rep[wB()] >= 15; sChat(SPK(e), [
+      `So you are the knight everyone is talking about. I am Edric Vale. The old Wardens of the Roads kept these crossroads open for a hundred years, until the crowns forgot us.`,
+      `Two armies are marching, and every village between them is kindling. There are three roads from here. You can take up ${KDATA[wA()].name}'s banner, or ${KDATA[wB()].name}'s, and end this quickly with steel.`,
+      `Or you can try to drag both crowns to the table. That road is slower, and the Circle will try to kill you on it.`,
+      `Whichever you choose, the crown you back will remember it. So will the one you do not.`,
+    ], [
+      { t: `<span class="dn">WAR</span>I fight for ${KDATA[wA()].name}.`, fn: () => { SF('war', 'A'); addRep(wA(), 10, 'Took up arms in the Long War'); addRep(wB(), -15, 'Fought against us in the Long War'); deed(`Took up ${KDATA[wA()].name}'s banner in the Long War.`); sAdvance(q); closeDialog(); } },
+      { t: `<span class="dn">WAR</span>I fight for ${KDATA[wB()].name}.`, fn: () => { SF('war', 'B'); addRep(wB(), 10, 'Took up arms in the Long War'); addRep(wA(), -15, 'Fought against us in the Long War'); deed(`Took up ${KDATA[wB()].name}'s banner in the Long War.`); sAdvance(q); closeDialog(); } },
+      { t: `<span class="dn">PEACE</span>I will bring them to the table.${okPeace ? '' : ' (Reputation 15 with both crowns)'}`, dis: !okPeace, fn: () => { SF('war', 'peace'); addRep(wA(), 4, 'Sought peace'); addRep(wB(), 4, 'Sought peace'); deed('Chose to broker peace in the Long War.'); sAdvance(q); closeDialog(); } },
+    ]); }),
+  ],
+  done: () => sStart(SF('war') === 'peace' ? 'w3p' : 'w3w'),
+};
+SQ.w3w = {
+  title: 'The Burning Border', giver: () => KDATA[wS()].ruler, k: () => wS(),
+  desc: () => `You fight for ${KDATA[wS()].name}. Break ${KDATA[wE()].name}'s army at the border and take the fight to them.`,
+  reward: { gold: 320, xp: 420 },
+  steps: [
+    S_RULER(() => `Report to ${KDATA[wS()].ruler}`, () => wS(), q => sChat(rulerSpk(wS()), [
+      `So Edric's crossroads knight chooses us. Good. ${KDATA[wE()].name} has a warband camped on our border, burning everything in reach.`,
+      `Break it. Then take ${eOut() ? eOut().name : 'their war camp'}, and they will have to sue for terms.`,
+    ], goOn(q, 'For the crown.'))),
+    S_WAIT('The army musters at the border', 1, { skip: () => dayNum() - (SF('wStart') || 0) > 3 }),
+    S_FIGHT(() => `Break the ${KDATA[wE()].name} warband`, () => sWarSpot(wS(), wE()), () => [[['soldier', 5, { tier: 2, o: { k: wE(), foeOf: wS(), questFoe: true } }], ['bowman', 2, { tier: 2, o: { k: wE(), foeOf: wS(), questFoe: true } }]], [['knight', 2, { tier: 3, o: { k: wE(), foeOf: wS(), questFoe: true } }], ['soldier', 3, { tier: 2, o: { k: wE(), foeOf: wS(), questFoe: true } }]]], { near: 14, allies: (q, x, y) => sKAllies(wS(), x, y, 4, 1), msg: 'The warband turns to meet you!', waveMsg: ['', 'Their knights charge!'] }),
+    S_FIGHT(() => eOut() ? `Storm ${eOut().name}` : `Destroy the ${KDATA[wE()].name} war camp`, eFortSpot, () => [[['guard', 4, { tier: 3, o: { k: wE(), foeOf: wS(), questFoe: true } }], ['bowman', 2, { tier: 3, o: { k: wE(), foeOf: wS(), questFoe: true } }], ['knight', 1, { tier: 3, o: { k: wE(), foeOf: wS(), questFoe: true } }]]], {
+      near: 14, allies: (q, x, y) => sKAllies(wS(), x, y, 4, 1), msg: 'Storm the walls!',
+      won: () => { const o = eOut(); if (o) { o.owner = wS(); if (o.spawned) despawnPlace(o); } K.mil[wE()] = Math.max(300, K.mil[wE()] - 300); deed(`Stormed ${eOut() ? eOut().name : 'the war camp'} for ${KDATA[wS()].name}.`); },
+    }),
+    S_DUEL(() => `Face ${KDATA[wE()].name}'s champion, Kaelen the Red`, () => soff(eFortSpot(), 3, 3), () => ({ name: 'Kaelen the Red', k: wE(), p: 1.55, look: Object.assign(knightLook(wE(), 'axe'), { head: 'hair', hair: '#a83a1a', shiny: 0, body: '#6a3a2a' }), yieldKey: 'kaelen', say: 'You will not take one step further!' })),
+    S_TALK("Decide Kaelen's fate", () => N2.kaelen(soff(eFortSpot(), 3, 3)), (q, e) => sChat(SPK(e), [
+      `...Enough. I yield.`,
+      `Kill me or don't, but know this: the heir of ${KDATA[wE()].name}, Kestrel, rode with this army. Your soldiers have her now.`,
+    ], [
+      { t: '<span class="dn">MERCY</span>Go home, Kaelen. Tell your crown there is still a way back.', fn: () => { SF('kaelen', 'spared'); addRep(wE(), 6, 'Spared their champion'); deed('Spared Kaelen the Red.'); sAdvance(q); closeDialog(); } },
+      { t: '<span class="dn">NO MERCY</span>(Strike him down.)', fn: () => { SF('kaelen', 'dead'); addRep(wE(), -10, 'Killed their champion'); deed('Killed Kaelen the Red.'); Object.assign(e, { dead: true, deadT: 0 }); sAdvance(q); closeDialog(); } },
+    ]), { skip: () => !sEnt('kaelen') }),
+  ],
+  done: () => sStart('w4'),
+};
+SQ.w3p = {
+  title: 'The Truce Road', giver: 'Sir Edric Vale', k: () => wA(),
+  desc: () => `Bring ${KDATA[wA()].name} and ${KDATA[wB()].name} to talks at ${truceV().name}, and keep the Circle from spilling blood at the table.`,
+  reward: { gold: 280, xp: 420 },
+  steps: [
+    S_RULER(() => `Persuade ${KDATA[wA()].ruler} to talk`, () => wA(), q => sChat(rulerSpk(wA()), [
+      `Talks? With ${KDATA[wB()].name}? ...Edric's crossroads knight has more patience than sense.`,
+      `Very well. I will send my chancellor to ${truceV().name}. But if ${KDATA[wB()].name}'s envoy does not arrive, this war ends in their capital.`,
+    ], goOn(q, 'Their envoy will come.'))),
+    S_RULER(() => `Collect ${KDATA[wB()].name}'s envoy at ${W.places[wB()].name}`, () => wB(), q => sChat(rulerSpk(wB()), [`Our envoy will go, but the roads are thick with killers. Keep them alive, knight.`], goOn(q, 'On my honor.'))),
+    S_ESCORT(() => `Escort the envoy to ${truceV().name}`, () => ({ key: 'tenvoy', name: `Envoy of ${KDATA[wB()].name}`, role: 'Bearing an offer of peace', look: envoyLook(wB()), k: wB() }), () => soff(truceV(), 0, 2), { ambush: [['assassin', 3, { tier: 2 }], ['cultist', 2, { tier: 2 }]], amsg: 'The Circle wants this envoy dead!' }),
+    S_FIGHT('Protect the talks', () => soff(truceV(), 0, 2), [[['assassin', 3, { tier: 2 }], ['cultist', 2, { tier: 2 }]], [['assassin', 1, { name: 'The Pale Hand', boss: true, hp: 720, dmg: 17, yieldAt: .3, ysay: 'Another time, knight.', o: { _look: LK2.pale } }], ['assassin', 2, { tier: 3 }]]], {
+      near: 10, msg: 'Blades in the crowd! Protect the envoys!', waveMsg: ['', 'A figure in white steps out of the smoke: the Pale Hand!'],
+      protect: (q, x, y) => [sEnvoy(q, wA(), x - 1.5 * TS, y), sEnvoy(q, wB(), x + 1.5 * TS, y)],
+      onLoss: q => { SF('truceBlood', 1); addRel(wA(), wB(), -20, 'Envoy murdered at the truce'); deed(`An envoy was murdered at the truce of ${truceV().name}.`); },
+      won: () => { SF('paleSeen', 1); if (!SF('truceBlood')) { const d = -10 - getRel(wA(), wB()); addRel(wA(), wB(), Math.max(20, d), 'The truce of ' + truceV().name, `${KDATA[wA()].name} and ${KDATA[wB()].name} signed a truce at ${truceV().name}.`); deed(`Brokered the truce of ${truceV().name}.`); } },
+    }),
+    S_TALK('Speak with Sir Edric', () => N2.edric(soff(truceV(), 2, 3)), (q, e) => sChat(SPK(e), [
+      SF('truceBlood') ? 'Blood on the table. It will take more than ink to fix this now.' : 'Ink instead of blood. You have done a rare thing, knight.',
+      'But the Pale Hand escaped. He will not stop at envoys.',
+    ], goOn(q, 'Then neither will I.'))),
+  ],
+  done: () => sStart('w4'),
+};
+SQ.w4 = {
+  title: 'The Captive Heir', giver: () => SF('war') === 'peace' ? KDATA[wA()].ruler : KDATA[wS()].ruler, k: () => SF('war') === 'peace' ? wA() : wS(),
+  desc: () => SF('war') === 'peace' ? `Kestrel, heir of ${KDATA[wA()].name}, has been taken by the Circle to reignite the war.` : `Kestrel, heir of ${KDATA[wE()].name}, is a prisoner of ${KDATA[wS()].name}. What becomes of her may decide the war.`,
+  reward: { gold: 250, xp: 400 },
+  steps: [
+    S_RULER(() => `Speak with ${KDATA[wS()].ruler} about the captive`, () => wS(), q => sChat(rulerSpk(wS()), [
+      `My soldiers pulled ${KDATA[wE()].name}'s heir, Kestrel, out of the wreck of the fort. You won us that fort. You may have a say in what we do with her.`,
+      'My generals want her head on a spear. My treasurer wants her ransomed. What say you?',
+    ], [
+      { t: '<span class="dn">EXECUTE</span>Let her death end their will to fight.', fn: () => { SF('heir', 'executed'); addRel(wS(), wE(), -30, 'Their heir executed'); addRep(wE(), -30, 'Their heir was executed'); deed(`Counseled the execution of Kestrel, heir of ${KDATA[wE()].name}.`); sAdvance(q, 3); closeDialog(); } },
+      { t: '<span class="dn">RANSOM</span>Sell her back. Gold heals more than blood.', fn: () => { SF('heir', 'ransomed'); P.gold += 400; addRel(wS(), wE(), 6, 'Heir ransomed'); deed(`Ransomed Kestrel back to ${KDATA[wE()].name}.`); sAdvance(q, 3); sChat(rulerSpk(wS()), ['Pragmatic. Take a share of the ransom for your trouble: four hundred crowns.']); } },
+      { t: '<span class="dn">RETURN</span>Give her back freely, as a sign that this war can end.', fn: () => { SF('heir', 'returned'); addRep(wS(), -5, 'Gave away a hostage'); deed(`Asked that Kestrel be returned to ${KDATA[wE()].name} freely.`); sAdvance(q); sChat(rulerSpk(wS()), ['Sentiment. ...Very well. You take her to them, then. If she dies on the road, it is on your head.']); } },
+    ]), { skip: () => SF('war') === 'peace' }),
+    S_ESCORT(() => `Escort Kestrel home to ${W.places[heirK()].name}`, () => N2.kestrel(), () => soff(W.places[heirK()], 0, 12), { ambush: [['assassin', 2, { tier: 2 }], ['cultist', 3, { tier: 2 }]], amsg: 'The Circle wants the heir dead, and the war with her!', skip: () => SF('war') === 'peace' || SF('heir') !== 'returned' }),
+    S_RULER(() => `Return Kestrel to ${KDATA[heirK()].ruler}`, () => heirK(), q => sChat(rulerSpk(heirK()), [
+      'My heir, alive and unchained... brought home by an enemy knight.',
+      `I will not forget this. Tell ${KDATA[wS()].ruler} that ${KDATA[heirK()].name} will hear terms.`,
+    ], [{ t: 'Peace is closer than you think.', fn: () => { addRep(heirK(), 25, 'Returned our heir'); addRel(wS(), wE(), 25, 'Heir returned freely', `${KDATA[wS()].name} returned ${KDATA[wE()].name}'s heir unharmed.`); sAdvance(q); closeDialog(); } }]), { skip: () => SF('war') === 'peace' || SF('heir') !== 'returned' }),
+    S_RULER(() => `Answer ${KDATA[wA()].ruler}'s summons`, () => wA(), q => sChat(rulerSpk(wA()), [
+      'My heir, Kestrel, is gone. Taken from her bed while the truce ink was still wet.',
+      [NARR, 'A dagger lies on the ruler\'s table, its pommel a grey flame.'],
+      `If she is not found, I will blame ${KDATA[wB()].name}, truce or no truce. My spies say she was carried to ${heirCave().name}, ${dirW(W.places[wA()], heirCave())} of here.`,
+    ], goOn(q, 'I will bring her home.')), { skip: () => SF('war') !== 'peace' }),
+    S_DUNGEON(() => `Rescue Kestrel from ${heirCave().name}`, heirCave, { name: 'The Grey Warden', hpM: 3, o: { _look: LK.vesper } }, { skip: () => SF('war') !== 'peace' }),
+    S_ESCORT(() => `Bring Kestrel home to ${W.places[wA()].name}`, () => N2.kestrel(), () => soff(W.places[wA()], 0, 12), { skip: () => SF('war') !== 'peace' }),
+    S_RULER(() => `Return Kestrel to ${KDATA[wA()].ruler}`, () => wA(), q => sChat(rulerSpk(wA()), ['You found her. ...The truce holds, knight. Because of you.'], [{ t: 'Keep her close.', fn: () => { SF('heir', 'rescued'); addRep(wA(), 20, 'Rescued our heir'); deed(`Rescued Kestrel, heir of ${KDATA[wA()].name}, from the Circle.`); sAdvance(q); closeDialog(); } }]), { skip: () => SF('war') !== 'peace' }),
+  ],
+  done: () => sStart('w5'),
+};
+SQ.w5 = {
+  title: 'Blight in the Fens', giver: 'Mother Sorrel', k: 3,
+  desc: () => `A black rot is spreading through the villages of Eldoria. Mother Sorrel in ${fenV().name} knows where it comes from.`,
+  reward: { gold: 260, xp: 460 },
+  steps: [
+    S_TALK(() => `Find Mother Sorrel in ${fenV().name}`, N2.sorrel, (q, e) => sChat(SPK(e), [
+      'Look at my hands. That black on the fingers is not dirt. It is the Hollow rot, and three of our hamlets have it.',
+      `It spreads from ${rotCave().name}, ${dirW(fenV(), rotCave())} of here. Something is nesting down there: the Rot Mother, the hunters call her. Her heart could brew a cure.`,
+      `The High Lady's captains want to burn the sick hamlets to the ground instead. It is faster. It is certain. It is also murder.`,
+    ], [
+      { t: '<span class="dn">CURE</span>I will go into the cave and bring you her heart.', fn: () => { SF('blight', 'cure'); sAdvance(q); closeDialog(); } },
+      { t: '<span class="dn">BURN</span>The captains are right. Burn the hamlets before it spreads.', fn: () => { SF('blight', 'burned'); addRep(3, -18, 'Burned the blighted hamlets'); STORY.lost++; deed('Put the blighted hamlets of Eldoria to the torch.'); sAdvance(q, 3); sChat(SPK(e), ['...Then go and watch them burn. I will not.']); } },
+    ])),
+    S_DUNGEON(() => `Slay the Rot Mother in ${rotCave().name}`, rotCave, { name: 'The Rot Mother', hpM: 8, dmgM: 1.6, o: { scale: 2 } }, { skip: () => SF('blight') !== 'cure' }),
+    S_TALK('Bring the heart to Mother Sorrel', N2.sorrel, (q, e) => sChat(SPK(e), [
+      [NARR, 'You set the Rot Mother\'s blackened heart on Sorrel\'s table. She works through the night.'],
+      'It is done. Three flasks, one for each hamlet. Take them quickly; the sick will not last long.',
+    ], goOn(q, 'I will ride now.')), { skip: () => SF('blight') !== 'cure' }),
+    S_WAIT('The cure brews in Sorrel\'s kettles', 1, { skip: () => SF('blight') !== 'cure' }),
+    S_MULTI(q => `Bring the cure to the sick hamlets (${Object.keys(q.m || {}).length}/3)`, () => fenVs().map((v, i) => ({ id: 'v' + i, at: () => v, talk: null })), { skip: () => SF('blight') !== 'cure' }),
+    S_MULTI(q => `Watch the blighted hamlets burn (${Object.keys(q.m || {}).length}/3)`, () => fenVs().map((v, i) => ({ id: 'v' + i, at: () => v, talk: null })), { skip: () => SF('blight') !== 'burned' }),
+  ],
+  done: () => { if (SF('blight') === 'cure') { addRep(3, 18, 'Cured the Hollow blight'); deed('Cured the Hollow blight in the villages of Eldoria.'); } sStart('w6'); },
+};
+SQ.w6 = {
+  title: 'The Bone Wyrm', giver: 'Brother Caddock', k: null,
+  desc: () => `The Hollow have raised a dragon from ${bonesP().name}. It must be destroyed before it reaches the villages.`,
+  reward: { gold: 400, xp: 700 },
+  steps: [
+    S_TALK('Speak with Brother Caddock', () => N.caddock(), (q, e) => sChat(SPK(e), [
+      `You feel it too? The ground went cold at ${bonesP().name} three nights ago. The Hollow King has done what even Aurek never dared: he has woken the wyrm whose bones lie there.`,
+      'A dead dragon cannot burn. But it can breathe the grave-cold, and one breath will freeze a man where he stands. Keep moving, knight. Always keep moving.',
+      'Bring me its heart when it falls. Bone Wyrms have hearts. Cold, black things.',
+    ], goOn(q, 'I will bring it.'))),
+    S_FIGHT(() => `Destroy the Bone Wyrm at ${bonesP().name}`, () => bonesP(), [[['wight', 5, { tier: 3 }], ['hollow_archer', 2, { tier: 2 }]], [['bone_wyrm', 1, { name: 'The Bone Wyrm', boss: true, hp: 1700, dmg: 26 }], ['wight', 2, { tier: 3 }]]], { near: 16, sfx: 'hollow', msg: 'The dead guard their dragon!', waveMsg: ['', 'THE BONE WYRM RISES!'], allies: (q, x, y) => SF('thessaly') === 'ally' ? [sThessAlly(x, y)] : [] }),
+    S_ITEM("Take the Wyrm's heart", () => soff(bonesP(), 0, 1), 'wyrm_heart'),
+    S_TALK('Bring the heart to Brother Caddock', () => N.caddock(), (q, e) => sChat(SPK(e), [
+      'It still beats. Gods, it still beats.',
+      'If I bind it into the barrow stones, the seal will hold stronger, and the Hollow will stir less often. Or... Queen Isabeau would pay a fortune for it, and a master smith could bind its hunger into a blade. It is your kill. Your choice.',
+    ], [
+      { t: '<span class="dn">THE SEAL</span>Bind it into the seal. Protect the villages.', fn: () => { removeItemById('wyrm_heart'); SF('wyrm', 'sealed'); STORY.raidT = Math.max(STORY.raidT, 900); SF('raidSlow', 1); deed('Bound the Bone Wyrm\'s heart into the barrow seal.'); sAdvance(q); closeDialog(); } },
+      { t: '<span class="dn">SELL</span>Isabeau can have it, for a price. (2000 gold)', fn: () => { removeItemById('wyrm_heart'); SF('wyrm', 'sold'); P.gold += 2000; addRep(1, 6, 'Sold the Wyrm Heart to the crown'); deed('Sold the Bone Wyrm\'s heart to Queen Isabeau.'); sAdvance(q); closeDialog(); } },
+      { t: '<span class="dn">KEEP</span>I will keep it. A master smith can make use of it.', fn: () => { SF('wyrm', 'kept'); deed('Kept the Bone Wyrm\'s heart.'); sAdvance(q); sChat(SPK(e), ['...Keep it close, then. And do not listen to it at night.']); } },
+    ])),
+  ],
+  done: () => sStart('w7'),
+};
+SQ.w7 = {
+  title: 'The Pale Hand', giver: 'Your own hunch', k: null,
+  desc: 'The Circle\'s master assassin, the Pale Hand, has been a step behind you all war. It is time to turn the hunt around.',
+  reward: { gold: 350, xp: 600 },
+  steps: [
+    S_WAIT('Travel on. You have the feeling you are being followed', 1),
+    S_FIGHT('Survive the ambush', q => { if (!q.ax) { const f = findFree(P.x + 140, P.y + 90); q.ax = f.x; q.ay = f.y; } return { x: q.ax, y: q.ay }; }, [[['assassin', 4, { tier: 3, name: 'Pale Blade' }]]], { near: 9999, msg: 'Knives in the dark! The Pale Hand\'s killers!' }),
+    S_ITEM('Search the dead assassins', q => ({ x: q.ax || P.x, y: (q.ay || P.y) + 20 }), 'pale_orders'),
+    S_DUNGEON(() => `Storm the Pale Hand's lair in ${paleCrypt().name}`, paleCrypt, { kind: 'assassin', name: 'The Pale Hand', hpM: 9, dmgM: 1.5, o: { _look: LK2.pale } }),
+    S_COND("Read what you found in the Pale Hand's lair", () => true, { at: () => P }),
+  ],
+  done: () => {
+    addItem('grandmaster_letter', 1, 1);
+    sSoon(() => sChat(NARR, ['Among the Pale Hand\'s belongings is a letter sealed in grey wax, addressed to "the Grandmaster". It names every hidden lord of the Circle in all four courts.', 'Whoever holds this letter holds the Circle by the throat.'], [
+      { t: '<span class="dn">EXPOSE</span>Send copies to all four crowns.', fn: () => { removeItemById('grandmaster_letter'); SF('letter', 'exposed'); PAIRS.forEach(([a, b]) => addRel(a, b, 10, 'A common enemy unmasked')); [0, 1, 2, 3].forEach(k => addRep(k, 5, 'Unmasked the Circle\'s lords')); deed('Sent the Circle\'s secret roll to all four crowns.'); closeDialog(); sStart('w8'); } },
+      { t: '<span class="dn">BURN</span>Burn it. Some names are better forgotten.', fn: () => { removeItemById('grandmaster_letter'); SF('letter', 'burned'); deed('Burned the Circle\'s secret roll.'); closeDialog(); sStart('w8'); } },
+      { t: '<span class="dn">KEEP</span>Keep it. Leverage may be worth more than justice.', fn: () => { SF('letter', 'kept'); deed('Kept the Circle\'s secret roll for leverage.'); closeDialog(); sStart('w8'); } },
+    ]));
+  },
+};
+SQ.w8 = {
+  title: 'The Winter Muster', giver: () => KDATA[siegeK()].ruler, k: () => siegeK(),
+  desc: () => `The Hollow are gathering in the north under a general called Morrow the Gravelord. Scouts say he will strike ${W.places[siegeK()].name}. Prepare.`,
+  reward: { gold: 300, xp: 500 },
+  steps: [
+    S_RULER(() => `Answer ${KDATA[siegeK()].ruler}'s summons`, () => siegeK(), q => sChat(rulerSpk(siegeK()), [
+      'The dead are coming, knight. Thousands of them, under a general of their own: Morrow the Gravelord. He will be at my gates within days.',
+      'Gather what strength you can. Swords of your own, and allies from another crown if any will come.',
+    ], goOn(q, 'I will be ready.'))),
+    S_COND(() => `Gather a company: travel with at least 2 soldiers or companions (${partyNow().length}/2)`, () => partyNow().length >= 2, { at: () => W.places[siegeK()] }),
+    S_COND('Arm yourself: carry a weapon of Fine quality or better (the royal forges can improve one)', () => P.inv.some(i => ITEMS[i.id].type === 'weapon' && i.q >= 2)),
+    S_MULTI(q => `Ask another crown to send aid (${Math.min(1, Object.keys(q.m || {}).length)}/1)`, () => [0, 1, 2, 3].filter(k => k !== siegeK()).map(k => ({ id: 'k' + k, k, talk: (q, e, id) => {
+      const ok = K.rep[k] >= 20 && relStatus(k, siegeK()).n !== 'At War';
+      sChat(rulerSpk(k), [ok ? `${KDATA[siegeK()].name}'s walls are the realm's walls tonight. ${KDATA[k].name} will send soldiers.` : `${KDATA[k].name} has its own dead to bury. (Needs reputation 20, and no war with ${KDATA[siegeK()].name}.)`], ok ? [{ t: 'Thank you.', fn: () => { SF('aidK', k); deed(`Won ${KDATA[k].name}'s aid for the siege of ${W.places[siegeK()].name}.`); sSubDone(q, id); closeDialog(); } }] : [{ t: 'I understand.', fn: closeDialog }, { t: '<span class="dn">ALONE</span>Then we hold the walls without you.', fn: () => { deed(`Rode to the defense of ${W.places[siegeK()].name} with no crown's aid.`); sAdvance(q); closeDialog(); } }]);
+    } })), { need: 1 }),
+    S_WAIT(() => `The Hollow host marches on ${W.places[siegeK()].name}`, 2),
+  ],
+  done: () => sStart('w9'),
+};
+SQ.w9 = {
+  title: () => `The Siege of ${W.places[siegeK()].name}`, giver: () => KDATA[siegeK()].ruler, k: () => siegeK(),
+  desc: () => `Morrow the Gravelord and the Hollow host have reached ${W.places[siegeK()].name}. Hold the gates.`,
+  reward: { gold: 600, xp: 1000 },
+  steps: [
+    S_GO(() => `Reach the gates of ${W.places[siegeK()].name}`, () => soff(W.places[siegeK()], 0, 13), 8),
+    S_FIGHT('Hold the gates against the Hollow host', () => soff(W.places[siegeK()], 0, 14), [
+      [['wight', 6, { tier: 3 }], ['hollow_archer', 3, { tier: 2 }]],
+      [['hknight', 2, { tier: 3 }], ['wight', 5, { tier: 3 }]],
+      [['hknight', 1, { name: 'Morrow the Gravelord', boss: true, hp: 1400, dmg: 24, o: { scale: 1.45, _look: LK2.morrow } }], ['wight', 4, { tier: 3 }], ['hollow_archer', 2, { tier: 3 }]],
+    ], {
+      near: 14, sfx: 'hollow', msg: 'The Hollow host breaks against the walls!', waveMsg: ['', 'Hollow Knights lead the second assault!', 'MORROW THE GRAVELORD TAKES THE FIELD!'],
+      allies: (q, x, y) => { const out = [...sKAllies(siegeK(), x, y, 4, 1)]; if (SF('aidK') != null) out.push(...sKAllies(SF('aidK'), x, y, 3, 1)); if (SF('war') !== 'peace' && wS() !== siegeK() && K.rep[wS()] > 0) out.push(...sKAllies(wS(), x, y, 2, 0)); out.push(sNamedAlly('knight', 'Sir Edric Vale', LK2.edric, x, y)); if (SF('thessaly') === 'ally') out.push(sThessAlly(x, y)); return out; },
+      won: () => { if (SF('aidK') == null) SF('edric', 'dead'); else SF('edric', 'alive'); deed(`Held ${W.places[siegeK()].name} against Morrow the Gravelord.`); },
+    }),
+    S_TALK('Find Sir Edric after the battle', () => N2.edric(soff(W.places[siegeK()], 2, 13)), (q, e) => sChat(SPK(e), [
+      'We held. ...We held.',
+      'The realm will want to know what comes next. The crowns are gathering in the great hall. Go, knight. They will listen to you now.',
+    ], goOn(q, 'Come with me.')), { skip: () => SF('edric') === 'dead' }),
+    S_COND("Sir Edric Vale fell at the gates. Go to the great hall", () => true, { skip: () => SF('edric') !== 'dead', at: () => W.places[siegeK()] }),
+    S_RULER('Speak at the Council of Winter', () => siegeK(), q => { const allyOk = SF('war') === 'peace' ? !SF('truceBlood') : ['returned', 'ransomed'].includes(SF('heir')); const loved = [0, 1, 2, 3].filter(k => K.rep[k] >= 30).length; sChat(rulerSpk(siegeK()), [
+      ...(SF('edric') === 'dead' ? [[NARR, 'Sir Edric Vale fell holding the gate. No other crown sent aid in time. The hall is quiet when you enter.']] : []),
+      'Envoys of all four crowns stand in this hall for the first time in a generation. The Hollow King still waits in his barrow, and we are all tired.',
+      'You have fought in this war more than any of us, knight. What should the four crowns do now?',
+    ], [
+      { t: `<span class="dn">ALLIANCE</span>Stand together, all four, until the Hollow King is dust.${allyOk && loved >= 2 ? '' : ' (Needs a clean peace or a spared heir, and reputation 30 with two crowns)'}`, dis: !(allyOk && loved >= 2), fn: () => { SF('council', 'alliance'); PAIRS.forEach(([a, b]) => addRel(a, b, 30, 'The Council of Winter', null)); deed('Forged the Grand Alliance at the Council of Winter.'); sAdvance(q); closeDialog(); } },
+      { t: `<span class="dn">DOMINION</span>Let ${KDATA[SF('war') === 'peace' ? siegeK() : wS()].name} lead, and the rest follow.`, fn: () => { const lead = SF('war') === 'peace' ? siegeK() : wS(); SF('council', 'dominion'); SF('domK', lead); [0, 1, 2, 3].forEach(k => { if (k !== lead) addRel(lead, k, -12, 'Bowed to a new overlord'); }); addRep(lead, 15, 'Named our crown to lead'); deed(`Named ${KDATA[lead].name} to lead the realm at the Council of Winter.`); sAdvance(q); closeDialog(); } },
+      { t: '<span class="dn">ALONE</span>Each crown must look to its own walls.', fn: () => { SF('council', 'alone'); PAIRS.forEach(([a, b]) => addRel(a, b, -8, 'The council broke apart')); deed('Let the Council of Winter break apart.'); sAdvance(q); closeDialog(); } },
+    ]); }),
+  ],
+  done: () => sAct2Done(),
 };
 
 /* ---------------- Hollow raids (side quests in every path) ---------------- */
@@ -7440,9 +7908,28 @@ const ENDINGS = {
   protector: { t: 'Protector of the Realm', p: () => [`You knelt and placed the Ember Crown in the hands of ${KDATA[liege()].ruler}. ${KDATA[liege()].name} rose to lead the four kingdoms, and you stood at the throne's right hand as Protector of the Realm.`, `It is not a crown, but it is power, and it was honestly earned. The hedge knight from ${W.start.name} now commands armies, and rulers wait on your counsel.`] },
   usurper: { t: 'The Usurper', p: () => [`${W.places[liege()].name} fell in a single bloody night. You sat the throne of ${KDATA[liege()].name} with the Ember Crown on your brow and the royal guard dead at your feet.`, 'You rule, and nobody loves you. Every cup might be poisoned and every shadow might hold a knife, so you sleep with a sword across your knees. Such is the price of a stolen throne.'] },
   puppet: { t: 'The Puppet', p: () => ['Vesper set the Ember Crown on your head, and the four crowns knelt to the champion who had slain the Hollow King. The Circle made you a sovereign.', 'Every morning a letter sealed in grey wax arrives, telling you what to decree. You sign. The realm is one again, just as the Circle always wanted, and you are its most magnificent ornament.'] },
+  four_banners: { t: 'The Four Banners', p: () => ['The four crowns that stood together at the Council of Winter did not stop standing together when the Hollow King fell. Their banners fly side by side over every border fort now, and the roads between the kingdoms are open for the first time in living memory.', `Children born that year will never see a war between the four kingdoms. They will learn your name in the same breath as the Council of Winter, and wonder what all the fighting was for.`, 'Some nights you still ride out to the crossroads and look down the four roads. They are all quiet.'] },
+  iron_peace: { t: 'An Iron Peace', p: () => [`${KDATA[SF('domK') ?? wS()].name} came out of the Long War first among the crowns, and it has no intention of ever being second again. Its soldiers garrison the others' border forts; its tax collectors ride every road.`, 'There is peace. It is the peace of a clenched fist. Nobody starves and nobody dares to speak too loudly.', 'You helped build it. On some mornings you are proud of that. On others, you remember the price.'] },
+  mercy_knight: { t: 'The Mercy Knight', p: () => ['They call you the Mercy Knight now, half in admiration and half in disbelief. You spared the champions you could have killed, sent home the prisoners you could have hanged, and walked into a poisoned cave to save villages that could have been burned.', 'The bards say mercy is weakness. The four kingdoms, which have known little else but war, have decided they rather like it.', 'Wherever you ride, doors open and cups are filled. Nobody ever asks you to draw your sword.'] },
+  shadow_broker: { t: 'The Shadow Broker', p: () => ['You never let anyone see the Grandmaster\'s letter. You never had to. It was enough that the Circle\'s lords knew you had it.', 'One by one they came to you: a vote here, a treaty there, a rival quietly retired. The four crowns rule in name. The knight with the grey-wax letter rules in fact.', 'You sleep with a dagger under your pillow and the letter under the dagger. It is a small price for owning a realm.'] },
+  wyrm_blooded: { t: 'The Wyrm-Blooded', p: () => ['The Bone Wyrm\'s heart still beat in your pack when the crown\'s power came into you, and the two colds met and became one. You did not die. You are not sure you can.', 'Frost follows your footsteps now, and the dead turn their eyes to you when you pass a graveyard. The bones at Dragon Bones have begun, slowly, to rebuild themselves.', 'The four crowns send you gifts and keep their distance. They are right to.'] },
+  broken_realm: { t: 'The Broken Realm', p: () => ['The Hollow King is gone, but so is the last thing that held the four crowns together. The council broke, the old grudges came back, and the wars began again before the snow melted.', 'The map is redrawn every season now. Villages change hands, then change them back. Nobody remembers the Council of Winter.', 'You still take work where you can find it. There is always work in a broken realm.'] },
+  wanderer: { t: 'The Road Goes On', p: () => ['When it was done, you did not go back to court. You did not wait for titles or thanks. You simply turned your horse onto the nearest road and rode.', 'The bards tell a dozen versions of what became of you. In some you took ship over the Greywater; in others you became a hermit, or a wandering healer, or a ghost story told in inns.', 'The truth is simpler. There was always another village over the next hill, and someone in it who needed a sword. You went to find them.'] },
   outlaw: { t: 'The Outlaw Knight', p: () => ['The Hollow King is gone, but it is not your name the bards sing. Three crowns have posted bounties on your head, and every road is watched.', 'You ride the borderlands with your hood pulled low, a legend to some and a curse to most. Perhaps that is its own kind of freedom.'] },
 };
 function sComputeEnding() {
+  const base = sBaseEnding(); if (SF('end') === 'wanderer') return 'wanderer';
+  const dark = ['ashes', 'grey_throne', 'hollow_crown', 'long_night', 'conqueror', 'usurper', 'puppet', 'outlaw'].includes(base);
+  const wars = PAIRS.filter(([a, b]) => relStatus(a, b).n === 'At War').length;
+  if (SF('wyrm') === 'kept' && ['hollow_crown', 'last_oath'].includes(base)) return 'wyrm_blooded';
+  if (SF('letter') === 'kept' && ['knife', 'protector', 'puppet', 'high_king', 'usurper', 'grey_throne'].includes(base)) return 'shadow_broker';
+  if (SF('council') === 'alone' && wars >= 2 && !['outlaw', 'ashes'].includes(base)) return 'broken_realm';
+  if (!dark && SF('council') === 'alliance' && STORY.lost === 0 && SF('blight') === 'cure' && ['returned', 'rescued'].includes(SF('heir'))) return 'four_banners';
+  if (SF('council') === 'dominion' && (SF('heir') === 'executed' || SF('kaelen') === 'dead') && !['usurper', 'puppet', 'hollow_crown'].includes(base)) return 'iron_peace';
+  if (!dark && ['returned', 'rescued', 'ransomed'].includes(SF('heir')) && SF('blight') === 'cure' && SF('kaelen') !== 'dead' && !SF('ruthless') && SF('trial') !== 'death' && SF('vesper') !== 'dead' && !SF('purge')) return 'mercy_knight';
+  return base;
+}
+function sBaseEnding() {
   const choice = SF('end');
   if ([0, 1, 2, 3].filter(k => K.rep[k] <= -40).length >= 3 && !['hollow_crown', 'puppet', 'usurper'].includes(choice)) return 'outlaw';
   if (STORY.path === 'conspiracy') {
@@ -7459,6 +7946,49 @@ function sRealmLine(k) {
   const rel = [al.length ? `allied with ${al.join(' and ')}` : '', wr.length ? `at war with ${wr.join(' and ')}` : ''].filter(Boolean).join(', ') || 'at peace with its neighbors';
   return `<b style="color:${KDATA[k].color}">${KDATA[k].name}</b> is ${rel}. Its people call you <i>${repTitle(k)}</i>.`;
 }
+function sWarLines() {
+  const L = []; if (!SF('war')) return L;
+  L.push(SF('war') === 'peace' ? `You dragged ${KDATA[wA()].name} and ${KDATA[wB()].name} to the table at ${truceV().name}${SF('truceBlood') ? ', though blood was spilled there' : ''}.` : `You fought for ${KDATA[wS()].name} in the Long War, and ${KDATA[wE()].name} paid for it.`);
+  if (SF('blight')) L.push(SF('blight') === 'cure' ? 'The fens of Eldoria were cured of the Hollow blight.' : 'Three hamlets of Eldoria were burned to stop the blight.');
+  if (SF('wyrm')) L.push({ sealed: "The Bone Wyrm's heart sleeps in the barrow seal.", sold: "The Bone Wyrm's heart sits in Queen Isabeau's treasury.", kept: "You still carry the Bone Wyrm's heart." }[SF('wyrm')]);
+  if (SF('letter')) L.push({ exposed: "The Circle's secret lords were unmasked in every court.", burned: "The Circle's secret roll burned, and its lords sleep easy.", kept: "The Circle's secret roll is still in your keeping." }[SF('letter')]);
+  if (SF('council')) L.push({ alliance: 'The Council of Winter forged a Grand Alliance of all four crowns.', dominion: `The Council of Winter named ${KDATA[SF('domK') ?? 0].name} first among the crowns.`, alone: 'The Council of Winter broke apart, each crown for itself.' }[SF('council')]);
+  return L;
+}
+function sFates() {
+  const L = [], f = SF, add = (who, t) => { if (t) L.push(`<b>${who}</b> ${t}`); };
+  if (f('wren')) add('Lady Wren', f('trial') === 'death' ? 'was hanged at dawn before the four courts.' : f('trial') === 'exile' ? 'was exiled beyond the Greywater, and never seen again.' : f('trial') === 'service' ? 'serves the crown she betrayed, watched by every eye she once commanded.' : f('wren') === 'dead' ? 'died at the barrow by your blade.' : f('wren') === 'ally' ? 'rules from the shadows beside you.' : 'waits in the King\'s darkest cell.');
+  if (f('vesper')) add('Vesper', f('vesper') === 'spared' ? 'kept her word and vanished. Some say she hunts the Circle now.' : 'lies in an unmarked grave.');
+  else if (STORY.path === 'rise') add('Vesper', circle() ? 'still sends you letters sealed in grey wax.' : 'swore to see you ruined, and never managed it.');
+  if (f('thessaly')) add('Warden Thessaly', f('thessaly') === 'ally' ? 'still walks the Thornwood, and sends word whenever the dead stir.' : 'was released from Sylwen\'s cells, bitter but alive.');
+  if (f('maelis')) add('Chancellor Maelis', f('maelis') === 'exposed' ? 'was hanged in the square at Solmont.' : 'keeps his post, and your secrets.');
+  if (f('ulfar')) add('Skald Ulfar', f('ulfar') === 'truth' ? 'is a name spat upon in Draven\'s mead halls.' : 'is forgotten, his letters burned.');
+  if (f('merciful') || f('ruthless')) add('Lord Harrowgate', f('merciful') ? 'became your most loyal friend at court, to everyone\'s surprise.' : f('title') ? 'lies in his family\'s crypt.' : null);
+  if (f('poisoner')) add('The royal cupbearer', f('poisoner') === 'right' ? 'was unmasked as a Circle poisoner and hanged.' : 'slipped away, and was never caught.');
+  if (f('kaelen')) add('Kaelen the Red', f('kaelen') === 'spared' ? `went home to ${KDATA[wE()].name} and never raised his axe against you again.` : 'fell to your blade at the border.');
+  if (f('heir')) add('Kestrel', { executed: 'was executed, and her name became a rallying cry for years.', ransomed: 'was ransomed home, and never quite forgave you.', returned: 'was carried home by an enemy knight, and speaks of you with respect.', rescued: 'owes you her life, and says so often.' }[f('heir')]);
+  if (f('edric')) add('Sir Edric Vale', f('edric') === 'dead' ? 'fell holding the gate. The Wardens of the Roads raised a stone for him.' : 'rebuilt the Wardens of the Roads.');
+  if (f('blight')) add('Mother Sorrel', f('blight') === 'cure' ? 'still brews her cures in the fens, and your name is blessed in every hamlet.' : 'never spoke your name again.');
+  if (STORY.qdone.includes('w7')) add('The Pale Hand', 'is dead, his white knives rusting in a crypt.');
+  if (STORY.path === 'ancient' || f('lore') || STORY.qdone.includes('w6')) add('Brother Caddock', 'wrote the true history of the Ember Crown, and put you in it.');
+  (P.comps || []).forEach(id => { const c = COMPANIONS.find(x => x.id === id); if (c) add(c.name, 'rode beside you to the very end.'); });
+  return L;
+}
+function sLegacy() {
+  const L = [];
+  if (P.fief) L.push(`You are the Warden of ${W.places[P.fief.v].name} (prosperity ${P.fief.pros}, loyalty ${P.fief.loyal}).`);
+  if ((P.houses || []).length) L.push(`You keep a house in ${P.houses.map(id => W.places[id].name).join(', ')}.`);
+  if ((P.forts || []).length) L.push(`Your banner flies over ${P.forts.map(id => W.places[id].name).join(', ')}.`);
+  if (P.allegiance != null) L.push(`You are sworn to ${KDATA[P.allegiance].ruler} of ${KDATA[P.allegiance].name}.`);
+  const sk = SKILLS.filter(s2 => SK(s2.id)).map(s2 => `${s2.n} ${SK(s2.id)}`); if (sk.length) L.push(`Skills: ${sk.join(', ')}.`);
+  return L;
+}
+let epiPages = [], epiI = 0;
+function renderEpi() {
+  const pg = epiPages[epiI]; $('endBody').innerHTML = `<h4 style="margin-top:0">${pg.h}</h4>` + pg.html; $('endBody').scrollTop = 0;
+  $('epiNav').innerHTML = `<button class="btn sm" id="epiPrev" ${epiI ? '' : 'disabled'}>‹ Back</button><span class="epiDots">${epiPages.map((p2, i) => `<i class="${i === epiI ? 'on' : ''}"></i>`).join('')}</span><button class="btn sm ${epiI < epiPages.length - 1 ? 'gold' : ''}" id="epiNext" ${epiI < epiPages.length - 1 ? '' : 'disabled'}>Next ›</button>`;
+  $('epiPrev').onclick = () => { epiI--; renderEpi(); SND.play('ui'); }; $('epiNext').onclick = () => { epiI++; renderEpi(); SND.play('ui'); };
+}
 function storyEnding() {
   if (!STORY || STORY.done) return;
   const id = sComputeEnding(), E = ENDINGS[id];
@@ -7469,10 +7999,14 @@ function storyEnding() {
   if (!seen.includes(id)) seen.push(id); try { localStorage.setItem('fk_endings', JSON.stringify(seen)); } catch (e) { }
   const raid = STORY.saved || STORY.lost ? `<p>You drove the Hollow from ${STORY.saved} village${STORY.saved === 1 ? '' : 's'}${STORY.lost ? `; ${STORY.lost} fell to the dead` : ''}.</p>` : '';
   $('endTitle').textContent = E.t.toUpperCase();
-  $('endBody').innerHTML = E.p().map(t => `<p>${t}</p>`).join('') + raid
-    + `<h4>THE FOUR KINGDOMS</h4>${[0, 1, 2, 3].map(k => `<p style="margin-bottom:5px">${sRealmLine(k)}</p>`).join('')}`
-    + `<h4>YOUR DEEDS</h4><ul>${STORY.deeds.slice(-14).map(d => `<li>${esc(d.t)}</li>`).join('')}</ul>`
-    + `<h4>YOUR JOURNEY</h4><table class="statT">${statsRows().map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>`;
+  const wl = sWarLines(), fates = sFates(), leg = sLegacy();
+  epiPages = [
+    { h: 'HOW IT ENDED', html: E.p().map(t => `<p>${t}</p>`).join('') + raid },
+    { h: 'THE FOUR KINGDOMS', html: [0, 1, 2, 3].map(k => `<p style="margin-bottom:6px">${sRealmLine(k)}</p>`).join('') + (wl.length ? `<h4>THE LONG WAR</h4><ul>${wl.map(t => `<li>${t}</li>`).join('')}</ul>` : '') },
+    ...(fates.length ? [{ h: 'THOSE YOU KNEW', html: `<ul class="fates">${fates.map(t => `<li>${t}</li>`).join('')}</ul>` }] : []),
+    { h: leg.length ? 'YOUR LEGACY' : 'YOUR DEEDS', html: (leg.length ? `<ul>${leg.map(t => `<li>${t}</li>`).join('')}</ul><h4>YOUR DEEDS</h4>` : '') + `<ul>${STORY.deeds.slice(-16).map(d => `<li>${esc(d.t)}</li>`).join('')}</ul><h4>YOUR JOURNEY</h4><table class="statT">${statsRows().map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>` },
+  ];
+  epiI = 0; renderEpi();
   $('endStats').textContent = `Day ${dayNum()} · Level ${P.lvl} · ${fmt(G.kills)} foes slain · ${STORY.qdone.length} story quests completed`;
   $('endPips').innerHTML = Object.keys(ENDINGS).map(k => `<span class="${seen.includes(k) ? 'on' : ''}" data-tip="${seen.includes(k) ? esc(ENDINGS[k].t) : 'Undiscovered ending'}"></span>`).join('') + `<em>${seen.length} / ${Object.keys(ENDINGS).length} endings discovered</em>`;
   G.state = 'ending'; closeDialog(); UI.closeAll(); UI.show('endScreen'); SND.play('ending');
