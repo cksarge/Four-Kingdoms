@@ -65,6 +65,9 @@ Before a new game you can set:
 - Carriages for fast travel between towns you have discovered (the castle coachman or any village signpost), for a fee by the league.
 - Bounty boards on every signpost: bandit captains, wanted outlaws and dangerous beasts.
 - Dungeons to explore underground: smugglers' caves, spider caves, crypts, abandoned mines and an ice cave in the snowfields. Each is a torch-lit maze with traps (spike plates, dart launchers, webs), side chests and a boss guarding a hoard. The first boss of each kind drops a legendary weapon. Saving underground returns you to the entrance.
+- Live sieges: when a war would take a fort near you, or your liege is involved, armies march and fight for it while a capture meter fills. Fight for either side to earn reputation. Bandits may also raid a fort you own.
+- Tournaments (sandbox): every eight days a castle holds a tourney. Win three bouts to the yield for gold, a rare prize and renown.
+- Fiefs: sworn knights with reputation 80 can ask their ruler for a village to hold. Set its taxes, keep its people loyal (feasts help, raids hurt) and collect its income every week.
 - Skills: a point every level for Swordsmanship, Archery, Riding, Leadership and Trade.
 - Companions and soldiers: hire spearmen, bowmen and knights from castle captains (daily pay), or recruit four named sellswords found in the villages, including a healer and a venom archer. Named companions are knocked down, never killed.
 - Property: buy a house in a friendly village (rest, a safe stash, and you wake there if you fall), or restore a ruined fort that pays a daily income and can be garrisoned.

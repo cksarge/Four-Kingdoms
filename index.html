@@ -54,6 +54,10 @@ b,strong{font-weight:600}
 .qt .qd{font-size:11px;color:var(--muted);font-style:italic}
 .qt.story{border-left-color:#e8a23a}
 .qt.story .qn::before{content:'✦ ';color:#ffcf4a}
+#siegeBar{position:absolute;left:50%;top:84px;transform:translateX(-50%);width:min(360px,60vw);text-align:center;pointer-events:none}
+#siegeBar .sgN{font-family:var(--fh);font-weight:700;color:#ffe0b0;font-size:12px;letter-spacing:.1em;text-shadow:0 1px 3px #000}
+#siegeBar .sgT{height:8px;border:1px solid #8a6a32;background:rgba(0,0,0,.65);border-radius:3px;overflow:hidden;margin-top:3px}
+#siegeBar .sgF{height:100%;background:linear-gradient(180deg,#f0c050,#a06a1a);transform-origin:left}
 #bossBar{position:absolute;left:50%;bottom:112px;transform:translateX(-50%);width:min(460px,64vw);text-align:center;pointer-events:none}
 #bossBar .bbN{font-family:var(--fh);font-weight:700;color:#ffd0c0;letter-spacing:.12em;font-size:13px;text-shadow:0 1px 3px #000,0 0 10px #000}
 #bossBar .bbT{height:10px;border:1px solid #8a3a2a;background:rgba(0,0,0,.65);border-radius:3px;overflow:hidden;margin-top:3px}
@@ -447,6 +451,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <button class="hbtn" data-open="pause" title="Menu (Esc)">Esc</button>
       </div>
     </div>
+    <div id="siegeBar" class="hidden"><div class="sgN" id="sgN"></div><div class="sgT"><div class="sgF" id="sgF"></div></div></div>
     <div id="bossBar" class="hidden"><div class="bbN" id="bbN"></div><div class="bbT"><div class="bbF" id="bbF"></div></div></div>
     <div id="prompt" class="hudbox"></div>
     <div id="toasts"></div>
@@ -899,7 +904,7 @@ const SND = {
     }
     if (boss) {
       if (boss.kind === 'hollow_king') return 'hollowking';
-      if (boss.kind === 'champion') return STORY && Q.active.some(q => q.sid === 'r2') ? 'tourney' : 'duel';
+      if (boss.kind === 'champion') return boss.tourney || (STORY && Q.active.some(q => q.sid === 'r2')) ? 'tourney' : 'duel';
       if (/Wren/.test(boss.name)) return 'greymother';
       return 'boss';
     }
@@ -2393,6 +2398,7 @@ function damage(t, amt, src, o = {}) {
     if (P.mounted && P.S.horse && P.S.horse.defB) a *= 1 - P.S.horse.defB;
     if (P.mounted) a *= 1 - (SK('riding') >= 4 ? .24 : SK('riding') >= 2 ? .12 : 0);
     a = Math.max(.5, a);
+    if (G.tourney && G.tourney.fighting && src && src.tourney && P.hp - a <= 1) { tourneyLose(); return a; }
     P.hp -= a; P.flash = .15; addShake(3 + a * .25); SND.play('hurt');
     $('hurtVignette').style.boxShadow = 'inset 0 0 160px rgba(170,0,0,.55)'; setTimeout(() => $('hurtVignette').style.boxShadow = 'inset 0 0 160px rgba(170,0,0,0)', 180);
     if (settings.dmgNums) addText(P.x + rand(-6, 6), P.y - 28, Math.round(a), '#ff6a5a', 15);
@@ -2420,6 +2426,7 @@ function damage(t, amt, src, o = {}) {
     if (src === P) { if (!wasHostile && !o.dot) crime(t); if (t.place != null) alertPlace(t.place, P); }
     if (t.civ) { t.flee = 3; t.fleeFrom = src; }
   }
+  if (t.tourney && t.hp < t.maxHp * .15) { t.hp = Math.max(1, t.hp); tourneyYield(t); return amt; } // bouts are to the yield
   if (t.hp <= 0 && t.comp) { t.hp = 1; t.downed = 15; t.target = null; t.wind = 0; toast(`${t.name} is down!`, 'bad'); return amt; }
   if (t.hp <= 0) kill(t, src);
   return amt;
@@ -2473,6 +2480,7 @@ function kill(t, src) {
   }
   if (t === horseEnt) horseEnt = null;
   if (t.hired) toast(`${t.name} has fallen.`, 'bad');
+  if (G.siege && t.siege && src === P) G.siege.pk[t.siege]++;
   if (t.dspec != null && G.under) { const pl = G.under; (pl.ddead || (pl.ddead = [])).push(t.dspec); if (t.dboss) { pl.dcleared = true; SND.play('quest'); gainXP(120 + (pl.tier || 1) * 40); toast(`<b>${pl.name} cleared!</b> The guardian's hoard is unsealed.`, 'gold'); } }
   questOnKill(t);
 }
@@ -2869,6 +2877,7 @@ function captureOutpost(a, b) {
   const [win, lose] = (K.mil[a] * rand(.7, 1.3) > K.mil[b] * rand(.7, 1.3)) ? [a, b] : [b, a];
   const cand = W.places.filter(p => p.type === 'outpost' && p.owner === lose).sort((p, q) => dist(p.tx, p.ty, W.caps[win][0], W.caps[win][1]) - dist(q.tx, q.ty, W.caps[win][0], W.caps[win][1]));
   const o = cand[0]; if (!o || dist(o.tx, o.ty, W.caps[win][0], W.caps[win][1]) > 210) return;
+  if (!G.siege && !G.under && G.state === 'play' && (dist(P.x, P.y, o.x, o.y) < 2500 || P.allegiance === win || P.allegiance === lose)) { startSiege(o, win, lose); return; } // fought for real
   o.owner = win; if (o.spawned) despawnPlace(o);
   K.mil[lose] -= 150;
   const txt = `${KDATA[win].name} captured ${o.name} from ${KDATA[lose].name}!`;
@@ -2958,6 +2967,7 @@ function spawnPlace(pl) {
       const k = pl.owner, sp = pl.spots, T_ = v => v * TS + TS / 2;
       mkActor('npc', T_(sp.ruler[0]) - TS / 2, T_(sp.ruler[1]), { place: pl.id, role: 'ruler', k, name: KDATA[k].ruler, stand: true, standFace: Math.PI / 2, royal: true });
       mkActor('npc', T_(sp.armorer[0]), T_(sp.armorer[1]), { place: pl.id, role: 'armorer', k, name: pick(NAMES.first) + ' the Armorer', stand: true, standFace: Math.PI / 2 });
+      if (G.tourney && G.tourney.castle === pl.id && !G.tourney.done) spawnHerald(pl);
       mkActor('npc', pl.x - 6 * TS, pl.y + 7 * TS, { place: pl.id, role: 'captain', k, name: 'Captain ' + pick(NAMES.first), stand: true, standFace: Math.PI / 2 });
       mkActor('npc', pl.x + 5 * TS, pl.y + 12.5 * TS, { place: pl.id, role: 'coach', k, name: pick(NAMES.first) + ' the Coachman', stand: true, standFace: Math.PI / 2, cart: true });
       mkActor('npc', T_(sp.stable[0]), T_(sp.stable[1]), { place: pl.id, role: 'stable', k, name: pick(NAMES.first) + ' the Stablemaster', stand: true, standFace: Math.PI / 2 });
@@ -3211,7 +3221,7 @@ function questUpdate() {
       }
       case 'raid': {
         if (q.foes.every(e => e.dead)) { completeQuest(q); ents.forEach(e => { if (e.quest === q.id) e.quest = null; }); }
-        else if (G.time - q.started > q.limit) { failQuest(q, `${W.places[q.target].name} was ransacked by bandits.`); addRep(W.places[q.target].owner, -3, 'Failed to defend a village', true); q.foes.forEach(e => { e.quest = null; }); }
+        else if (G.time - q.started > q.limit) { if (P.fief && q.target === P.fief.v) { P.fief.loyal = clamp(P.fief.loyal - 15, 0, 100); P.fief.pros = clamp(P.fief.pros - 10, 0, 100); } failQuest(q, `${W.places[q.target].name} was ransacked by bandits.`); addRep(W.places[q.target].owner, -3, 'Failed to defend a village', true); q.foes.forEach(e => { e.quest = null; }); }
         break;
       }
       case 'story': storyUpdate(q); break;
@@ -3239,6 +3249,7 @@ function completeQuest(q) {
   (r.items || []).forEach(id => addItem(id, 2, 1));
   ['letter', 'supplies', 'heirloom', 'clue'].forEach(id => { if ((q.give === id) || (q.type === 'find' && id === 'heirloom') || (q.type === 'investigate' && id === 'clue')) removeItemById(id, 1); });
   if (q.type === 'find') addRep(q.k, 0);
+  if (q.type === 'raid' && P.fief && q.target === P.fief.v) { P.fief.loyal = clamp(P.fief.loyal + 10, 0, 100); toast('Your people will not forget that you came. (+10 loyalty)', 'good'); }
   if (q.type === 'message' && q.ult === false) logEvent(`A knight carried ${KDATA[q.k].name}'s letter of friendship to ${KDATA[q.j].name}.`, [q.k, q.j]);
   logEvent(`Quest completed: ${q.title}.`, []);
 }
@@ -3260,7 +3271,7 @@ function worldEvent() {
 }
 function evRaid() {
   if (Q.active.some(q => q.type === 'raid')) return evCaravan();
-  const v = nearestPlace(P.x, P.y, p => p.type === 'village' && dist(P.x, P.y, p.x, p.y) < 2600 && dist(P.x, P.y, p.x, p.y) > 300);
+  const v = P.fief && chance(.4) && !Q.active.some(q => q.type === 'raid') ? W.places[P.fief.v] : nearestPlace(P.x, P.y, p => p.type === 'village' && dist(P.x, P.y, p.x, p.y) < 2600 && dist(P.x, P.y, p.x, p.y) > 300);
   if (!v) return evCaravan();
   const q = { id: Q.next++, type: 'raid', title: `Defend ${v.name}`, desc: `Bandits are raiding ${v.name}! Drive them off before the village burns.`, obj: `Drive the bandits from ${v.name}`, target: v.id, giver: v.id, giverName: v.name, k: v.owner, loc: { x: v.x, y: v.y }, started: G.time, limit: 240, stage: 0, reward: { gold: 70 + P.lvl * 10, xp: 70, rep: { [v.owner]: 12 }, rel: [], items: [] }, foes: [] };
   const n = 3 + Math.min(4, Math.floor(P.lvl / 2)); const tier = Math.min(3, 1 + Math.floor(P.lvl / 3));
@@ -3429,7 +3440,7 @@ function interactLabel(b) {
       case 'elder': return `Talk to ${e.name}`; case 'merchant': return `Trade with ${e.name}`; case 'ruler': return `Seek an audience with ${e.name}`;
       case 'armorer': return 'Browse the royal armory'; case 'stable': return 'Visit the royal stables'; case 'caravan': return 'Trade with the caravan'; case 'trader': return `Trade with ${e.name}`;
       case 'traveler': return `Talk to ${e.name}`;
-      case 'coach': return 'Hire a carriage'; case 'hermit': return `Speak with ${e.name}`; case 'captain': return 'Hire soldiers'; case 'companion': return `Talk to ${e.name}`;
+      case 'coach': return 'Hire a carriage'; case 'hermit': return `Speak with ${e.name}`; case 'captain': return 'Hire soldiers'; case 'herald': return 'Speak with the herald'; case 'companion': return `Talk to ${e.name}`;
     }
     return `Talk to ${e.name.toLowerCase().includes('soldier') || e.name === 'Guard' || e.name === 'Knight' ? KDATA[e.k] ? KDATA[e.k].name + ' ' + e.name.toLowerCase() : e.name : e.name}`;
   }
@@ -3749,11 +3760,122 @@ function toggleParty() {
   const hold = pt.some(e => e.follow); pt.forEach(e => setFollow(e, !hold)); toast(hold ? 'Your companions hold their ground.' : 'Your companions fall in behind you.');
 }
 function dailyTick() {
+  if (G.mode === 'sandbox') { if (!G.tourney && dayNum() % 8 === 3) announceTourney(); else if (G.tourney && dayNum() - G.tourney.day >= 2 && !G.tourney.fighting) { G.tourney = null; ents = ents.filter(e => e.role !== 'herald'); } }
+  if ((P.forts || []).length && chance(.12)) raidFort(pick(P.forts));
+  if (P.fief && dayNum() - P.fief.lastTax >= 7) { P.fief.lastTax = dayNum(); fiefWeek(); }
+  if (P.fief && chance(.2)) { const v = W.places[P.fief.v]; genVillageOffers(v); v.request = true; toast(`A messenger from your fief of <b>${v.name}</b>: the elder asks for your help.`, 'gold'); }
   const hired = partyNow().filter(e => e.hired), guards = Object.values(P.fortGuards || {}).reduce((a, b) => a + b, 0);
   const pay = hired.reduce((a, e) => a + (e.upkeep || 0), 0) + guards * 5, income = (P.forts || []).length * 30;
   P.gold += income;
   if (pay) { if (P.gold >= pay) { P.gold -= pay; toast(`Daily pay for your soldiers: −${pay} gold${income ? ` · fort income +${income}` : ''}`, ''); } else { const quit = hired.sort((a, b) => b.upkeep - a.upkeep)[0]; if (quit) { removeEnt(quit); if (G.over) G.over.ents = G.over.ents.filter(x => x !== quit); toast(`${quit.name} leaves your service, unpaid.`, 'bad'); } } }
   else if (income) toast(`Your fort pays ${income} gold.`, 'gold');
+}
+/* ---------------- Sieges ----------------
+   When a war would take an outpost near you (or your liege is involved), the battle is fought for real. */
+function startSiege(o, att, def) {
+  const cap = W.caps[att], a = Math.atan2(cap[1] * TS - o.y, cap[0] * TS - o.x), hx = o.x + Math.cos(a) * 20 * TS, hy = o.y + Math.sin(a) * 20 * TS;
+  G.siege = { o: o.id, att, def, t: 0, prog: 0, pk: { att: 0, def: 0 } };
+  const unit = (kind, x, y, side) => { const f = findFree(x, y); return mkActor(kind, f.x, f.y, { k: side === 'att' ? att : def, foeOf: side === 'att' ? def : att, siege: side, home: { x: o.x, y: o.y + TS }, leash: side === 'att' ? 260 : 220, aggro: 380 }); };
+  for (let i = 0; i < 10; i++) unit(i < 2 ? 'knight' : i < 4 ? 'bowman' : 'soldier', hx + rand(-90, 90), hy + rand(-90, 90), 'att');
+  if (!o.spawned) spawnPlace(o);
+  ents.forEach(e => { if (e.place === o.id && e.faction === 'k' + def) { e.siege = 'def'; e.foeOf = att; } });
+  for (let i = 0; i < 4; i++) unit(i < 2 ? 'bowman' : 'soldier', o.x + rand(-60, 60), o.y + rand(-30, 90), 'def');
+  const sworn = P.allegiance === att ? 'Your liege sends you to take it!' : P.allegiance === def ? 'Your liege calls on you to defend it!' : 'Join a side, or keep your distance.';
+  toast(`⚔ <b>${KDATA[att].name}</b> lays siege to <b>${o.name}</b> (${KDATA[def].name}), ${leagues(dist(P.x, P.y, o.x, o.y))} leagues ${dirTo(P, o)}. ${sworn}`, 'war', bannerURL(att)); SND.play('horn');
+}
+function raidFort(id) {
+  const o = W.places[id], n = P.fortGuards[id] || 0;
+  if (G.siege || G.under || dist(P.x, P.y, o.x, o.y) > 2200) { // far away: the garrison deals with it
+    if (n >= 2) toast(`Your bowmen at <b>${o.name}</b> drove off a bandit raid.`, 'good');
+    else { const lost = Math.min(P.gold, 100); P.gold -= lost; if (n) P.fortGuards[id] = n - 1; toast(`Bandits raided your fort at <b>${o.name}</b>! You lost ${lost} gold${n ? ' and a guard' : ''}. More bowmen would keep it safe.`, 'bad'); }
+    return;
+  }
+  G.siege = { o: id, att: 'bandit', def: 'player', t: 0, prog: 0, pk: { att: 0, def: 0 } };
+  if (!o.spawned) spawnPlace(o);
+  ents.forEach(e => { if (e.fortGuard === id && !e.dead) e.siege = 'def'; });
+  const a = rand(0, TAU), tier = Math.min(4, 1 + Math.floor(P.lvl / 3));
+  for (let i = 0; i < 6; i++) { const f = findFree(o.x + Math.cos(a) * 15 * TS + rand(-70, 70), o.y + Math.sin(a) * 15 * TS + rand(-70, 70)); mkActor(i === 0 ? 'leader' : i < 3 ? 'xbowman' : 'bandit', f.x, f.y, { tier, siege: 'att', home: { x: o.x, y: o.y + TS }, leash: 260, aggro: 380 }); }
+  toast(`🔥 Bandits are storming your fort at <b>${o.name}</b>!`, 'war'); SND.play('horn');
+}
+function updateSiege(dt) {
+  const S = G.siege; if (!S) return; S.t += dt; const o = W.places[S.o];
+  if (dist(P.x, P.y, o.x, o.y) > 2300) { if (S.t > 300) endSiege(S.att === 'bandit' ? (P.fortGuards[S.o] || 0) < 2 : Math.random() < .5 + (K.mil[S.att] - K.mil[S.def]) / 4000); return; } // you are elsewhere: armies decide it
+  const att = ents.filter(e => e.siege === 'att' && !e.dead), def = ents.filter(e => e.siege === 'def' && !e.dead), near = (e, r) => dist(e.x, e.y, o.x, o.y) < r * TS;
+  const you = S.def === 'player' && G.state === 'play' && near(P, 12) ? 1 : 0;
+  const a = att.filter(e => near(e, 7)).length, d = def.filter(e => near(e, 9)).length + you;
+  if (a && !d) S.prog = Math.min(1, S.prog + dt / 14); else if (d > a) S.prog = Math.max(0, S.prog - dt / 30);
+  if (S.prog >= 1 || (!def.length && !you && att.length && S.t > 20)) endSiege(true); else if (!att.length) endSiege(false); else if (S.t > 300) endSiege(att.length * rand(.7, 1.3) > (def.length + you) * rand(.8, 1.4));
+}
+function endSiege(taken) {
+  const S = G.siege, o = W.places[S.o]; G.siege = null;
+  ents.forEach(e => { if (e.siege) { e.siege = null; e.foeOf = null; e.transient = true; e.roam = true; e.target = null; e.home = { x: e.x + rand(-600, 600), y: e.y + rand(-600, 600) }; } });
+  if (S.att === 'bandit') {
+    if (taken) { const lost = Math.min(P.gold, 150); P.gold -= lost; toast(`The bandits sacked <b>${o.name}</b> and carried off ${lost} gold.`, 'bad'); }
+    else { gainXP(80); toast(`<b>${o.name}</b> holds! The raiders flee.`, 'gold'); SND.play('quest'); }
+    return;
+  }
+  if (taken) { o.owner = S.att; if (o.spawned) despawnPlace(o); K.mil[S.def] -= 150; const txt = `${KDATA[S.att].name} stormed ${o.name} and took it from ${KDATA[S.def].name}!`; pairEvent(S.att, S.def, txt); toast('⚔ ' + txt, 'war', bannerURL(S.att)); }
+  else { K.mil[S.att] -= 120; const txt = `${o.name} held against ${KDATA[S.att].name}'s assault.`; pairEvent(S.att, S.def, txt); toast('🛡 ' + txt, 'good', bannerURL(S.def)); }
+  if (S.pk.att >= 2) { addRep(S.def, 8, `Defended ${o.name}`); gainXP(60); }
+  if (S.pk.def >= 2) { addRep(S.att, 8, `Helped storm ${o.name}`); gainXP(60); }
+}
+/* ---------------- Tournaments (sandbox) ---------------- */
+const T_EPI = ['the Bold', 'of the Marches', 'Ironhand', 'the Fair', 'Redcloak', 'the Unbroken', 'Lionheart', 'the Grey'];
+function announceTourney() {
+  const cs = W.places.filter(p => p.type === 'castle' && K.rep[p.owner] > -40); if (!cs.length) return;
+  const c = pick(cs); G.tourney = { castle: c.id, day: dayNum(), round: 0, fighting: false, done: false };
+  toast(`🏆 A tourney is proclaimed at <b>${c.name}</b>! Knights of all four crowns are called to the lists within two days. Speak with the herald by the gate.`, 'gold', bannerURL(c.owner)); SND.play('horn');
+  if (c.spawned) spawnHerald(c);
+}
+function spawnHerald(c) { if (ents.some(e => e.role === 'herald' && !e.dead)) return; const f = findFree(c.x - 3 * TS, c.y + 13 * TS); mkActor('npc', f.x, f.y, { place: c.id, role: 'herald', k: c.owner, name: 'Tourney Herald', stand: true, standFace: Math.PI / 2, _look: { body: KDATA[c.owner].color, head: 'cap', skin: '#e0b890', cape: KDATA[c.owner].accent } }); }
+function heraldDialog(e) {
+  const T = G.tourney, c = W.places[T.castle];
+  if (T.done) { openDialog({ name: e.name, role: c.name, portrait: e, text: 'The lists are closed. What a tourney it was!', options: [{ t: 'Farewell', fn: closeDialog }] }); return; }
+  openDialog({ name: e.name, role: `The Tourney of ${c.name}`, portrait: e, text: 'Three bouts, each to the yield, against champions of rising skill. Killing is forbidden. The entry is 50 gold; the champion takes a fat purse, a rare prize and the love of the crowd.',
+    options: [{ t: 'Enter the lists <span class="dn">50g</span>', dis: P.gold < 50 || T.fighting, fn: () => { P.gold -= 50; closeDialog(); tourneyRound(1); } }, { t: 'Not today', fn: closeDialog }] });
+}
+function tourneyRound(r) {
+  const T = G.tourney, c = W.places[T.castle]; T.round = r; T.fighting = true; T.ring = { x: c.x, y: c.y + 17 * TS };
+  const f = findFree(T.ring.x + 60, T.ring.y), k = pick([0, 1, 2, 3].filter(j => j !== c.owner));
+  const e = mkActor('champion', f.x, f.y, { name: `${pick(['Sir', 'Dame'])} ${pick(NAMES.first)} ${pick(T_EPI)}`, k, _look: knightLook(k, pick(['sword', 'sword', 'axe', 'spear'])), aggroPlayer: true, boss: true, tourney: true, home: { x: T.ring.x, y: T.ring.y }, leash: 600, aggro: 600 });
+  e.hp = e.maxHp = Math.round(180 * [1, 1.3, 1.75][r - 1] * (1 + P.lvl * .06)); e.dmg *= [1, 1.2, 1.45][r - 1] * (1 + P.lvl * .04); e.target = P;
+  const g2 = findFree(T.ring.x - 60, T.ring.y); P.x = g2.x; P.y = g2.y; cam.x = P.x; cam.y = P.y;
+  if (!ents.some(x => x.tourneyCrowd)) for (let i = 0; i < 8; i++) { const a = i / 8 * TAU, cf = findFree(T.ring.x + Math.cos(a) * 7 * TS, T.ring.y + Math.sin(a) * 5 * TS); mkActor('villager', cf.x, cf.y, { tourneyCrowd: true, stand: true, standFace: a + Math.PI, transient: true }); }
+  showAreaTitle(`BOUT ${['I', 'II', 'III'][r - 1]}`, e.name); SND.play('duel'); SND.play('crowd');
+}
+function tourneyYield(e) {
+  const T = G.tourney; Object.assign(e, { boss: false, target: null, aggroPlayer: false, faction: 'civ', civ: true, transient: true, tourney: false, home: { x: e.x, y: e.y + 400 } }); e.say = { text: 'I yield! Well fought.', t: 3 }; SND.play('crowd');
+  if (T.round < 3) { toast(`<b>${e.name}</b> yields! Catch your breath for the next bout.`, 'gold'); P.hp = Math.min(P.maxHp, P.hp + P.maxHp * .5); P.st = P.maxSt; setTimeout(() => { if (G.tourney && G.state === 'play') tourneyRound(T.round + 1); }, 3500); }
+  else {
+    T.fighting = false; T.done = true; const c = W.places[T.castle], gold = 300 + P.lvl * 40, id = pick(LOOT_TIERS[Math.min(4, 2 + Math.floor(P.lvl / 4))].filter(i => ['weapon', 'shield', 'armor'].includes(ITEMS[i].type)));
+    P.gold += gold; addItem(id, 3, 1); addRep(c.owner, 12, `Champion of the ${c.name} tourney`); gainXP(200); SND.play('mainquest');
+    showAreaTitle('CHAMPION!', `The Tourney of ${c.name}`); toast(`🏆 You are the champion of ${c.name}! +${gold} gold and a prize from the crown.`, 'gold'); if (G.stats) G.stats.tourneys = (G.stats.tourneys || 0) + 1;
+  }
+}
+function tourneyLose() {
+  const T = G.tourney; T.fighting = false; T.done = true; P.hp = Math.max(1, Math.round(P.maxHp * .3));
+  ents.forEach(e => { if (e.tourney) Object.assign(e, { boss: false, target: null, aggroPlayer: false, faction: 'civ', civ: true, transient: true, tourney: false }); });
+  toast('You yield. The crowd groans, then cheers your courage. Better luck at the next tourney.', ''); SND.play('fail');
+}
+/* ---------------- Fiefs ---------------- */
+const TAXES = ['Low', 'Normal', 'High'];
+function grantFief(k) {
+  const v = W.places.filter(p => p.type === 'village' && p.owner === k).sort((a, b) => dist(a.x, a.y, P.x, P.y) - dist(b.x, b.y, P.x, P.y))[0]; if (!v) return;
+  P.fief = { v: v.id, tax: 1, pros: 60, loyal: 60, lastTax: dayNum() }; closeDialog(); SND.play('mainquest');
+  showAreaTitle(`WARDEN OF ${v.name.toUpperCase()}`, `By grace of ${KDATA[k].ruler}`); toast(`${KDATA[k].ruler} grants you <b>${v.name}</b> as your fief. Its taxes are yours every week; keep its people safe and content. (Talk to its elder to manage it.)`, 'gold');
+}
+function fiefWeek() {
+  const F = P.fief, v = W.places[F.v];
+  F.pros = clamp(F.pros + [6, 1, -8][F.tax], 0, 100); F.loyal = clamp(F.loyal + [5, 0, -9][F.tax], 0, 100);
+  if (F.loyal < 5) { P.fief = null; toast(`The people of <b>${v.name}</b> rise up and drive out your stewards. You have lost your fief.`, 'bad'); SND.play('fail'); return; }
+  if (F.loyal < 20) { toast(`Unrest in <b>${v.name}</b>: the villagers refuse to pay. Lower taxes or hold a feast.`, 'bad'); return; }
+  const tax = Math.round((60 + F.pros * 1.2) * [.6, 1, 1.5][F.tax]); P.gold += tax; toast(`Taxes from your fief of <b>${v.name}</b>: +${tax} gold. (Prosperity ${F.pros}, loyalty ${F.loyal})`, 'gold'); SND.play('coin');
+}
+function fiefDialog(e, pl) {
+  const F = P.fief, next = 7 - (dayNum() - F.lastTax);
+  openDialog({ name: e.name, role: `Steward of your fief, ${pl.name}`, portrait: e, text: `My lord warden. Prosperity is <b>${F.pros}</b>, loyalty <b>${F.loyal}</b>. Taxes are set <b>${TAXES[F.tax].toLowerCase()}</b>; the next collection is in ${Math.max(0, next)} day${next === 1 ? '' : 's'}. High taxes fill your purse but sour the people; low taxes grow the village.`,
+    options: [...TAXES.map((t, i) => ({ t: `Set taxes: ${t}${F.tax === i ? ' (current)' : ''}`, dis: F.tax === i, fn: () => { F.tax = i; fiefDialog(e, pl); } })),
+      { t: 'Hold a feast for the village <span class="dn">150g · +15 loyalty</span>', dis: P.gold < 150, fn: () => { P.gold -= 150; F.loyal = clamp(F.loyal + 15, 0, 100); SND.play('crowd'); fiefDialog(e, pl); } }, { t: 'That is all', fn: closeDialog }] });
 }
 /* ---------------- Fishing ---------------- */
 function startFishing(it) {
@@ -3858,6 +3980,7 @@ function talkTo(e) {
     case 'coach': return openTravel(W.places[e.place], e.name, e);
     case 'hermit': return hermitDialog(e);
     case 'captain': return captainDialog(e);
+    case 'herald': return heraldDialog(e);
     case 'companion': return compDialog(e);
     case 'citizen': e.say = { text: pick(BARKS.citizen), t: 3 }; return;
   }
@@ -3884,6 +4007,7 @@ function elderDialog(e, pl) {
     c.rumor = true; revealArea(c.tx, c.ty, 4);
     openDialog({ name: e.name, role: 'Village Elder', portrait: e, text: c.type === 'camp' ? `Hunters speak of a bandit camp ${dirTo(pl, c)} of here, perhaps ${leagues(dist(pl.x, pl.y, c.x, c.y))} leagues out. I've marked it on your map.` : `My grandmother told of a place called ${c.name}, ${dirTo(pl, c)} of here. I've marked where she said it lies.`, options: [{ t: 'Thank you', fn: closeDialog }] });
   } });
+  if (P.fief && P.fief.v === pl.id) opts.unshift({ t: '<span class="dn">FIEF</span>Manage your fief', fn: () => fiefDialog(e, pl) });
   if (!(P.houses || []).includes(pl.id)) opts.push({ t: `<span class="dn">HOME</span>Buy a house in ${pl.name} (${HOUSE_COST} gold${K.rep[pl.owner] < 20 ? ', needs reputation 20' : ''})`, dis: P.gold < HOUSE_COST || K.rep[pl.owner] < 20, fn: () => buyHouse(pl) });
   opts.push({ t: 'Farewell', fn: closeDialog });
   openDialog({ name: e.name, role: `Village Elder of ${pl.name}`, portrait: e, text: greet, options: opts });
@@ -3922,6 +4046,7 @@ function rulerDialog(e, k) {
     { t: '<span class="dn">COUNCIL</span>Let us discuss matters of state. (Diplomacy)', fn: () => { closeDialog(); UI.open('dip'); selectKingdom(k); } },
   ];
   if (so) opts.unshift({ t: `<span class="dn">✦ STORY</span>${esc(so.label)}`, fn: () => so.fn(e) });
+  if (P.allegiance === k && !P.fief) opts.push({ t: `<span class="dn">LANDS</span>I ask for lands of my own to hold for the crown.${rep < 80 ? ' (needs reputation 80)' : ''}`, dis: rep < 80, fn: () => grantFief(k) });
   if (P.allegiance !== k) opts.push({ t: `<span class="dn">OATH</span>I would swear my sword to ${kd.name}.`, dis: rep < 30, fn: () => { closeDialog(); dipAction(k, 'allegiance'); } });
   opts.push({ t: 'Farewell, Your Majesty.', fn: closeDialog });
   openDialog({ name: e.name, role: kd.rulerTitle, portrait: e, text, options: opts });
@@ -5346,6 +5471,7 @@ function renderWorld(t) {
   // ground markers
   if (playing && !G.under) {
     Q.active.forEach(q => { const tg = questTarget(q); if (tg && tg.r && q.type !== 'hidden') { g.strokeStyle = 'rgba(255,210,74,.5)'; g.setLineDash([10, 8]); g.lineWidth = 2; g.beginPath(); g.arc(tg.x, tg.y, tg.r, 0, TAU); g.stroke(); g.setLineDash([]); } });
+    if (G.tourney && G.tourney.fighting && G.tourney.ring) { const r0 = G.tourney.ring; g.strokeStyle = 'rgba(255,240,200,.55)'; g.setLineDash([12, 10]); g.lineWidth = 3; g.beginPath(); g.ellipse(r0.x, r0.y, 6 * TS, 4.5 * TS, 0, 0, TAU); g.stroke(); g.setLineDash([]); }
     if (G.mapWaypoint) { const w = G.mapWaypoint; g.strokeStyle = 'rgba(106,208,255,.8)'; g.lineWidth = 3; g.beginPath(); g.arc(w.x, w.y, 16 + Math.sin(t * 3) * 3, 0, TAU); g.stroke(); }
   }
   // pickups
@@ -5435,6 +5561,8 @@ function renderWorld(t) {
     const tq = Q.active.find(q => q.id === Q.tracked); const marks = [];
     if (tq) { const tg = questTarget(tq); if (tg) marks.push({ x: tg.x, y: tg.y, c: '#ffd24a', label: tq.title }); }
     if (G.mapWaypoint) marks.push({ x: G.mapWaypoint.x, y: G.mapWaypoint.y, c: '#6ad0ff', label: 'Waypoint' });
+    if (G.siege) { const o = W.places[G.siege.o]; if (G.siege.att === 'bandit' || P.allegiance === G.siege.att || P.allegiance === G.siege.def || dist(P.x, P.y, o.x, o.y) < 3000) marks.push({ x: o.x, y: o.y, c: '#ff7a4a', label: G.siege.att === 'bandit' ? 'Fort raid' : 'Siege' }); }
+    if (G.tourney && !G.tourney.done) { const c = W.places[G.tourney.castle]; marks.push({ x: c.x, y: c.y + 13 * TS, c: '#e7c35a', label: 'Tourney' }); }
     marks.forEach(m => {
       const sx = m.x - vx, sy = m.y - vy; const dd = dist(P.x, P.y, m.x, m.y);
       if (dd < 60 && m.c === '#6ad0ff') { G.mapWaypoint = null; toast('Waypoint reached.'); return; }
@@ -5473,6 +5601,8 @@ function updateHUD(force) {
   const tt = tod(); const tn = tt < .22 ? 'Night' : tt < .3 ? 'Dawn' : tt < .45 ? 'Morning' : tt < .55 ? 'Midday' : tt < .7 ? 'Afternoon' : tt < .8 ? 'Dusk' : 'Night';
   const wt = G.wx && G.wx.type !== 'clear' && G.wx.amt > .3 ? G.wx.type : null, ic = wt === 'rain' ? '☂' : wt === 'snow' || wt === 'blizzard' ? '❄' : wt === 'fog' ? '≋' : wt === 'sand' ? '≈' : isNight() ? '☾' : '☀';
   setIf('clk', `${ic} ${SEASONS[curSeason]} · Day ${dayNum()} · ${tn}${wt ? ' · ' + WX[wt] : ''}`, v => $('clock').textContent = v);
+  const SG = G.siege, sgOn = SG && !G.under && dist(P.x, P.y, W.places[SG.o].x, W.places[SG.o].y) < 2400;
+  setIf('sg', sgOn ? SG.o + '|' + Math.round(SG.prog * 20) : '', () => { $('siegeBar').classList.toggle('hidden', !sgOn); if (sgOn) { const o = W.places[SG.o]; $('sgN').textContent = SG.att === 'bandit' ? `RAID ON ${o.name.toUpperCase()}` : `SIEGE OF ${o.name.toUpperCase()} · ${KDATA[SG.att].name.toUpperCase()} ATTACKS`; $('sgF').style.transform = `scaleX(${SG.prog})`; } });
   const own = ownerAtPx(P.x, P.y); const rs = statusOf(K.rep[own]);
   if (G.under) { setIf('terr', 'u' + G.under.id, () => { $('terrBanner').src = bannerURL(G.under.owner); $('terrName').textContent = G.under.name; }); setIf('terrRep', 'u', () => $('terrRep').innerHTML = 'Underground'); }
   else setIf('terr', own, v => { $('terrBanner').src = bannerURL(v); $('terrName').textContent = KDATA[v].full; });
@@ -5613,7 +5743,7 @@ function resetState() {
   G.under = null; G.over = null;
   ents = []; pickups = []; projs = []; parts = []; texts = []; horseEnt = null; uidCounter = 1; nextEid = 1;
   W.places.forEach(p => { p.disc = false; p.rumor = false; p.spawned = false; p.dead = []; p.cleared = false; p.chestOpened = false; p.clearedAt = 0; p.offers = null; p.request = false; p.blessed = false; p.investigated = false; p.rumorUsed = false; p.backerRevealed = false; p.wellT = -999; p.ddead = null; p.dchests = null; p.dcleared = false; p.legendTaken = false; if (p.type === 'outpost') p.owner = p.baseOwner; for (const k in p) if (k.startsWith('_shop_')) delete p[k]; });
-  (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false; G.lastPay = null;
+  (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false; G.lastPay = null; G.siege = null; G.tourney = null;
   Object.assign(G, { time: 0, dipT: 0, eventT: 50, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, questT: 0 });
   newKingdoms(); newQuests(); newFog();
 }
@@ -5655,7 +5785,7 @@ function saveGame(silent) {
   const qStrip = q => { const c = Object.assign({}, q); delete c.ent; delete c.foes; return c; };
   const data = {
     v: 1, seed: W.seed, time: G.time, kills: G.kills, uid: uidCounter, waypoint: G.mapWaypoint, savedAt: Date.now(),
-    P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, skills: P.skills, sp: P.sp, comps: P.comps, houses: P.houses, stash: P.stash, forts: P.forts, fortGuards: P.fortGuards,
+    P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, skills: P.skills, sp: P.sp, comps: P.comps, houses: P.houses, stash: P.stash, forts: P.forts, fortGuards: P.fortGuards, fief: P.fief || null,
       party: partyNow().filter(e => !e.comp || true).map(e => ({ comp: e.comp, kind: e.kind, name: e.name, hp: Math.round(Math.max(1, e.hp)), k: e.k })), mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
     horse: horseEnt ? { x: horseEnt.x, y: horseEnt.y } : null,
     K: { rel: K.rel, aff: K.aff, rep: K.rep, mil: K.mil, reasons: K.reasons, events: K.events, kev: K.kev, repWhy: K.repWhy, gifts: K.gifts, log: K.log, cd: {} },
@@ -6750,6 +6880,7 @@ function update(dt) {
   updatePlayer(dt);
   if (STORY && !G.under) storyTick(dt);
   if (G.under) updateTraps(dt);
+  if (G.siege && !G.under) updateSiege(dt);
   for (const e of ents) { if (Math.abs(e.x - P.x) > 2600 || Math.abs(e.y - P.y) > 2600) { if (!e.follow) continue; } updateActor(e, dt); }
   separate(); updateProjs(dt); updatePickups(dt); updateFX(dt); updateSpawns(dt);
   if ((G.fogT -= dt) <= 0) { G.fogT = .25; if (!G.under) updateDiscovery(); }
