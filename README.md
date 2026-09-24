@@ -82,6 +82,11 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
   - **Inns:** every city also has an inn. Its rooms range from a common-room bunk to a royal suite that leaves you rested, blessed and lucky, and the inn becomes your respawn point.
   - **People:** crowds of townsfolk, children, nobles and patrolling guards fill the streets, along with a bard, a town crier, a beggar and the cathedral's priest.
   - **Things to do:** you can knock on doors, toss a coin in the fountain for luck, read the statue's plaque, and pray or give alms at the cathedral.
+- **Walk-in interiors:**
+  - The tavern has a bar, a bard on stage, patrons and a dice table, and fills up at night.
+  - The inn has rooms upstairs; the cathedral has pews, choristers and the priest at the altar.
+  - The bakery, apothecary and jeweller are walk-in shops.
+  - Your own house has a bed, your stash, a hearth and a trophy room displaying relics of the bosses and champions you have defeated.
 - Watchtowers guard the roads into each castle and the border crossings. Bowmen on the towers and castle walls shoot at bandits, enemy soldiers and outlaws.
 - Quests, random world events and a day/night cycle.
 - Seasons that change every six days: spring blossom, summer, golden autumn (cheap food) and snowy winter (slower travel off the roads, dear bread).
