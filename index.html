@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Four Kingdoms</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
@@ -30,6 +33,55 @@ b,strong{font-weight:600}
 
 /* ---------- HUD ---------- */
 #hud{position:fixed;inset:0;pointer-events:none;transition:opacity .5s}
+/* touch controls (phones and tablets) */
+#touchUI{display:none}
+body.touch #touchUI{display:block}
+body.touch #hud.off #touchUI{display:none}
+body.touch canvas,body.touch #touchUI{touch-action:none}
+body.touch button,body.touch .btn,body.touch .dOpt{touch-action:manipulation}
+body.touch{-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;overscroll-behavior:none}
+#tStickZone{position:absolute;left:0;top:22%;bottom:0;width:44%;pointer-events:auto}
+#tStick{position:absolute;width:128px;height:128px;margin:-64px 0 0 -64px;border-radius:50%;background:radial-gradient(circle,rgba(20,14,8,.22),rgba(20,14,8,.42));border:2px solid rgba(231,195,90,.45);box-shadow:0 0 18px rgba(0,0,0,.4);opacity:.55;transition:opacity .15s;left:110px;bottom:auto;top:calc(100% - 120px)}
+#tStick.on{opacity:1}
+#tKnob{position:absolute;left:50%;top:50%;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#6a4c2c,#2a1c10);border:2px solid #d8b25a;box-shadow:0 2px 8px rgba(0,0,0,.6)}
+.tb{position:absolute;pointer-events:auto;width:60px;height:60px;border-radius:50%;border:2px solid rgba(231,195,90,.75);background:radial-gradient(circle at 40% 30%,rgba(90,64,36,.92),rgba(30,20,10,.92));color:#f5e6bd;font-size:24px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,230,170,.25);padding:0;font-family:var(--fh)}
+.tb small{position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:.08em;color:rgba(245,230,189,.8);text-shadow:0 1px 2px #000;white-space:nowrap;font-weight:700}
+.tb.big{width:86px;height:86px;font-size:34px;border-width:3px}
+.tb.sm{width:44px;height:44px;font-size:18px;border-width:1.5px}
+.tb.down,.tb.lit{background:radial-gradient(circle at 40% 30%,#c89a3a,#6a4a1a);border-color:#ffe08a;box-shadow:0 0 14px rgba(255,210,110,.6)}
+.tb.dim{opacity:.35}
+.tb.ready{animation:tbPulse 1s ease-in-out infinite}
+@keyframes tbPulse{50%{box-shadow:0 0 18px rgba(255,220,120,.85),0 3px 10px rgba(0,0,0,.55)}}
+#tAtk{right:calc(26px + env(safe-area-inset-right));bottom:30px}
+#tBlk{right:calc(128px + env(safe-area-inset-right));bottom:22px}
+#tDodge{right:calc(40px + env(safe-area-inset-right));bottom:136px}
+#tSpec{right:calc(118px + env(safe-area-inset-right));bottom:108px}
+#tUse{right:calc(200px + env(safe-area-inset-right));bottom:30px}
+#tSmall{position:absolute;right:calc(12px + env(safe-area-inset-right));bottom:212px;display:grid;grid-template-columns:44px 44px;gap:18px 10px;pointer-events:none}
+#tSmall .tb{position:relative}
+body.touch #hudBR{top:10px;bottom:auto;right:auto;left:50%;transform:translateX(-50%);padding:4px 6px}
+body.touch #hudBR .hk{display:none}
+body.touch .hbtn{font-size:12px;padding:7px 10px}
+body.touch #hudBC{bottom:8px;zoom:calc(var(--ui-scale) * .85)}
+body.touch #prompt{pointer-events:auto;padding:9px 18px}
+body.touch #toasts{top:52px;width:min(560px,70vw);zoom:var(--ui-scale)}
+body.touch #prompt kbd{font-size:15px}
+#rotateMsg{display:none;position:fixed;inset:0;z-index:9999;background:#0b0806;color:#f5e6bd;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;font-family:var(--fh);font-size:20px;letter-spacing:.08em;padding:24px}
+#rotateMsg .ph{width:54px;height:90px;border:4px solid #d8b25a;border-radius:10px;animation:rotPh 2s ease-in-out infinite}
+@keyframes rotPh{0%,20%{transform:rotate(0)}50%,70%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
+@media (orientation:portrait){body.touch #rotateMsg{display:flex}}
+@media (max-height:560px){ /* phones in landscape: the small buttons sit in a grid at the bottom centre */
+  body.touch #tSmall{left:50%;right:auto;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);grid-template-columns:repeat(4,40px);gap:22px 14px}
+  body.touch #tSmall .tb{width:40px;height:40px;font-size:17px}
+  body.touch #hudBC{display:none}
+  body.touch #tStick{left:96px}
+  body.touch #questTracker{zoom:calc(var(--ui-scale) * .85)}
+  body.touch #hudTR{zoom:calc(var(--ui-scale) * .78)}
+  body.touch #mmWrap{zoom:.8}
+  body.touch #prompt{top:30%}
+}
+#helpTouch{display:none}
+body.touch #helpTouch{display:block}
 #hud.off{opacity:0}
 .hudbox{background:linear-gradient(180deg,rgba(34,25,16,.86),rgba(18,13,8,.86));border:1px solid rgba(160,122,58,.75);border-radius:6px;box-shadow:0 3px 12px rgba(0,0,0,.55),inset 0 0 14px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,220,150,.12)}
 #hudTL{position:absolute;left:12px;top:12px;display:flex;gap:10px;align-items:center;padding:8px 12px 8px 8px}
@@ -462,6 +514,24 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 <div id="hurtVignette"></div>
 <div id="ui">
   <div id="hud" class="off">
+    <div id="touchUI">
+      <div id="tStickZone"><div id="tStick"><div id="tKnob"></div></div></div>
+      <button class="tb big" id="tAtk">⚔<small>ATTACK</small></button>
+      <button class="tb" id="tBlk">🛡<small>BLOCK</small></button>
+      <button class="tb" id="tDodge">↻<small>DODGE</small></button>
+      <button class="tb" id="tSpec">✦<small>SPECIAL</small></button>
+      <button class="tb" id="tUse">✋<small>USE</small></button>
+      <div id="tSmall">
+        <button class="tb sm" id="tSprint">»<small>SPRINT</small></button>
+        <button class="tb sm" id="tHorse">🐎<small>HORSE</small></button>
+        <button class="tb sm" id="tSwap">⇄<small>SWAP</small></button>
+        <button class="tb sm" id="tAmmo">➶<small>ARROWS</small></button>
+        <button class="tb sm" id="tEat">🍖<small>EAT</small></button>
+        <button class="tb sm" id="tPot">⚗<small>POTION</small></button>
+        <button class="tb sm" id="tParty">⚑<small>PARTY</small></button>
+        <button class="tb sm" id="tFull">⛶<small>FULL</small></button>
+      </div>
+    </div>
     <div id="hudTL" class="hudbox scal">
       <div class="lvl"><small>LVL</small><span id="hudLvl">1</span></div>
       <div class="bars">
@@ -712,6 +782,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <div><kbd>K</kbd> Diplomacy (kingdoms)</div><div><kbd>J</kbd> Quest journal</div>
         <div><kbd>1</kbd>–<kbd>3</kbd> Eat food / drink potion</div><div><kbd>Esc</kbd> Pause / close</div>
       </div>
+      <div id="helpTouch" style="margin-top:12px;padding:10px 12px;border:1px solid rgba(154,117,54,.4);border-radius:6px;background:rgba(0,0,0,.25)"><b style="font-family:var(--fh);color:var(--gold-l)">ON A PHONE OR TABLET</b><br>Drag anywhere on the left of the screen to move. <b>⚔</b> attacks (hold it to draw a bow, release to shoot), <b>🛡</b> blocks, <b>↻</b> dodges, <b>✦</b> is your special move and <b>✋</b> talks and interacts (or tap the prompt). Attacks and arrows aim at the nearest foe by themselves. The small buttons sprint, mount, swap weapons, switch arrows, eat, drink a potion, call your companions and go fullscreen. On the map, drag to pan, pinch to zoom, tap a place for details and press and hold to set a waypoint.</div>
       <p style="margin-top:12px">You begin as a poor hedge knight near a village of Albion. Explore the continent, hunt bandits, complete quests, trade goods between kingdoms, and build your reputation with four rival crowns. Your deeds shift the balance between the realms: help one kingdom and its rivals will take notice.</p>
       <p>Bandit camps hide in forests, hills and mountains; harder camps guard better loot. Kingdom soldiers turn hostile if your reputation falls too low, or if you swear allegiance to their enemy. Villages offer work, rest, rumors and trade. Rulers grant audiences in their castles.</p>
     </div>
@@ -786,6 +857,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div class="actHint">Enter or Space to continue</div>
     </div>
   </div>
+  <div id="rotateMsg"><div class="ph"></div><div>Turn your device sideways to play</div><div style="font-family:var(--fb);font-size:15px;letter-spacing:0;color:var(--ink2)">Four Kingdoms plays in landscape.</div></div>
   <div id="endScreen" class="screen">
     <div class="panel rv">
       <div class="endKicker">THE END</div>
@@ -862,7 +934,7 @@ let WIPED = false; // set while all save data is being deleted, so nothing write
 function loadSettings() { try { return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem('fk_settings') || '{}')); } catch (e) { return Object.assign({}, DEFAULT_SETTINGS); } }
 function saveSettings() { if (WIPED) return; try { localStorage.setItem('fk_settings', JSON.stringify(settings)); } catch (e) { } }
 function applySettings() {
-  document.documentElement.style.setProperty('--ui-scale', settings.uiScale);
+  document.documentElement.style.setProperty('--ui-scale', TOUCH && TOUCH.on ? Math.min(settings.uiScale, TOUCH.scale) : settings.uiScale);
   $('mmWrap').classList.toggle('hidden', !settings.minimap);
   SND.apply(); resize();
 }
@@ -1289,6 +1361,7 @@ function resize() {
 addEventListener('resize', resize);
 
 const input = { keys: {}, mx: 0, my: 0, wx: 0, wy: 0, lmb: false, rmb: false, force: false, clicked: false };
+var TOUCH = { on: false, mx: 0, my: 0, sprint: false, stick: null, scale: 1 }; // touch controls, switched on by the first touch
 cv.addEventListener('mousemove', e => { input.mx = e.clientX; input.my = e.clientY; });
 cv.addEventListener('mousedown', e => {
   SND.init();
@@ -2341,6 +2414,7 @@ function tryDodge() {
   const cost = Math.round((G.time - (P.lastDodge ?? -9) < 1.5 ? 42 : 28) * DIFF().stCost); // rolling again right away costs extra
   if (P.dodge > 0 || P.st < cost || G.state !== 'play') return;
   let mx = (input.keys.KeyD ? 1 : 0) - (input.keys.KeyA ? 1 : 0), my = (input.keys.KeyS ? 1 : 0) - (input.keys.KeyW ? 1 : 0);
+  if (TOUCH.on && (TOUCH.mx || TOUCH.my)) { mx = TOUCH.mx; my = TOUCH.my; }
   if (!mx && !my) { mx = Math.cos(P.face); my = Math.sin(P.face); }
   const l = Math.hypot(mx, my); P.dodgeX = mx / l; P.dodgeY = my / l; P.dodge = DODGE_T; P.st -= cost; P.stDelay = 1.1; P.lastDodge = G.time; P.blocking = false;
   SND.play('dodge'); for (let i = 0; i < 6; i++) addPart(P.x, P.y + 8, rand(-40, 40), rand(-30, 0), '#b8a888', .4, 3);
@@ -2465,8 +2539,9 @@ function doPlayerHit() {
 }
 function updatePlayer(dt) {
   P.flash -= dt; P.iframes -= dt; P.atkCd -= dt; if (P.blessT > 0) P.blessT -= dt; if (P.luckT > 0) P.luckT -= dt; if (P.restT > 0) P.restT -= dt;
-  P.face = PAD.on && PAD.aim != null ? PAD.aim : Math.atan2(input.wy - P.y, input.wx - P.x);
+  P.face = PAD.on && PAD.aim != null ? PAD.aim : TOUCH.on ? touchFace() : Math.atan2(input.wy - P.y, input.wx - P.x);
   let mx = (input.keys.KeyD ? 1 : 0) - (input.keys.KeyA ? 1 : 0), my = (input.keys.KeyS ? 1 : 0) - (input.keys.KeyW ? 1 : 0);
+  if (TOUCH.on && (TOUCH.mx || TOUCH.my)) { mx = TOUCH.mx; my = TOUCH.my; }
   const ml = Math.hypot(mx, my); if (ml) { mx /= ml; my /= ml; }
   const t = terAtPx(P.x, P.y); let spd = 150 * (TINFO[t].spd || 1);
   if (P.mounted) { spd *= P.S.hspd; if (t === T.DENSE || t === T.SWAMP || t === T.FORD) spd *= .55; else if (t === T.FOREST) spd *= .8; spd *= 1 - P.S.slow * .4; }
@@ -2479,7 +2554,7 @@ function updatePlayer(dt) {
   if (P.webbed > 0) { P.webbed -= dt; spd *= .5; }
   if (P.chillT > 0) { P.chillT -= dt; spd *= .6; }
   if (P.drawing) spd *= P.mounted ? .8 : .55;
-  const sprintKey = input.keys.ShiftLeft || input.keys.ShiftRight;
+  const sprintKey = input.keys.ShiftLeft || input.keys.ShiftRight || (TOUCH.on && TOUCH.sprint);
   if (!sprintKey) P.winded = false; else if (P.st <= 0) P.winded = true;
   P.sprinting = !!sprintKey && ml > 0 && !P.winded && !P.blocking && !P.drawing && P.dodge <= 0 && P.swing <= 0 && P.st > 0 && (P.st > 20 || P.sprinting);
   if (P.sprinting) spd *= P.mounted ? 1.2 : 1.35;
@@ -4334,6 +4409,7 @@ const TUT = [
   { t: 'Return to Sergeant Mara', at: 'mara', done: T => T.graduated },
 ];
 const MARA_SAY = ['Over here, recruit!', 'Stretch those legs. Hold Shift!', 'Come here and talk to me. Press E.', 'Hit the dummy. It will not hit back.', 'Now show me something fancy. Press C.', 'Shield up! Hold right click and face the blow.', 'Now dodge. Space, right as the blow lands!', 'Finish it. Make them yield.', 'Tab swaps to your bow.', 'Draw fully for a strong shot. Aim at the target.', 'Check your pack. Press I.', 'Every road is on your map. Press M.', 'A knight needs a horse. Press F.', 'Your quests live in the journal. Press J.', 'Come back to me, recruit.'];
+const MARA_TOUCH = ['Over here, recruit!', 'Stretch those legs. Tap sprint!', 'Come here and talk to me. Tap the hand.', 'Hit the dummy. It will not hit back.', 'Now show me something fancy. Tap the star.', 'Shield up! Hold the shield and face the blow.', 'Now dodge, right as the blow lands!', 'Finish it. Make them yield.', 'Swap to your bow.', 'Hold to draw, let go to shoot.', 'Check your pack.', 'Every road is on your map.', 'A knight needs a horse.', 'Your quests live in the journal.', 'Come back to me, recruit.'];
 function tutSpot() { // an open patch near the first village with no trees or buildings, wide enough for the yard
   const treesNear = (x, y) => { let n = 0; const cx = Math.floor(x / (CH * TS)), cy = Math.floor(y / (CH * TS)); for (let j = cy - 1; j <= cy + 1; j++) for (let i = cx - 1; i <= cx + 1; i++) { const ch = W.chunkTrees[j * CW + i]; if (ch) ch.forEach(t => { if (t.x > x - 3 * TS && t.x < x + 12 * TS && t.y > y - 3 * TS && t.y < y + 5 * TS) n++; }); } return n; };
   let best = null, bs = 1e9;
@@ -4358,11 +4434,13 @@ function tutBegin(step) {
   if (!step) sSoon(() => openDialog({ name: 'Sergeant Mara', role: 'Drill sergeant of the Albion levy', portrait: G.tut.mara, text: 'So you want to be a knight? Everyone does, until the first arrow. I am Sergeant Mara, and before you ride out I will teach you to walk, fight, shoot and ride. Follow the instructions at the top left of your screen. It will not take long.', options: [{ t: 'Ready, Sergeant.', fn: closeDialog }, { t: 'Skip the tutorial and start playing', fn: () => { closeDialog(); tutEnd(true); } }] }));
 }
 function tutRecruit() { const T = G.tut; if (T.recruit && !T.recruit.dead && !T.recruit.civ) return; const f = findFree(T.dummy.x + 30, T.dummy.y + 70); T.recruit = mkActor('champion', f.x, f.y, { tut: true, tutYield: true, name: 'Sparring Recruit', aggroPlayer: true, persistent: true, home: { x: f.x, y: f.y }, leash: 400, aggro: 400, _look: { body: '#b9a17b', head: 'hair', hair: '#4a3020', skin: '#d8a878', weapon: { wk: 'sword', len: 22, col: '#b08050', wooden: true }, shield: { b: ITEMS.wooden_shield } } }); T.recruit.hp = T.recruit.maxHp = 110; T.recruit.dmg = 4; T.recruit.cd = 1.8; T.recruit.windT = .75; T.recruit.target = P; }
+const TUT_TOUCH = ['Drag on the left of the screen to walk to Sergeant Mara', 'Tap » SPRINT, then move, to run', 'Walk up to Sergeant Mara and tap ✋ USE', 'Hit the training dummy with ⚔ ATTACK (3 hits)', 'Use your special move on the dummy: tap ✦', 'Block a strike from the recruit: hold 🛡 BLOCK while facing them', 'Dodge a strike: tap ↻ DODGE just as the blow lands', 'Beat the recruit until they yield', 'Tap ⇄ SWAP to change to the bow Mara gave you', 'Hold ⚔ to draw and let go to shoot the archery target (2 hits)', 'Tap the Pack button at the top to open your inventory', 'Tap the Map button to open the map', 'Close the map, then tap 🐎 to mount your horse', 'Tap the Quests button to open your journal', 'Return to Sergeant Mara'];
+const tutText = i => TOUCH.on && TUT_TOUCH[i] ? TUT_TOUCH[i] : TUT[i].t;
 function tutGo(i) {
   const T = G.tut; T.step = i; const st = TUT[i]; if (!st) return tutEnd();
   if (st.enter) st.enter(); T.opened = {};
-  T.q.obj = `${st.t}  (${i + 1}/${TUT.length})`; SND.play('story'); updateHUD(true);
-  if (T.mara) T.mara.say = { text: MARA_SAY[i], t: 4.5 };
+  T.q.obj = `${tutText(i)}  (${i + 1}/${TUT.length})`; SND.play('story'); updateHUD(true);
+  if (T.mara) T.mara.say = { text: TOUCH.on ? MARA_TOUCH[i] || MARA_SAY[i] : MARA_SAY[i], t: 4.5 };
 }
 function tutTick(dt) {
   const T = G.tut; if (!T || T.done) return;
@@ -4381,7 +4459,7 @@ function tutTalk(e) {
     openDialog({ name: e.name, role: 'Drill sergeant', portrait: e, text: 'Not bad, recruit. Not bad at all. One more thing: every village elder has work for a sword, and the signposts carry bounties and carriages. Press P when you level up to learn skills. Now go. The realm is yours.', options: [{ t: 'Thank you, Sergeant.', fn: () => { T.graduated = true; closeDialog(); } }] });
     return;
   }
-  openDialog({ name: e.name, role: 'Drill sergeant', portrait: e, text: TUT[T.step].t + '.', options: [{ t: 'Understood.', fn: closeDialog }, { t: 'Skip the rest of the training', fn: () => { closeDialog(); tutEnd(true); } }] });
+  openDialog({ name: e.name, role: 'Drill sergeant', portrait: e, text: tutText(T.step) + '.', options: [{ t: 'Understood.', fn: closeDialog }, { t: 'Skip the rest of the training', fn: () => { closeDialog(); tutEnd(true); } }] });
 }
 function tutEnd(skipped) {
   const T = G.tut; if (!T) return; T.done = true;
@@ -6460,6 +6538,26 @@ function drawBigMap() {
     mi.innerHTML = `<b style="font-family:var(--fh);color:var(--gold-l)">${best.name}</b><br><span style="color:var(--ink2);font-size:12px">${typeN} · ${leagues(dist(P.x, P.y, best.x, best.y))} leagues ${compass(best.x - P.x, best.y - P.y)}</span><br>${extra}`;
     mi.classList.remove('hidden');
   });
+  let tp = null, pinch = null;
+  const tdist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  c.addEventListener('touchstart', e => {
+    e.preventDefault();
+    if (e.touches.length >= 2) { pinch = { d: tdist(e.touches), z: mapView.z }; mapView.drag = null; tp = null; return; }
+    const t0 = e.touches[0]; tp = { x: t0.clientX, y: t0.clientY, t: performance.now() };
+    c.dispatchEvent(new MouseEvent('mousedown', { clientX: t0.clientX, clientY: t0.clientY, button: 0, bubbles: true }));
+  }, { passive: false });
+  c.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (pinch && e.touches.length >= 2) { mapView.z = clamp(pinch.z * tdist(e.touches) / pinch.d, 1.2, 12); return; }
+    const t0 = e.touches[0]; if (t0) dispatchEvent(new MouseEvent('mousemove', { clientX: t0.clientX, clientY: t0.clientY, bubbles: true }));
+  }, { passive: false });
+  c.addEventListener('touchend', e => {
+    e.preventDefault();
+    if (pinch) { if (e.touches.length < 2) pinch = null; mapView.drag = null; return; }
+    if (!tp || !mapView.drag) return; const t0 = e.changedTouches[0];
+    if (performance.now() - tp.t > 550 && Math.hypot(t0.clientX - tp.x, t0.clientY - tp.y) < 12) mapView.drag.b = 2; // press and hold: waypoint, or edit the pin under your finger
+    dispatchEvent(new MouseEvent('mouseup', { clientX: t0.clientX, clientY: t0.clientY, button: mapView.drag.b, bubbles: true })); tp = null;
+  }, { passive: false });
   c.addEventListener('wheel', e => {
     e.preventDefault(); const r = c.getBoundingClientRect(); const mx = e.clientX - r.left - r.width / 2, my = e.clientY - r.top - r.height / 2;
     const wx = mapView.cx + mx / mapView.z, wy = mapView.cy + my / mapView.z; mapView.z = clamp(mapView.z * (e.deltaY < 0 ? 1.18 : 1 / 1.18), 1.2, 12);
@@ -6911,6 +7009,7 @@ function updateHUD(force) {
     if (input.force) pr = '<span style="color:#ff9a7a">⚠ Holding Q: your attacks will hit friendly and neutral characters</span>' + (pr ? ' &nbsp; ' + pr : '');
   }
   if (PAD.on) pr = pr.replace(/<kbd>E<\/kbd>/g, '<kbd>X</kbd>').replace(/<kbd>F<\/kbd>/g, '<kbd>B</kbd>');
+  else if (TOUCH.on) pr = pr.replace(/press <kbd>E<\/kbd>/g, 'tap ✋').replace(/<kbd>E<\/kbd>/g, '<kbd>✋</kbd>');
   setIf('hk', PAD.on, on => { const el = document.querySelector('#hud .hk'); if (!PAD.hk) PAD.hk = el.innerHTML; el.innerHTML = on ? PAD_HK : PAD.hk; });
   setIf('pr', pr, v => { $('prompt').innerHTML = v; $('prompt').classList.toggle('show', !!v); });
 }
@@ -6991,6 +7090,78 @@ function pollPad() {
   }
   PAD.prevUp = ly < -.6; PAD.prevDn = ly > .6; PAD.prev = gp.buttons.map(x => x.pressed);
 }
+/* ---------------- Touch controls ---------------- */
+// A floating joystick on the left half of the screen and a cluster of buttons on the right. Attacks, blocks and bow shots
+// aim themselves at the nearest foe; otherwise the knight faces where the stick points.
+function touchTarget(r) {
+  let best = null, bs = 1e9;
+  for (const e of ents) {
+    if (e.dead || e.civ || e.kind === 'horse' || !playerHostileTo(e)) continue;
+    const ey = e.y - (e.elev || 0), d = dist(P.x, P.y, e.x, ey); if (d > r) continue;
+    const off = Math.abs(angDiff(P.face, Math.atan2(ey - P.y, e.x - P.x))), sc = d * (1 + off * .35);
+    if (sc < bs) { bs = sc; best = e; }
+  }
+  return best;
+}
+function touchFace() {
+  if (input.lmb || input.rmb || P.drawing || P.swing > 0) { const tg = touchTarget(P.S.bow ? 480 : 170); if (tg) return Math.atan2(tg.y - (tg.elev || 0) - P.y, tg.x - P.x); }
+  if (TOUCH.mx || TOUCH.my) return Math.atan2(TOUCH.my, TOUCH.mx);
+  return P.face;
+}
+function tryFullscreen() {
+  const el = document.documentElement;
+  try { if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen({ navigationUI: 'hide' }).then(() => { try { screen.orientation.lock('landscape').catch(() => { }); } catch (e) { } }).catch(() => { }); } catch (e) { }
+}
+function enableTouch() {
+  if (TOUCH.on) return; TOUCH.on = true; document.body.classList.add('touch');
+  TOUCH.scale = Math.min(innerWidth, innerHeight) < 520 ? .72 : Math.min(innerWidth, innerHeight) < 800 ? .86 : 1;
+  let saved = null; try { saved = localStorage.getItem('fk_settings'); } catch (e) { }
+  if (!saved && settings.quality === 'high') settings.quality = 'medium'; // phones run cooler at medium until told otherwise
+  applySettings(); SND.init();
+}
+addEventListener('touchstart', enableTouch, { passive: true });
+document.addEventListener('click', e => { if (TOUCH.on && e.target.closest && e.target.closest('#mainMenu .btn, #modeScreen .modeCard, #btnSetupGo, #contScreen .modeCard, #btnNewYes')) tryFullscreen(); }, true);
+(function touchControls() {
+  const zone = $('tStickZone'), stick = $('tStick'), knob = $('tKnob'), R0 = 56;
+  const home = () => { stick.style.left = '110px'; stick.style.top = 'calc(100% - 120px)'; knob.style.transform = ''; stick.classList.remove('on'); TOUCH.mx = TOUCH.my = 0; TOUCH.stick = null; };
+  zone.addEventListener('pointerdown', e => {
+    if (TOUCH.stick != null) return; e.preventDefault(); try { zone.setPointerCapture(e.pointerId); } catch (err) { } TOUCH.stick = e.pointerId;
+    const r = zone.getBoundingClientRect(); TOUCH.sx = e.clientX; TOUCH.sy = e.clientY;
+    stick.style.left = (e.clientX - r.left) + 'px'; stick.style.top = (e.clientY - r.top) + 'px'; stick.classList.add('on');
+  });
+  zone.addEventListener('pointermove', e => {
+    if (e.pointerId !== TOUCH.stick) return;
+    let dx = e.clientX - TOUCH.sx, dy = e.clientY - TOUCH.sy; const l = Math.hypot(dx, dy);
+    if (l > R0) { dx *= R0 / l; dy *= R0 / l; }
+    knob.style.transform = `translate(${dx}px,${dy}px)`;
+    const m = Math.min(1, l / R0); if (m < .2) { TOUCH.mx = TOUCH.my = 0; } else { TOUCH.mx = dx / R0; TOUCH.my = dy / R0; }
+  });
+  const up = e => { if (e.pointerId === TOUCH.stick) home(); };
+  zone.addEventListener('pointerup', up); zone.addEventListener('pointercancel', up); zone.addEventListener('lostpointercapture', up);
+  // buttons: holds set the mouse buttons, taps fire actions
+  const hold = (id, on, off) => { const b = $(id);
+    b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); try { b.setPointerCapture(e.pointerId); } catch (err) { } b.classList.add('down'); on(); });
+    const rel = e => { if (!b.classList.contains('down')) return; b.classList.remove('down'); off(); };
+    b.addEventListener('pointerup', rel); b.addEventListener('pointercancel', rel); b.addEventListener('lostpointercapture', rel);
+    b.addEventListener('contextmenu', e => e.preventDefault());
+  };
+  const tap = (id, fn) => hold(id, () => { if (G.state === 'play' && !dialogOpen && !UI.stack.length) fn(); }, () => { });
+  hold('tAtk', () => { input.lmb = true; input.clicked = true; }, () => { input.lmb = false; });
+  hold('tBlk', () => { input.rmb = true; }, () => { input.rmb = false; });
+  tap('tDodge', tryDodge); tap('tSpec', useSpecial); tap('tUse', doInteract); tap('tHorse', toggleMount); tap('tSwap', swapWeapons); tap('tAmmo', cycleAmmo);
+  tap('tEat', () => quickUse('food')); tap('tPot', () => quickUse('potion')); tap('tParty', toggleParty);
+  tap('tSprint', () => { TOUCH.sprint = !TOUCH.sprint; });
+  hold('tFull', () => { if (document.fullscreenElement) { try { document.exitFullscreen(); } catch (e) { } } else tryFullscreen(); }, () => { });
+  $('prompt').addEventListener('click', () => { if (TOUCH.on && G.state === 'play' && !dialogOpen && !UI.stack.length) doInteract(); });
+  // keep the buttons honest: sprint lit while on, arrows only with a bow, use pulses when there is something to use
+  setInterval(() => {
+    if (!TOUCH.on || G.state !== 'play') return;
+    if (TOUCH.sprint && P.winded) TOUCH.sprint = false;
+    $('tSprint').classList.toggle('lit', TOUCH.sprint); $('tAmmo').classList.toggle('dim', !P.S || !P.S.bow);
+    $('tUse').classList.toggle('ready', !!findInteract()); $('tHorse').classList.toggle('dim', !P.eq || !P.eq.horse);
+    $('tSpec').classList.toggle('dim', (P.specCd || 0) > 0); $('tAtk').firstChild.nodeValue = P.S && P.S.bow ? '➹' : '⚔';
+  }, 200);
+})();
 /* ---------------- Input ---------------- */
 addEventListener('keydown', e => {
   if (document.activeElement && document.activeElement.id === 'pinText') { if (e.code === 'Enter') $('pinSave').click(); else if (e.code === 'Escape') $('pinCancel').click(); return; } // typing a pin note
@@ -8812,7 +8983,7 @@ function frame(now) {
 /* ---------------- Boot ---------------- */
 (function boot() {
   resize();
-  document.documentElement.style.setProperty('--ui-scale', settings.uiScale);
+  document.documentElement.style.setProperty('--ui-scale', TOUCH && TOUCH.on ? Math.min(settings.uiScale, TOUCH.scale) : settings.uiScale);
   $('mmWrap').classList.toggle('hidden', !settings.minimap);
   let seed = Math.floor(Math.random() * 1e9);
   try { const d = JSON.parse(localStorage.getItem('fk_save') || 'null'); if (d && d.seed) seed = d.seed; } catch (e) { }

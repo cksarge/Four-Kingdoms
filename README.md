@@ -60,6 +60,13 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 
 **Controller:** left stick moves, right stick aims, RT attacks or draws a bow, LT blocks, A dodges, X interacts, B mounts, Y swaps weapons, LB switches arrows, RB sprints, clicking the right stick uses your special, clicking the left stick commands companions, Back opens the map and Start pauses. In menus, the D-pad moves between buttons, A selects and B goes back.
 
+**Phones and tablets:** touch controls turn on the first time you touch the screen. Play in landscape.
+- **Moving:** drag anywhere on the left of the screen.
+- **Combat:** ⚔ attacks (hold it to draw a bow, then let go to shoot), 🛡 blocks, ↻ dodges and ✦ uses your special move. Attacks and arrows aim at the nearest foe by themselves.
+- **Interacting:** ✋ talks and interacts, or you can tap the prompt.
+- **Small buttons:** sprint, mount, swap weapons, switch arrows, eat, drink a potion, call your companions, and go fullscreen.
+- **Map:** drag to pan, pinch to zoom, tap a place for details, and press and hold to set a waypoint.
+
 ## Features
 
 - A new map is generated for each game, with castles, villages, rivers, mountain passes, ruins, bandit camps and hidden locations to discover.
