@@ -79,6 +79,14 @@ b,strong{font-weight:600}
 #slotW .sw2{position:absolute;right:-9px;top:-11px;width:25px;height:25px;border-radius:4px}
 #slotW .sw2.none{display:none}
 #specPip{position:absolute;left:-8px;top:-10px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 10px var(--fh);color:#1b140d;background:conic-gradient(#e7c35a var(--p,100%),rgba(20,14,8,.9) 0);border:1px solid #6b5230;box-shadow:0 0 6px rgba(0,0,0,.5)}
+#skillScreen .panel{width:min(940px,95vw)}
+.skGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:10px}
+.skCol{background:rgba(0,0,0,.25);border:1px solid rgba(160,122,58,.35);border-radius:6px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.skCol h4{font-family:var(--fh);color:var(--gold-l);margin:0;font-size:14px}
+.skPips{display:flex;gap:4px}.skPip{flex:1;height:8px;border-radius:3px;background:#2a2016;border:1px solid #6b5230}.skPip.on{background:linear-gradient(#f0d070,#b8902a)}
+.skRank{font-size:12.5px;color:var(--muted);line-height:1.35}.skRank.done{color:var(--ink)}.skRank.next{color:#e7c35a}
+.skCol .btn{margin-top:auto}
+@media (max-width:760px){.skGrid{grid-template-columns:1fr 1fr}}
 .slot.mounted{border-color:var(--gold);box-shadow:0 0 10px rgba(216,178,90,.35)}
 #hudBR{position:absolute;right:12px;bottom:12px;padding:7px 10px;font-size:11.5px;color:var(--ink2);line-height:1.65;pointer-events:auto}
 #hudBR .hk{display:grid;grid-template-columns:auto auto;gap:0 10px}
@@ -429,7 +437,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <span><kbd>WASD</kbd>Move</span><span><kbd>LMB</kbd>Attack</span>
         <span><kbd>RMB</kbd>Block</span><span><kbd>Space</kbd>Dodge</span>
         <span><kbd>E</kbd>Interact</span><span><kbd>F</kbd>Horse</span>
-        <span><kbd>Q</kbd>+Click Hit friendlies</span><span><kbd>Shift</kbd>Sprint</span><span><kbd>R</kbd>Arrows</span><span><kbd>Tab</kbd>Swap weapon</span><span><kbd>C</kbd>Special</span><span><kbd>J</kbd>Quests</span>
+        <span><kbd>Q</kbd>+Click Hit friendlies</span><span><kbd>Shift</kbd>Sprint</span><span><kbd>R</kbd>Arrows</span><span><kbd>Tab</kbd>Swap weapon</span><span><kbd>C</kbd>Special</span><span><kbd>G</kbd>Companions</span><span><kbd>P</kbd>Skills<b id="spBadge" style="color:#e7c35a"></b></span><span><kbd>J</kbd>Quests</span>
       </div>
       <div class="hudbtns">
         <button class="hbtn" data-open="inv" title="Inventory (I)">I · Pack</button>
@@ -634,6 +642,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <div><kbd>Tab</kbd> Swap to your sidearm (set one in the inventory)</div><div><kbd>C</kbd> Special move: sword whirlwind, axe crushing blow, spear lunge, piercing arrow; while blocking, a shield bash</div>
         <div><kbd>Space</kbd> Dodge: time it just as a blow lands to take no damage</div><div><kbd>E</kbd> Talk / loot / interact</div>
         <div><kbd>F</kbd> Mount, dismount, call horse</div><div><kbd>Shift</kbd> Sprint (hold; drains stamina)</div><div><kbd>Q</kbd>+<kbd>LMB</kbd> Hit friendly or neutral characters (villagers, guards, animals). Hurting people is a crime</div>
+        <div><kbd>P</kbd> Skills (one point per level)</div><div><kbd>G</kbd> Companions: follow or hold position</div>
         <div><kbd>I</kbd> Inventory</div><div><kbd>M</kbd> Map</div>
         <div><kbd>K</kbd> Diplomacy (kingdoms)</div><div><kbd>J</kbd> Quest journal</div>
         <div><kbd>1</kbd>–<kbd>3</kbd> Eat food / drink potion</div><div><kbd>Esc</kbd> Pause / close</div>
@@ -654,6 +663,17 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <div class="shopCol"><h3>YOUR GOODS</h3><div class="shopList" id="shopSell"></div></div>
       </div>
       <div class="shopFoot"><span id="shopNote"></span><span class="goldbox" style="padding:0"><span class="coin"></span><span id="shopGold"></span></span></div>
+    </div>
+  </div>
+
+  <!-- SKILLS -->
+  <div id="skillScreen" class="screen">
+    <div class="panel rv">
+      <div class="closeX" data-close>✕</div>
+      <div class="ptitle">SKILLS</div>
+      <div class="orn">✦</div>
+      <div class="psub" id="skillPts"></div>
+      <div class="skGrid" id="skillBody"></div>
     </div>
   </div>
 
@@ -1282,6 +1302,10 @@ const ITEMS = {
   ember_core: { name: 'Ember Core', type: 'misc', val: 220, stack: 1, desc: 'A coal that never cools, pried from the deep mines. A master smith could bind its fire into a blade.' },
   venom_gland: { name: 'Venom Gland', type: 'misc', val: 180, stack: 1, desc: 'Taken from the Broodmother. A master smith could bind its venom into a blade.' },
   frost_heart: { name: 'Frost Heart', type: 'misc', val: 240, stack: 1, desc: 'The still-cold heart of Rimeheart. A master smith could bind its frost into a blade.' },
+  timber: { name: 'Seasoned Timber', type: 'misc', val: 8, stack: 1, desc: 'Straight ash and yew staves. Fletchers make arrows from it.' },
+  pitch: { name: 'Pitch', type: 'misc', val: 10, stack: 1, desc: 'Sticky pine tar. Fletchers use it for fire arrows.' },
+  venom_vial: { name: 'Adder Venom', type: 'misc', val: 16, stack: 1, desc: 'A stoppered vial of marsh-adder venom, for venom arrows.' },
+  rime_shard: { name: 'Rime Shard', type: 'misc', val: 14, stack: 1, desc: 'Ice that never melts, from the high snowfields. Fletchers tip frost arrows with it.' },
   bread: { name: 'Bread', type: 'misc', heal: 22, val: 4, stack: 1, food: 1, desc: 'Restores 22 health. [1]' },
   meat: { name: 'Roast Meat', type: 'misc', heal: 40, val: 10, stack: 1, food: 1, desc: 'Restores 40 health. [1]' },
   potion: { name: 'Healing Draught', type: 'misc', heal: 85, val: 45, stack: 1, potion: 1, desc: 'Restores 85 health. [2]' },
@@ -1331,7 +1355,8 @@ const LOOT_TIERS = [
 let uidCounter = 1;
 function mkItem(id, q = 1, n = 1) { const b = ITEMS[id]; if (!b) return null; if (b.type !== 'weapon' && b.type !== 'shield' && b.type !== 'armor') q = 1; return { uid: uidCounter++, id, q, n: b.stack ? n : 1 }; }
 function rollQual(tier) { const r = Math.random(); if (r < .08 + tier * .04) return 3; if (r < .3 + tier * .06) return 2; if (r < .75) return 1; return tier > 2 ? 1 : 0; }
-function itemName(it) { const b = ITEMS[it.id]; const q = QUAL[it.q]; return (q && q.n && !b.legend ? q.n + ' ' : '') + b.name; }
+const ENCH_N = { fire: 'Burning', venom: 'Venomous', frost: 'Frostbitten', life: 'Lifedrinking' }, ENCH_GLOW = { fire: '#ff8a3a', venom: '#7ad04a', frost: '#9fdcff', life: '#e04a5a' };
+function itemName(it) { const b = ITEMS[it.id]; const q = QUAL[it.q]; return (it.ench ? ENCH_N[it.ench] + ' ' : '') + (q && q.n && !b.legend ? q.n + ' ' : '') + b.name; }
 function itemColor(it) { const b = ITEMS[it.id]; if (b.legend) return '#ff9a4a'; if (b.type === 'quest') return '#ffd76a'; return QUAL[it.q] ? QUAL[it.q].c : '#eadfc4'; }
 function itemStats(it) {
   const b = ITEMS[it.id], m = QUAL[it.q] ? QUAL[it.q].m : 1;
@@ -1341,7 +1366,7 @@ function itemStats(it) {
   if (b.type === 'horse') return { hspd: b.hspd };
   return {};
 }
-function itemValue(it) { const b = ITEMS[it.id]; return Math.max(1, Math.round(b.val * (QUAL[it.q] ? QUAL[it.q].v : 1))); }
+function itemValue(it) { const b = ITEMS[it.id]; return Math.max(1, Math.round(b.val * (QUAL[it.q] ? QUAL[it.q].v : 1) * (it.ench ? 1.6 : 1))); }
 
 /* ---------------- New-game options: difficulty and world ---------------- */
 // Knight is the original game, unchanged. Values are multipliers unless noted.
@@ -1960,6 +1985,20 @@ function swapWeapons() {
   [P.eq.weapon, P.eq.weapon2] = [P.eq.weapon2, P.eq.weapon]; P.swing = 0; P.spec = null; P.atkCd = Math.max(P.atkCd, .35);
   recalc(); SND.play('swap'); const w = getItem(P.eq.weapon); if (w) addText(P.x, P.y - 34, itemName(w), itemColor(w), 12);
 }
+/* ---------------- Skills ---------------- */
+const SK = id => (P && P.skills && P.skills[id]) || 0;
+const SKILLS = [
+  { id: 'sword', n: 'Swordsmanship', ranks: ['+6% melee damage', '+12% melee damage · specials recharge 6% faster', '+18% melee damage · melee attacks cost 15% less stamina', '+24% melee damage · specials recharge 24% faster'] },
+  { id: 'archery', n: 'Archery', ranks: ['Draw 7% faster · +10% arrow recovery', 'Draw 14% faster · +5% crit at full draw', 'Draw 21% faster · +30% arrow recovery', 'Draw 28% faster · full draws pierce a second foe'] },
+  { id: 'riding', n: 'Riding', ranks: ['Horses 5% faster · +6% mounted damage', 'Horses 10% faster · take 12% less damage mounted', 'Horses 15% faster · +18% mounted damage', 'Horses 20% faster · take 24% less damage mounted'] },
+  { id: 'lead', n: 'Leadership', ranks: ['Command 2 hired soldiers · allies +8% damage', 'Command 3 · hiring 20% cheaper', 'Command 4 · allies +24% damage', 'Command 5 · hiring 40% cheaper'] },
+  { id: 'trade', n: 'Trade', ranks: ['Buy 5% cheaper · sell 5% dearer', 'Buy 10% cheaper · sell 10% dearer', 'Buy 15% cheaper · sell 15% dearer', 'Buy 20% cheaper · sell 20% dearer'] },
+];
+function renderSkills() {
+  $('skillPts').innerHTML = P.sp ? `You have <b style="color:#e7c35a">${P.sp}</b> skill point${P.sp > 1 ? 's' : ''} to spend.` : 'No skill points to spend. You earn one every level.';
+  $('skillBody').innerHTML = SKILLS.map(sk => { const r = SK(sk.id), can = P.sp > 0 && r < 4; return `<div class="skCol"><h4>${sk.n}</h4><div class="skPips">${[0, 1, 2, 3].map(i => `<span class="skPip ${i < r ? 'on' : ''}"></span>`).join('')}</div>${sk.ranks.map((t, i) => `<div class="skRank ${i < r ? 'done' : i === r ? 'next' : ''}">${i < r ? '✓' : (i + 1) + '.'} ${t}</div>`).join('')}<button class="btn sm ${can ? 'gold' : ''}" data-sk="${sk.id}" ${can ? '' : 'disabled'}>${r >= 4 ? 'Mastered' : 'Learn'}</button></div>`; }).join('');
+  document.querySelectorAll('[data-sk]').forEach(b => b.onclick = () => { if (!P.sp || SK(b.dataset.sk) >= 4) return; P.skills[b.dataset.sk] = SK(b.dataset.sk) + 1; P.sp--; SND.play('level'); recalc(); renderSkills(); });
+}
 function slotOf(type) { return type === 'weapon' ? 'weapon' : type === 'shield' ? 'shield' : type === 'armor' ? 'armor' : type === 'horse' ? 'horse' : null; }
 function equip(uid, silent, slot) {
   const it = getItem(uid); if (!it) return; const s = slot || slotOf(ITEMS[it.id].type); if (!s) return;
@@ -2006,7 +2045,7 @@ function newPlayer() {
     isPlayer: true, kind: 'player', name: 'You', x: s.x + TS * .5, y: s.y + TS * 2.6, r: 11, hp: 100, maxHp: 100, st: 100, maxSt: 100, gold: 25, xp: 0, lvl: 1, face: 0, faction: 'player',
     swing: 0, swingDur: .25, swingDir: 1, hitDone: true, atkCd: 0, blocking: false, dodge: 0, dodgeX: 0, dodgeY: 0, iframes: 0, stDelay: 0,
     mounted: false, hface: 0, walk: 0, flash: 0, kbx: 0, kby: 0, inv: [], eq: { weapon: null, weapon2: null, shield: null, armor: null, horse: null },
-    allegiance: null, bonusHp: 0, bonusSt: 0, stepT: 0, respawn: { x: s.x, y: s.y + TS * 2.6 }, visited: {}
+    allegiance: null, bonusHp: 0, bonusSt: 0, skills: {}, sp: 0, comps: [], houses: [], stash: [], forts: [], fortGuards: {}, stepT: 0, respawn: { x: s.x, y: s.y + TS * 2.6 }, visited: {}
   };
   const w = addItem('wooden_sword', 1, 1, true), sh = addItem('wooden_shield', 1, 1, true), a = addItem('padded', 1, 1, true);
   P.eq.weapon = w.uid; P.eq.shield = sh.uid; P.eq.armor = a.uid;
@@ -2023,7 +2062,9 @@ function recalc() {
   };
   P.S.bow = P.S.wk === 'bow'; P.S.frost = w ? ITEMS[w.id].frost || 0 : 0; P.S.ench = w ? ITEMS[w.id].ench || null : null; P.S.saddle = !!(w && ITEMS[w.id].saddle); P.S.drawT = .3 + (100 - P.S.spd) * .012; P.S.shotCost = 5 + ws.dmg * .12;
   if (!P.S.bow) P.drawing = false;
-  P.S.swingT = .17 + (100 - P.S.spd) * .0045; P.S.cool = .16 + (100 - P.S.spd) * .011; P.S.cost = 6 + ws.dmg * .16;
+  if (!P.S.bow) P.S.dmg *= 1 + .06 * SK('sword'); P.S.drawT *= 1 - .07 * SK('archery'); P.S.hspd *= 1 + .05 * SK('riding');
+  P.S.glow = w ? (ITEMS[w.id].glow || (w.ench ? ENCH_GLOW[w.ench] : null)) : null; if (w && w.ench) P.S.ench = w.ench;
+  P.S.swingT = .17 + (100 - P.S.spd) * .0045; P.S.cool = .16 + (100 - P.S.spd) * .011; P.S.cost = (6 + ws.dmg * .16) * (SK('sword') >= 3 ? .85 : 1);
   P.maxHp = 100 + (P.lvl - 1) * 8 + P.bonusHp; P.maxSt = 100 + (P.lvl - 1) * 5 + P.bonusSt;
   P.hp = Math.min(P.hp, P.maxHp); P.st = Math.min(P.st, P.maxSt);
   if (typeof updateHUD === 'function') updateHUD(true);
@@ -2033,7 +2074,8 @@ function gainXP(n) {
   if (!n) return; P.xp += n;
   while (P.xp >= xpNeed(P.lvl)) {
     P.xp -= xpNeed(P.lvl); P.lvl++; recalc(); P.hp = P.maxHp; P.st = P.maxSt;
-    toast(`<b>Level ${P.lvl}!</b> +8 Health · +5 Stamina · +3% Damage`, 'gold'); SND.play('level');
+    P.sp = (P.sp || 0) + 1;
+    toast(`<b>Level ${P.lvl}!</b> +8 Health · +5 Stamina · +3% Damage · <b>+1 skill point</b> (press P)`, 'gold'); SND.play('level');
     for (let i = 0; i < 30; i++) addPart(P.x, P.y, rand(-120, 120), rand(-200, -40), '#ffe08a', rand(.6, 1.2), 3, -60);
   }
 }
@@ -2086,7 +2128,7 @@ function useSpecial() {
   const sp = SPECS[k], cdKey = k === 'bash' ? 'bashCd' : 'specCd';
   if ((P[cdKey] || 0) > 0) return;
   const cost = sp.st * DIFF().stCost; if (P.st < cost) { toast('Not enough stamina.'); return; }
-  P.st -= cost; P.stDelay = .9; P[cdKey] = sp.cd; if (k !== 'bash') P.specMax = sp.cd;
+  const cdm = k === 'bash' || k === 'bow' ? 1 : 1 - .06 * SK('sword'); P.st -= cost; P.stDelay = .9; P[cdKey] = sp.cd * cdm; if (k !== 'bash') P.specMax = sp.cd * cdm;
   if (k === 'bash') { doBash(); return; }
   if (k === 'bow') { P.pierceNext = true; addText(P.x, P.y - 34, 'Piercing shot ready', '#bfe0ff', 12); SND.play('bowfull'); return; }
   P.spec = { k, t: 0, hit: false, dur: k === 'sword' ? .42 : k === 'spear' ? .32 : .72 };
@@ -2168,10 +2210,11 @@ function loose() {
   const id = curAmmo(); if (!id) return; const A = ITEMS[id], S = P.S, d = P.draw;
   removeItemById(id, 1);
   const spd = 520 + 380 * d, a = P.face + rand(-1, 1) * (1 - d) * .07;
-  let dmg = S.dmg * (.3 + .7 * d * d) * (A.dmgM || 1) * DIFF().dmgDealt; const crit = d >= 1 && Math.random() < .15; if (crit) dmg *= 1.6;
+  let dmg = S.dmg * (.3 + .7 * d * d) * (A.dmgM || 1) * DIFF().dmgDealt; const crit = d >= 1 && Math.random() < .15 + (SK('archery') >= 2 ? .05 : 0); if (crit) dmg *= 1.6;
   if (P.mounted && S.horse && S.horse.dmgB) dmg *= 1 + S.horse.dmgB;
+  if (P.mounted) dmg *= 1 + .06 * (SK('riding') >= 3 ? 3 : SK('riding') >= 1 ? 1 : 0);
   if (P.mounted && S.saddle) dmg *= 1.15;
-  const storm = S.ench === 'storm' && d >= 1, pierce = P.pierceNext ? 3 : storm ? 2 : 0, v = spd * (storm ? 1.15 : 1); P.pierceNext = false;
+  const storm = S.ench === 'storm' && d >= 1, pierce = P.pierceNext ? 3 : storm || (SK('archery') >= 4 && d >= 1) ? 2 : 0, v = spd * (storm ? 1.15 : 1); P.pierceNext = false;
   projs.push({ x: P.x + Math.cos(a) * 16, y: P.y + Math.sin(a) * 16, vx: Math.cos(a) * v, vy: Math.sin(a) * v, dmg, crit, src: P, life: S.rng * (.45 + .55 * d) * wxRange() / spd, arrow: id, frost: S.frost, force: input.force, pierce });
   P.atkCd = .2; P.st -= S.shotCost * DIFF().stCost; P.stDelay = .6;
   SND.play('bowshot'); if (id === 'fire_arrow') SND.play('ignite');
@@ -2184,7 +2227,7 @@ function doPlayerHit() {
     const d = dist(P.x, P.y, e.x, e.y); if (d > reach + e.r) continue;
     const a = Math.atan2(e.y - P.y, e.x - P.x); if (Math.abs(angDiff(P.face, a)) > S.arc / 2 + (d < e.r + 16 ? .9 : .12)) continue;
     let dmg = S.dmg * rand(.9, 1.1) * DIFF().dmgDealt; const crit = Math.random() < .1; if (crit) dmg *= 1.6;
-    if (P.mounted) dmg *= 1.1 + (S.horse && S.horse.dmgB ? S.horse.dmgB : 0);
+    if (P.mounted) dmg *= 1.1 + (S.horse && S.horse.dmgB ? S.horse.dmgB : 0) + .06 * (SK('riding') >= 3 ? 3 : SK('riding') >= 1 ? 1 : 0);
     damage(e, dmg, P, { crit, kb: S.wk === 'great' || S.wk === 'axe' ? 1.6 : S.wk === 'spear' ? 1.2 : 1 }); applyEnch(e, dmg); hits++;
   }
   if (hits) { G.hitstop = .045; addShake(2 + hits); }
@@ -2301,7 +2344,7 @@ function playerHostileTo(e) {
   return false;
 }
 function hostile(a, b) {
-  if (a === b || a.dead || b.dead) return false;
+  if (a === b || a.dead || b.dead || a.downed > 0 || b.downed > 0) return false;
   if (a.isPlayer) return playerHostileTo(b);
   if (b.isPlayer) return playerHostileTo(a);
   if (a.kind === 'horse' || b.kind === 'horse') return false;
@@ -2348,6 +2391,7 @@ function damage(t, amt, src, o = {}) {
     }
     let def = P.S.def; a *= 100 / (100 + def * 6.5);
     if (P.mounted && P.S.horse && P.S.horse.defB) a *= 1 - P.S.horse.defB;
+    if (P.mounted) a *= 1 - (SK('riding') >= 4 ? .24 : SK('riding') >= 2 ? .12 : 0);
     a = Math.max(.5, a);
     P.hp -= a; P.flash = .15; addShake(3 + a * .25); SND.play('hurt');
     $('hurtVignette').style.boxShadow = 'inset 0 0 160px rgba(170,0,0,.55)'; setTimeout(() => $('hurtVignette').style.boxShadow = 'inset 0 0 160px rgba(170,0,0,0)', 180);
@@ -2359,6 +2403,7 @@ function damage(t, amt, src, o = {}) {
   }
   if (t.important || t.kind === 'horse') return 0;
   const wasHostile = src === P ? playerHostileTo(t) : true;
+  if (src && src.party) amt *= 1 + .08 * (SK('lead') >= 3 ? 3 : SK('lead') >= 1 ? 1 : 0);
   if (t.guard && src && !o.dot && !o.heavy && !(t.guardBroken > 0) && !(t.stun > 0) && o.arrow !== 'bodkin' && Math.abs(angDiff(t.face, Math.atan2(src.y - t.y, src.x - t.x))) < 1.1) {
     amt *= .3; SND.play('block', .7); if (settings.dmgNums) addText(t.x, t.y - 40, 'Blocked', '#d8d0b8', 12); // hit them from the side, from behind, or with a heavy blow
     for (let i = 0; i < 5; i++) addPart(t.x + Math.cos(t.face) * 12, t.y + Math.sin(t.face) * 12, rand(-90, 90), rand(-90, 40), '#ffe8a0', .25, 2);
@@ -2375,6 +2420,7 @@ function damage(t, amt, src, o = {}) {
     if (src === P) { if (!wasHostile && !o.dot) crime(t); if (t.place != null) alertPlace(t.place, P); }
     if (t.civ) { t.flee = 3; t.fleeFrom = src; }
   }
+  if (t.hp <= 0 && t.comp) { t.hp = 1; t.downed = 15; t.target = null; t.wind = 0; toast(`${t.name} is down!`, 'bad'); return amt; }
   if (t.hp <= 0) kill(t, src);
   return amt;
 }
@@ -2406,6 +2452,7 @@ function kill(t, src) {
     if (t.kind === 'wolf' && chance(.4)) dropItem(t.x, t.y, 'furs');
     if (t.kind === 'snow_wolf' && chance(.6)) dropItem(t.x, t.y, 'furs');
     if (t.kind === 'ice_bear') { dropItem(t.x, t.y, 'furs'); dropItem(t.x + 8, t.y, 'furs'); dropItem(t.x + 10, t.y, 'meat'); }
+    if (t.kind === 'spider' && chance(.3)) dropItem(t.x, t.y, 'venom_vial');
     if (t.kind === 'goat') { dropItem(t.x, t.y, 'meat'); if (chance(.3)) dropItem(t.x + 8, t.y, 'furs'); }
     if (t.kind === 'boar') dropItem(t.x, t.y, chance(.7) ? 'meat' : 'furs');
     if (t.kind === 'bear') { dropItem(t.x, t.y, 'furs'); dropItem(t.x + 10, t.y, 'meat'); }
@@ -2425,6 +2472,7 @@ function kill(t, src) {
     K.mil[t.k] = Math.max(300, K.mil[t.k] - (t.kind === 'knight' ? 25 : 8));
   }
   if (t === horseEnt) horseEnt = null;
+  if (t.hired) toast(`${t.name} has fallen.`, 'bad');
   if (t.dspec != null && G.under) { const pl = G.under; (pl.ddead || (pl.ddead = [])).push(t.dspec); if (t.dboss) { pl.dcleared = true; SND.play('quest'); gainXP(120 + (pl.tier || 1) * 40); toast(`<b>${pl.name} cleared!</b> The guardian's hoard is unsealed.`, 'gold'); } }
   questOnKill(t);
 }
@@ -2449,7 +2497,7 @@ function enemyStrike(e, tg) {
   if (e.ranged) {
     const ey = e.y - (e.elev || 0), d = dist(e.x, ey, tg.x, tg.y), vs = e.kind === 'xbowman' ? 640 : 430, tt = d / vs; const px = tg.x + (tg.vx || 0) * tt * .5, py = tg.y + (tg.vy || 0) * tt * .5;
     const a = Math.atan2(py - ey, px - e.x) + rand(-.06, .06);
-    projs.push({ x: e.x + Math.cos(a) * 14, y: ey + Math.sin(a) * 14, vx: Math.cos(a) * vs, vy: Math.sin(a) * vs, dmg: e.dmg, src: e, life: Math.max(1.1, e.range / 380), lob: e.perch ? .35 : 0, bolt: e.kind === 'xbowman' });
+    projs.push({ x: e.x + Math.cos(a) * 14, y: ey + Math.sin(a) * 14, vx: Math.cos(a) * vs, vy: Math.sin(a) * vs, dmg: e.dmg, src: e, arrow: e.venom ? 'venom_arrow' : undefined, life: Math.max(1.1, e.range / 380), lob: e.perch ? .35 : 0, bolt: e.kind === 'xbowman' });
     if (dist(e.x, e.y, P.x, P.y) < 600) SND.play(e.kind === 'xbowman' ? 'xbow' : 'arrow'); return;
   }
   if (dist(e.x, e.y, P.x, P.y) < 500) SND.play(e.kind === 'scorpion' ? 'sting' : e.kind === 'bear' || e.kind === 'ice_bear' || e.kind === 'leader' ? 'swingH' : 'swing', .5);
@@ -2487,7 +2535,10 @@ function think(e) {
 }
 function updateActor(e, dt) {
   if (e.dead) { e.deadT += dt; return; }
+  if (e.downed > 0) { e.downed -= dt; if (e.downed <= 0) { e.hp = Math.round(e.maxHp * .35); e.say = { text: 'Still breathing…', t: 2.5 }; } return; }
   if (e.burn > 0 || e.poison > 0 || e.chill > 0) tickStatus(e, dt);
+  if (e.healer && P.hp < P.maxHp && dist(e.x, e.y, P.x, P.y) < 160) { P.hp = Math.min(P.maxHp, P.hp + 1.6 * dt); if (Math.random() < 2 * dt) addPart(P.x + rand(-8, 8), P.y - rand(0, 16), 0, -30, '#8fe07a', .6, 2.5); }
+  if (e.comp && !e.target && (e.bantT = (e.bantT ?? rand(40, 90)) - dt) <= 0) { e.bantT = rand(70, 150); const c = COMPANIONS.find(cc => cc.id === e.comp); if (c) e.say = { text: pick(c.lines), t: 3.5 }; }
   e.flash -= dt; e.atkCd -= dt * (e.chill > 0 ? .5 : 1); if (e.swing > 0) e.swing -= dt;
   if (e.say) { e.say.t -= dt; if (e.say.t <= 0) e.say = null; }
   if ((e.kbx || e.kby) && !e.perch) { moveEnt(e, e.kbx * dt, e.kby * dt); const f = Math.pow(.004, dt); e.kbx *= f; e.kby *= f; if (Math.abs(e.kbx) + Math.abs(e.kby) < 5) e.kbx = e.kby = 0; }
@@ -2598,7 +2649,7 @@ function arrowHit(p, t) {
     SND.play('frost'); for (let i = 0; i < 8 * QMUL(); i++) addPart(t.x, t.y - (t.elev || 0), rand(-70, 70), rand(-70, 40), Math.random() < .5 ? '#ffffff' : '#9fdcff', .45, 2.5);
   }
 }
-function tryRecover(p) { if (p.arrow && !p.hitSet && Math.random() < Math.min(.9, DIFF().arrowRec)) { p.rec = true; p.life = 20; } } // arrows that hit a foe are never recovered
+function tryRecover(p) { const base = DIFF().arrowRec, ch = base ? Math.min(.9, base + .1 * SK('archery') + (SK('archery') >= 3 ? .2 : 0)) : 0; if (p.arrow && !p.hitSet && Math.random() < ch) { p.rec = true; p.life = 20; } } // arrows that hit a foe are never recovered
 function updateProjs(dt) {
   for (let i = projs.length - 1; i >= 0; i--) {
     const p = projs[i]; p.life -= dt;
@@ -2901,12 +2952,13 @@ function spawnPlace(pl) {
       if (pl.cleared && G.time - pl.clearedAt > 1500) { pl.cleared = false; pl.dead = []; pl.chestOpened = false; }
       if (!pl.cleared) specsSpawn(pl.tier);
       Q.active.filter(q => q.type === 'bounty' && q.bk === 'captain' && q.place === pl.id).forEach(q => spawnCaptain(q, pl)); break;
-    case 'ruin': if (pl.guarded) specsSpawn(1); break;
+    case 'ruin': if (pl.playerFort) spawnFortGuards(pl); else if (pl.guarded) specsSpawn(1); break;
     case 'hidden': specsSpawn(1); break;
     case 'castle': {
       const k = pl.owner, sp = pl.spots, T_ = v => v * TS + TS / 2;
       mkActor('npc', T_(sp.ruler[0]) - TS / 2, T_(sp.ruler[1]), { place: pl.id, role: 'ruler', k, name: KDATA[k].ruler, stand: true, standFace: Math.PI / 2, royal: true });
       mkActor('npc', T_(sp.armorer[0]), T_(sp.armorer[1]), { place: pl.id, role: 'armorer', k, name: pick(NAMES.first) + ' the Armorer', stand: true, standFace: Math.PI / 2 });
+      mkActor('npc', pl.x - 6 * TS, pl.y + 7 * TS, { place: pl.id, role: 'captain', k, name: 'Captain ' + pick(NAMES.first), stand: true, standFace: Math.PI / 2 });
       mkActor('npc', pl.x + 5 * TS, pl.y + 12.5 * TS, { place: pl.id, role: 'coach', k, name: pick(NAMES.first) + ' the Coachman', stand: true, standFace: Math.PI / 2, cart: true });
       mkActor('npc', T_(sp.stable[0]), T_(sp.stable[1]), { place: pl.id, role: 'stable', k, name: pick(NAMES.first) + ' the Stablemaster', stand: true, standFace: Math.PI / 2 });
       sp.guards.forEach((g, i) => mkActor(i === 4 ? 'knight' : 'guard', T_(g[0]), T_(g[1]), { place: pl.id, k, stand: i < 4, standFace: Math.PI / 2, leash: 520 }));
@@ -2923,6 +2975,7 @@ function spawnPlace(pl) {
       for (let i = 0; i < randi(3, 5); i++) mk('villager', pl.x + rand(-5, 5) * TS, pl.y + rand(-5, 5) * TS, { wanderR: 210, role: 'citizen', k });
       mk('soldier', pl.x + TS * 2, pl.y + TS * 3, { k, wanderR: 220 });
       if (chance(.6)) mk('bowman', pl.x - TS * 2, pl.y + TS * 3, { k, wanderR: 200 });
+      COMPANIONS.forEach(c => { if (compHome(c) === pl.id && !(P.comps || []).includes(c.id)) mk('npc', pl.x - 3 * TS, pl.y + 2 * TS, { place: pl.id, role: 'companion', comp0: c.id, name: c.name, _look: c.look, stand: true, standFace: Math.PI / 2 }); });
       break;
     }
     case 'outpost': {
@@ -3281,15 +3334,16 @@ function evWolves() {
 
 /* ---------------- Shops ---------------- */
 function goodsFactor(id, k, selling) { if (k == null) return 1; if (KDATA[k].produces === id) return .6; if (KDATA[k].wants === id) return selling ? 1.65 : 1.5; return 1; }
-function buyPrice(it, shop) { return Math.max(1, Math.round(itemValue(it) * seasonPrice(it.id) * goodsFactor(it.id, shop.k) * (shop.k != null ? repMul(shop.k) : 1.15))); }
-function sellPrice(it, shop) { return Math.max(1, Math.round(itemValue(it) * .42 * goodsFactor(it.id, shop.k, true) * (shop.k != null ? clamp(1 + K.rep[shop.k] / 300, .75, 1.3) : 1))); }
+function buyPrice(it, shop) { return Math.max(1, Math.round(itemValue(it) * (1 - .05 * SK('trade')) * seasonPrice(it.id) * goodsFactor(it.id, shop.k) * (shop.k != null ? repMul(shop.k) : 1.15))); }
+function sellPrice(it, shop) { return Math.max(1, Math.round(itemValue(it) * .42 * (1 + .05 * SK('trade')) * goodsFactor(it.id, shop.k, true) * (shop.k != null ? clamp(1 + K.rep[shop.k] / 300, .75, 1.3) : 1))); }
 function makeShop(kind, pl, k) {
   const s = { kind, k, items: [], t: G.time };
   const add = (id, q = 1, n = 1) => s.items.push({ uid: uidCounter++, id, q, n });
   if (kind === 'village') {
     s.name = pl.name + (pl.frost ? ' Frost Market' : ' Market'); add('bread', 1, 12); add('meat', 1, 5); add('bandage', 1, 6); add('potion', 1, randi(1, 3));
     add(KDATA[k].produces, 1, randi(6, 12)); add(pick(['iron', 'wine', 'furs', 'spices', 'silk'].filter(g => g !== KDATA[k].produces)), 1, randi(2, 5));
-    add('fishing_rod', 1, 1); add('map_' + k, 1, 1); if (chance(.4)) add('map_' + pick([0, 1, 2, 3].filter(j => j !== k)), 1, 1);
+    add('fishing_rod', 1, 1); add('timber', 1, randi(6, 12)); if (k === 1 || k === 3) add('pitch', 1, randi(3, 6)); if (k === 3) add('venom_vial', 1, randi(3, 6)); if (pl.frost) add('rime_shard', 1, randi(4, 8));
+    add('map_' + k, 1, 1); if (chance(.4)) add('map_' + pick([0, 1, 2, 3].filter(j => j !== k)), 1, 1);
     for (let i = 0; i < randi(2, 3); i++) { const t = chance(.3) ? 2 : 1; add(pick(LOOT_TIERS[t].filter(id => ['weapon', 'shield', 'armor'].includes(ITEMS[id].type))), rollQual(t - 1)); }
     add('arrow', 1, randi(30, 60)); if (chance(.4)) add('broadhead', 1, randi(15, 30)); if (chance(.5)) add(pick(['short_bow', 'hunting_bow']), rollQual(1));
     if (k === 3) add('venom_arrow', 1, randi(15, 25));
@@ -3309,6 +3363,41 @@ function makeShop(kind, pl, k) {
     add(pick(['fast_horse', 'war_horse'])); add('treasure_map', 1, 2); add('potion', 1, 4); if (chance(.25)) add(pick(LEGENDS));
   }
   return s;
+}
+/* ---------------- Crafting: fletching at any market, improving and enchanting at the royal forges ---------------- */
+const RECIPES = [
+  { out: 'arrow', n: 10, need: [['timber', 1]], gold: 4 }, { out: 'broadhead', n: 10, need: [['timber', 1], ['iron', 1]], gold: 0 }, { out: 'bodkin', n: 10, need: [['timber', 1], ['iron', 1]], gold: 8 },
+  { out: 'fire_arrow', n: 10, need: [['arrow', 10], ['pitch', 1]], gold: 0 }, { out: 'venom_arrow', n: 10, need: [['arrow', 10], ['venom_vial', 1]], gold: 0 }, { out: 'frost_arrow', n: 10, need: [['arrow', 10], ['rime_shard', 1]], gold: 0 },
+];
+const hasAll = (need, gold) => need.every(([id, n]) => countItem(id) >= n) && P.gold >= gold;
+function backToShop() { closeDialog(); if (curShop) { UI.open('shop'); renderShop(); } }
+function openCraft(forge) {
+  const opts = [{ t: '<span class="dn">FLETCH</span>Make arrows', fn: () => openFletch(forge) }];
+  if (forge) { opts.push({ t: '<span class="dn">IMPROVE</span>Improve a weapon, shield or armor', fn: () => openImprove() }); opts.push({ t: '<span class="dn">ENCHANT</span>Bind a dungeon relic into a weapon', fn: () => openEnchant() }); }
+  opts.push({ t: 'Back to trading', fn: backToShop });
+  UI.closeAll(); openDialog({ name: forge ? 'The Royal Forge' : "Fletcher's Bench", role: 'Crafting', portrait: curShopE || 'sign', text: forge ? 'Bring materials and coin, and the smiths will make or mend what you need.' : 'Timber, iron and a steady hand. What will you make?', options: opts });
+}
+function openFletch(forge) {
+  openDialog({ name: "Fletcher's Bench", role: 'Crafting', portrait: curShopE || 'sign', text: 'Each batch makes ten arrows. Timber and pitch are sold in village markets; venom in Eldoria, rime shards in the frost villages of Draven.',
+    options: [...RECIPES.map(r => ({ t: `${r.n} ${ITEMS[r.out].name} <span class="dn">${r.need.map(([id, n]) => `${n} ${ITEMS[id].name} (${countItem(id)})`).join(', ')}${r.gold ? ` + ${r.gold}g` : ''}</span>`, dis: !hasAll(r.need, r.gold), fn: () => { r.need.forEach(([id, n]) => removeItemById(id, n)); P.gold -= r.gold; addItem(r.out, 1, r.n); SND.play('pickup'); openFletch(forge); } })), { t: 'Done', fn: () => openCraft(forge) }] });
+}
+function openImprove() {
+  const list = P.inv.filter(it => ['weapon', 'shield', 'armor'].includes(ITEMS[it.id].type) && it.q < 3 && !ITEMS[it.id].legend).sort((a, b) => isEquipped(b.uid) - isEquipped(a.uid)).slice(0, 8);
+  const cost = it => ({ gold: Math.round(itemValue(it) * .5 + 40), iron: it.q + 1 });
+  openDialog({ name: 'The Royal Forge', role: 'Improve', portrait: curShopE || 'sign', text: list.length ? 'The smiths can raise an item one grade: Worn, then Standard, then Fine, then Masterwork.' : 'You carry nothing the smiths could improve.',
+    options: [...list.map(it => { const c = cost(it); return { t: `${itemName(it)} → ${QUAL[it.q + 1].n || 'Standard'} <span class="dn">${c.gold}g + ${c.iron} Iron Ingots (${countItem('iron')})</span>`, dis: !hasAll([['iron', c.iron]], c.gold), fn: () => { P.gold -= c.gold; removeItemById('iron', c.iron); it.q++; recalc(); SND.play('block'); toast(`The smiths hand back your <b style="color:${itemColor(it)}">${itemName(it)}</b>.`, 'gold'); openImprove(); } }; }), { t: 'Done', fn: () => openCraft(true) }] });
+}
+function openEnchant(mat) {
+  const MATS = { ember_core: 'fire', venom_gland: 'venom', frost_heart: 'frost' };
+  if (!mat) {
+    const have = Object.keys(MATS).filter(id => countItem(id));
+    openDialog({ name: 'The Royal Forge', role: 'Enchant', portrait: curShopE || 'sign', text: have.length ? 'Which relic shall the master smith bind? It costs 500 gold, and the relic is spent.' : 'You need a relic from the deep places: an Ember Core from a mine, a Venom Gland from a spider cave, or a Frost Heart from the ice cave.',
+      options: [...have.map(id => ({ t: `${ITEMS[id].name} <span class="dn">${ENCH_N[MATS[id]]}</span>`, fn: () => openEnchant(id) })), { t: 'Done', fn: () => openCraft(true) }] });
+    return;
+  }
+  const list = P.inv.filter(it => ITEMS[it.id].type === 'weapon' && ITEMS[it.id].wk !== 'bow' && !it.ench && !ITEMS[it.id].ench).sort((a, b) => isEquipped(b.uid) - isEquipped(a.uid)).slice(0, 8);
+  openDialog({ name: 'The Royal Forge', role: `Bind the ${ITEMS[mat].name}`, portrait: curShopE || 'sign', text: list.length ? 'Choose the blade.' : 'You have no melee weapon that could hold the enchantment.',
+    options: [...list.map(it => ({ t: `${itemName(it)} <span class="dn">500g</span>`, dis: P.gold < 500, fn: () => { P.gold -= 500; removeItemById(mat, 1); it.ench = MATS[mat]; recalc(); SND.play('shard'); toast(`Your blade is now <b style="color:${itemColor(it)}">${itemName(it)}</b>.`, 'gold'); openCraft(true); } })), { t: 'Back', fn: () => openEnchant() }] });
 }
 function getShop(e) {
   if (e.shop && G.time - e.shop.t < 300) return e.shop;
@@ -3340,7 +3429,7 @@ function interactLabel(b) {
       case 'elder': return `Talk to ${e.name}`; case 'merchant': return `Trade with ${e.name}`; case 'ruler': return `Seek an audience with ${e.name}`;
       case 'armorer': return 'Browse the royal armory'; case 'stable': return 'Visit the royal stables'; case 'caravan': return 'Trade with the caravan'; case 'trader': return `Trade with ${e.name}`;
       case 'traveler': return `Talk to ${e.name}`;
-      case 'coach': return 'Hire a carriage'; case 'hermit': return `Speak with ${e.name}`;
+      case 'coach': return 'Hire a carriage'; case 'hermit': return `Speak with ${e.name}`; case 'captain': return 'Hire soldiers'; case 'companion': return `Talk to ${e.name}`;
     }
     return `Talk to ${e.name.toLowerCase().includes('soldier') || e.name === 'Guard' || e.name === 'Knight' ? KDATA[e.k] ? KDATA[e.k].name + ' ' + e.name.toLowerCase() : e.name : e.name}`;
   }
@@ -3348,7 +3437,7 @@ function interactLabel(b) {
   switch (it.type) {
     case 'chest': return pl.chestOpened ? 'Empty stash' : pl.type === 'camp' ? (pl.cleared ? 'Loot the bandit stash' : 'Bandit stash (guarded)') : 'Search the chest';
     case 'sign': return 'Signpost, bounty board and carriages'; case 'well': return 'Drink from the well'; case 'fish': return G.fishing ? 'Reel in' : 'Fish here';
-    case 'dungeon': return `Enter ${pl.name}${pl.dcleared ? ' (cleared)' : ''}`; case 'dexit': return 'Climb back outside';
+    case 'dungeon': return `Enter ${pl.name}${pl.dcleared ? ' (cleared)' : ''}`; case 'home': return 'Enter your house'; case 'fort': return pl.playerFort ? `Your fort: ${pl.name}` : `Look over the ruined fort`; case 'dexit': return 'Climb back outside';
     case 'dchest': return G.under && (G.under.dchests || []).includes(it.idx) ? 'Empty chest' : it.boss ? 'Open the guardian\'s hoard' : 'Open the chest';
     case 'shrine': return pl.blessed ? 'The shrine is silent' : 'Pray at the shrine';
   }
@@ -3363,6 +3452,8 @@ function doInteract() {
   else if (it.type === 'sign') readSign(pl);
   else if (it.type === 'fish') startFishing(it);
   else if (it.type === 'dungeon') enterDungeon(pl);
+  else if (it.type === 'home') homeDialog(pl);
+  else if (it.type === 'fort') fortDialog(pl);
   else if (it.type === 'dexit') leaveDungeon();
   else if (it.type === 'dchest') openDChest(it);
   else if (it.type === 'well') { if ((pl.wellT || -999) > G.time - 60) { toast('You have drunk your fill for now.'); return; } pl.wellT = G.time; P.st = P.maxSt; P.hp = Math.min(P.maxHp, P.hp + Math.round(12 * DIFF().heal)); SND.play('eat'); toast(`The cool water refreshes you. (+${Math.round(12 * DIFF().heal)} health, stamina restored)`, 'good'); }
@@ -3565,6 +3656,105 @@ function fastTravel(from, to, cost) {
     if (Math.random() < .15) setTimeout(() => { if (G.state !== 'play') return; const a = rand(0, TAU); for (let i = 0; i < 3; i++) { const g2 = findFree(P.x + Math.cos(a) * 330 + rand(-50, 50), P.y + Math.sin(a) * 330 + rand(-50, 50)); const b = mkActor('bandit', g2.x, g2.y, { tier: Math.min(3, 1 + Math.floor(P.lvl / 3)), transient: true, roam: true }); b.target = P; } toast('Bandits followed the coach! Ambush!', 'bad'); SND.play('horn'); }, 1500);
   });
 }
+/* ---------------- Property ---------------- */
+const HOUSE_COST = 1200, FORT_COST = 2500;
+function houseObj(pl) { return W.objs.filter(o => o.k === 'house' && dist(o.x + o.w / 2, o.y + o.h / 2, pl.x, pl.y) < 12 * TS).sort((a, b) => dist(a.x, a.y, pl.x, pl.y) - dist(b.x, b.y, pl.x, pl.y))[0]; }
+function fortTower(pl) { return W.objs.find(o => o.k === 'rtower' && dist(o.x + o.w / 2, o.y + o.h / 2, pl.x, pl.y) < 7 * TS); }
+function setupWorldExtras() { // player homes and forts live in the save, so re-apply them to the freshly generated world
+  if (G.under) return;
+  W.objs.forEach(o => { o.home = false; if (o.k === 'rtower') o.restored = false; });
+  W.interacts = W.interacts.filter(i => i.type !== 'home' && i.type !== 'fort');
+  (P.houses || []).forEach(id => { const pl = W.places[id], o = pl && houseObj(pl); if (!o) return; o.home = true; W.interacts.push({ type: 'home', x: o.x + o.w / 2, y: o.y + o.h + 10, place: id }); });
+  W.places.forEach(pl => { if (pl.type !== 'ruin' || !pl.fort) return; pl.playerFort = (P.forts || []).includes(pl.id); const o = fortTower(pl); if (o && pl.playerFort) { o.restored = true; o.owner = P.allegiance ?? pl.owner; } W.interacts.push({ type: 'fort', x: pl.x, y: pl.y + 2 * TS, place: pl.id }); });
+}
+function buyHouse(pl) {
+  if (P.gold < HOUSE_COST) return; P.gold -= HOUSE_COST; P.houses.push(pl.id); setupWorldExtras(); closeDialog(); SND.play('level');
+  toast(`You own a house in <b>${pl.name}</b>. Rest there, keep your valuables in its stash, and wake there if you fall.`, 'gold');
+}
+function homeDialog(pl) {
+  const door = W.interacts.find(i => i.type === 'home' && i.place === pl.id);
+  openDialog({ name: 'Your House', role: pl.name, portrait: 'sign', text: 'A warm hearth, a straw bed and a stout chest. It is good to be home.',
+    options: [
+      { t: '<span class="dn">REST</span>Sleep until morning', fn: () => { const add = ((.3 - tod()) + 1) % 1 * DAYLEN; G.time += add; P.hp = P.maxHp; P.st = P.maxSt; if (door) P.respawn = { x: door.x, y: door.y + 12 }; closeDialog(); SND.play('eat'); toast('You sleep soundly and wake at dawn, fully rested.', 'good'); } },
+      { t: '<span class="dn">STASH</span>Open your stash', fn: () => { closeDialog(); curShop = { stash: true, name: 'Your house in ' + pl.name, k: null, items: P.stash || (P.stash = []) }; curShopE = null; UI.open('shop'); renderShop(); } },
+      { t: 'Leave', fn: closeDialog }] });
+}
+function renderStash(s) {
+  const hs = document.querySelectorAll('#shopScreen .shopCol h3'); hs[0].textContent = 'IN YOUR STASH'; hs[1].textContent = 'IN YOUR PACK';
+  $('shopTitle').textContent = s.name.toUpperCase(); $('shopSub').textContent = 'Anything you leave here is safe, even if you fall in battle.';
+  const row = (it, btn) => `<div class="srow"><img src="${itemIcon(it.id)}" alt=""><div><div class="n" style="color:${itemColor(it)}">${itemName(it)}${ITEMS[it.id].stack && it.n > 1 ? ` <span style="color:var(--muted)">×${it.n}</span>` : ''}</div><div class="s">${statSummary(it)}</div></div><div style="text-align:right">${btn}</div></div>`;
+  $('shopBuy').innerHTML = s.items.length ? s.items.map((it, i) => row(it, `<button class="btn sm gold" data-take="${i}">Take</button>`)).join('') : '<div class="empty">Your stash is empty.</div>';
+  const mine = P.inv.filter(it => ITEMS[it.id].type !== 'quest' && !isEquipped(it.uid));
+  $('shopSell').innerHTML = mine.length ? mine.map(it => row(it, `<button class="btn sm" data-store="${it.uid}">Store</button>`)).join('') : '<div class="empty">Nothing to store. (Equipped items stay with you.)</div>';
+  $('shopGold').textContent = fmt(P.gold); $('shopNote').innerHTML = '';
+  document.querySelectorAll('[data-take]').forEach(b => b.onclick = () => { const it = s.items.splice(+b.dataset.take, 1)[0]; if (!it) return; if (ITEMS[it.id].stack) addItem(it.id, it.q, it.n, true); else { it.uid = uidCounter++; P.inv.push(it); } SND.play('pickup'); renderStash(s); });
+  document.querySelectorAll('[data-store]').forEach(b => b.onclick = () => { const it = getItem(+b.dataset.store); if (!it) return; P.inv = P.inv.filter(x => x !== it); const ex = ITEMS[it.id].stack && s.items.find(x => x.id === it.id); if (ex) ex.n += it.n; else s.items.push(it); recalc(); SND.play('pickup'); renderStash(s); });
+}
+function fortDialog(pl) {
+  if (!pl.playerFort) {
+    const clear = !placeSpecs(pl).length || placeSpecs(pl).every((sp, i) => pl.dead[i]), rep = K.rep[pl.owner];
+    const why = !clear ? 'Deserters still hold the ruin. Clear them out first.' : rep < 40 ? `${KDATA[pl.owner].name} will not let you fortify their land until your reputation there reaches 40 (it is ${Math.round(rep)}).` : `Masons could rebuild the tower and walls for ${FORT_COST} gold. A fort of your own would pay a small income and let you post guards.`;
+    openDialog({ name: pl.name, role: 'A ruined fort', portrait: 'sign', text: why, options: [{ t: `Restore the fort <span class="dn">${FORT_COST}g</span>`, dis: !clear || rep < 40 || P.gold < FORT_COST, fn: () => { P.gold -= FORT_COST; P.forts.push(pl.id); setupWorldExtras(); closeDialog(); SND.play('level'); toast(`<b>${pl.name}</b> is yours. It yields 30 gold a day; hire bowmen here to guard it.`, 'gold'); } }, { t: 'Leave', fn: closeDialog }] });
+    return;
+  }
+  const n = P.fortGuards[pl.id] || 0;
+  openDialog({ name: pl.name, role: 'Your fort', portrait: 'sign', text: `Your banner flies over the walls. ${n} bowm${n === 1 ? 'an' : 'en'} keep watch. The fort pays 30 gold a day; each guard costs 5.`,
+    options: [{ t: `Hire a bowman for the walls <span class="dn">90g · 5g a day</span>`, dis: n >= 4 || P.gold < 90, fn: () => { P.gold -= 90; P.fortGuards[pl.id] = n + 1; if (pl.spawned) spawnFortGuards(pl, n); SND.play('coin'); fortDialog(pl); } },
+      { t: 'Dismiss a guard', dis: !n, fn: () => { P.fortGuards[pl.id] = n - 1; const g2 = ents.find(e => e.fortGuard === pl.id && !e.dead); if (g2) removeEnt(g2); fortDialog(pl); } }, { t: 'Leave', fn: closeDialog }] });
+}
+function spawnFortGuards(pl, from = 0) { for (let i = from; i < (P.fortGuards[pl.id] || 0); i++) { const a = i / 4 * TAU, f = findFree(pl.x + Math.cos(a) * 3 * TS, pl.y + Math.sin(a) * 3 * TS); mkActor('bowman', f.x, f.y, { place: pl.id, ally: true, fortGuard: pl.id, k: P.allegiance ?? pl.owner, wanderR: 60, home: { x: f.x, y: f.y }, aggro: 380, name: 'Your bowman' }); } }
+/* ---------------- Companions and hired soldiers ---------------- */
+const HIRE = { soldier: { n: 'Spearman', cost: 60, up: 6 }, bowman: { n: 'Bowman', cost: 75, up: 7 }, knight: { n: 'Knight', cost: 240, up: 18, rep: 25 } };
+const COMPANIONS = [
+  { id: 'brannoc', name: 'Brannoc the Hound', k: 2, kind: 'soldier', hp: 170, dmg: 16, fee: 300, look: { body: '#5a4a6a', head: 'hair', hair: '#8a5a2a', skin: '#e0b48a', cape: '#3a2a4a', pauld: 1, weapon: { wk: 'axe', len: 28, col: '#9ba1a8' } },
+    intro: "Brannoc. Axe for hire, if the pay's honest and the fight's worth having. You look like trouble follows you. Good.", lines: ['Stop admiring the view. Someone might put an arrow in it.', 'In Draven we call this a warm day.', 'Another road, another fight. I like you, knight.', 'My axe is getting bored.'] },
+  { id: 'mira', name: 'Mira Swiftbow', k: 1, kind: 'bowman', hp: 110, dmg: 15, fee: 260, cd: 1.5, look: { body: '#3a6a9a', head: 'hood', hood: '#2a5a8a', skin: '#e8c8a8', cape: '#f5d76e', weapon: { wk: 'bow', len: 22, col: '#7a4a26' } },
+    intro: "Mira. Best bow in Solmont, and the quickest. Pay me and I'll keep your back free of knives.", lines: ['I count six birds, and one very slow knight.', 'Wind from the east. Good shooting weather.', 'Try not to stand between me and them.'] },
+  { id: 'tobbe', name: 'Old Tobbe', k: 0, kind: 'soldier', hp: 120, dmg: 7, fee: 150, healer: true, look: { body: '#7a6a50', head: 'hair', hair: '#d8d8d0', beard: 1, skin: '#e0c0a0', weapon: { wk: 'spear', len: 44, col: '#8a6a4a' } },
+    intro: 'Tobbe. I patched soldiers in three wars and one wedding. Take me along and I will keep you breathing. Slowly.', lines: ['Hold still, I am not done with that cut.', 'In my day we walked uphill both ways.', 'Eat something green, knight.'] },
+  { id: 'sela', name: 'Sela of the Fens', k: 3, kind: 'bowman', hp: 105, dmg: 13, fee: 280, venom: true, look: { body: '#2e6e4b', head: 'hood', hood: '#1e4e33', skin: '#d8b890', cape: '#15502c', weapon: { wk: 'bow', len: 20, col: '#4a5a2a' } },
+    intro: 'Sela. My arrows are dipped in the fens, and the fens are not kind. You want company on the road? It costs.', lines: ['Smell that? Rain, and something rotten.', 'Every arrow I loose finishes the job, eventually.', 'The marsh taught me patience. You could learn some.'] },
+];
+function compHome(c) { const vs = W.places.filter(p => p.type === 'village' && p.owner === c.k).sort((a, b) => a.id - b.id); return vs.length ? vs[(W.seed + c.id.length * 7) % vs.length].id : -1; }
+const partyNow = () => (G.under && G.over ? ents.concat(G.over.ents) : ents).filter(e => e.party && !e.dead);
+const hiredCap = () => 1 + SK('lead');
+function spawnPartyMember(m, x = P.x, y = P.y) {
+  const c = m.comp && COMPANIONS.find(cc => cc.id === m.comp), f = findFree(x + rand(-50, 50), y + rand(20, 60));
+  const o = { k: c ? c.k : (m.k ?? P.allegiance ?? 0), ally: true, follow: true, party: true, persistent: true, followDist: 60 + rand(0, 40), fox: rand(-40, 40), foy: rand(-40, 40), aggro: 360, leash: 99999, named: true };
+  let e;
+  if (c) { e = mkActor(c.kind, f.x, f.y, Object.assign(o, { comp: c.id, name: c.name, _look: c.look, healer: c.healer, venom: c.venom })); e.hp = e.maxHp = c.hp; e.dmg = c.dmg; if (c.cd) e.cd = c.cd; }
+  else e = mkActor(m.kind, f.x, f.y, Object.assign(o, { hired: true, name: m.name, upkeep: HIRE[m.kind].up }));
+  if (m.hp) e.hp = Math.min(e.maxHp, m.hp);
+  return e;
+}
+function captainDialog(e) {
+  const k = e.k, rep = K.rep[k], hired = partyNow().filter(x => x.hired).length, cap = hiredCap(), mul = 1 - (SK('lead') >= 4 ? .4 : SK('lead') >= 2 ? .2 : 0);
+  openDialog({ name: e.name, role: `Captain of ${KDATA[k].castle}`, portrait: e, text: rep < 0 ? 'I do not lend soldiers to strangers of ill repute. Earn some standing with the crown first.' : `Soldiers for hire, if your purse is full. You lead ${hired} of ${cap}. (Leadership lets you command more.) Each draws daily pay.`,
+    options: [...Object.entries(HIRE).map(([kind, h]) => { const cost = Math.round(h.cost * mul); return { t: `Hire a ${h.n} <span class="dn">${cost}g · ${h.up}g a day${h.rep ? ` · rep ${h.rep}` : ''}</span>`, dis: rep < (h.rep || 0) || hired >= cap || P.gold < cost, fn: () => { P.gold -= cost; const m = spawnPartyMember({ kind, k, name: `${pick(NAMES.first)} the ${h.n}` }, e.x, e.y); m.say = { text: 'At your command!', t: 2.5 }; SND.play('coin'); captainDialog(e); } }; }), { t: 'Farewell', fn: closeDialog }] });
+}
+function compDialog(e) {
+  const c = COMPANIONS.find(cc => cc.id === e.comp0);
+  openDialog({ name: c.name, role: `A sellsword of ${KDATA[c.k].name}`, portrait: e, text: c.intro + (K.rep[c.k] < -10 ? '<br><i>Then again, your name is mud in these parts. No.</i>' : ''),
+    options: [{ t: `Join me <span class="dn">${c.fee}g, no daily pay</span>`, dis: P.gold < c.fee || K.rep[c.k] < -10, fn: () => { P.gold -= c.fee; P.comps.push(c.id); removeEnt(e); const m = spawnPartyMember({ comp: c.id }, e.x, e.y); m.say = { text: 'Lead on.', t: 2.5 }; closeDialog(); SND.play('quest'); toast(`<b>${c.name}</b> joins you. Companions never die: if they fall, they get back up after the fight.`, 'gold'); } }, { t: 'Another time', fn: closeDialog }] });
+}
+function partyDialog(e) {
+  const c = e.comp && COMPANIONS.find(cc => cc.id === e.comp);
+  openDialog({ name: e.name, role: c ? 'Companion' : `Hired ${HIRE[e.kind] ? HIRE[e.kind].n : 'soldier'} · ${e.upkeep}g a day`, portrait: e, text: c ? pick(c.lines) : 'Orders, sir?',
+    options: [{ t: e.follow ? 'Hold this position' : 'Follow me', fn: () => { setFollow(e, !e.follow); closeDialog(); } },
+      { t: c ? 'Part ways (they go home)' : 'Dismiss from service', fn: () => { if (c) P.comps = P.comps.filter(id => id !== c.id); removeEnt(e); closeDialog(); toast(`${e.name} leaves your company.`); } }, { t: 'Carry on', fn: closeDialog }] });
+}
+function setFollow(e, f) { e.follow = f; if (!f) { e.home = { x: e.x, y: e.y }; e.wanderR = 30; e.leash = 380; } else e.leash = 99999; }
+function toggleParty() {
+  const pt = ents.filter(e => e.party && !e.dead); if (!pt.length) { toast('You have no companions. Hire soldiers from a castle captain, or find sellswords in the villages.'); return; }
+  const hold = pt.some(e => e.follow); pt.forEach(e => setFollow(e, !hold)); toast(hold ? 'Your companions hold their ground.' : 'Your companions fall in behind you.');
+}
+function dailyTick() {
+  const hired = partyNow().filter(e => e.hired), guards = Object.values(P.fortGuards || {}).reduce((a, b) => a + b, 0);
+  const pay = hired.reduce((a, e) => a + (e.upkeep || 0), 0) + guards * 5, income = (P.forts || []).length * 30;
+  P.gold += income;
+  if (pay) { if (P.gold >= pay) { P.gold -= pay; toast(`Daily pay for your soldiers: −${pay} gold${income ? ` · fort income +${income}` : ''}`, ''); } else { const quit = hired.sort((a, b) => b.upkeep - a.upkeep)[0]; if (quit) { removeEnt(quit); if (G.over) G.over.ents = G.over.ents.filter(x => x !== quit); toast(`${quit.name} leaves your service, unpaid.`, 'bad'); } } }
+  else if (income) toast(`Your fort pays ${income} gold.`, 'gold');
+}
 /* ---------------- Fishing ---------------- */
 function startFishing(it) {
   if (!countItem('fishing_rod')) { toast('You need a fishing rod. Village markets sell them.'); return; }
@@ -3595,6 +3785,7 @@ function hermitDialog(e) {
   const opts = [];
   if (!got.hp) opts.push({ t: 'Brew me one of your tonics <span class="dn">+10 max health, for good · 180g</span>', dis: P.gold < 180, fn: buy(180, () => { got.hp = 1; P.bonusHp += 10; P.hp += 10; toast('<b>Hermit\'s tonic:</b> +10 maximum health.', 'gold'); }) });
   if (!got.st) opts.push({ t: 'Teach me the old breathing ways <span class="dn">+15 max stamina, for good · 160g</span>', dis: P.gold < 160, fn: buy(160, () => { got.st = 1; P.bonusSt += 15; toast('<b>Breathing ways:</b> +15 maximum stamina.', 'gold'); }) });
+  if (!got.sp) opts.push({ t: 'Teach me what the old soldiers knew <span class="dn">+1 skill point · 400g</span>', dis: P.gold < 400, fn: buy(400, () => { got.sp = 1; P.sp = (P.sp || 0) + 1; toast('<b>The hermit\'s lesson:</b> +1 skill point (press P).', 'gold'); }) });
   const hid = W.places.filter(p => p.type === 'hidden' && !p.disc && !p.rumor);
   if (hid.length) opts.push({ t: 'Tell me of a hidden place <span class="dn">80g</span>', dis: P.gold < 80, fn: buy(80, () => { const h = hid.sort((a, b) => dist(P.x, P.y, a.x, a.y) - dist(P.x, P.y, b.x, b.y))[0]; h.rumor = true; revealArea(h.tx, h.ty, 6); toast(`The hermit speaks of <b>${h.name}</b>, ${dirTo(P, h)} of here. Marked on your map.`, 'gold'); }) });
   opts.push({ t: 'Farewell', fn: closeDialog });
@@ -3653,6 +3844,7 @@ const BARKS = {
   citizen: ['Fine weather for the harvest.', 'Have you seen the prices at market?', 'Bandits took my cousin\'s cart last week.', 'The king\'s tax collectors came again…', 'Mind the wolves after dark.', 'A knight! Are you here to help?'],
 };
 function talkTo(e) {
+  if (e.party) return partyDialog(e);
   const k = e.k != null ? e.k : ownerAtPx(e.x, e.y);
   switch (e.role) {
     case 'elder': return elderDialog(e, W.places[e.place]);
@@ -3665,6 +3857,8 @@ function talkTo(e) {
     case 'story': return storyTalk(e);
     case 'coach': return openTravel(W.places[e.place], e.name, e);
     case 'hermit': return hermitDialog(e);
+    case 'captain': return captainDialog(e);
+    case 'companion': return compDialog(e);
     case 'citizen': e.say = { text: pick(BARKS.citizen), t: 3 }; return;
   }
   if (e.faction && e.faction[0] === 'k') {
@@ -3690,6 +3884,7 @@ function elderDialog(e, pl) {
     c.rumor = true; revealArea(c.tx, c.ty, 4);
     openDialog({ name: e.name, role: 'Village Elder', portrait: e, text: c.type === 'camp' ? `Hunters speak of a bandit camp ${dirTo(pl, c)} of here, perhaps ${leagues(dist(pl.x, pl.y, c.x, c.y))} leagues out. I've marked it on your map.` : `My grandmother told of a place called ${c.name}, ${dirTo(pl, c)} of here. I've marked where she said it lies.`, options: [{ t: 'Thank you', fn: closeDialog }] });
   } });
+  if (!(P.houses || []).includes(pl.id)) opts.push({ t: `<span class="dn">HOME</span>Buy a house in ${pl.name} (${HOUSE_COST} gold${K.rep[pl.owner] < 20 ? ', needs reputation 20' : ''})`, dis: P.gold < HOUSE_COST || K.rep[pl.owner] < 20, fn: () => buyHouse(pl) });
   opts.push({ t: 'Farewell', fn: closeDialog });
   openDialog({ name: e.name, role: `Village Elder of ${pl.name}`, portrait: e, text: greet, options: opts });
 }
@@ -4249,10 +4444,10 @@ function drawStruct(g, o, t) {
       g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, cx + 8, cy + 10, r, r * .7);
       g.fillStyle = shade(st, -.3); g.fillRect(cx - r, cy - 6, r * 2, 18); ell(g, cx, cy + 12, r, r * .45);
       g.fillStyle = st; circ(g, cx, cy - 6, r);
-      if (o.k === 'rtower') { g.fillStyle = '#5a564e'; circ(g, cx, cy - 6, r * .6); g.fillStyle = '#5a7a3a'; circ(g, cx - r * .5, cy - r * .5, 5); break; }
+      if (o.k === 'rtower' && !o.restored) { g.fillStyle = '#5a564e'; circ(g, cx, cy - 6, r * .6); g.fillStyle = '#5a7a3a'; circ(g, cx - r * .5, cy - r * .5, 5); break; }
       g.fillStyle = shade(st, .2); for (let i = 0; i < 10; i++) { const a = i / 10 * TAU; circ(g, cx + Math.cos(a) * r * .88, cy - 6 + Math.sin(a) * r * .88, 3.2); }
       g.fillStyle = kd.roof; g.beginPath(); g.moveTo(cx - r * .8, cy - 4); g.lineTo(cx, cy - r * 2.6); g.lineTo(cx + r * .8, cy - 4); g.fill(); g.fillStyle = shade(kd.roof, .25); g.beginPath(); g.moveTo(cx - r * .8, cy - 4); g.lineTo(cx, cy - r * 2.6); g.lineTo(cx - r * .15, cy - 4); g.fill();
-      if (o.k === 'tower') { g.fillStyle = '#3a2a1a'; g.fillRect(cx - 1, cy - r * 2.6 - 26, 2, 28); drawWavingBanner(g, k, cx + 1, cy - r * 2.6 - 24, 18, 26, t + x * .01); }
+      if (o.k === 'tower' || o.restored) { g.fillStyle = '#3a2a1a'; g.fillRect(cx - 1, cy - r * 2.6 - 26, 2, 28); drawWavingBanner(g, k, cx + 1, cy - r * 2.6 - 24, 18, 26, t + x * .01); }
       break;
     }
     case 'bannerpole': g.fillStyle = '#3a2a1a'; g.fillRect(x, y - 60, 3, 62); g.fillRect(x - 10, y - 58, 23, 3); drawWavingBanner(g, k, x - 9, y - 56, 21, 32, t + x * .02); break;
@@ -4408,7 +4603,7 @@ function lookFor(e) {
     const S = P.S; const al = ARMOR_LOOK[S.aid] || { body: '#8a7a5a', head: 'hair' };
     const kc = P.allegiance != null ? KDATA[P.allegiance].color : null;
     return { body: al.body, head: al.head, mail: al.mail, pauld: al.pauld, shiny: al.shiny, skin: '#e0b48a', hair: '#5a3a22', tabard: kc, cape: S.aid === 'plate' || S.aid === 'scale' ? (kc || '#6a1e1a') : kc, plume: kc || '#c0302a',
-      weapon: S.wid ? { wk: ITEMS[S.wid].wk, len: ITEMS[S.wid].len, col: ITEMS[S.wid].col, glow: ITEMS[S.wid].glow, wooden: S.wid === 'wooden_sword' } : null,
+      weapon: S.wid ? { wk: ITEMS[S.wid].wk, len: ITEMS[S.wid].len, col: ITEMS[S.wid].col, glow: S.glow, wooden: S.wid === 'wooden_sword' } : null,
       shield: S.sid && !S.bow ? { b: ITEMS[S.sid], col: S.sid === 'knight_shield' && P.allegiance != null ? KDATA[P.allegiance].color : null } : null };
   }
   if (e._look) return e._look;
@@ -4692,13 +4887,13 @@ function drawMinimap() {
    ===================================================================== */
 const UI = {
   stack: [],
-  ids: { mode: 'modeScreen', cont: 'contScreen', pause: 'pauseScreen', inv: 'invScreen', map: 'mapScreen', dip: 'dipScreen', quests: 'questScreen', settings: 'settingsScreen', help: 'helpScreen', shop: 'shopScreen' },
+  ids: { skills: 'skillScreen', mode: 'modeScreen', cont: 'contScreen', pause: 'pauseScreen', inv: 'invScreen', map: 'mapScreen', dip: 'dipScreen', quests: 'questScreen', settings: 'settingsScreen', help: 'helpScreen', shop: 'shopScreen' },
   open(n) {
     if (dialogOpen) closeDialog();
     if (this.isOpen(n)) return;
     if (n !== 'settings' && n !== 'help') this.closeAll();
     this.stack.push(n); $(this.ids[n]).classList.add('show'); SND.play('open');
-    if (n === 'inv') renderInventory(); else if (n === 'map') openMap(); else if (n === 'dip') renderDiplomacy(); else if (n === 'quests') renderQuests(); else if (n === 'settings') renderSettings(); else if (n === 'pause') $('quitConfirm').classList.add('hidden');
+    if (n === 'inv') renderInventory(); else if (n === 'skills') renderSkills(); else if (n === 'map') openMap(); else if (n === 'dip') renderDiplomacy(); else if (n === 'quests') renderQuests(); else if (n === 'settings') renderSettings(); else if (n === 'pause') $('quitConfirm').classList.add('hidden');
     tipHide();
   },
   close() { const n = this.stack.pop(); if (n) { $(this.ids[n]).classList.remove('show'); SND.play('close'); } tipHide(); },
@@ -5023,6 +5218,8 @@ let curShop = null, curShopE = null;
 function openShop(shop, e) { curShop = shop; curShopE = e; UI.open('shop'); renderShop(); }
 function renderShop() {
   const s = curShop; if (!s) return;
+  if (s.stash) return renderStash(s);
+  const hs = document.querySelectorAll('#shopScreen .shopCol h3'); hs[0].textContent = 'FOR SALE'; hs[1].textContent = 'YOUR GOODS';
   $('shopTitle').textContent = s.name.toUpperCase();
   const k = s.k; $('shopSub').innerHTML = k != null ? `${KDATA[k].full} · Your standing: <b style="color:${statusOf(K.rep[k]).c}">${repTitle(k)}</b> · Prices ×${repMul(k).toFixed(2)} · Produces <b>${ITEMS[KDATA[k].produces].name}</b>, wants <b>${ITEMS[KDATA[k].wants].name}</b>` : 'A wandering merchant — no kingdom, no favors, rare goods.';
   const row = (it, price, btn, extra = '') => `<div class="srow"><img src="${itemIcon(it.id)}" alt=""><div><div class="n" style="color:${itemColor(it)}">${itemName(it)}${ITEMS[it.id].stack && it.n > 1 ? ` <span style="color:var(--muted)">×${it.n}</span>` : ''}</div><div class="s">${statSummary(Object.assign({}, it, { n: 1 }))}${extra}</div></div><div style="text-align:right"><div class="price"><span class="coin"></span>${price}</div>${btn}</div></div>`;
@@ -5037,6 +5234,7 @@ function renderShop() {
   $('shopSell').innerHTML = mine.length ? mine.map(it => { const pr = sellPrice(it, s); return row(it, pr, `<button class="btn sm" data-sell="${it.uid}">Sell</button>${ITEMS[it.id].stack && it.n > 1 ? ` <button class="btn sm" data-sellall="${it.uid}">All</button>` : ''}`); }).join('') : '<div class="empty">Nothing to sell. (Equipped items cannot be sold.)</div>';
   $('shopGold').textContent = fmt(P.gold);
   $('shopNote').innerHTML = s.frost ? '❄ Rimewood bows and rime-iron frost arrows are made here in the snowfields. Elsewhere they are rare.' : 'Tip: buy trade goods where they are produced and sell where they are wanted.';
+  if (s.kind === 'armorer' || s.kind === 'village') { $('shopNote').innerHTML += ` <button class="btn sm" id="btnCraft">⚒ ${s.kind === 'armorer' ? 'The forge' : 'Fletch arrows'}</button>`; $('btnCraft').onclick = () => openCraft(s.kind === 'armorer'); }
   document.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => {
     const it = s.items[+b.dataset.buy]; if (!it) return; const qty = bundle(it), pr = buyPrice(it, s) * qty; if (P.gold < pr) return;
     P.gold -= pr; SND.play('coin'); addItem(it.id, it.q, qty);
@@ -5077,6 +5275,7 @@ function drawEntity(g, e, t) {
   drawEntityBody(g, e, t);
 }
 function drawEntityBody(g, e, t) {
+  if (e.downed > 0) { drawCorpse(g, Object.assign({}, e, { deadT: 0 })); return; }
   if (e.kind === 'horse') { drawHorse(g, e.x, e.y, e.face, ITEMS[e.hid], e.walk, true, P.allegiance); return; }
   if (e.wind > 0 && !e.ranged && playerHostileTo(e) && dist(e.x, e.y, P.x, P.y) < 300) {
     const p = 1 - e.wind / e.windT; g.fillStyle = `rgba(255,60,30,${.1 + p * .22})`; g.beginPath(); g.moveTo(e.x, e.y); g.arc(e.x, e.y, e.range + 8, e.face - .9, e.face + .9); g.closePath(); g.fill();
@@ -5180,7 +5379,7 @@ function renderWorld(t) {
       const sway = q > .5 ? Math.sin(t * 1.2 + tr.x * .05) * 1.2 : 0;
       g.drawImage(spr, tr.x - 36 * s + sway, tr.y - 82 * s, 72 * s, 90 * s);
       g.globalAlpha = 1;
-    } else if (it.o) drawStruct(g, it.o, t);
+    } else if (it.o) { drawStruct(g, it.o, t); if (it.o.home) { const o = it.o; g.fillStyle = '#3a2a1a'; g.fillRect(o.x + o.w - 10, o.y - 30, 2, 26); g.fillStyle = '#e7c35a'; g.beginPath(); g.moveTo(o.x + o.w - 8, o.y - 30); g.lineTo(o.x + o.w + 8, o.y - 25); g.lineTo(o.x + o.w - 8, o.y - 20); g.fill(); } }
     else drawEntity(g, it.e, t);
   }
   signQueue.forEach(o => drawSignPlanks(g, o)); signQueue.length = 0;
@@ -5282,6 +5481,7 @@ function updateHUD(force) {
   const ammoId = S.bow ? curAmmo() : null, ammoN = ammoId ? countItem(ammoId) : 0;
   setIf('sw', S.wid + '|' + S.wq + '|' + Math.round(S.dmg) + '|' + ammoId + '|' + ammoN, () => { const it = getItem(P.eq.weapon); const sl = $('slotW'); sl.querySelector('img').src = it ? itemIcon(it.id) : itemIcon('wooden_sword'); sl.querySelector('.sn').innerHTML = it ? `<span style="color:${itemColor(it)}">${itemName(it)}</span>` : 'Bare Fists'; sl.querySelector('.ss').textContent = S.bow ? (ammoId ? `${ITEMS[ammoId].name} ×${ammoN} · [R] switch` : 'No arrows!') : `${Math.round(S.dmg)} dmg · ${S.spd} spd · ${S.rng} rng`; });
   const w2 = P.eq.weapon2 ? getItem(P.eq.weapon2) : null;
+  setIf('spb', P.sp || 0, v => $('spBadge').textContent = v ? ` (${v})` : '');
   setIf('sw2', w2 ? w2.id : '', () => { const el = $('slotW2'); el.classList.toggle('none', !w2); if (w2) { el.src = itemIcon(w2.id); el.title = `Tab: swap to ${itemName(w2)}`; } });
   const sk = specKind(), cdv = sk === 'bash' ? P.bashCd : P.specCd, cmx = sk === 'bash' ? SPECS.bash.cd : (P.specMax || 1), pp = sk ? Math.round((1 - (cdv || 0) / cmx) * 20) * 5 : 0;
   setIf('pip', pp + '|' + sk, () => { const el = $('specPip'); el.style.setProperty('--p', pp + '%'); el.style.opacity = sk ? 1 : .35; el.title = sk ? `C: ${SPECS[sk].n}${pp < 100 ? ' (recharging)' : ''}` : 'No special move with bare fists'; });
@@ -5316,7 +5516,7 @@ addEventListener('keydown', e => {
   if (e.code === 'Escape') { if (dialogOpen) closeDialog(); else if (UI.stack.length) UI.close(); else if (G.state === 'play') UI.open('pause'); return; }
   if (dialogOpen) { const n = parseInt(e.key); if (n >= 1) { const b = $('dOpts').children[n - 1]; if (b && !b.disabled) b.click(); } return; }
   if (G.state !== 'play' || e.repeat) return;
-  const tog = { KeyI: 'inv', KeyM: 'map', KeyK: 'dip', KeyJ: 'quests' }[e.code];
+  const tog = { KeyI: 'inv', KeyM: 'map', KeyK: 'dip', KeyJ: 'quests', KeyP: 'skills' }[e.code];
   if (tog) { if (tog === 'map' && G.under) { toast('Your map is no use down here. Find your way back to the ladder.'); return; } UI.toggle(tog); return; }
   if (UI.stack.length) return;
   if (e.code === 'Space') tryDodge();
@@ -5325,6 +5525,7 @@ addEventListener('keydown', e => {
   else if (e.code === 'KeyR') cycleAmmo();
   else if (e.code === 'Tab') swapWeapons();
   else if (e.code === 'KeyC') useSpecial();
+  else if (e.code === 'KeyG') toggleParty();
   else if (e.code === 'Digit1') quickUse('food');
   else if (e.code === 'Digit2') quickUse('potion');
   else if (e.code === 'Digit3') quickUse('band');
@@ -5412,12 +5613,12 @@ function resetState() {
   G.under = null; G.over = null;
   ents = []; pickups = []; projs = []; parts = []; texts = []; horseEnt = null; uidCounter = 1; nextEid = 1;
   W.places.forEach(p => { p.disc = false; p.rumor = false; p.spawned = false; p.dead = []; p.cleared = false; p.chestOpened = false; p.clearedAt = 0; p.offers = null; p.request = false; p.blessed = false; p.investigated = false; p.rumorUsed = false; p.backerRevealed = false; p.wellT = -999; p.ddead = null; p.dchests = null; p.dcleared = false; p.legendTaken = false; if (p.type === 'outpost') p.owner = p.baseOwner; for (const k in p) if (k.startsWith('_shop_')) delete p[k]; });
-  (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false;
+  (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false; G.lastPay = null;
   Object.assign(G, { time: 0, dipT: 0, eventT: 50, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, questT: 0 });
   newKingdoms(); newQuests(); newFog();
 }
 function beginPlay() {
-  G.state = 'play'; G.ironDead = false; if (P) { P.drawing = false; P.draw = 0; P.spec = null; P.swingArc = null; } UI.hide('mainMenu'); UI.hide('endScreen'); UI.closeAll(); $('hud').classList.remove('off');
+  G.state = 'play'; G.ironDead = false; if (P && W && !G.under) setupWorldExtras(); if (P) { P.drawing = false; P.draw = 0; P.spec = null; P.swingArc = null; } UI.hide('mainMenu'); UI.hide('endScreen'); UI.closeAll(); $('hud').classList.remove('off');
   $('btnRespawn').classList.remove('hidden'); $('btnLoadSave').classList.remove('hidden');
   cam.x = P.x; cam.y = P.y; updateDiscovery(); updateHUD(true);
 }
@@ -5454,7 +5655,8 @@ function saveGame(silent) {
   const qStrip = q => { const c = Object.assign({}, q); delete c.ent; delete c.foes; return c; };
   const data = {
     v: 1, seed: W.seed, time: G.time, kills: G.kills, uid: uidCounter, waypoint: G.mapWaypoint, savedAt: Date.now(),
-    P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
+    P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, skills: P.skills, sp: P.sp, comps: P.comps, houses: P.houses, stash: P.stash, forts: P.forts, fortGuards: P.fortGuards,
+      party: partyNow().filter(e => !e.comp || true).map(e => ({ comp: e.comp, kind: e.kind, name: e.name, hp: Math.round(Math.max(1, e.hp)), k: e.k })), mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
     horse: horseEnt ? { x: horseEnt.x, y: horseEnt.y } : null,
     K: { rel: K.rel, aff: K.aff, rep: K.rep, mil: K.mil, reasons: K.reasons, events: K.events, kev: K.kev, repWhy: K.repWhy, gifts: K.gifts, log: K.log, cd: {} },
     Q: { active: Q.active.filter(q => q.type !== 'raid' && q.sid !== 'hraid').map(qStrip), done: Q.done.map(qStrip), tracked: Q.tracked, next: Q.next },
@@ -5477,6 +5679,9 @@ function loadGame(d) {
   (d.places || []).forEach((s, i) => { const p = W.places[i]; if (p) Object.assign(p, s, { dead: s.dead || [] }); });
   EXP = unpackBits(d.exp, EW * EH); fogCtx.globalCompositeOperation = 'destination-out'; for (let cy = 0; cy < EH; cy++) for (let cx = 0; cx < EW; cx++) if (EXP[cy * EW + cx]) { fogCtx.beginPath(); fogCtx.arc(cx * EC + 2, cy * EC + 2, 3.6, 0, TAU); fogCtx.fill(); } fogCtx.globalCompositeOperation = 'source-over';
   if (P.eq.horse) { spawnHorse(d.horse ? d.horse.x : P.x + 40, d.horse ? d.horse.y : P.y); if (d.P.mounted) mount(); }
+  if (!d.P.skills) { P.skills = {}; P.sp = Math.max(0, P.lvl - 1); } // older saves: grant the points for levels already earned
+  ['comps', 'houses', 'stash', 'forts'].forEach(k => { if (!Array.isArray(P[k])) P[k] = []; }); if (!P.fortGuards) P.fortGuards = {};
+  (d.P.party || []).forEach(m => spawnPartyMember(m)); delete P.party; recalc();
   Q.active.forEach(q => {
     if (q.type === 'find' && q.stage === 0) pickups.push({ x: q.spot.x, y: q.spot.y, vx: 0, vy: 0, type: 'qitem', id: 'heirloom', q: 1, t: 1, qid: q.id });
     if (q.type === 'escort') spawnTraveler(q);
@@ -6553,6 +6758,7 @@ function update(dt) {
     ents.forEach(e => { if (e.expire && G.time > e.expire) { e.expire = 0; if (e.ally) { e.ally = false; e.follow = false; e.transient = true; e.roam = true; e.home = { x: e.x + rand(-2000, 2000), y: e.y + rand(-2000, 2000) }; e.say = { text: 'We must return to our posts.', t: 3 }; } else if (e.role === 'trader') { e.dead = true; e.deadT = 99; toast('Ysolde the Far-Wanderer has packed up and moved on.'); } } });
   }
   if ((G.dipT += dt) >= 40) { G.dipT = 0; dipTick(); }
+  const dnow = dayNum(); if (G.lastPay == null) G.lastPay = dnow; else if (dnow !== G.lastPay) { G.lastPay = dnow; dailyTick(); }
   if ((G.eventT -= dt) <= 0) { G.eventT = rand(60, 115); if (!G.under) worldEvent(); }
   if ((G.autosaveT += dt) >= 180) { G.autosaveT = 0; saveGame(true); }
   if ((ambT -= dt) <= 0) {
