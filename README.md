@@ -14,6 +14,12 @@ When you start a new game you choose a mode:
   - **Act I:** a shared opening splits into three storylines depending on your choices: unmasking the Ashen Circle, stopping the Hollow King, or seizing power yourself.
   - **Act II, *The Long War*:** every storyline passes through this act. Two crowns go to war, and you choose a side or try to broker peace. Your decisions settle the fate of a captive heir, a Hollow blight in the fens, the Bone Wyrm, the Pale Hand's secret roll, and a siege of a royal capital. It ends at the Council of Winter.
   - **Act III:** each storyline continues with its own quests and bosses, including the Ashen Seneschal, Rimeheart, a poisoned feast and a crown council. It ends in a final battle against the Hollow King, who rises a second time. The allies who fight beside you depend on the choices you made in Act II.
+  - **The final battle** is meant to be a real test of skill. The allies you earned in Act II fight beside you through the first two waves of the Hollow host. Then Aurek rises, the grave-mist seals the barrow and freezes your allies, and you face him alone:
+    - **His attacks:** sword combos, a charge, a frost blast, volleys of frost bolts, grave hands that burst from the ground, and a step through the mist to land behind you. Each is marked on the ground first. Gold marks can be blocked, at a heavy stamina cost; red marks must be dodged.
+    - **Fighting him:** his guard is up unless he is attacking, so the opening comes right after an attack. Enough damage in a short burst staggers him.
+    - **Limits in the arena:** healing has a cooldown, your horse will not come near, and he calls up more dead as his health falls.
+    - **If you fall,** you wake at the edge of the barrow-field and the fight starts again from the moment he rises.
+    - **Difficulty:** it sets how long his warnings last, how often he attacks, how long his combos run and how long the healing cooldown is.
   - **22 endings:** which one you get depends on your choices and on the state of the world, meaning its wars, alliances and your reputation with each kingdom.
   - **Epilogue:** a closing section of several pages covers how it ended, what became of each kingdom, the fates of the people you met, and your legacy and deeds.
   - When the story ends you can keep playing the same world as a sandbox or return to the main menu.
