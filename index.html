@@ -80,7 +80,7 @@ body.touch #prompt kbd{font-size:15px}
   body.touch #mmWrap{zoom:.8}
   body.touch #prompt{top:30%}
 }
-.slotList{display:flex;flex-direction:column;gap:8px;max-height:calc(70vh/var(--ui-scale));overflow-y:auto}
+.slotList{display:flex;flex-direction:column;gap:8px;max-height:calc(70vh/var(--ui-scale));overflow-y:auto;padding:4px 3px} /* room for a card's hover lift, which the scroll box would otherwise clip */
 .slotCard{position:relative}.slotCard.empty{opacity:.7;border-style:dashed}
 .slotActs{display:flex;gap:6px;margin-top:6px}
 .modeCard.fromstory{border-color:#5fb8a6;box-shadow:inset 0 0 0 1px rgba(95,184,166,.35)}
