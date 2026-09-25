@@ -2458,6 +2458,8 @@ function useItem(uid) {
   const it = getItem(uid); if (!it) return; const b = ITEMS[it.id];
   if (b.heal) {
     if (P.hp >= P.maxHp && !(b.st && P.st < P.maxSt)) { toast('You are already at full health.'); return; }
+    if (G.arena && P.healLock > G.time) { toast(`The grave-cold is in your throat. You can heal again in ${Math.ceil(P.healLock - G.time)}s.`, 'bad'); return; }
+    if (G.arena) P.healLock = G.time + TD().heal;
     const heal = Math.round(b.heal * DIFF().heal);
     P.hp = Math.min(P.maxHp, P.hp + heal); if (b.st) P.st = Math.min(P.maxSt, P.st + b.st); SND.play('eat'); addText(P.x, P.y - 30, '+' + heal, '#8fe07a', 15); removeItem(uid, 1);
   } else if (b.use === 'nock') {
@@ -2539,6 +2541,7 @@ function toggleMount() {
   if (G.under) { toast('Your horse waits for you outside.'); return; }
   if (!P.eq.horse) { toast('You have no horse. Loot or buy one from a stable master.'); return; }
   if (P.mounted) { dismount(); return; }
+  if (G.arena) { toast('Your horse will not come near the grave-mist.'); return; }
   if (!horseEnt) spawnHorse(P.x + 40, P.y);
   const d = dist(P.x, P.y, horseEnt.x, horseEnt.y);
   if (d < 70) mount();
@@ -2596,7 +2599,7 @@ function specialHit(k) {
     n++;
     const dmg = S.dmg * mul * rand(.95, 1.05) * DIFF().dmgDealt * (P.mounted ? 1.1 : 1);
     damage(e, dmg, P, o); applyEnch(e, dmg);
-    if (o.heavy && !e.dead) { e.wind = 0; e.atkCd = Math.max(e.atkCd, 1.2); e.stun = .7; }
+    if (o.heavy && !e.dead) { e.wind = 0; e.atkCd = Math.max(e.atkCd, 1.2); if (!e.titan) e.stun = .7; }
     hits++;
   }
   if (k === 'sword') for (let i = 0; i < 16; i++) { const a = i / 16 * TAU; addPart(P.x + Math.cos(a) * 26, P.y + Math.sin(a) * 26, Math.cos(a) * 90, Math.sin(a) * 90, '#f4efe0', .3, 2); }
@@ -2609,7 +2612,7 @@ function doBash() {
     if (e.dead || e.kind === 'horse' || e.important || e.perch || !playerHostileTo(e)) continue;
     if (dist(P.x, P.y, e.x, e.y) > 46 + e.r || Math.abs(angDiff(P.face, Math.atan2(e.y - P.y, e.x - P.x))) > 1.1) continue;
     e.guardBroken = 2; damage(e, 4 * DIFF().dmgDealt, P, { kb: 2.2 });
-    if (!e.dead) { e.wind = 0; e.atkCd = Math.max(e.atkCd, 1.3); e.stun = 1; } n++;
+    if (!e.dead) { e.wind = 0; e.atkCd = Math.max(e.atkCd, 1.3); if (!e.titan) e.stun = 1; } n++;
   }
   if (n) { addShake(4); G.hitstop = .05; addText(P.x, P.y - 34, 'Bash!', '#ffe08a', 13); }
 }
@@ -2777,12 +2780,13 @@ function drawGrave(g, gv, t) {
 function respawnPlayer() {
   if (G.under) leaveDungeon(true);
   const lost = Math.floor(P.gold * DIFF().goldLoss); P.gold -= lost;
-  P.x = P.respawn.x; P.y = P.respawn.y; const f = findFree(P.x, P.y); P.x = f.x; P.y = f.y;
+  let near = null; if (STORY) Q.active.forEach(q => { if (q.type !== 'story' || !q.foes) return; const st = sStep(q); if (!st || !st.reset) return; const tg = storyTarget(q); sFightReset(q); if (tg) near = randomLandSpot(tg.x, tg.y, (st.near || 20) + 3, (st.near || 20) + 7); }); // a boss fight starts over from its checkpoint
+  P.x = near ? near.x : P.respawn.x; P.y = near ? near.y : P.respawn.y; const f = findFree(P.x, P.y); P.x = f.x; P.y = f.y;
   P.hp = Math.round(P.maxHp * .6); P.st = P.maxSt; P.mounted = false; P.kbx = P.kby = 0; P.dodge = 0;
   ents.forEach(e => { e.aggroPlayer = false; if (e.target === P) e.target = null; });
   if (horseEnt) { horseEnt.x = P.x + 40; horseEnt.y = P.y; }
   cam.x = P.x; cam.y = P.y; G.state = 'play'; UI.hide('deathScreen');
-  toast(`You awaken, bruised and ${lost} gold lighter.`, 'bad');
+  toast(near ? `You wake at the edge of the barrow-field, ${lost} gold lighter. The Hollow King is waiting.` : `You awaken, bruised and ${lost} gold lighter.`, 'bad');
 }
 
 /* ---------------- Entities ---------------- */
@@ -2832,7 +2836,7 @@ function playerHostileTo(e) {
   return false;
 }
 function hostile(a, b) {
-  if (a === b || a.dead || b.dead || a.downed > 0 || b.downed > 0) return false;
+  if (a === b || a.dead || b.dead || a.downed > 0 || b.downed > 0 || a.held || b.held) return false;
   if (a.dummy) return false; // straw never fights back
   if (b.dummy) return !!a.isPlayer; // only you train on the dummies
   if (a.isPlayer) return playerHostileTo(b);
@@ -2870,13 +2874,13 @@ function damage(t, amt, src, o = {}) {
       a *= .2 + .5 * (into - DODGE_PERFECT) / (DODGE_T - DODGE_PERFECT);
       if (settings.dmgNums) addText(P.x, P.y - 34, 'Grazed', '#d8d0b8', 12);
     }
-    if (P.blocking && src) {
+    if (P.blocking && src && !o.unblock) {
       const ang = Math.atan2(src.y - P.y, src.x - P.x);
       if (Math.abs(angDiff(P.face, ang)) < 1.3) {
-        const b = a * P.S.block; a -= b; P.st -= (b * 1.1 + 2) * DIFF().stCost; P.stDelay = .5; SND.play('block');
+        const b = a * P.S.block * (o.crush ? .6 : 1); a -= b; P.st -= (b * 1.1 + 2 + (o.crush || 0)) * DIFF().stCost; // a crushing blow gets through more of the shield and drains far more stamina P.stDelay = .5; SND.play('block');
         for (let i = 0; i < 8; i++) addPart(P.x + Math.cos(P.face) * 14, P.y + Math.sin(P.face) * 14, rand(-120, 120), rand(-120, 60), '#ffe8a0', .3, 2);
         if (settings.dmgNums) addText(P.x, P.y - 34, 'Blocked', '#d8d0b8', 12);
-        if (src && !src.isPlayer && !o.proj) { const d = Math.hypot(src.x - P.x, src.y - P.y) || 1; src.kbx = (src.x - P.x) / d * 140; src.kby = (src.y - P.y) / d * 140; }
+        if (src && !src.isPlayer && !o.proj && !src.titan) { const d = Math.hypot(src.x - P.x, src.y - P.y) || 1; src.kbx = (src.x - P.x) / d * 140; src.kby = (src.y - P.y) / d * 140; }
         if (P.st <= 0) { P.st = 0; a += b * .5; toast('Guard broken!', 'bad'); P.stDelay = 1.2; }
         if (G.tut && src.tutYield) G.tut.blocked = true;
       }
@@ -2906,7 +2910,8 @@ function damage(t, amt, src, o = {}) {
     for (let i = 0; i < 5; i++) addPart(t.x + Math.cos(t.face) * 12, t.y + Math.sin(t.face) * 12, rand(-90, 90), rand(-90, 40), '#ffe8a0', .25, 2);
   }
   t.hp -= amt; t.flash = .12;
-  if (src && !o.dot && !t.perch) { const d = Math.hypot(t.x - src.x, t.y - src.y) || 1; const kb = (o.kb || 1) * (t.kind === 'bone_wyrm' ? 12 : t.kind === 'bear' || t.kind === 'ice_bear' ? 50 : 125); t.kbx = (t.x - src.x) / d * kb; t.kby = (t.y - src.y) / d * kb; }
+  if (t.titan && !o.dot) titanPoise(t, amt);
+  if (src && !o.dot && !t.perch) { const d = Math.hypot(t.x - src.x, t.y - src.y) || 1; const kb = (o.kb || 1) * (t.kind === 'bone_wyrm' || t.titan ? 12 : t.kind === 'bear' || t.kind === 'ice_bear' ? 50 : 125); t.kbx = (t.x - src.x) / d * kb; t.kby = (t.y - src.y) / d * kb; }
   const armored = t.faction && t.faction[0] === 'k';
   for (let i = 0; i < (o.dot ? 1 : 7) * QMUL(); i++) addPart(t.x, t.y - (t.elev || 0), rand(-110, 110), rand(-120, 30), armored && Math.random() < .5 ? '#ffe8a0' : '#9a1a12', rand(.3, .6), 2.5, 220);
   if (settings.dmgNums) addText(t.x + rand(-8, 8), t.y - 26 - (t.elev || 0), Math.max(1, Math.round(amt)) + (o.crit ? '!' : ''), o.dot === 'fire' ? '#ffa24a' : o.dot === 'venom' ? '#8fe07a' : o.crit ? '#ffd24a' : '#fff4e0', o.dot ? 12 : o.crit ? 19 : 14);
@@ -3017,6 +3022,7 @@ function nearestHostile(e, r) {
   return best;
 }
 function think(e) {
+  if (e.titan && G.state === 'play') { e.target = P; return; } // the Hollow King wants only you
   if (e.civ) {
     if (e.kind === 'horse') return;
     let threat = null; for (const o of ents) { if (o.dead || o.civ) continue; if (Math.abs(o.x - e.x) + Math.abs(o.y - e.y) < 230 && hostile(o, e)) { threat = o; break; } }
@@ -3041,6 +3047,7 @@ function think(e) {
 }
 function updateActor(e, dt) {
   if (e.dead) { e.deadT += dt; return; }
+  if (e.held) { if (e.say) { e.say.t -= dt; if (e.say.t <= 0) e.say = null; } e.swing = 0; if (Math.random() < 5 * dt * QMUL()) addPart(e.x + rand(-9, 9), e.y - rand(0, 20), rand(-6, 6), rand(-18, -6), Math.random() < .5 ? '#e4f6ff' : '#9fdcff', .7, 2.5); return; } // frozen by the grave-mist
   if (e.racer || e.jouster) { if (e.say) { e.say.t -= dt; if (e.say.t <= 0) e.say = null; } return; } // driven by raceTick / joustTick
   if (e.downed > 0) { e.downed -= dt; if (e.downed <= 0) { e.hp = Math.round(e.maxHp * .35); e.say = { text: 'Still breathing…', t: 2.5 }; } return; }
   if (e.burn > 0 || e.poison > 0 || e.chill > 0) tickStatus(e, dt);
@@ -3065,6 +3072,7 @@ function updateActor(e, dt) {
   if ((e.kbx || e.kby) && !e.perch) { moveEnt(e, e.kbx * dt, e.kby * dt); const f = Math.pow(.004, dt); e.kbx *= f; e.kby *= f; if (Math.abs(e.kbx) + Math.abs(e.kby) < 5) e.kbx = e.kby = 0; }
   if (e.guardBroken > 0) e.guardBroken -= dt;
   if (e.stun > 0) { e.stun -= dt; e.wind = 0; return; } // staggered by a bash or heavy blow
+  if (e.titan && titanTick(e, dt)) return;
   e.thinkT -= dt; if (e.thinkT <= 0) { e.thinkT = .22 + Math.random() * .2; think(e); }
   let gx = null, gy = null, sm = 1, face = null;
   if (e.kind === 'horse') {
@@ -3120,6 +3128,210 @@ function updateActor(e, dt) {
     }
   }
   if (face != null) e.face = turnToward(e.face, face, dt * 9);
+}
+/* ---------------- Aurek, the Hollow King: a telegraphed, phase-based final boss ----------------
+   Every attack is marked on the ground before it lands. Gold marks can be blocked, at a heavy stamina cost; red marks must be dodged.
+   His guard is up whenever he is not attacking, so the opening is right after a swing, a charge or a blast. Enough damage in a short
+   burst staggers him. The difficulty chosen at the start sets how long the warnings last, how often he attacks and how long his combos run. */
+const TITAN_D = [
+  { tell: 1.5, cd: 1.6, combo: 1, hands: 1, heal: 2, adds: 1 },
+  { tell: 1.25, cd: 1.3, combo: 2, hands: 2, heal: 4, adds: 2 },
+  { tell: 1, cd: 1, combo: 3, hands: 3, heal: 6, adds: 3 },
+  { tell: .9, cd: .85, combo: 3, hands: 4, heal: 8, adds: 3 },
+  { tell: .8, cd: .75, combo: 4, hands: 5, heal: 10, adds: 4 },
+  { tell: .72, cd: .65, combo: 4, hands: 6, heal: 12, adds: 4 },
+];
+const TD = () => TITAN_D[G.opts ? G.opts.diff : 2] || TITAN_D[2];
+let tells = [];
+function addTell(o) { const tl = Object.assign({ t: 0 }, o); tells.push(tl); return tl; }
+function updateTells(dt) {
+  for (let i = tells.length - 1; i >= 0; i--) {
+    const tl = tells[i]; if (tl.src && (tl.src.dead || (tl.src.stun > 0 && !tl.keep))) { tells.splice(i, 1); continue; }
+    tl.t += dt; if (tl.t >= tl.dur) { tells.splice(i, 1); if (tl.fn && G.state === 'play') tl.fn(tl); }
+  }
+}
+function drawTells(g, t) {
+  const A = G.arena;
+  if (A) {
+    g.save(); g.strokeStyle = 'rgba(170,225,255,.12)'; g.lineWidth = 26; g.beginPath(); g.arc(A.x, A.y, A.r + 12, 0, TAU); g.stroke();
+    g.strokeStyle = 'rgba(190,235,255,.6)'; g.lineWidth = 3; g.setLineDash([16, 12]); g.lineDashOffset = -t * 24; g.beginPath(); g.arc(A.x, A.y, A.r, 0, TAU); g.stroke(); g.restore();
+  }
+  for (const tl of tells) {
+    const p = clamp(tl.t / tl.dur, 0, 1), c = tl.red ? '225,55,45' : '245,195,70', s = tl.src;
+    g.fillStyle = `rgba(${c},.14)`; g.strokeStyle = `rgba(${c},${.45 + p * .45})`; g.lineWidth = 2;
+    if (tl.k === 'circle') {
+      g.beginPath(); g.arc(tl.x, tl.y, tl.r, 0, TAU); g.fill(); g.stroke();
+      g.fillStyle = `rgba(${c},.3)`; g.beginPath(); g.arc(tl.x, tl.y, tl.r * p, 0, TAU); g.fill();
+    } else if (tl.k === 'cone') {
+      const a = s.face; g.beginPath(); g.moveTo(s.x, s.y); g.arc(s.x, s.y, tl.r, a - tl.arc, a + tl.arc); g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = `rgba(${c},.3)`; g.beginPath(); g.moveTo(s.x, s.y); g.arc(s.x, s.y, tl.r * p, a - tl.arc, a + tl.arc); g.closePath(); g.fill();
+    } else if (tl.k === 'line') {
+      g.save(); g.translate(s.x, s.y); g.rotate(tl.a); g.fillRect(0, -tl.w, tl.len, tl.w * 2); g.strokeRect(0, -tl.w, tl.len, tl.w * 2);
+      g.fillStyle = `rgba(${c},.3)`; g.fillRect(0, -tl.w, tl.len * p, tl.w * 2); g.restore();
+    }
+  }
+}
+function titanInit(e) {
+  Object.assign(e, { atkCd: 99, act: null, gcd: 1.4, poise: 0, poiseImm: 0, farT: 0, leash: 99999, aggro: 2000, target: P,
+    cds: { combo: 0, nova: 3, charge: 2, volley: 4, hands: e.titan > 1 ? 3 : 7, blink: 8 }, sumAt: e.titan > 1 ? [.66, .33] : [.7, .4] });
+}
+function titanPoise(t, amt) {
+  if (G.time < t.poiseImm) return;
+  t.poise += amt; if (t.poise < t.maxHp * .09) return;
+  t.poise = 0; t.poiseImm = G.time + 9; t.stun = 1.4; t.act = null; t.fade = 0; t.gcd = .5; tells = tells.filter(tl => tl.src !== t || tl.keep);
+  addText(t.x, t.y - 54, 'STAGGERED!', '#ffe08a', 17); SND.play('perfect'); addShake(5);
+}
+function titanPick(e, d, D, ph) {
+  const c = e.cds, opts = [];
+  if (c.blink <= 0 && (e.farT > 1.6 || (ph > 1 && d > 260 && Math.random() < .3))) return { k: 'blink', t: 0 };
+  if (d < 100 && c.combo <= 0) opts.push(['combo', 3]);
+  if (d < 150 && c.nova <= 0) opts.push(['nova', ph > 1 ? 2.4 : 1.6]);
+  if (d > 170 && d < 470 && c.charge <= 0) opts.push(['charge', 2]);
+  if (d > 200 && c.volley <= 0) opts.push(['volley', 1.6]);
+  if (c.hands <= 0 && (ph > 1 || D.hands >= 3)) opts.push(['hands', ph > 1 ? 2 : 1.2]);
+  if (!opts.length) return null;
+  let r = Math.random() * opts.reduce((n, o) => n + o[1], 0);
+  for (const [k, w] of opts) if ((r -= w) <= 0) return { k, t: 0 };
+  return { k: opts[0][0], t: 0 };
+}
+function titanSummon(e) {
+  const q = Q.active.find(q2 => q2.id === e.quest), n = TD().adds;
+  for (let i = 0; i < n; i++) {
+    const a = rand(0, TAU), f = findFree(e.x + Math.cos(a) * rand(80, 150), e.y + Math.sin(a) * rand(80, 150));
+    const kind = e.titan > 1 && i % 2 ? 'hknight' : 'wight';
+    const m = mkActor(kind, f.x, f.y, { tier: sT(3), quest: e.quest, roam: true, home: { x: e.x, y: e.y }, leash: 900, aggro: 900, guard: kind === 'hknight' });
+    m.hp = m.maxHp = Math.round(m.maxHp * 1.4); m.target = P;
+    for (let k = 0; k < 10 * QMUL(); k++) addPart(f.x + rand(-10, 10), f.y + rand(-4, 8), rand(-20, 20), rand(-90, -30), Math.random() < .5 ? '#6a6458' : '#9fdcff', .8, 3);
+    if (q && q.foes) q.foes.f.push(m);
+  }
+}
+function titanTick(e, dt) {
+  const D = TD(), ph = e.titan, enr = ph > 1 && e.hp < e.maxHp * .3;
+  if (enr && !e.enraged) { e.enraged = true; e.say = { text: 'ENOUGH! Kneel, or be buried!', t: 3 }; toast('Aurek howls with fury. His blows come faster!', 'war'); SND.play('roar'); addShake(8); }
+  const tm = D.tell * (ph > 1 ? .9 : 1) * (enr ? .85 : 1), cm = D.cd * (ph > 1 ? .8 : 1) * (enr ? .8 : 1);
+  const s = dt * (e.chill > 0 ? .85 : 1); // frost only slows him a little
+  e.atkCd = 99; e.poise = Math.max(0, e.poise - e.maxHp * .012 * dt);
+  for (const k in e.cds) e.cds[k] -= s; e.gcd -= s;
+  e.guard = !e.act; e.fade = e.act && e.act.k === 'blink' ? Math.min(1, e.act.t / .45) : 0;
+  if (G.state !== 'play') { e.act = null; e.fade = 0; return false; }
+  const d = dist(e.x, e.y, P.x, P.y), a = Math.atan2(P.y - e.y, P.x - e.x);
+  e.farT = d > 430 ? e.farT + s : 0;
+  if (!e.act && e.sumAt.length && e.hp < e.maxHp * e.sumAt[0]) { e.sumAt.shift(); e.act = { k: 'roar', t: 0 }; }
+  if (!e.act) { if (e.gcd > 0) return false; e.act = titanPick(e, d, D, ph); if (!e.act) return false; }
+  const A = e.act; A.t += s;
+  const rec = dur => { e.act = { k: 'rec', t: 0, dur }; };
+  const frost = (x, y, n) => { for (let i = 0; i < n * QMUL(); i++) addPart(x + rand(-12, 12), y + rand(-12, 12), rand(-60, 60), rand(-70, 10), Math.random() < .5 ? '#e4f6ff' : '#9fdcff', .5, 2.5); };
+  switch (A.k) {
+    case 'rec': if (A.t >= A.dur) { e.act = null; e.gcd = rand(.3, .8) * cm; } return true;
+    case 'roar':
+      if (!A.init) { A.init = 1; SND.play('roar'); addShake(10); e.say = { text: pick(['Rise, my faithful!', 'The grave remembers its king!', 'Serve me again!']), t: 2.5 }; toast('Aurek calls his dead up from the grave!', 'war'); }
+      if (A.t >= .9 && !A.done) { A.done = 1; titanSummon(e); }
+      if (A.t >= 1.3) { e.act = null; e.gcd = .4; }
+      return true;
+    case 'combo': {
+      const reach = e.range + 26;
+      if (!A.init) { A.init = 1; A.n = Math.min(5, D.combo + (ph > 1 ? 1 : 0)); A.i = 0; A.next = .55 * tm; addTell({ k: 'cone', src: e, r: reach, arc: .95, dur: A.next }); }
+      e.face = turnToward(e.face, a, s * (A.i ? 2.2 : 3.5)); // he tracks you, but slowly enough to sidestep
+      if (A.t >= A.next) {
+        const last = A.i === A.n - 1 && A.n > 1, aa = Math.atan2(P.y - e.y, P.x - e.x);
+        e.swing = .22; SND.play('swingH'); moveEnt(e, Math.cos(e.face) * 22, Math.sin(e.face) * 22); frost(e.x + Math.cos(e.face) * 50, e.y + Math.sin(e.face) * 50, 8);
+        if (dist(e.x, e.y, P.x, P.y) <= reach + P.r && Math.abs(angDiff(e.face, aa)) < 1.0) damage(P, e.dmg * (last ? 1.5 : 1) * rand(.92, 1.08), e, { crush: last ? 40 : 14 });
+        if (last) addShake(6);
+        A.i++;
+        if (A.i < A.n) { const gap = (A.i === A.n - 1 ? .5 : .34) * tm; A.next = A.t + gap; addTell({ k: 'cone', src: e, r: reach, arc: .95, dur: gap, red: false }); }
+        else { e.cds.combo = 2.2 * cm; rec(.8); }
+      }
+      return true;
+    }
+    case 'charge':
+      if (!A.init) { A.init = 1; A.w = .8 * tm; A.a = a; A.tl = addTell({ k: 'line', src: e, a, len: 520, w: e.r + P.r + 6, dur: A.w, red: true }); if (Math.random() < .35) e.say = { text: pick(['Face me!', 'You cannot run from the grave.']), t: 2 }; }
+      if (!A.go) {
+        if (A.t < A.w * .7) { A.a = turnToward(A.a, a, s * 2.5); A.tl.a = A.a; }
+        e.face = A.a; if (A.t >= A.w) { A.go = 1; A.gt = 0; SND.play('roar'); }
+        return true;
+      }
+      {
+        A.gt += s; const ok = moveEnt(e, Math.cos(A.a) * 600 * s, Math.sin(A.a) * 600 * s); frost(e.x, e.y, 2);
+        if (!A.hit && dist(e.x, e.y, P.x, P.y) < e.r + P.r + 12) { A.hit = 1; if (damage(P, e.dmg * 1.4, e, { unblock: true }) > 0) { P.kbx = Math.cos(A.a) * 420; P.kby = Math.sin(A.a) * 420; addShake(8); } }
+        if (!ok || A.gt > .87) { if (!ok) addShake(5); e.cds.charge = 5 * cm; rec(1); }
+      }
+      return true;
+    case 'nova': {
+      const R = ph > 1 ? 175 : 150;
+      if (!A.init) { A.init = 1; A.w = tm; addTell({ k: 'circle', src: e, x: e.x, y: e.y, r: R, dur: A.w, red: true }); SND.play('frost'); if (Math.random() < .4) e.say = { text: 'The cold take you!', t: 1.8 }; }
+      if (Math.random() < .6) { const b = rand(0, TAU); addPart(e.x + Math.cos(b) * R, e.y + Math.sin(b) * R, -Math.cos(b) * R * 1.4, -Math.sin(b) * R * 1.4, '#cfeeff', .6, 2.5); }
+      if (A.t >= A.w) {
+        if (dist(e.x, e.y, P.x, P.y) < R + P.r && damage(P, e.dmg * 1.3, e, { unblock: true }) > 0) P.chillT = 2.5;
+        addShake(9); SND.play('frost'); SND.play('hit');
+        for (let i = 0; i < 44 * QMUL(); i++) { const b = i / 44 * TAU; addPart(e.x + Math.cos(b) * 20, e.y + Math.sin(b) * 20, Math.cos(b) * R * 2.2, Math.sin(b) * R * 2.2, i % 2 ? '#ffffff' : '#9fdcff', .45, 3); }
+        e.cds.nova = 6 * cm; rec(.75);
+      }
+      return true;
+    }
+    case 'volley':
+      if (!A.init) { A.init = 1; A.w = .6 * tm; A.left = ph > 1 ? 2 : 1; addTell({ k: 'cone', src: e, r: 240, arc: .55, dur: A.w }); SND.play('frost'); }
+      e.face = turnToward(e.face, a, s * 4);
+      if (A.t >= A.w) {
+        const n = ph > 1 ? 9 : 7;
+        for (let i = 0; i < n; i++) { const b = e.face + (i - (n - 1) / 2) * .13; projs.push({ x: e.x + Math.cos(b) * 30, y: e.y + Math.sin(b) * 30, vx: Math.cos(b) * 330, vy: Math.sin(b) * 330, dmg: e.dmg * .42, src: e, life: 1.8, breath: true }); }
+        SND.play('roar');
+        if (--A.left > 0) { const gap = .5 * tm; A.w = A.t + gap; addTell({ k: 'cone', src: e, r: 240, arc: .55, dur: gap }); } else { e.cds.volley = 5 * cm; rec(.55); }
+      }
+      return true;
+    case 'hands':
+      if (!A.init) {
+        A.init = 1; const n = ph > 1 ? D.hands + 1 : Math.max(1, D.hands - 1), w = 1.1 * tm;
+        for (let i = 0; i < n; i++) {
+          const lead = i === 0 ? 0 : i === 1 ? .7 : rand(-.2, 1), sc = i > 1 ? 130 : 0;
+          addTell({ k: 'circle', src: e, keep: true, red: true, r: 46, dur: w + i * .12, x: P.x + (P.avx || 0) * lead + rand(-sc, sc), y: P.y + (P.avy || 0) * lead + rand(-sc, sc), fn: tl => {
+            SND.play('bones', .6); for (let k = 0; k < 14 * QMUL(); k++) addPart(tl.x + rand(-20, 20), tl.y + rand(-12, 12), rand(-30, 30), rand(-140, -50), k % 3 ? '#5a5448' : '#bfe8ff', .6, 3);
+            if (dist(tl.x, tl.y, P.x, P.y) < tl.r + P.r * .5 && damage(P, e.dmg * 1.05, e, { unblock: true }) > 0) P.webbed = Math.max(P.webbed || 0, .8);
+          } });
+        }
+        SND.play('hollow'); if (Math.random() < .4) e.say = { text: 'The dead hold you fast.', t: 2 };
+      }
+      if (A.t >= .55) { e.act = null; e.gcd = rand(.2, .5) * cm; e.cds.hands = (ph > 1 ? 7 : 10) * cm; }
+      return true;
+    case 'blink':
+      if (!A.init) { A.init = 1; SND.play('hollow'); frost(e.x, e.y, 16); }
+      if (A.t >= .45) {
+        const b = P.face + Math.PI + rand(-.5, .5), f = findFree(P.x + Math.cos(b) * 75, P.y + Math.sin(b) * 75);
+        e.x = f.x; e.y = f.y; e.face = Math.atan2(P.y - e.y, P.x - e.x); e.fade = 0; frost(e.x, e.y, 16);
+        e.cds.blink = 9 * cm; e.cds.combo = 0; e.farT = 0; e.act = { k: 'combo', t: 0 }; // straight into a combo, from behind you
+      }
+      return true;
+  }
+  e.act = null; return false;
+}
+function bossArena(q, tg, r) {
+  G.arena = { x: tg.x, y: tg.y, r: r * TS, q: q.id };
+  if (P.mounted) dismount();
+  if (horseEnt) { const a = Math.atan2(horseEnt.y - tg.y, horseEnt.x - tg.x) || 0, f = findFree(tg.x + Math.cos(a) * (r + 8) * TS, tg.y + Math.sin(a) * (r + 8) * TS); horseEnt.x = f.x; horseEnt.y = f.y; horseEnt.called = false; }
+  let n = 0;
+  ents.forEach(e => { if (e.dead || e.held || e.kind === 'horse') return; if ((e.ally || e.party || e.comp || e.hired) && dist(e.x, e.y, tg.x, tg.y) < 2200) { Object.assign(e, { held: true, target: null, wind: 0, swing: 0 }); const b = Math.atan2(e.y - tg.y, e.x - tg.x) || rand(0, TAU), f = findFree(tg.x + Math.cos(b) * (r + 1.5) * TS, tg.y + Math.sin(b) * (r + 1.5) * TS); e.x = f.x; e.y = f.y; if (n++ < 3) e.say = { text: pick(['The mist! I cannot move!', 'My limbs are ice!', 'It is on you now, knight!']), t: 3 }; } });
+  ents.forEach(e => { if (e.target && e.target.held) e.target = null; });
+  if (dist(P.x, P.y, tg.x, tg.y) > G.arena.r - 20) { const a = Math.atan2(P.y - tg.y, P.x - tg.x), f = findFree(tg.x + Math.cos(a) * (G.arena.r - 60), tg.y + Math.sin(a) * (G.arena.r - 60)); P.x = f.x; P.y = f.y; }
+  SND.play('frost');
+  setTimeout(() => toast(n ? 'The grave-mist seals the barrow and freezes your allies where they stand. You face the Hollow King alone.' : 'The grave-mist seals the barrow. There is no way out but through.', 'war'), 1600);
+}
+function endArena() { G.arena = null; tells = []; ents.forEach(e => { if (e.held) e.held = false; }); }
+function arenaTick(dt, px0, py0) {
+  const A = G.arena; if (G.state !== 'play' || G.under) return;
+  const d = dist(P.x, P.y, A.x, A.y), lim = A.r - P.r;
+  if (d > lim) {
+    const nx = A.x + (P.x - A.x) * lim / d, ny = A.y + (P.y - A.y) * lim / d;
+    if (!collides(nx, ny, P.r * .8)) { P.x = nx; P.y = ny; } else { P.x = px0; P.y = py0; }
+    P.kbx = P.kby = 0; if ((A.msgT = (A.msgT || 0) - dt) <= 0) { A.msgT = 5; toast('The grave-mist will not let you leave.', 'bad'); }
+  }
+  if (A.msgT > 0) A.msgT -= dt;
+  if (Math.random() < 14 * dt * QMUL()) { const a = rand(0, TAU); addPart(A.x + Math.cos(a) * A.r, A.y + Math.sin(a) * A.r, rand(-8, 8), rand(-30, -10), '#cfeeff', 1.4, 3); }
+}
+function sFightReset(q) {
+  const R = q.foes; if (!R) return;
+  if (G.arena && G.arena.q === q.id) endArena();
+  R.f.forEach(removeEnt); R.a.forEach(removeEnt); R.p.forEach(e => { e.prot = 0; });
+  projs = projs.filter(p => p.src === P);
+  q.sp = 0; q.foes = null; q.wt = 0;
 }
 function tickStatus(e, dt) {
   const q = QMUL();
@@ -6294,7 +6506,7 @@ function drawStruct(g, o, t) {
       break;
     }
     case 'wtower': drawWatchtower(g, o, t, k, kd, towerPart(o)); break;
-    case 'lorescroll': { const read = (P.lore || []).includes(o.lore); g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, x + w / 2 + 1, y + h + 1, 12, 4); g.fillStyle = '#8a8478'; ell(g, x + w / 2, y + h - 3, 11, 5.5); g.fillStyle = '#6e695e'; ell(g, x + w / 2, y + h - 1, 11, 3);
+    case 'lorescroll': { const read = !!P && (P.lore || []).includes(o.lore); g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, x + w / 2 + 1, y + h + 1, 12, 4); g.fillStyle = '#8a8478'; ell(g, x + w / 2, y + h - 3, 11, 5.5); g.fillStyle = '#6e695e'; ell(g, x + w / 2, y + h - 1, 11, 3);
       g.fillStyle = '#eadfbe'; g.fillRect(x + 3, y + h - 13, w - 6, 8); g.fillStyle = '#c8b888'; circ(g, x + 3, y + h - 9, 4); circ(g, x + w - 3, y + h - 9, 4); g.fillStyle = '#a02a20'; g.fillRect(x + w / 2 - 1.5, y + h - 13, 3, 8);
       if (!read) { const a = .45 + Math.sin(t * 3 + o.lore) * .3; g.fillStyle = `rgba(255,228,150,${a})`; circ(g, x + w / 2 + Math.sin(t * 1.3) * 6, y + h - 19 + Math.sin(t * 2.1) * 3, 1.8); circ(g, x + w / 2 - 5 + Math.cos(t * 1.7) * 4, y + h - 15 + Math.cos(t * 2.4) * 2, 1.3); }
       break; }
@@ -7811,6 +8023,7 @@ function drawEntity(g, e, t) {
   }
   if (e.dead) { if (e.perch) return; if (e.animal) drawAnimal(g, e); else if (e.kind !== 'horse') drawCorpse(g, e); return; }
   if (e.elev) { g.save(); g.translate(0, -e.elev); drawEntityBody(g, e, t); g.restore(); if (e.perch) drawPerchFront(g, e, t); return; }
+  if (e.fade > 0) { g.globalAlpha = clamp(1 - e.fade, .06, 1); drawEntityBody(g, e, t); g.globalAlpha = 1; return; } // stepping through the mist
   drawEntityBody(g, e, t);
 }
 function drawEntityBody(g, e, t) {
@@ -7889,6 +8102,7 @@ function renderWorld(t) {
     if (G.tourney && G.tourney.fighting && G.tourney.ring) { const r0 = G.tourney.ring; g.strokeStyle = 'rgba(255,240,200,.55)'; g.setLineDash([12, 10]); g.lineWidth = 3; g.beginPath(); g.ellipse(r0.x, r0.y, 6 * TS, 4.5 * TS, 0, 0, TAU); g.stroke(); g.setLineDash([]); }
     if (G.mapWaypoint) { const w = G.mapWaypoint; g.strokeStyle = 'rgba(106,208,255,.8)'; g.lineWidth = 3; g.beginPath(); g.arc(w.x, w.y, 16 + Math.sin(t * 3) * 3, 0, TAU); g.stroke(); }
   }
+  if (playing && (tells.length || G.arena)) drawTells(g, t);
   // pickups
   for (const p of pickups) {
     if (p.x < vx - 20 || p.x > vx + VW + 20 || p.y < vy - 20 || p.y > vy + VH + 20) continue;
@@ -8418,7 +8632,7 @@ function resetState() {
   ents = []; pickups = []; projs = []; parts = []; texts = []; horseEnt = null; uidCounter = 1; nextEid = 1;
   W.places.forEach(p => { p.disc = false; p.rumor = false; p.spawned = false; p.dead = []; p.cleared = false; p.chestOpened = false; p.clearedAt = 0; p.offers = null; p.request = false; p.blessed = false; p.investigated = false; p.rumorUsed = false; p.backerRevealed = false; p.wellT = -999; p.sboss = null; p.ddead = null; p.dchests = null; p.dcleared = false; p.legendTaken = false; if (p.type === 'outpost') p.owner = p.baseOwner; for (const k in p) if (k.startsWith('_shop_')) delete p[k]; });
   (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false; G.lastPay = null; G.siege = null; G.tourney = null; G.stats = newStats(); G.tut = null;
-  G.bounty = [0, 0, 0, 0]; G.contest = null; G.festival = null; G.wboss = null; G.wbossNext = 0; G.wbossCount = 0; G.enc = null; G.encT = null; G.race = null; G.joust = null; G.seen = {}; G.fromStory = null; G.tourney = null;
+  G.bounty = [0, 0, 0, 0]; G.contest = null; G.festival = null; G.wboss = null; G.wbossNext = 0; G.wbossCount = 0; G.enc = null; G.encT = null; G.race = null; G.joust = null; G.seen = {}; G.fromStory = null; G.tourney = null; G.arena = null; tells = [];
   Object.assign(G, { time: 0, dipT: 0, eventT: 50, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, questT: 0 });
   newKingdoms(); newQuests(); newFog();
 }
@@ -8478,6 +8692,7 @@ function saveGame(silent, quiet) {
 }
 function loadGame(d) {
   resetState();
+  G.mode = d.mode === 'story' ? 'story' : 'sandbox'; STORY = d.story || null; // before anything draws the HUD, which reads story quests
   newPlayer();
   Object.assign(P, d.P); P.inv = d.P.inv; P.eq = d.P.eq; P.mounted = false; uidCounter = d.uid || (Math.max(0, ...P.inv.map(i => i.uid)) + 1);
   recalc();
@@ -8727,7 +8942,10 @@ function sWave(q, st, tg) {
       const e = mkActor(kind, f.x, f.y, Object.assign({ tier: ex.hp ? undefined : sT(ex.tier || 1), quest: q.id, roam: true, home: { x: tg.x, y: tg.y }, leash: 900, aggro: 440 }, ex.o));
       if (ex.name) e.name = ex.name;
       if (ex.hp) sScale(e, ex.hp, ex.dmg);
+      if (ex.hpM) e.hp = e.maxHp = Math.round(e.maxHp * ex.hpM);
+      if (ex.dmgM) e.dmg *= ex.dmgM;
       if (ex.boss) e.boss = true;
+      if (e.titan) titanInit(e);
       if (ex.yieldAt) Object.assign(e, { yieldAt: ex.yieldAt, ykey: ex.key, yname: ex.yname, ysay: ex.ysay });
       if (dist(e.x, e.y, P.x, P.y) < 700) e.target = P;
       q.foes.f.push(e);
@@ -8749,6 +8967,7 @@ function sYield(e, q) {
   else Object.assign(e, { faction: 'civ', transient: true, quest: null, home: { x: e.x + rand(-300, 300), y: e.y + 420 } });
 }
 function sFightEnd(q) {
+  if (G.arena && G.arena.q === q.id) endArena();
   const R = q.foes; if (!R) return;
   R.f.forEach(e => { if (!e.dead && !e.yielded) { e.quest = null; e.transient = true; } });
   R.a.forEach(e => { if (e.dead) return; if (e.alias) removeEnt(e); else e.leaveAt = G.time + 45; });
@@ -8757,11 +8976,12 @@ function sFightEnd(q) {
 function sFight(q, st, tg) {
   if (!q.sp) {
     if (!tg || dist(P.x, P.y, tg.x, tg.y) > (st.near || 20) * TS) return;
-    q.sp = 1; q.w = 0; q.wt = 0; q.t0 = G.time; q.foes = { f: [], a: [], p: [] };
+    q.sp = 1; q.w = st.ckpt != null && q.ckpt ? q.ckpt : 0; q.wt = 0; q.t0 = G.time; q.foes = { f: [], a: [], p: [] };
     if (st.allies) q.foes.a = st.allies(q, tg.x, tg.y) || [];
     if (st.protect) q.foes.p = st.protect(q, tg.x, tg.y) || [];
     if (st.t === 'duel') sDuel(q, st, tg); else sWave(q, st, tg);
-    if (st.msg) toast(st.msg, 'war');
+    if (st.arena && q.w >= st.arena.w) bossArena(q, tg, st.arena.r);
+    if (st.msg) toast(q.w && st.waveMsg && st.waveMsg[q.w] ? st.waveMsg[q.w] : st.msg, 'war');
     SND.play(st.sfx || (st.t === 'duel' ? 'duel' : q.foes.f.some(e => e.faction === 'hollow') ? 'hollow' : 'horn'));
     return;
   }
@@ -8775,6 +8995,8 @@ function sFight(q, st, tg) {
     if (!q.wt) { q.wt = G.time + 2.5; return; }
     if (G.time < q.wt) return;
     q.wt = 0; q.w++; R.f = []; sWave(q, st, tg);
+    if (st.ckpt != null && q.w >= st.ckpt) q.ckpt = st.ckpt;
+    if (st.arena && q.w >= st.arena.w && !G.arena) bossArena(q, tg, st.arena.r);
     const m = st.waveMsg && st.waveMsg[q.w]; if (m) toast(m, 'war');
     SND.play(R.f.some(e => e.boss) ? 'boss' : R.f.some(e => e.faction === 'hollow') ? 'hollow' : 'horn');
     return;
@@ -9608,11 +9830,11 @@ SQ.fin = {
   reward: { gold: 500, xp: 900 },
   steps: [
     S_FIGHT(() => `Defeat the Hollow King at ${B().name}`, () => B(), [
-      [['wight', 5, { tier: 3 }], ['hknight', 1, { tier: 2 }], ['hollow_archer', 2, { tier: 2 }]],
-      [['wight', 4, { tier: 3 }], ['hknight', 2, { tier: 3 }], ['hollow_archer', 2, { tier: 3 }]],
-      [['hollow_king', 1, { name: 'Aurek, the Hollow King', boss: true, hp: 1350, dmg: 24, o: { scale: 1.3 } }], ['wight', 3, { tier: 3 }]],
-      [['hollow_king', 1, { name: 'Aurek Unbound', boss: true, hp: 1600, dmg: 29, o: { scale: 1.55 } }], ['hknight', 2, { tier: 3 }], ['hollow_archer', 2, { tier: 3 }]],
-    ], { near: 18, sfx: 'seal', msg: "The earth splits open. The Hollow King's host pours out of the barrow!", waveMsg: ['', 'Hollow Knights rise from the grave-mist!', 'AUREK, THE HOLLOW KING, RISES!', 'Aurek falls... and rises again, UNBOUND!'], allies: sFinAllies, won: () => deed('Struck down Aurek, the Hollow King.') }),
+      [['wight', 8, { tier: 3, hpM: 1.8, dmgM: 1.3 }], ['hknight', 2, { tier: 2, hpM: 1.6, dmgM: 1.25, o: { guard: true } }], ['hollow_archer', 4, { tier: 2, hpM: 1.5, dmgM: 1.3 }]],
+      [['wight', 6, { tier: 3, hpM: 1.8, dmgM: 1.3 }], ['hknight', 4, { tier: 3, hpM: 1.6, dmgM: 1.25, o: { guard: true } }], ['hollow_archer', 4, { tier: 3, hpM: 1.5, dmgM: 1.3 }]],
+      [['hollow_king', 1, { name: 'Aurek, the Hollow King', boss: true, hp: 2100, dmg: 44, o: { scale: 1.3, titan: 1, range: 72 } }], ['wight', 2, { tier: 3, hpM: 1.5, dmgM: 1.2 }]],
+      [['hollow_king', 1, { name: 'Aurek Unbound', boss: true, hp: 2600, dmg: 54, o: { scale: 1.55, titan: 2, range: 80, spd: 96 } }], ['hknight', 1, { tier: 3, hpM: 1.4, dmgM: 1.2, o: { guard: true } }], ['hollow_archer', 2, { tier: 3, hpM: 1.3, dmgM: 1.2 }]],
+    ], { near: 18, sfx: 'seal', ckpt: 2, arena: { w: 2, r: 15 }, reset: true, msg: "The earth splits open. The Hollow King's host pours out of the barrow!", waveMsg: ['', 'Hollow Knights rise from the grave-mist!', 'AUREK, THE HOLLOW KING, RISES!', 'Aurek falls... and rises again, UNBOUND!'], allies: sFinAllies, won: () => deed('Struck down Aurek, the Hollow King.') }),
     S_TALK(() => STORY.path === 'conspiracy' ? 'Decide what comes next' : 'Decide the fate of the Ember Crown', sFinNpc, sFinalChoice),
   ],
   done: () => { if (SF('end') === 'usurper') sStart('coup'); else sSoon(storyEnding); },
@@ -10067,7 +10289,9 @@ function update(dt) {
   G.time += dt; if (!G.under) updateWeather(dt);
   G.stats.play += dt; if (P.gold > G.stats.maxGold) G.stats.maxGold = P.gold; if ((G.achT = (G.achT || 0) - dt) <= 0) { G.achT = 2; checkAch(); }
   input.wx = cam.x + (input.mx - VW / 2) / ZOOM; input.wy = cam.y + (input.my - VH / 2) / ZOOM;
-  updatePlayer(dt);
+  const px0 = P.x, py0 = P.y; updatePlayer(dt); if (dt > 0) { P.avx = (P.x - px0) / dt; P.avy = (P.y - py0) / dt; }
+  if (G.arena) arenaTick(dt, px0, py0);
+  if (tells.length) updateTells(dt);
   if (STORY && !G.under) storyTick(dt);
   if (G.under && !G.under.interior) updateTraps(dt);
   if (G.tut) tutTick(dt);
@@ -10104,6 +10328,10 @@ function frame(now) {
   const dt = Math.min(.05, (now - last) / 1000); last = now; const t = now / 1000;
   pollPad();
   fpsA = fpsA * .95 + (1 / Math.max(dt, .001)) * .05;
+  try { frameBody(dt, t); } catch (err) { console.error(err); ctx.restore(); ctx.globalAlpha = 1; } // one bad frame must never stop the loop
+  requestAnimationFrame(frame);
+}
+function frameBody(dt, t) {
   if (W) {
     if (seasonOf() !== curSeason) { applySeason(G.state === 'play' && G.seasonInit); } if (G.state === 'play') G.seasonInit = true;
     if (G.state === 'play' && !paused()) { if (G.hitstop > 0) G.hitstop -= dt; else update(dt); }
@@ -10121,7 +10349,6 @@ function frame(now) {
       if (UI.isOpen('dip') && dipDirty) withOverworld(renderDiplomacy);
     }
   }
-  requestAnimationFrame(frame);
 }
 
 /* ---------------- Audio unlock ----------------
