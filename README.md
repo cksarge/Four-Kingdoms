@@ -70,7 +70,7 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 
 ## Features
 
-- A new map is generated for each game, with castles, villages, rivers, mountain passes, ruins, bandit camps and hidden locations to discover.
+- A new map is generated for each game, with castles, villages, rivers, mountain passes, ruins, bandit camps and hidden locations to discover. Every new world is ringed by at least a league of open sea, and the ocean carries on past the edge of the map.
 - Each kingdom has its own landscape: Albion's green countryside, Valoria's plains broken by desert (with cacti, scorpions, jackals and camels), Draven's mountain-walled forests with snowfields in its high country (snow pines, snowfall, snow wolves, ice bears and mountain goats), and Eldoria's swamps.
 - Kingdom relations change on their own over time, and your actions affect them. The Diplomacy screen shows a live relationship graph and offers actions such as gifts, alliances, peace talks and swearing allegiance.
 - Real-time combat with blocking, stamina and dodging, plus gear, horses and loot that change both your stats and how your knight looks.
