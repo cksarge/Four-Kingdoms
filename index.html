@@ -1778,11 +1778,11 @@ function terAtPx(x, y) { return terAt(Math.floor(x / TS), Math.floor(y / TS)); }
 const isWaterT = t => t === T.SEA || t === T.WATER;
 const isMountT = t => t === T.MOUNT || t === T.SNOW;
 
-function genWorld(seed) {
+function genWorld(seed, gen = 1) { // gen 2 (new games) keeps a league of open sea at the edges; saves without it rebuild the original world
   srng = mulberry32(seed * 7 + 13);
   const N = WW * WH, f = WW / 360, sc = (n, pw = 1) => Math.round(n * Math.pow(f, pw));
   W = {
-    size: WW, seed, ter: new Uint8Array(N), own: new Uint8Array(N), solid: new Uint8Array(N), wall: new Uint8Array(N), clear: new Uint8Array(N), bord: new Uint8Array(N),
+    size: WW, seed, gen, ter: new Uint8Array(N), own: new Uint8Array(N), solid: new Uint8Array(N), wall: new Uint8Array(N), clear: new Uint8Array(N), bord: new Uint8Array(N),
     hgt: new Float32Array(N), places: [], objs: [], chunkTrees: [], chunkObjs: [], interacts: [], caps: [], rivers: [], landCount: [0, 0, 0, 0], names: new Set()
   };
   const nH = makeNoise(seed + 11), nM = makeNoise(seed + 23), nR = makeNoise(seed + 37), nB = makeNoise(seed + 41), nC = makeNoise(seed + 53), nG = makeNoise(seed + 67), nD = makeNoise(seed + 79);
@@ -1799,7 +1799,7 @@ function genWorld(seed) {
     W.own[i] = b1; const border = d2 - d1; W.bord[i] = Math.min(255, border);
     const h = fbm(nH, x / 48, y / 48, 4), m = fbm(nM, x / 34 + 100, y / 34 + 100, 4);
     W.hgt[i] = h;
-    const e = Math.min(x, y, WW - 1 - x, WH - 1 - y) + (fbm(nC, x / 16, y / 16, 3) - .5) * 26;
+    const ed = Math.min(x, y, WW - 1 - x, WH - 1 - y), en = (fbm(nC, x / 16, y / 16, 3) - .5) * 26, e = gen >= 2 ? (ed < 10 ? Math.min(ed, 8) : ed - 7 + en) : ed + en;
     let t;
     if (e < 9) t = T.SEA; else if (e < 11.5) t = T.SAND;
     else {
@@ -1979,12 +1979,13 @@ function genWorld(seed) {
   // ---------- Bandit camps ----------
   tries = 0; const camps = [];
   const nCamp = sc(18, 2);
-  while (camps.length < nCamp && tries++ < sc(8000, 2)) {
+  const cg = gen >= 2 ? .85 : 1; // new worlds keep a sea margin, so camps pack a little closer to fit
+  while (camps.length < nCamp && tries++ < sc(8000, 2) * (gen >= 2 ? 2 : 1)) {
     const tx = sri(16, WW - 17), ty = sri(16, WH - 17); const t0 = ter[ty * WW + tx];
     let wild = (t0 === T.FOREST || t0 === T.DENSE || t0 === T.HILL || t0 === T.SWAMP);
     if (!wild) { let m = 0; for (let dy = -9; dy <= 9; dy += 3) for (let dx = -9; dx <= 9; dx += 3) if (isMountT(terAt(tx + dx, ty + dy))) m++; wild = m > 2; }
     if (!wild && srng() > .08) continue;
-    if (!farDist(tx, ty, ['castle'], 40) || !farDist(tx, ty, ['village'], 25) || !farDist(tx, ty, ['outpost', 'camp'], 24) || !farDist(tx, ty, ['ruin'], 14)) continue;
+    if (!farDist(tx, ty, ['castle'], 40 * cg) || !farDist(tx, ty, ['village'], 25 * cg) || !farDist(tx, ty, ['outpost', 'camp'], 24 * cg) || !farDist(tx, ty, ['ruin'], 14 * cg)) continue;
     if (!landOK(tx, ty, 6)) continue;
     const k = W.own[ty * WW + tx];
     clearArea(tx, ty, 7, 4.2, T.DIRT);
@@ -5917,9 +5918,9 @@ function buildPalette() {
 const chunkCache = new Map(); let chunkFrame = 0, chunksBuilt = 0;
 function blobGroup(t) { if (t === T.SEA || t === T.WATER) return 2; if (t === T.ROAD) return 3; if (t === T.BRIDGE || t === T.FARM || t === T.FLOOR || t >= T.PLANK) return 9; if (t === T.FORD) return 2; if (t === T.MOUNT || t === T.SNOW || t === T.ROCK || t === T.ICEWALL) return 1; if (t === T.CRYPT || t === T.BRICK) return 9; return 0; }
 function getChunk(cx, cy) {
-  const key = cy * CW + cx; let ch = chunkCache.get(key);
+  const key = cx < 0 || cy < 0 || cx >= CW || cy >= CHH ? `o${cx},${cy}` : cy * CW + cx; let ch = chunkCache.get(key); // chunks past the edge are open sea
   if (ch) { ch.used = chunkFrame; return ch.c; }
-  if (chunksBuilt >= 3) return null; chunksBuilt++;
+  if (chunksBuilt >= (G.state === 'menu' || chunkCache.size < 12 ? 40 : 3)) return null; chunksBuilt++; // a cold cache fills in one go, so embedded browsers that draw few frames never show bare ground
   const c = document.createElement('canvas'); c.width = c.height = CH * TS; const g = c.getContext('2d');
   renderChunk(g, cx, cy); chunkCache.set(key, { c, used: chunkFrame });
   const lim = settings.quality === 'low' ? 36 : 64;
@@ -6038,7 +6039,7 @@ function renderChunk(g, cx, cy) {
   }
   // walls
   for (let ty = y0; ty < y0 + CH; ty++) for (let tx = x0; tx < x0 + CH; tx++) {
-    const w = W.wall[ty * WW + tx]; if (!w) continue; const px = tx * TS + ox, py = ty * TS + oy; const k = W.own[ty * WW + tx];
+    if (tx < 0 || ty < 0 || tx >= WW || ty >= WH) continue; const w = W.wall[ty * WW + tx]; if (!w) continue; const px = tx * TS + ox, py = ty * TS + oy; const k = W.own[ty * WW + tx];
     if (w === 1) { const st = KDATA[k].stone; g.fillStyle = shade(st, -.35); g.fillRect(px, py + 6, TS, TS); g.fillStyle = st; g.fillRect(px, py - 4, TS, TS); g.fillStyle = shade(st, .2); for (let i = 0; i < 4; i++) if (i % 2 === 0) g.fillRect(px + i * 8, py - 8, 8, 6); g.strokeStyle = 'rgba(0,0,0,.25)'; g.lineWidth = 1; g.strokeRect(px + .5, py - 3.5, TS - 1, TS - 1); g.beginPath(); g.moveTo(px, py + 12); g.lineTo(px + TS, py + 12); g.stroke(); }
     else if (w === 2 || w === 4) { g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(px + 4, py + 18, TS, 8); for (let i = 0; i < 4; i++) { g.fillStyle = w === 4 ? '#6a4a28' : '#7a5530'; circ(g, px + 4 + i * 8, py + 16, 4.5); g.fillStyle = shade(w === 4 ? '#6a4a28' : '#7a5530', .25); circ(g, px + 3 + i * 8, py + 15, 2.2); } if (w === 4) { g.strokeStyle = '#4a3018'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(px, py + 26); g.lineTo(px + TS, py + 6); g.moveTo(px, py + 6); g.lineTo(px + TS, py + 26); g.stroke(); } }
     else if (w === 3) { g.fillStyle = '#6e6a62'; g.fillRect(px + 2, py + 4, TS - 4, TS - 6); g.fillStyle = '#8e8a80'; g.fillRect(px + 2, py, TS - 4 - hash2(tx, ty) * 10, 10); g.fillStyle = '#5a7a3a'; circ(g, px + 6 + hash2(ty, tx) * 20, py + 6, 4); }
@@ -6046,6 +6047,7 @@ function renderChunk(g, cx, cy) {
   // kingdom borders (subtle)
   g.lineWidth = 2; g.setLineDash([5, 5]);
   for (let ty = y0; ty < y0 + CH; ty++) for (let tx = x0; tx < x0 + CH; tx++) {
+    if (tx < 0 || ty < 0 || tx >= WW || ty >= WH) continue; // open sea past the edge has no borders
     const i = ty * WW + tx; if (W.ter[i] === T.SEA) continue; const k = W.own[i];
     if (tx + 1 < WW && W.own[i + 1] !== k && W.ter[i + 1] !== T.SEA) { g.strokeStyle = hexA(kcol(k), .45); g.beginPath(); g.moveTo((tx + 1) * TS + ox, ty * TS + oy); g.lineTo((tx + 1) * TS + ox, (ty + 1) * TS + oy); g.stroke(); }
     if (ty + 1 < WH && W.own[i + WW] !== k && W.ter[i + WW] !== T.SEA) { g.strokeStyle = hexA(kcol(k), .45); g.beginPath(); g.moveTo(tx * TS + ox, (ty + 1) * TS + oy); g.lineTo((tx + 1) * TS + ox, (ty + 1) * TS + oy); g.stroke(); }
@@ -7867,14 +7869,14 @@ function renderWorld(t) {
   g.fillStyle = G.under ? (G.under.interior ? '#0c0906' : '#1a1612') : '#24507e'; g.fillRect(0, 0, VW, VH);
   g.save(); g.translate(-vx, -vy);
   const CS = CH * TS;
-  const c0 = Math.max(0, Math.floor(vx / CS)), c1 = Math.min(CW - 1, Math.floor((vx + VW) / CS)), r0 = Math.max(0, Math.floor(vy / CS)), r1 = Math.min(CHH - 1, Math.floor((vy + VH) / CS));
-  for (let cy = r0; cy <= r1; cy++) for (let cx = c0; cx <= c1; cx++) { const c = getChunk(cx, cy); if (c) g.drawImage(c, cx * CS, cy * CS, CS + 1, CS + 1); else { g.fillStyle = '#5f8d3b'; g.fillRect(cx * CS, cy * CS, CS, CS); } }
+  const sea = !G.under, c0 = sea ? Math.floor(vx / CS) : Math.max(0, Math.floor(vx / CS)), c1 = sea ? Math.floor((vx + VW) / CS) : Math.min(CW - 1, Math.floor((vx + VW) / CS)), r0 = sea ? Math.floor(vy / CS) : Math.max(0, Math.floor(vy / CS)), r1 = sea ? Math.floor((vy + VH) / CS) : Math.min(CHH - 1, Math.floor((vy + VH) / CS));
+  for (let cy = r0; cy <= r1; cy++) for (let cx = c0; cx <= c1; cx++) { const c = getChunk(cx, cy); if (c) g.drawImage(c, cx * CS, cy * CS, CS + 1, CS + 1); else { g.fillStyle = tcol(cx * CH + (CH >> 1), cy * CH + (CH >> 1)); g.fillRect(cx * CS, cy * CS, CS, CS); } }
   // water shimmer
   if (settings.quality !== 'low') {
     g.strokeStyle = 'rgba(255,255,255,.22)'; g.lineWidth = 1.5;
-    const tx0 = Math.max(0, Math.floor(vx / TS)), tx1 = Math.min(WW - 1, Math.floor((vx + VW) / TS)), ty0 = Math.max(0, Math.floor(vy / TS)), ty1 = Math.min(WH - 1, Math.floor((vy + VH) / TS));
+    const tx0 = sea ? Math.floor(vx / TS) : Math.max(0, Math.floor(vx / TS)), tx1 = sea ? Math.floor((vx + VW) / TS) : Math.min(WW - 1, Math.floor((vx + VW) / TS)), ty0 = sea ? Math.floor(vy / TS) : Math.max(0, Math.floor(vy / TS)), ty1 = sea ? Math.floor((vy + VH) / TS) : Math.min(WH - 1, Math.floor((vy + VH) / TS));
     for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
-      const tt = W.ter[ty * WW + tx]; if (tt !== T.WATER && tt !== T.SEA) continue; const h = hash2(tx * 3, ty * 5); if (h > .3) continue;
+      const tt = terAt(tx, ty); if (tt !== T.WATER && tt !== T.SEA) continue; const h = hash2(tx * 3, ty * 5); if (h > .3) continue;
       const a = Math.sin(t * 1.6 + h * 40); if (a < .3) continue; g.globalAlpha = (a - .3) * .9;
       const x = tx * TS + h * 20, y = ty * TS + hash2(ty, tx) * 26 + Math.sin(t + h * 9) * 2; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 8, y); g.stroke();
     }
@@ -8410,7 +8412,7 @@ function storyToSandbox() { if (G.mode !== 'story') return; G.mode = 'sandbox'; 
 $('btnEndMenu').onclick = () => { UI.hide('endScreen'); toMainMenu(); };
 
 function withLoading(text, fn) { $('loadText').textContent = text; $('loading').classList.remove('done'); setTimeout(() => { try { fn(); } finally { $('loading').classList.add('done'); } }, 60); }
-function prepareWorld(seed, opts = normOpts()) { setWorldSize(SIZES[opts.size].n); genWorld(seed); applyStartKingdom(opts.kingdom); buildPalette(); buildTreeSprites(); buildMapLayers(); chunkCache.clear(); }
+function prepareWorld(seed, opts = normOpts()) { setWorldSize(SIZES[opts.size].n); genWorld(seed, opts.gen || 1); applyStartKingdom(opts.kingdom); buildPalette(); buildTreeSprites(); buildMapLayers(); chunkCache.clear(); }
 function resetState() {
   G.under = null; G.over = null;
   ents = []; pickups = []; projs = []; parts = []; texts = []; horseEnt = null; uidCounter = 1; nextEid = 1;
@@ -8427,7 +8429,7 @@ function beginPlay() {
 }
 function startNew(mode = 'sandbox', opts) {
   withLoading('FORGING A NEW REALM…', () => {
-    opts = normOpts(opts); if (mode === 'story') opts.kingdom = 0; // the story begins in Albion
+    opts = normOpts(opts); opts.gen = 2; if (mode === 'story') opts.kingdom = 0; // the story begins in Albion
     if (DIFFS[opts.diff].ironman) { opts.wild = 2; opts.explored = false; }
     G.mode = mode; G.opts = opts; DAYLEN = DAYS[opts.day].len; STORY = mode === 'story' ? newStory() : null;
     prepareWorld(Math.floor(Math.random() * 1e9), opts); resetState(); newPlayer(); applyNewGameOpts();
@@ -8447,7 +8449,7 @@ function continueGame(n = G.slot) {
   withLoading('RETURNING TO THE REALM…', () => {
     G.slot = n; const mode = modeOf(d);
     const o = normOpts(d.opts); G.mode = mode; G.opts = o; DAYLEN = DAYS[o.day].len;
-    if (!W || W.seed !== d.seed || W.size !== SIZES[o.size].n || W.startK !== o.kingdom) prepareWorld(d.seed, o);
+    if (!W || W.seed !== d.seed || W.size !== SIZES[o.size].n || W.startK !== o.kingdom || (W.gen || 1) !== (o.gen || 1)) prepareWorld(d.seed, o);
     loadGame(d); beginPlay(); toast(`Welcome back. Day ${dayNum()}.`, 'gold');
   });
 }
@@ -10135,7 +10137,7 @@ function frame(now) {
   let seed = Math.floor(Math.random() * 1e9);
   migrateSaves(); const recent = slotsUsed().sort((a, b) => (b.d.savedAt || 0) - (a.d.savedAt || 0))[0]; if (recent) seed = recent.d.seed;
   setTimeout(() => {
-    prepareWorld(seed); resetState();
+    prepareWorld(seed, recent ? normOpts(recent.d.opts) : normOpts({ gen: 2 })); resetState();
     refreshMenu(); UI.show('mainMenu');
     $('loading').classList.add('done');
     try { SND.init(); } catch (e) { } // plays right away if the browser allows it; otherwise on the first click or key press
