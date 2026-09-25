@@ -3328,6 +3328,7 @@ function arenaTick(dt, px0, py0) {
 }
 function sFightReset(q) {
   const R = q.foes; if (!R) return;
+  q.fell = 1; // for the Untouchable achievement
   if (G.arena && G.arena.q === q.id) endArena();
   R.f.forEach(removeEnt); R.a.forEach(removeEnt); R.p.forEach(e => { e.prot = 0; });
   projs = projs.filter(p => p.src === P);
@@ -3753,7 +3754,7 @@ function goToJail(k, days) {
   closeDialog(); if (G.under) leaveDungeon(true);
   const loot = stolenItems(); loot.forEach(it => removeItem(it.uid, it.n || 1));
   const lostXp = Math.min(P.xp, Math.round(xpNeed(P.lvl) * .12 * days)); P.xp -= lostXp;
-  G.time += days * DAYLEN; G.bounty[k] = 0; G.arrestCd = G.time + 60; P.hp = Math.max(P.hp, Math.round(P.maxHp * .8)); P.st = P.maxSt; P.mounted = false;
+  G.time += days * DAYLEN; G.bounty[k] = 0; G.arrestCd = G.time + 60; G.stats.jail = (G.stats.jail || 0) + 1; P.hp = Math.max(P.hp, Math.round(P.maxHp * .8)); P.st = P.maxSt; P.mounted = false;
   const c = W.places.find(p => p.type === 'castle' && p.owner === k) || W.places[k]; const f = findFree(c.x, c.y + 12 * TS); P.x = f.x; P.y = f.y; cam.x = P.x; cam.y = P.y;
   ents.forEach(e => { if (e.target === P) { e.target = null; e.aggroPlayer = false; } });
   openDialog({ name: 'The Cells', role: KDATA[k].castle, portrait: 'grave', text: `${days} day${days > 1 ? 's' : ''} of cold stone, thin gruel and a snoring cellmate. The gaoler finally swings the door open.${loot.length ? ' Your stolen goods stay with the crown.' : ''}${lostXp ? ` You feel rusty (−${lostXp} XP).` : ''}`, options: [{ t: 'Walk free', fn: closeDialog }] });
@@ -4241,7 +4242,7 @@ function nemFriendDialog(e) {
   const lines = N.visits <= 1 ? '"I have thought a great deal about the day you let me live. I was a fool, and a jealous one. Let me make some small amends."' : pick(['"The roads are kinder with you on them. Mostly."', '"I told a tavern the truth about our feud last week. They did not believe me either."', '"Still alive, I see. Good. I would hate for anyone else to beat you."']);
   openDialog({ name: nemName(N), role: 'Once your nemesis, now a friend', portrait: e, text: lines, options: [
     ...(!e.gave ? [{ t: '<span class="dn">GIFT</span>Accept a token of thanks', fn: () => { e.gave = true; const r = Math.random(); if (r < .4) { const g0 = randi(60, 140) + P.lvl * 10; P.gold += g0; SND.play('coin'); toast(`${nemName(N)} presses <b>${g0} gold</b> into your hand.`, 'gold'); } else if (r < .75) { addItem('potion', 1, 2); toast('Two healing potions, "for the next fool who tries to kill you."', 'good'); } else { const id = pick(LOOT_TIERS[Math.min(4, 1 + Math.floor(P.lvl / 4))].filter(i => ['weapon', 'shield', 'armor'].includes(ITEMS[i].type))); addItem(id, 2, 1); toast(`${nemName(N)} gives you a fine <b>${ITEMS[id].name}</b>.`, 'gold'); } nemFriendDialog(e); } }] : []),
-    { t: '<span class="dn">RIDE</span>Ride with me a while', dis: !!e.ally, fn: () => { closeDialog(); Object.assign(e, { ally: true, civ: false, follow: true, followDist: 70, fox: rand(-40, 40), foy: rand(-40, 40), stand: false, aggro: 360, leash: 99999, expire: G.time + DAYLEN * .5, transient: false }); e.say = { text: 'Lead on. My sword is yours until nightfall.', t: 3 }; } },
+    { t: '<span class="dn">RIDE</span>Ride with me a while', dis: !!e.ally, fn: () => { closeDialog(); G.stats.nemRide = 1; Object.assign(e, { ally: true, civ: false, follow: true, followDist: 70, fox: rand(-40, 40), foy: rand(-40, 40), stand: false, aggro: 360, leash: 99999, expire: G.time + DAYLEN * .5, transient: false }); e.say = { text: 'Lead on. My sword is yours until nightfall.', t: 3 }; } },
     { t: '<span class="dn">NEWS</span>Heard anything on the road?', fn: () => { const c = W.places.filter(p => !p.disc && ['camp', 'dungeon', 'hidden', 'ruin'].includes(p.type)).sort((a, b) => dist(P.x, P.y, a.x, a.y) - dist(P.x, P.y, b.x, b.y))[0]; closeDialog();
       if (G.wboss && chance(.4) && W.places[G.wboss.target]) toast(`"${G.wboss.name} is heading for ${W.places[G.wboss.target].name}. I would not go alone."`, 'war');
       else if (c) { c.disc = true; G.mapWaypoint = { x: c.x, y: c.y }; toast(`"There is ${{ camp: 'a bandit camp', dungeon: 'a dungeon', hidden: 'something hidden', ruin: 'an old ruin' }[c.type]} ${leagues(dist(P.x, P.y, c.x, c.y))} leagues ${compass(c.x - P.x, c.y - P.y).toLowerCase()} of here." It is marked on your map.`, 'gold'); }
@@ -4279,7 +4280,7 @@ function startEncounter(type) {
   if (G2.ents[0]) G2.ents[0].say = { text: { knight: 'Help… please…', child: 'I want my mama!', toll: 'Road\'s closed. Unless you pay.', thief: 'Hide me! Please!', merchant: 'Blast this axle!', pilgrim: 'Peace on your road, traveller.', fortune: 'Your future awaits, knight…', deserter: 'Please… don\'t turn me in.' }[type], t: 5 };
 }
 function encDialog(e) {
-  const G2 = G.enc || { k: ownerAtPx(e.x, e.y) }, k = G2.k, type = e.enc, done = msg => { closeDialog(); if (msg) toast(msg, 'gold'); e.role = 'encdone'; };
+  const G2 = G.enc || { k: ownerAtPx(e.x, e.y) }, k = G2.k, type = e.enc, done = msg => { closeDialog(); if (msg) toast(msg, 'gold'); e.role = 'encdone'; (G.stats.encs || (G.stats.encs = {}))[type] = 1; };
   const opt = (t, fn, dis) => ({ t, fn, dis });
   const O = { name: e.name, role: 'On the road', portrait: e };
   if (type === 'knight') return openDialog(Object.assign(O, { text: 'Bandits… jumped me on the road. Took my horse. I can\'t stop the bleeding.', options: [
@@ -8289,7 +8290,7 @@ function updateHUD(force) {
 }
 
 /* ---------------- Statistics and achievements ---------------- */
-const newStats = () => ({ play: 0, dist: 0, kills: {}, arrows: 0, bowKills: 0, maxGold: 0, deaths: 0, dungeons: 0, fish: 0, carp: 0, camps: 0, tourneys: 0, sieges: 0, enchants: 0, unhorsed: 0, races: 0, voyages: 0, festWins: 0, wbosses: 0 });
+const newStats = () => ({ play: 0, dist: 0, kills: {}, arrows: 0, bowKills: 0, maxGold: 0, deaths: 0, dungeons: 0, fish: 0, carp: 0, camps: 0, tourneys: 0, sieges: 0, enchants: 0, unhorsed: 0, races: 0, voyages: 0, festWins: 0, wbosses: 0, jail: 0, encs: {} });
 const legendsOwned = () => ['oathkeeper', ...LEGENDS].filter(id => countItem(id) || (P.stash || []).some(i => i.id === id)).length;
 const ACH = [
   ['first_blood', '⚔', 'First Blood', 'Defeat your first foe', () => G.kills >= 1], ['slayer', '⚔', 'Slayer', 'Defeat 100 foes', () => G.kills >= 100], ['legend500', '☠', 'Legend of the Realm', 'Defeat 500 foes', () => G.kills >= 500],
@@ -8312,7 +8313,14 @@ const ACH = [
   ['voyage', '⚓', 'Sea Legs', 'Sail to another harbour', () => G.stats.voyages >= 1], ['festival', '🎉', 'Fairground Hero', 'Win the top prize in a festival game', () => G.stats.festWins >= 1],
   ['feud', '⚔', "Feud's End", 'Settle the feud with your nemesis', () => !!P.nemesis && ['dead', 'spared', 'exiled'].includes(P.nemesis.state)], ['wboss', '🐉', 'Giant Killer', 'Slay a roaming world boss', () => G.stats.wbosses >= 1],
   ['guild', '🗝', 'Honour Among Thieves', "See the thieves' guild's work through, one way or another", () => !!P.guild && P.guild.stage >= 5], ['trophies5', '🏆', 'Hall of Glory', 'Fill your trophy room with 5 trophies', () => (P.trophies || []).length >= 5],
-  ['endings5', '📜', 'Many Roads', 'Discover 5 story endings', () => endingsSeen() >= 5], ['endings_all', '📜', 'Every Ending', 'Discover all 15 story endings', () => endingsSeen() >= 15],
+  ['pickpocket', '🤏', 'Light Fingers', 'Pick 10 pockets without getting caught', () => (G.stats.picks || 0) >= 10], ['jail', '⛓', 'Jailbird', 'Serve time in a royal jail', () => (G.stats.jail || 0) >= 1],
+  ['wanted', '⚠', 'Most Wanted', 'Carry a bounty of 500 gold in one kingdom', () => (G.bounty || []).some(b => b >= 500)], ['roads', '🛤', 'Tales of the Road', 'Resolve all eight kinds of roadside encounter', () => Object.keys(G.stats.encs || {}).length >= 8],
+  ['ferry', '🛶', 'River Crossing', 'Cross a river by ferry', () => (G.stats.ferries || 0) >= 1], ['dressed', '🧣', 'Dressed for the Occasion', 'Wear three keepsakes at once', () => (P.worn || []).filter(id => countItem(id)).length >= 3],
+  ['old_rivals', '🤝', 'Old Rivals', 'Spare your nemesis, then ride into battle together', () => !!G.stats.nemRide], ['trophies10', '🏆', 'Hall of Legends', 'Fill your trophy room with 10 trophies', () => (P.trophies || []).length >= 10],
+  ['kingslayer', '♛', 'Kingslayer', 'Strike down Aurek, the Hollow King', () => !!G.stats.aurek], ['untouchable', '✧', 'Untouchable', 'Defeat the Hollow King without falling once in the final battle', () => !!G.stats.aurekClean],
+  ['hardest_road', '☠', 'The Hardest Road', 'Defeat the Hollow King on Warlord or Forsaken difficulty', () => !!G.stats.aurekHard], ['story_end', '📖', 'The Tale Is Told', 'Reach an ending of the story', () => endingsSeen() >= 1],
+  ['endings5', '📜', 'Many Roads', 'Discover 5 story endings', () => endingsSeen() >= 5], ['endings12', '📜', 'Weaver of Fates', 'Discover 12 story endings', () => endingsSeen() >= 12],
+  ['endings_all', '📜', 'Every Ending', 'Discover all 22 story endings', () => endingsSeen() >= Object.keys(ENDINGS).length],
 ];
 function endingsSeen() { try { return JSON.parse(localStorage.getItem('fk_endings') || '[]').length; } catch (e) { return 0; } }
 let ACHS = {}; try { ACHS = JSON.parse(localStorage.getItem('fk_ach') || '{}'); } catch (e) { }
@@ -9834,7 +9842,7 @@ SQ.fin = {
       [['wight', 6, { tier: 3, hpM: 1.8, dmgM: 1.3 }], ['hknight', 4, { tier: 3, hpM: 1.6, dmgM: 1.25, o: { guard: true } }], ['hollow_archer', 4, { tier: 3, hpM: 1.5, dmgM: 1.3 }]],
       [['hollow_king', 1, { name: 'Aurek, the Hollow King', boss: true, hp: 2100, dmg: 44, o: { scale: 1.3, titan: 1, range: 72 } }], ['wight', 2, { tier: 3, hpM: 1.5, dmgM: 1.2 }]],
       [['hollow_king', 1, { name: 'Aurek Unbound', boss: true, hp: 2600, dmg: 54, o: { scale: 1.55, titan: 2, range: 80, spd: 96 } }], ['hknight', 1, { tier: 3, hpM: 1.4, dmgM: 1.2, o: { guard: true } }], ['hollow_archer', 2, { tier: 3, hpM: 1.3, dmgM: 1.2 }]],
-    ], { near: 18, sfx: 'seal', ckpt: 2, arena: { w: 2, r: 15 }, reset: true, msg: "The earth splits open. The Hollow King's host pours out of the barrow!", waveMsg: ['', 'Hollow Knights rise from the grave-mist!', 'AUREK, THE HOLLOW KING, RISES!', 'Aurek falls... and rises again, UNBOUND!'], allies: sFinAllies, won: () => deed('Struck down Aurek, the Hollow King.') }),
+    ], { near: 18, sfx: 'seal', ckpt: 2, arena: { w: 2, r: 15 }, reset: true, msg: "The earth splits open. The Hollow King's host pours out of the barrow!", waveMsg: ['', 'Hollow Knights rise from the grave-mist!', 'AUREK, THE HOLLOW KING, RISES!', 'Aurek falls... and rises again, UNBOUND!'], allies: sFinAllies, won: q => { deed('Struck down Aurek, the Hollow King.'); G.stats.aurek = 1; if (!q.fell) G.stats.aurekClean = 1; if ((G.opts ? G.opts.diff : 2) >= 4) G.stats.aurekHard = 1; checkAch(); } }),
     S_TALK(() => STORY.path === 'conspiracy' ? 'Decide what comes next' : 'Decide the fate of the Ember Crown', sFinNpc, sFinalChoice),
   ],
   done: () => { if (SF('end') === 'usurper') sStart('coup'); else sSoon(storyEnding); },
