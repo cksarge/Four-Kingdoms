@@ -107,6 +107,18 @@ body.touch #helpTouch{display:block}
 .bar.st .fill{background:linear-gradient(180deg,#b8d86a,#6f9a2c 55%,#46681a)}
 .bar.st.low .fill{background:linear-gradient(180deg,#e0b050,#9a6a1c)}
 .bar.xp{height:6px;width:220px}
+.txtIn{background:#120c07;border:1px solid #6b5230;border-radius:4px;color:var(--ink);font:inherit;font-size:15px;padding:6px 9px;width:100%;box-sizing:border-box}.txtIn.sm{font-size:13px;padding:3px 7px;width:auto;max-width:220px}.crName .txtIn{width:auto;font-family:var(--fh);font-size:16px}
+#courtBody{max-height:min(70vh,640px);overflow:auto;margin-top:8px}
+.crGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.crCard{display:flex;gap:12px;padding:10px;border:1px solid rgba(160,122,58,.35);border-left:4px solid var(--kc,#8a6a32);border-radius:6px;background:rgba(0,0,0,.25)}
+.crPort{width:72px;height:72px;border-radius:6px;border:1px solid #6b5230;flex:none}
+.crInfo{flex:1;min-width:0;font-size:13.5px}.crName{font-family:var(--fh);color:var(--gold-l);font-size:16px}.crSub{color:var(--muted);font-size:12.5px;margin:2px 0 5px}.crSub img{width:12px;height:16px;vertical-align:-3px}
+.crTraits{margin:3px 0}.crLine{margin:3px 0}.crBar{display:inline-block;width:90px;height:7px;background:#1a120a;border:1px solid #5d4526;border-radius:3px;vertical-align:1px;overflow:hidden}.crBar span{display:block;height:100%}
+.crCrisis{color:#ffb060;margin:4px 0}.crNote{margin-top:10px;padding:8px 10px;border:1px solid rgba(160,122,58,.3);border-radius:6px;background:rgba(0,0,0,.2);font-size:13.5px}.crNote>b{display:block;font-family:var(--fh);color:var(--gold-l);margin-bottom:3px}
+.dim{color:var(--muted)}.hsTop{display:flex;gap:14px;align-items:flex-start;padding:10px;border:1px solid rgba(160,122,58,.35);border-radius:6px;background:rgba(0,0,0,.25)}.hsTop .crPort{width:96px;height:96px}
+.hsH{font-family:var(--fh);color:var(--gold-l);font-size:14px;margin:14px 0 6px}.hsKids{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.hsKid{display:flex;gap:8px;padding:7px;border:1px solid rgba(160,122,58,.3);border-radius:6px;background:rgba(0,0,0,.2);font-size:13px}.hsKid.heir{border-color:#e7c35a}.hsKid img{width:48px;height:48px;border-radius:5px}.hsBtns{display:flex;gap:6px;margin-top:4px;align-items:center;flex-wrap:wrap}
+@media (max-width:760px){.crGrid,.hsKids{grid-template-columns:1fr}}
 .bar.mp{height:11px}.bar.mp .fill{background:linear-gradient(180deg,#8ab8ff,#3a64c8 55%,#243e8a)}.bar.mp span{font-size:9.5px}
 body.hasMana #questTracker{top:98px}
 #spellBar{position:absolute;left:50%;bottom:92px;transform:translateX(-50%);display:flex;gap:6px;padding:5px;pointer-events:auto}
@@ -611,6 +623,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <button class="hbtn" data-open="map" title="Map (M)">M · Map</button>
         <button class="hbtn" data-open="dip" title="Diplomacy (K)">K · Realms</button>
         <button class="hbtn" data-open="quests" title="Journal (J)">J · Journal</button>
+        <button class="hbtn" data-open="court" title="Realm &amp; Court (H)">H · Court</button>
         <button class="hbtn" data-open="pause" title="Menu (Esc)">Esc</button>
       </div>
     </div>
@@ -653,6 +666,11 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <div class="modeCard tut" data-mode="tutorial"><div class="mcT">TUTORIAL</div><div class="mcD">A quick lesson in the training yard: moving, fighting, archery, riding and the menus. Afterwards, keep playing the same world as an endless sandbox.</div><div class="mcS">About five minutes · Knight difficulty · Medium world</div></div>
       </div>
       <div id="setupBox" class="hidden">
+        <div class="setH">YOUR KNIGHT</div>
+        <div class="setupRow">
+          <div><input id="optName" class="txtIn" maxlength="22" placeholder="Name (blank for a random one)"><div class="choice" id="sexSeg" style="margin-top:8px"></div></div>
+          <div><div class="choice" id="bloodSeg"></div><div class="segNote" id="bloodNote"></div></div>
+        </div>
         <div class="setH">DIFFICULTY</div>
         <div class="diffGrid" id="diffGrid"></div>
         <div class="diffInfo" id="diffInfo"></div>
@@ -842,6 +860,17 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
     </div>
   </div>
 
+  <!-- REALM & COURT -->
+  <div id="courtScreen" class="screen">
+    <div class="panel rv" style="width:min(1060px,96vw)">
+      <div class="closeX" data-close>✕</div>
+      <div class="ptitle">REALM &amp; COURT</div>
+      <div class="orn">✦</div>
+      <div class="tabs" id="courtTabs"></div>
+      <div id="courtBody"></div>
+    </div>
+  </div>
+
   <!-- SHOP -->
   <div id="shopScreen" class="screen">
     <div class="panel rv">
@@ -958,7 +987,7 @@ const sgn = n => (n > 0 ? '+' : '') + Math.round(n);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 /* Hooks: the bigger systems (magic, courts, armies, the realm, the seas, the Tide, the Long Road) each register here
    for reset, save, load and the game clocks, so the core save/load and loop code only needs one call per hook. */
-const HOOKS = { reset: [], save: [], load: [], newgame: [], daily: [], tick: [], slow: [], hud: [], draw: [], recalc: [], kill: [], pad: [] };
+const HOOKS = { reset: [], save: [], load: [], newgame: [], daily: [], tick: [], slow: [], hud: [], draw: [], recalc: [], kill: [], pad: [], succession: [] };
 const hook = (n, fn) => { HOOKS[n].push(fn); };
 // New NPC roles, world interactions and keys register here: ROLES[role] = { label(e), talk(e) }, IACTS[type] = { label(it, pl), act(it, pl) },
 // KEYFN[code] = fn (the code is the default key; players can rebind it in Settings), PANELS[code] = UI screen to toggle.
@@ -1003,7 +1032,7 @@ function compass(dx, dy) { const a = Math.atan2(dy, dx); const dirs = ['East', '
 const DEFAULT_SETTINGS = { music: 0.45, sound: 0.7, effects: 0.6, shake: true, dmgNums: true, minimap: true, uiScale: 1, quality: 'high', battery: false, voices: true, voiceVol: .8, noFlash: false, cb: false, textScale: 1, keys: {} };
 let settings = loadSettings();
 /* Key bindings: every action keeps its default code inside the game; settings.keys maps it to the physical key. */
-const KEY_ACTIONS = [['KeyW', 'Move up'], ['KeyS', 'Move down'], ['KeyA', 'Move left'], ['KeyD', 'Move right'], ['ShiftLeft', 'Sprint'], ['Space', 'Dodge'], ['KeyE', 'Interact'], ['KeyF', 'Horse'], ['KeyQ', 'Hit friendlies (hold)'], ['KeyR', 'Switch arrows'], ['Tab', 'Swap weapon'], ['KeyC', 'Special move'], ['KeyG', 'Companions'], ['KeyI', 'Inventory'], ['KeyM', 'Map'], ['KeyK', 'Diplomacy'], ['KeyJ', 'Journal: quests'], ['KeyP', 'Skills'], ['KeyL', 'Journal: bestiary'], ['Digit1', 'Eat food'], ['Digit2', 'Drink potion'], ['Digit3', 'Use bandage'], ['Digit4', 'Quick tonic'], ['KeyZ', 'Spell 1'], ['KeyX', 'Spell 2'], ['KeyV', 'Spell 3'], ['KeyB', 'Spell 4']];
+const KEY_ACTIONS = [['KeyW', 'Move up'], ['KeyS', 'Move down'], ['KeyA', 'Move left'], ['KeyD', 'Move right'], ['ShiftLeft', 'Sprint'], ['Space', 'Dodge'], ['KeyE', 'Interact'], ['KeyF', 'Horse'], ['KeyQ', 'Hit friendlies (hold)'], ['KeyR', 'Switch arrows'], ['Tab', 'Swap weapon'], ['KeyC', 'Special move'], ['KeyG', 'Companions'], ['KeyI', 'Inventory'], ['KeyM', 'Map'], ['KeyK', 'Diplomacy'], ['KeyJ', 'Journal: quests'], ['KeyP', 'Skills'], ['KeyL', 'Journal: bestiary'], ['Digit1', 'Eat food'], ['Digit2', 'Drink potion'], ['Digit3', 'Use bandage'], ['Digit4', 'Quick tonic'], ['KeyZ', 'Spell 1'], ['KeyX', 'Spell 2'], ['KeyV', 'Spell 3'], ['KeyB', 'Spell 4'], ['KeyH', 'Realm & Court']];
 const KEY_LOGICAL = new Set(KEY_ACTIONS.map(a => a[0]));
 let keyRev = {};
 function keyOf(code) { return (settings.keys && settings.keys[code]) || code; }
@@ -1511,8 +1540,8 @@ const kcol = k => settings.cb ? KCOL_CB[k] : KDATA[k].color; // kingdom colours 
    CROWNS is "the four crowns" (story rallies, crown-wide rewards); KIDS() is every kingdom that exists right now. */
 const CROWNS = [0, 1, 2, 3];
 const KIDS = () => KDATA.map((_, i) => i);
-const KDATA_DEF = KDATA.map(d => ({ ruler: d.ruler, rulerTitle: d.rulerTitle, fem: d.fem || 0, rulerHair: d.rulerHair || null }));
-function resetKData() { KDATA.length = 4; KDATA_DEF.forEach((d, k) => Object.assign(KDATA[k], d)); if (PAIRS.length > 6) PAIRS.length = 6; }
+const KDATA_DEF = KDATA.map(d => ({ ruler: d.ruler, rulerTitle: d.rulerTitle, fem: d.fem || 0, rulerHair: d.rulerHair || null, pers: Object.assign({}, d.pers) }));
+function resetKData() { KDATA.length = 4; KDATA_DEF.forEach((d, k) => Object.assign(KDATA[k], d, { pers: Object.assign({}, d.pers) })); if (PAIRS.length > 6) PAIRS.length = 6; }
 
 const NAMES = {
   pre: [['Ash', 'Bram', 'Kings', 'Oak', 'Thorn', 'Wick', 'Mill', 'Stone', 'Harrow', 'Elm', 'Fox', 'Red', 'Hollow', 'Brook'],
@@ -1700,7 +1729,7 @@ const SIZES = [
 ];
 const DAYS = [{ name: 'Short', len: 300 }, { name: 'Normal', len: 480 }, { name: 'Long', len: 780 }];
 const WILDS = [{ name: 'Scarce', cap: 2, every: 7 }, { name: 'Normal', cap: 5, every: 4 }, { name: 'Abundant', cap: 9, every: 2.5 }];
-const normOpts = o => Object.assign({ diff: 2, size: 2, kingdom: 0, explored: false, day: 1, wild: 1, season: 0 }, o || {});
+const normOpts = o => Object.assign({ diff: 2, size: 2, kingdom: 0, explored: false, day: 1, wild: 1, season: 0, pname: '', fem: 0, bloodline: 0 }, o || {});
 const DIFF = () => DIFFS[G.opts ? G.opts.diff : 2];
 function sizeCounts(n) { const f = n / 360; return { vil: Math.round(20 * Math.pow(f, 1.5)), camp: Math.round(18 * f * f) }; }
 function diffEffects(d) {
@@ -2802,12 +2831,13 @@ function updatePlayer(dt) {
   updateFishing(dt);
   G.snowAmt = (G.snowAmt || 0) + ((inSnow() ? 1 : 0) - (G.snowAmt || 0)) * Math.min(1, dt * .7);
   // regen slowly out of combat
-  P.combatT = (P.combatT || 0) - dt; if (P.combatT <= 0 && P.hp < P.maxHp) P.hp = Math.min(P.maxHp, P.hp + dt * DIFF().regen);
+  P.combatT = (P.combatT || 0) - dt; if (P.combatT <= 0 && P.hp < P.maxHp && !P.plague) P.hp = Math.min(P.maxHp, P.hp + dt * DIFF().regen);
 }
 function playerDie() {
   if (G.state === 'dead') return;
   P.hp = 0; G.state = 'dead'; SND.play('death'); addShake(12); G.stats.deaths++;
   for (let i = 0; i < 30; i++) addPart(P.x, P.y, rand(-150, 150), rand(-150, 150), '#8a1a12', rand(.5, 1.2), 3);
+  if (bloodlineDeath(!!DIFF().ironman)) return;
   const iron = !!DIFF().ironman; // a real boolean: classList.toggle(c, undefined) flips instead of forcing
   if (!iron) raiseGrave();
   if (P.lastBlow && P.lastBlow.src && P.lastBlow.src.nem) nemesisWon();
@@ -2860,6 +2890,8 @@ function drawGrave(g, gv, t) {
   g.fillStyle = '#5a8a3a'; circ(g, x - 7, y - 1, 2.2); circ(g, x + 6, y, 1.8); g.fillStyle = '#e8e0c0'; circ(g, x + 9, y - 1, 1.4);
 }
 function respawnPlayer() {
+  $('btnRespawn').textContent = 'Rise Again';
+  if (G.pendingHeir != null) { const h = P.kids[G.pendingHeir]; if (h) { becomeHeir(h, 'battle'); return; } G.pendingHeir = null; }
   if (G.under) leaveDungeon(true);
   const lost = Math.floor(P.gold * DIFF().goldLoss); P.gold -= lost;
   let near = null; Q.active.forEach(q => { if (q.type !== 'story' || !q.foes) return; const st = sStep(q); if (!st || !st.reset) return; const tg = storyTarget(q); sFightReset(q); if (tg) near = randomLandSpot(tg.x, tg.y, (st.near || 20) + 3, (st.near || 20) + 7); }); // a boss fight starts over from its checkpoint
@@ -3643,7 +3675,7 @@ function announceStatus(a, b, before, after) {
   else logEvent(`Relations between ${A} and ${B} are now ${after.n}.`, [a, b]);
 }
 function addRep(k, v, reason, silent) {
-  if (!v || k == null) return; const before = K.rep[k];
+  if (!v || k == null) return; const before = K.rep[k]; if (v > 0 && P && P.spouse && P.spouse.arch === 'courtier') v = Math.round(v * 1.2 * 10) / 10;
   K.rep[k] = clamp(K.rep[k] + v, -100, 100);
   if (reason) { const arr = K.repWhy[k]; const ex = arr.find(r => r.t === reason); if (ex) ex.v += v; else arr.unshift({ t: reason, v }); if (arr.length > 8) arr.length = 8; }
   if (!silent) toast(`<b>${sgn(v)}</b> Reputation with ${KDATA[k].name}${reason ? ` <span style="opacity:.7;font-size:12.5px">— ${reason}</span>` : ''}`, v > 0 ? 'good' : 'bad', bannerURL(k));
@@ -3651,7 +3683,7 @@ function addRep(k, v, reason, silent) {
   if (before <= -40 && K.rep[k] > -40) toast(`${KDATA[k].name} no longer hunts you.`, 'peace', bannerURL(k));
   dipDirty = true;
 }
-const repMul = k => clamp(1 - K.rep[k] / 250, .6, 1.4);
+const repMul = k => clamp(1 - K.rep[k] / 250, .6, 1.4) * (P && P.spouse && P.spouse.arch === 'courtier' ? .95 : 1);
 function repTitle(k) { const r = K.rep[k]; if (P.allegiance === k) return r >= 80 ? 'Lord Protector' : r >= 55 ? 'Knight Captain' : 'Sworn Knight'; return r >= 60 ? 'Honored' : r >= 25 ? 'Respected' : r > -25 ? 'Stranger' : r > -40 ? 'Distrusted' : 'Outlaw'; }
 function territoryOf(k) { return Math.round(((G.under && G.over ? G.over.W : W).landCount || [0, 0, 0, 0])[k] * .25); }
 /* Menus that read the world (diplomacy, the map) still work indoors and underground: point at the overworld while they draw,
@@ -4739,7 +4771,7 @@ function diceDialog(e, last) {
 function priestDialog(e, pl) {
   const k = pl.owner, C = pl.city, day = dayNum(), port = e || ents.find(x => x.role === 'priest' && x.place === pl.id) || fakeP({ body: '#ece6d8', head: 'hood', hood: '#d8d0c0', skin: '#e0b48a' }, k);
   openDialog({ name: e ? e.name : C.cath.name, role: e ? `Of the ${C.cath.name}` : 'Candlelight and incense, and a hush like snowfall', portrait: port, text: e ? pick(['Peace be upon you, child. The doors of the cathedral are always open.', 'The saints see every deed, sir knight, the brave and the cruel alike.', 'Kneel, if you wish. There is no shame in asking for strength.']) : 'Sunlight pours through the stained glass in pools of red and gold. Somewhere above, a choir is practising.', options: [
-    { t: `<span class="dn">PRAY</span>Kneel and pray${pl.prayDay === day ? ' (you have prayed today)' : ''}`, dis: pl.prayDay === day, fn: () => { pl.prayDay = day; P.hp = P.maxHp; P.st = P.maxSt; P.burn = 0; P.poison = 0; P.chillT = 0; P.blessT = 480; SND.play('level'); for (let i = 0; i < 30; i++) addPart(P.x, P.y, rand(-60, 60), rand(-150, -30), '#fff2c0', rand(.6, 1.2), 3, -40); closeDialog(); toast('<b>Blessed.</b> Your wounds close, and for a while blows land a little softer.', 'gold'); } },
+    { t: `<span class="dn">PRAY</span>Kneel and pray${pl.prayDay === day ? ' (you have prayed today)' : ''}`, dis: pl.prayDay === day, fn: () => { pl.prayDay = day; if (P.plague) { P.plague = 0; recalc(); toast('The priest lays hands on you. The plague leaves you.', 'good'); } P.hp = P.maxHp; P.st = P.maxSt; P.burn = 0; P.poison = 0; P.chillT = 0; P.blessT = 480; SND.play('level'); for (let i = 0; i < 30; i++) addPart(P.x, P.y, rand(-60, 60), rand(-150, -30), '#fff2c0', rand(.6, 1.2), 3, -40); closeDialog(); toast('<b>Blessed.</b> Your wounds close, and for a while blows land a little softer.', 'gold'); } },
     { t: `<span class="dn">TITHE</span>Donate 50 gold to the poor${pl.titheDay === day ? ' (given today)' : ''}`, dis: P.gold < 50 || pl.titheDay === day, fn: () => { P.gold -= 50; pl.titheDay = day; addRep(k, 4, 'Gave alms at the cathedral'); SND.play('coin'); closeDialog(); toast(`The priests will remember your generosity. <b>+4 reputation</b> with ${KDATA[k].name}.`, 'gold'); } },
     { t: '<span class="dn">CANDLE</span>Light a candle for the fallen (1 gold)', dis: P.gold < 1, fn: () => { P.gold -= 1; SND.play('ui'); closeDialog(); toast(pick(['The little flame gutters, then burns steady.', 'You light a candle among a thousand others.', 'For a moment, you remember every face.'])); } },
     { t: '<span class="dn">FLOWERS</span>Leave flowers at the altar', dis: !countItem('flowers'), fn: () => { removeItemById('flowers'); P.luckT = 600; closeDialog(); toast('You leave the posy among the candles. You feel <b>lucky</b>.', 'gold'); } },
@@ -4902,6 +4934,7 @@ function genInterior(b) {
     const spots = [[7.3, .2], [8.5, .2], [9.7, .2], [9.8, 1.7], [9.8, 3.2], [9.8, 4.7], [7.9, 6.2], [.4, 5.4], [1.6, 5.4]];
     const tro = P.trophies || []; spots.forEach(([tx, ty], i) => { obj('f_pedestal', tx, ty, 30, 34, { tr: tro[i] || null, idx: i }, true); ints.push({ type: 'itrophy', x: X(tx) + 15, y: Y(ty) + 44, idx: i }); });
     if (P.allegiance != null) obj('f_banner', 2, -1.4, 26, 40, { k2: P.allegiance });
+    homeFamily(npc);
   } else if (b.kind === 'tower') towerRoom(b, obj, npc, ints, X, Y, rw, rh);
   const cw = Math.ceil(n / CH), DW = { size: n, seed: W.seed, ter, own: new Uint8Array(N).fill(b.owner || 0), solid, wall: new Uint8Array(N), clear: new Uint8Array(N).fill(1), bord: new Uint8Array(N), hgt: new Float32Array(N), places: W.places, objs, chunkTrees: [], chunkObjs: [], interacts: ints, startK: W.startK };
   for (let i = 0; i < cw * cw; i++) { DW.chunkTrees.push([]); DW.chunkObjs.push([]); }
@@ -7292,7 +7325,8 @@ function lookFor0(e) {
   if (e.isPlayer) {
     const S = P.S; const al = ARMOR_LOOK[S.aid] || { body: '#8a7a5a', head: 'hair' };
     const kc = P.allegiance != null ? KDATA[P.allegiance].color : null;
-    return { body: al.body, head: al.head, mail: al.mail, pauld: al.pauld, shiny: al.shiny, skin: '#e0b48a', hair: '#5a3a22', tabard: kc, cape: S.aid === 'plate' || S.aid === 'scale' ? (kc || '#6a1e1a') : kc, plume: kc || '#c0302a',
+    const pl0 = P.look ? pLook() : { skin: '#e0b48a', hair: '#5a3a22' };
+    return { body: al.body, head: al.head, mail: al.mail, pauld: al.pauld, shiny: al.shiny, skin: pl0.skin, hair: pl0.hair, fem: P.fem, beard: !P.fem && pl0.beard ? 1 : 0, beardC: pl0.hair, tabard: kc, cape: S.aid === 'plate' || S.aid === 'scale' ? (kc || '#6a1e1a') : kc, plume: kc || '#c0302a',
       weapon: S.wid ? { wk: ITEMS[S.wid].wk, len: ITEMS[S.wid].len, col: ITEMS[S.wid].col, glow: S.glow, wooden: S.wid === 'wooden_sword' } : null,
       shield: S.sid && !S.bow && S.wk !== 'staff' ? { b: ITEMS[S.sid], col: S.sid === 'knight_shield' && P.allegiance != null ? KDATA[P.allegiance].color : null } : null };
   }
@@ -7375,7 +7409,7 @@ function drawHuman(g, x, y, face, L, o) {
     case 'helm': g.fillStyle = '#8a9098'; circ(g, hc, 0, 6.8); g.fillStyle = '#b8bec4'; g.fillRect(hc - 6, -.9, 12, 1.8); g.fillStyle = '#5a5e64'; g.fillRect(hc + 4, -3, 2, 6); break;
     case 'great': { const gr = g.createRadialGradient(hc - 2, -2, 1, hc, 0, 7.5); gr.addColorStop(0, '#ffffff'); gr.addColorStop(1, '#8a9098'); g.fillStyle = gr; circ(g, hc, 0, 7.2); g.fillStyle = '#222'; g.fillRect(hc + 4.5, -3.5, 1.6, 7); g.fillStyle = L.plume || '#c0302a'; ell(g, hc - 7, 0, 7, 2.6); break; }
     case 'crown': g.fillStyle = L.hair; if (L.fem) ell(g, hc - 4.5, 0, 5.5, 6.8); circ(g, hc, 0, 6.5); g.fillStyle = '#f0c840'; g.beginPath(); for (let i = 0; i < 10; i++) { const a = i / 10 * TAU, r = i % 2 ? 5 : 8; g.lineTo(hc + Math.cos(a) * r, Math.sin(a) * r); } g.closePath(); g.fill(); g.fillStyle = L.hair; circ(g, hc, 0, 4); g.fillStyle = '#c02030'; circ(g, hc + 5, 0, 1.4); break;
-    default: g.fillStyle = L.skin; circ(g, hc, 0, 6.2); g.fillStyle = L.hair || '#4a3020'; ell(g, hc - 2, 0, 5, 6); if (L.beard) { g.fillStyle = '#e0e0d8'; ell(g, hc + 5, 0, 2.5, 3.5); }
+    default: if (L.fem) { g.fillStyle = L.hair || '#4a3020'; ell(g, hc - 4.5, 0, 5.5, 6.8); } g.fillStyle = L.skin; circ(g, hc, 0, 6.2); g.fillStyle = L.hair || '#4a3020'; ell(g, hc - 2, 0, 5, 6); if (L.beard) { g.fillStyle = L.beardC || '#e0e0d8'; ell(g, hc + 5, 0, 2.5, 3.5); }
   }
   if (L.garland) { const cs = ['#f08ab0', '#ffe070', '#ffffff', '#b890f0']; g.strokeStyle = '#4a8a3a'; g.lineWidth = 1.5; g.beginPath(); g.arc(hc - .5, 0, 6.4, 0, TAU); g.stroke(); for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; g.fillStyle = cs[i % 4]; circ(g, hc - .5 + Math.cos(a) * 6.4, Math.sin(a) * 6.4, 1.7); } }
   if (L.charm) { g.strokeStyle = '#a8842a'; g.lineWidth = 1; g.fillStyle = '#e0bc5a'; ell(g, -3, 9.5, 2.2, 1.6); g.beginPath(); g.moveTo(-3, 11); g.lineTo(-4.5, 14); g.moveTo(-3, 11); g.lineTo(-1.5, 14); g.stroke(); }
@@ -7593,7 +7627,7 @@ function drawPortrait(cv2, e) {
   else if (L.head === 'helm' || L.head === 'coif') { g.fillStyle = L.head === 'coif' ? '#9ba1a8' : '#8a9098'; g.beginPath(); g.arc(64, 54, 26, Math.PI, 0); g.fill(); if (L.head === 'helm') { g.fillRect(61, 50, 6, 26); } }
   else if (L.head === 'great') { g.fillStyle = '#c8ced4'; rrect(g, 40, 30, 48, 58, 12); g.fill(); g.fillStyle = '#222'; g.fillRect(46, 54, 36, 5); g.fillStyle = L.plume || '#c03030'; ell(g, 64, 26, 10, 14); }
   else if (L.head === 'crown') { g.fillStyle = L.hair; g.beginPath(); g.arc(64, 54, 24, Math.PI, 0); g.fill(); g.fillStyle = '#f0c840'; g.beginPath(); g.moveTo(40, 40); g.lineTo(44, 22); g.lineTo(52, 34); g.lineTo(64, 16); g.lineTo(76, 34); g.lineTo(84, 22); g.lineTo(88, 40); g.closePath(); g.fill(); g.fillStyle = '#c02030'; circ(g, 64, 32, 3.5); if (!L.fem) { g.fillStyle = L.hair; ell(g, 64, 84, 14, 8); } }
-  else { g.fillStyle = L.hair || '#4a3020'; g.beginPath(); g.arc(64, 52, 24, Math.PI * 1.05, -0.05); g.fill(); if (L.beard) { g.fillStyle = '#e0e0d8'; ell(g, 64, 80, 16, 12); } if (L.head === 'cap') { g.fillStyle = '#6a4a2a'; ell(g, 64, 38, 26, 10); } }
+  else { g.fillStyle = L.hair || '#4a3020'; g.beginPath(); g.arc(64, 52, 24, Math.PI * 1.05, -0.05); g.fill(); if (L.beard) { g.fillStyle = L.beardC || '#e0e0d8'; ell(g, 64, 80, 16, 12); } if (L.head === 'cap') { g.fillStyle = '#6a4a2a'; ell(g, 64, 38, 26, 10); } }
   g.restore();
 }
 
@@ -7667,6 +7701,7 @@ function drawMinimap() {
    ===================================================================== */
 const UI = {
   stack: [],
+  renders: {},
   ids: { act: 'actScreen', ach: 'achScreen', stats: 'statScreen', skills: 'skillScreen', mode: 'modeScreen', cont: 'contScreen', pause: 'pauseScreen', inv: 'invScreen', map: 'mapScreen', dip: 'dipScreen', quests: 'questScreen', settings: 'settingsScreen', help: 'helpScreen', shop: 'shopScreen' },
   open(n) {
     if (n === 'journal') { qTab = 'beasts'; jSel = null; n = 'quests'; if (this.isOpen('quests')) { withOverworld(renderQuests); return; } }
@@ -7675,7 +7710,7 @@ const UI = {
     if (this.isOpen(n)) return;
     if (n !== 'settings' && n !== 'help') this.closeAll();
     this.stack.push(n); $(this.ids[n]).classList.add('show'); SND.play('open'); if (G.tut) (G.tut.opened || (G.tut.opened = {}))[n] = true;
-    if (n === 'inv') renderInventory(); else if (n === 'skills') renderSkills(); else if (n === 'ach') renderAch(); else if (n === 'stats') withOverworld(renderStats); else if (n === 'map') withOverworld(openMap); else if (n === 'dip') withOverworld(renderDiplomacy); else if (n === 'quests') withOverworld(renderQuests); else if (n === 'settings') renderSettings(); else if (n === 'pause') withOverworld(renderPause);
+    if (n === 'inv') renderInventory(); else if (n === 'skills') renderSkills(); else if (n === 'ach') renderAch(); else if (n === 'stats') withOverworld(renderStats); else if (n === 'map') withOverworld(openMap); else if (n === 'dip') withOverworld(renderDiplomacy); else if (n === 'quests') withOverworld(renderQuests); else if (n === 'settings') renderSettings(); else if (n === 'pause') withOverworld(renderPause); else if (this.renders[n]) withOverworld(this.renders[n]);
     tipHide();
   },
   close() { const n = this.stack.pop(); if (n) { $(this.ids[n]).classList.remove('show'); SND.play('close'); } tipHide(); if (n === 'act') actFinish(); },
@@ -8456,7 +8491,7 @@ function renderPause() {
   const k = ownerAtPx(P.x, P.y), al = P.allegiance != null ? `${repTitle(P.allegiance)} of ${KDATA[P.allegiance].name}` : 'Wandering knight';
   const pl = !G.under && nearestPlace(P.x, P.y, p => p.disc && (p.type === 'village' || p.type === 'castle' || p.type === 'outpost'));
   const where = G.under ? `${G.under.name}${G.under.interior ? '' : ', underground'}` : pl && dist(P.x, P.y, pl.x, pl.y) < 14 * TS ? `${pl.name}, ${KDATA[k].full}` : `The wilds of ${KDATA[k].name}`;
-  $('pauseHero').innerHTML = `<canvas id="pausePort" width="128" height="128"></canvas><div style="flex:1;min-width:0"><div class="ph1">Level ${P.lvl} · ${al}${P.fief ? ` · Warden of ${W.places[P.fief.v].name}` : ''}</div><div class="ph2">${where}</div><div class="ph2">${SEASONS[curSeason]}, day ${dayNum()} · ${G.mode === 'story' ? (STORY && !STORY.done ? `Story · Act ${ROMAN[storyAct()]}` : 'Story') : G.fromStory ? 'Sandbox · story complete' : 'Sandbox'} · ${DIFF().name}</div><div class="phChips"><span>${fmt(P.gold)} gold</span><span>${Math.ceil(P.hp)} / ${P.maxHp} health</span><span>${fmt(G.kills)} foes slain</span><span>${Object.keys(ACHS).length} / ${ACH.length} achievements</span></div></div>`;
+  $('pauseHero').innerHTML = `<canvas id="pausePort" width="128" height="128"></canvas><div style="flex:1;min-width:0"><div class="ph1">${esc(pFull())}, ${pAge()} · Level ${P.lvl} · ${al}${P.fief ? ` · Warden of ${W.places[P.fief.v].name}` : ''}</div><div class="ph2">${where}</div><div class="ph2">${SEASONS[curSeason]}, day ${dayNum()} · ${G.mode === 'story' ? (STORY && !STORY.done ? `Story · Act ${ROMAN[storyAct()]}` : 'Story') : G.fromStory ? 'Sandbox · story complete' : 'Sandbox'} · ${DIFF().name}</div><div class="phChips"><span>${fmt(P.gold)} gold</span><span>${Math.ceil(P.hp)} / ${P.maxHp} health</span><span>${fmt(G.kills)} foes slain</span><span>${Object.keys(ACHS).length} / ${ACH.length} achievements</span></div></div>`;
   drawPortrait($('pausePort'), P);
   document.querySelectorAll('#pauseScreen [data-icon]').forEach(img => { const id = img.dataset.icon; img.src = id === 'banner' ? bannerURL(P.allegiance ?? k) : itemIcon(id); });
   $('pauseSp').textContent = P.sp || ''; $('pauseSp').classList.toggle('hidden', !P.sp);
@@ -8714,6 +8749,10 @@ function renderSetup() {
   seg('seasonSeg', SEASONS, 'season', x => ['🌱 ', '☀ ', '🍂 ', '❄ '][SEASONS.indexOf(x)] + x);
   $('seasonNote').textContent = ['Mild weather and green fields.', 'Long, bright days, and dust storms in the south.', 'Golden woods, cheap food after the harvest.', 'Snow on every road, dear bread and slow travel. For the hardy.'][o.season];
   $('optExplored').checked = !!o.explored; $('optExplored').disabled = iron;
+  seg('sexSeg', [{ name: 'Sir (a knight)' }, { name: 'Dame (a lady knight)' }], 'fem');
+  seg('bloodSeg', [{ name: 'Rise again' }, { name: 'Bloodline' }], 'bloodline'); $('bloodSeg').classList.toggle('hidden', pendingMode === 'story');
+  $('bloodNote').textContent = pendingMode === 'story' ? 'In the story, you always rise again when you fall.' : iron ? 'Forsaken: when you fall, your grown heir carries on. With no heir, the save is lost.' : o.bloodline ? 'When you fall, your grown heir takes up your sword. With no heir yet, you rise again.' : 'When you fall, you rise again at your last refuge. In old age, your heir inherits.';
+  const nm = $('optName'); nm.value = o.pname || ''; nm.oninput = () => { o.pname = nm.value; }; nm.onkeydown = ev => ev.stopPropagation();
   ['wildSeg', 'exploredChk'].forEach(id => $(id).classList.toggle('setLocked', iron)); ['wildLock', 'exploredLock'].forEach(id => $(id).classList.toggle('hidden', !iron));
 }
 $('optExplored').onchange = e => { newOpts.explored = e.target.checked; };
@@ -11307,6 +11346,471 @@ const storyBusy = () => !!(G.arena || G.siege || G.tourney && G.tourney.fighting
 { const _ad = archmageDialog; archmageDialog = e => { if (Q.active.some(q => q.sid === 'vc5') && !GF('vc_council')) { GF('vc_council', 1); sChat(SPK(e), [`So Velane sent you. The Council has heard of the grimoire, the storm and poor Hesk.`, `Kneel, knight. Rise a Magister of the Veiled Circle. Our towers are open to you, and our secrets a little less secret.`], [{ t: 'Rise', fn: () => { closeDialog(); } }]); return; } _ad(e); }; }
 // camps of the larger bands sometimes shelter a warlock (appended, so saved kill flags keep their indices)
 { const _ps = placeSpecs; placeSpecs = pl => { if (pl._specs) return pl._specs; const s = _ps(pl); if (pl.type === 'camp' && pl.tier >= 2 && hash2(pl.id * 17, W.seed % 9973) < .32) s.push({ kind: pl.tier >= 3 ? 'warlock' : 'apprentice', dx: -2.5, dy: -2 }); return s; }; }
+
+/* =====================================================================
+   COURTS — rulers who age, scheme and die; heirs and successions,
+   crises and pretenders, plots, revolts, royal weddings and plague years.
+   A year is 24 days (four seasons of six). In story mode no ruler dies
+   before the story ends, and heirs stay out of the way of the plot.
+   ===================================================================== */
+const YEAR = 24;
+const TRAITS = {
+  warlike: { n: 'Warlike', d: 'Quick to take offence, and quicker to march.', aggr: .2 },
+  peaceful: { n: 'Peaceable', d: 'Prefers a treaty to a battle.', aggr: -.2, honor: .05 },
+  greedy: { n: 'Greedy', d: 'Taxes hard, and the people grumble.', trade: .1, honor: -.1, unrest: 8 },
+  just: { n: 'Just', d: 'Keeps faith and fair laws.', honor: .15, unrest: -6 },
+  cruel: { n: 'Cruel', d: 'Rules by fear.', honor: -.2, aggr: .1, unrest: 12 },
+  pious: { n: 'Pious', d: 'Devoted to the saints. Distrusts the darker arts.', honor: .1, unrest: -3 },
+  paranoid: { n: 'Paranoid', d: 'Sees knives in every shadow, and sometimes finds them.', aggr: .05, plot: 1.7 },
+  shrewd: { n: 'Shrewd', d: 'A merchant\'s head for coin.', trade: .15 },
+  beloved: { n: 'Beloved', d: 'The common folk would die for this ruler.', unrest: -12 },
+  scholarly: { n: 'Scholarly', d: 'A patron of mages and scribes.', trade: .05 },
+  ailing: { n: 'Ailing', d: 'In poor health. The court whispers about the succession.', sick: 3 },
+  bold: { n: 'Bold', d: 'Leads from the front.', aggr: .1, honor: .05 },
+  young: { n: 'Untested', d: 'New to the crown. Others will test the young ruler.', unrest: 5 },
+};
+const RTITLE = [['King', 'Queen'], ['King', 'Queen'], ['Warlord', 'Warlady'], ['High Lord', 'High Lady']];
+const ROYAL_N = [[['Edmund', 'Aldric', 'Harold', 'Godric', 'Wystan'], ['Elinor', 'Matilda', 'Aveline', 'Rosamund', 'Edith']], [['Lucien', 'Aurelio', 'Florian', 'Bastien', 'Olivier'], ['Isabeau', 'Céleste', 'Margaux', 'Sabine', 'Aurore']], [['Ragnar', 'Vorik', 'Morgath', 'Skarn', 'Dagmar'], ['Ylva', 'Sigrun', 'Hilde', 'Brynja', 'Kára']], [['Faelan', 'Thalion', 'Elros', 'Caelum', 'Lorien'], ['Sylwen', 'Aerith', 'Nimue', 'Ithil', 'Elowen']]];
+const ORDINAL = ['', ' II', ' III', ' IV', ' V', ' VI', ' VII'];
+const HOUSES = ['Aldhaven', 'Solmont', 'Ravenmoor', 'Sylvanreach'];
+const INIT_COURT = [
+  { name: 'Aldric III', fem: 0, age: 61, traits: ['just', 'pious'], heir: ['Edmund', 0, 24] },
+  { name: 'Isabeau', fem: 1, age: 44, traits: ['shrewd', 'beloved'], heir: ['Céleste', 1, 17] },
+  { name: 'Morgath the Grim', fem: 0, age: 52, traits: ['warlike', 'cruel'], heir: ['Vorik', 0, 27] },
+  { name: 'Sylwen', fem: 1, age: 66, traits: ['scholarly', 'peaceful'], heir: ['Thalion', 0, 12] },
+];
+const cAge = born => Math.max(0, Math.floor((dayNum() - born) / YEAR));
+const ruler = k => K && K.court ? K.court[k] : null;
+function newCourt() {
+  const r = mulberry32(W.seed * 227 + 41), st = !!STORY;
+  return INIT_COURT.map((c, k) => ({ name: c.name, fem: c.fem, born: dayNum() - c.age * YEAR - Math.floor(r() * YEAR), traits: c.traits.slice(), health: 80 + Math.floor(r() * 20), house: HOUSES[k], gen: 1,
+    heir: st ? null : { name: c.heir[0], fem: c.heir[1], born: dayNum() - c.heir[2] * YEAR - Math.floor(r() * YEAR) }, crisis: null, since: 1, spouseOf: null }));
+}
+function courtTitle(k, c = ruler(k)) { return RTITLE[k] ? RTITLE[k][c.fem ? 1 : 0] : c.fem ? 'Queen' : 'King'; }
+function applyCourt() {
+  if (!K || !K.court) return;
+  for (let k = 0; k < 4; k++) {
+    const c = K.court[k], D = KDATA_DEF[k], kd = KDATA[k];
+    if (c.crisis && !c.name) { kd.ruler = 'The Regency Council'; kd.rulerTitle = `Regents of ${kd.name}`; }
+    else { kd.ruler = `${courtTitle(k, c)} ${c.name}`; kd.rulerTitle = `${courtTitle(k, c)} of ${kd.name}`; }
+    kd.fem = c.fem; kd.rulerHair = c.hair || (c.name === INIT_COURT[k].name ? D.rulerHair : (c.fem ? pick(['#c8983e', '#e2d6b4', '#6a3a1a', '#2a1a10']) : null)); c.hair = kd.rulerHair;
+    const P0 = D.pers, p = { aggr: P0.aggr, trade: P0.trade, honor: P0.honor }; c.traits.forEach(t => { const T0 = TRAITS[t]; if (!T0) return; ['aggr', 'trade', 'honor'].forEach(x => { if (T0[x]) p[x] = clamp(p[x] + T0[x], .05, .98); }); }); kd.pers = p;
+  }
+  ents.forEach(e => { if (e.role === 'ruler' && e.k != null && e.k < 4) { e.name = KDATA[e.k].ruler; e._look = null; } });
+  dipDirty = true;
+}
+function traitUnrest(k) { return ruler(k).traits.reduce((a, t) => a + ((TRAITS[t] && TRAITS[t].unrest) || 0), 0); }
+function warsOf(k) { return CROWNS.filter(j => j !== k && relStatus(k, j).n === 'At War').length; }
+function ageDeathP(age) { return age < 45 ? .0001 : age < 55 ? .0004 : age < 65 ? .0012 : age < 72 ? .003 : age < 80 ? .007 : .016; }
+function randomTrait(ex) { const all = Object.keys(TRAITS).filter(t => t !== 'young' && t !== 'ailing' && !(ex || []).includes(t)); return pick(all); }
+function royalName(k, fem, avoid) { const list = ROYAL_N[k][fem ? 1 : 0]; let n = pick(list); const used = [K.court[k].name, K.court[k].heir && K.court[k].heir.name].concat(avoid || []); for (let i = 0; i < 6 && used.some(u => u && u.startsWith(n)); i++) n = pick(list); const same = (G.royalNames = G.royalNames || {})[k + n] = ((G.royalNames[k + n] || 0) + 1); return n + (same > 1 ? ORDINAL[Math.min(same, 6) - 1] || '' : ''); }
+
+/* ---------------- Death and succession ---------------- */
+function rulerDies(k, cause) {
+  const c = ruler(k), old = KDATA[k].ruler, age = cAge(c.born);
+  const how = { age: `in ${c.fem ? 'her' : 'his'} sleep, at the age of ${age}`, plot: 'by an assassin\'s knife', sick: 'of a wasting sickness', plague: 'of the plague', battle: 'in battle', rebels: 'at the hands of rebels' }[cause] || 'suddenly';
+  (G.royalDead = G.royalDead || []).unshift({ k, name: old, d: dayNum(), cause, age }); if (G.royalDead.length > 30) G.royalDead.length = 30;
+  logEvent(`${old} died ${how}.`, [k]); toast(`🕯 <b>${old}</b> has died ${how}.`, 'war', bannerURL(k)); SND.play('bell');
+  if (P && P.allegiance === k) toast(`You are sworn to the crown of ${KDATA[k].name}, not the ${c.fem ? 'queen' : 'king'} alone. Your oath passes to whoever takes the throne.`);
+  const h = c.heir;
+  if (h && cAge(h.born) >= 16) crown(k, { name: h.name, fem: h.fem, born: h.born, traits: [c.traits.filter(t => t !== 'ailing')[Math.random() < .5 ? 0 : 1] || randomTrait(), 'young'], spouseOf: h.spouseOf || null }, 'heir');
+  else startCrisis(k, h);
+  G.lastRoyalDeath = dayNum(); runHooks('succession', k, cause);
+}
+function crown(k, n, how) {
+  const c = ruler(k); const prevTraits = c.traits.slice();
+  Object.assign(c, { name: n.name, fem: n.fem, born: n.born, traits: n.traits.filter(Boolean).slice(0, 3), health: 70 + randi(0, 30), heir: null, crisis: null, since: dayNum(), gen: (c.gen || 1) + 1, hair: null, spouseOf: n.spouseOf || null });
+  if (n.house) c.house = n.house;
+  if (cAge(c.born) >= 24 && chance(.6)) { const f = chance(.5) ? 1 : 0; c.heir = { name: royalName(k, f), fem: f, born: dayNum() - randi(0, Math.max(0, cAge(c.born) - 20)) * YEAR }; }
+  applyCourt();
+  const t = `${KDATA[k].ruler} is crowned in ${KDATA[k].castle}${how === 'claim' ? ', the victor of the succession' : how === 'usurp' ? ', seizing the throne' : ''}.`;
+  logEvent(t, [k]); toast(`👑 ${t}`, 'gold', bannerURL(k)); SND.play('bell');
+  // a new ruler sees the world afresh: relations drift back toward the old grudges, but less
+  CROWNS.forEach(j => { if (j !== k) { K.aff[k][j] = K.aff[j][k] = K.aff[k][j] * .8; } });
+  K.unrest[k] = clamp((K.unrest[k] || 20) + (how === 'heir' ? 5 : 12), 0, 100);
+  if (P && K.rep[k] > 20 && how !== 'backed') { const loss = Math.round((K.rep[k] - 20) * .25); if (loss > 0) addRep(k, -loss, 'A new ruler who does not know you', true); }
+}
+function startCrisis(k, minor) {
+  const c = ruler(k), fem = chance(.5) ? 1 : 0, backer = CROWNS.filter(j => j !== k).sort((a, b) => getRel(k, b) - getRel(k, a))[0];
+  const A = minor ? { name: minor.name, fem: minor.fem, born: minor.born, who: `the young heir ${minor.name}, ${cAge(minor.born)} years old, and a regency council`, minor: 1 } : { name: royalName(k, fem), fem, born: c.born + randi(2, 12) * YEAR, who: `${c.fem ? 'her' : 'his'} younger ${fem ? 'sister' : 'brother'}` };
+  const f2 = chance(.5) ? 1 : 0, B = { name: royalName(k, f2, [A.name]), fem: f2, born: dayNum() - randi(28, 50) * YEAR, who: `a distant cousin backed by ${KDATA[backer].name}`, backer };
+  c.crisis = { day: dayNum(), until: dayNum() + 12, claim: [A, B], sway: 0, backed: null }; c.name = null; applyCourt();
+  K.unrest[k] = clamp((K.unrest[k] || 20) + 25, 0, 100); K.mil[k] = Math.round(K.mil[k] * .85);
+  logEvent(`${KDATA[k].name} has no crowned ruler. ${A.name} and ${B.name} both claim the throne.`, [k]);
+  toast(`⚖ <b>Succession crisis in ${KDATA[k].name}!</b> ${A.name} and ${B.name} both claim the throne.`, 'war', bannerURL(k));
+  if (!storyOn() && P && K.rep[k] > -40 && !Q.active.some(q => q.sid === 'crisis')) sStart('crisis', { k, cap: k });
+}
+function resolveCrisis(k, winner, backed) {
+  const c = ruler(k), cr = c.crisis; if (!cr) return; const W0 = cr.claim[winner], L0 = cr.claim[1 - winner];
+  crown(k, { name: W0.name, fem: W0.fem, born: W0.born, traits: [randomTrait(), W0.minor ? 'young' : randomTrait()] }, backed ? 'backed' : 'claim');
+  if (winner === 1 && L0.minor) logEvent(`The young ${L0.name} was sent into exile.`, [k]);
+  if (W0.backer != null) addRel(k, W0.backer, 18, 'Backed the new ruler');
+  if (L0.backer != null) addRel(k, L0.backer, -22, 'Backed the losing claimant');
+}
+function crisisDaily(k) {
+  const c = ruler(k), cr = c.crisis; if (!cr) return;
+  cr.sway += (Math.random() - .5) * 6 + (cr.claim[1].backer != null ? .8 : 0);
+  if (dayNum() >= cr.until) { const w = cr.backed != null ? cr.backed : cr.sway > 0 ? 1 : 0; resolveCrisis(k, w, cr.backed != null); const q = Q.active.find(x => x.sid === 'crisis' && x.k === k); if (q) { if (cr.backed != null) sFinish(q); else failQuest(q, 'the lords chose without you.'); } }
+}
+
+/* ---------------- Daily life of the courts ---------------- */
+function courtDaily(day) {
+  if (!K.court || G.mode === 'road') return;
+  const quiet = storyOn();
+  for (let k = 0; k < 4; k++) {
+    const c = K.court[k];
+    if (c.crisis) { crisisDaily(k); continue; }
+    const age = cAge(c.born);
+    // the traits of youth fade after a couple of years on the throne
+    if (c.traits.includes('young') && day - c.since > YEAR * 2) c.traits = c.traits.filter(t => t !== 'young').concat(c.traits.length < 3 ? [randomTrait(c.traits)] : []);
+    if (!c.traits.includes('ailing') && age > 58 && chance(.002)) { c.traits.push('ailing'); logEvent(`${KDATA[k].ruler} has fallen ill.`, [k]); applyCourt(); }
+    if (!quiet && day - (G.lastRoyalDeath || -99) > 10) { const p = ageDeathP(age) * (c.traits.includes('ailing') ? TRAITS.ailing.sick : 1); if (Math.random() < p) { rulerDies(k, c.traits.includes('ailing') ? 'sick' : 'age'); continue; } }
+    if (!quiet && !c.heir && age >= 22 && age < 56 && chance(.012)) { const f = chance(.5) ? 1 : 0; c.heir = { name: royalName(k, f), fem: f, born: day }; logEvent(`A child, ${c.heir.name}, was born to ${KDATA[k].ruler}.`, [k]); toast(`🍼 ${KDATA[k].ruler} has an heir: ${c.heir.fem ? 'Princess' : 'Prince'} ${c.heir.name}.`, 'gold', bannerURL(k)); }
+    // unrest drifts toward a level set by war, the ruler's nature, plague and taxes
+    const target = clamp(18 + warsOf(k) * 12 + traitUnrest(k) + (G.plague && W.places[G.plague.v] && W.places[G.plague.v].owner === k ? 15 : 0) + (c.crisis ? 25 : 0), 0, 95);
+    K.unrest[k] = clamp((K.unrest[k] ?? 20) + clamp(target - (K.unrest[k] ?? 20), -3, 3) + rand(-1.5, 1.5), 0, 100);
+    if (K.unrest[k] > 72 && chance(.12) && !Q.active.some(q => q.sid === 'revolt') && !G.revoltCd) startRevolt(k);
+  }
+  if (G.revoltCd && day > G.revoltCd) G.revoltCd = 0;
+  if (!quiet && day > 6 && day >= (G.plotDay ?? (G.plotDay = day + randi(14, 26)))) { G.plotDay = day + randi(16, 30); hatchPlot(); }
+  if (day >= (G.weddingDay ?? (G.weddingDay = day + randi(20, 34)))) { G.weddingDay = day + randi(24, 40); royalWedding(); }
+  if (day >= (G.plagueDay ?? (G.plagueDay = day + randi(26, 48)))) { G.plagueDay = day + randi(55, 90); if (!G.plague) startPlague(); }
+  if (G.plague) plagueDaily(day);
+  if (G.plot && day >= G.plot.until) plotStrikes();
+}
+
+/* ---------------- Plots ---------------- */
+const PLOTTERS = ['a disgraced chancellor', 'the spymaster\'s own deputy', 'a jealous cousin', 'agents of a rival crown', 'the Ashen Circle\'s last loyalists', 'a guild of poisoners'];
+function hatchPlot() {
+  const w = CROWNS.filter(k => !ruler(k).crisis).map(k => [k, ruler(k).traits.includes('paranoid') ? 1.7 : 1]); if (!w.length || G.plot) return;
+  let tot = w.reduce((a, x) => a + x[1], 0), r = Math.random() * tot, k = w[0][0]; for (const [kk, ww] of w) { r -= ww; if (r <= 0) { k = kk; break; } }
+  G.plot = { k, by: pick(PLOTTERS), day: dayNum(), until: dayNum() + 7, foiled: false };
+  if (P && K.rep[k] > -30) { sStart('plot', { k, cap: k }); }
+}
+function plotStrikes() {
+  const pl = G.plot; G.plot = null; if (!pl || pl.foiled || ruler(pl.k).crisis) return;
+  const q = Q.active.find(x => x.sid === 'plot' && x.k === pl.k); if (q) failQuest(q, 'the plotters struck before you could stop them.');
+  if (Math.random() < .5) rulerDies(pl.k, 'plot');
+  else { logEvent(`An attempt on the life of ${KDATA[pl.k].ruler} failed. ${pl.by[0].toUpperCase() + pl.by.slice(1)} were hanged.`, [pl.k]); toast(`🗡 Assassins struck at ${KDATA[pl.k].ruler}, and failed.`, 'war', bannerURL(pl.k)); if (!ruler(pl.k).traits.includes('paranoid') && chance(.5)) { ruler(pl.k).traits.push('paranoid'); applyCourt(); } }
+}
+/* ---------------- Royal weddings ---------------- */
+function royalWedding() {
+  const cands = [];
+  for (const [a, b] of PAIRS) { if (a > 3 || b > 3) continue; const ha = ruler(a).heir, hb = ruler(b).heir; if (!ha || !hb || ha.spouseOf != null || hb.spouseOf != null || ha.fem === hb.fem || cAge(ha.born) < 17 || cAge(hb.born) < 17) continue; if (getRel(a, b) < 10) continue; cands.push([a, b]); }
+  if (!cands.length) return; const [a, b] = pick(cands), ha = ruler(a).heir, hb = ruler(b).heir;
+  ha.spouseOf = b; hb.spouseOf = a;
+  addRel(a, b, 22, 'Royal wedding', `${ha.name} of ${KDATA[a].name} wed ${hb.name} of ${KDATA[b].name}.`);
+  toast(`💍 A royal wedding! <b>${ha.name}</b> of ${KDATA[a].name} weds <b>${hb.name}</b> of ${KDATA[b].name}.`, 'peace'); SND.play('bell');
+}
+/* ---------------- Revolts ---------------- */
+function startRevolt(k) {
+  const v = W.places.filter(p => p.type === 'village' && p.owner === k && !(P.fief && P.fief.v === p.id)).sort(() => Math.random() - .5)[0]; if (!v) return;
+  G.revoltCd = dayNum() + 10; logEvent(`The people of ${v.name} rose in revolt against ${KDATA[k].ruler}.`, [k]);
+  toast(`🔥 <b>Revolt in ${v.name}!</b> The people of ${KDATA[k].name} have had enough.`, 'war', bannerURL(k)); SND.play('horn');
+  if (P && !storyBusy()) sStart('revolt', { k, v: v.id });
+}
+/* ---------------- Plague ---------------- */
+function startPlague() {
+  const vs = W.places.filter(p => p.type === 'village' && dist(p.x, p.y, P.x, P.y) > 30 * TS); if (!vs.length) return; const v = pick(vs);
+  G.plague = { v: v.id, hit: [v.id], cured: [], day: dayNum(), until: dayNum() + randi(10, 16) };
+  logEvent(`Plague broke out in ${v.name}.`, [v.owner]); toast(`☣ <b>Plague</b> has broken out in ${v.name}, ${dirTo(P, v)} of you. Apothecaries are calling for help.`, 'war', bannerURL(v.owner)); SND.play('hollow');
+  if (P && !Q.active.some(q => q.sid === 'plague_year')) sStart('plague_year', {});
+}
+const plagued = id => !!G.plague && G.plague.hit.includes(id) && !G.plague.cured.includes(id);
+function plagueDaily(day) {
+  const pg = G.plague; if (day >= pg.until || pg.hit.length - pg.cured.length <= 0) { endPlague(); return; }
+  if (chance(.45) && pg.hit.length < 7) { const from = W.places[pg.hit[pg.hit.length - 1]]; const nx = nearestPlace(from.x, from.y, p => p.type === 'village' && !pg.hit.includes(p.id) && dist(p.x, p.y, from.x, from.y) < 90 * TS); if (nx) { pg.hit.push(nx.id); logEvent(`The plague reached ${nx.name}.`, [nx.owner]); toast(`☣ The plague has spread to <b>${nx.name}</b>.`, 'bad', bannerURL(nx.owner)); } }
+  pg.hit.forEach(id => { if (!pg.cured.includes(id)) { const o = W.places[id].owner; K.unrest[o] = clamp((K.unrest[o] || 20) + 1.5, 0, 100); } });
+  if (!storyOn() && chance(.02)) { const ks = [...new Set(pg.hit.map(id => W.places[id].owner))]; const k = pick(ks); if (cAge(ruler(k).born) > 55 && !ruler(k).crisis && day - (G.lastRoyalDeath || -99) > 10) rulerDies(k, 'plague'); }
+}
+function endPlague() { const pg = G.plague; G.plague = null; logEvent(`The plague has run its course${pg.cured.length ? `, eased by the remedies brought to ${pg.cured.length} village${pg.cured.length > 1 ? 's' : ''}` : ''}.`, []); toast('☣ The plague has passed.', 'good'); const q = Q.active.find(x => x.sid === 'plague_year'); if (q) { if (pg.cured.length) sFinish(q); else failQuest(q, 'the plague burned itself out.'); } }
+function plagueTick() { // the sick cough; stand in a plague village without a ward and you may catch it
+  if (!G.plague || G.under || !P) return;
+  for (const id of G.plague.hit) { if (G.plague.cured.includes(id)) continue; const v = W.places[id]; if (dist(P.x, P.y, v.x, v.y) < v.r * TS) { if (!P.plague && !(P.fx && P.fx.plagueWard > 0) && chance(.012)) { P.plague = dayNum() + 3; toast('☣ You have caught the plague. You tire quickly and do not heal. A plague remedy, the Cleanse spell or a priest can cure it.', 'bad'); recalc(); } if (chance(.2)) { const e = ents.find(x => (x.role === 'citizen' || x.kind === 'villager') && !x.dead && dist(x.x, x.y, P.x, P.y) < 300); if (e) e.say = { text: pick(['*cough* *cough*', 'Keep away, sir! The sickness!', 'My children are burning with fever.', 'The apothecary has nothing left.']), t: 3 }; } } }
+  if (P.plague && dayNum() >= P.plague) { P.plague = 0; toast('The plague has run its course in you. You feel yourself again.', 'good'); recalc(); }
+}
+
+/* ---------------- Sagas of the courts ---------------- */
+const envoyOf = (k, key, off) => ({ key, name: `Herald of ${KDATA[k].name}`, role: `Voice of the ${KDATA[k].name} court`, look: envoyLook(k), at: soff(W.places[k], off ? off[0] : -3, off ? off[1] : 9), k });
+SQ.crisis = { saga: true, label: 'Succession', title: q => `The Empty Throne of ${KDATA[q.k].name}`, giver: q => `The court of ${KDATA[q.k].name}`, k: q => q.k,
+  desc: q => { const cr = ruler(q.k).crisis; return cr ? `${KDATA[q.k].name} has no crowned ruler. ${cr.claim[0].name} (${cr.claim[0].who}) and ${cr.claim[1].name} (${cr.claim[1].who}) both claim the throne. The lords will choose within days. Back one, and help them win.` : 'The crisis is over.'; },
+  reward: { xp: 250 },
+  steps: [
+    S_TALK(q => `Hear the claimants at ${KDATA[q.k].castle}`, q => envoyOf(q.k, 'crisis_herald'), (q, e) => { const cr = ruler(q.k).crisis; if (!cr) { e.say = { text: 'It is settled.', t: 3 }; return; } sChat(SPK(e), [`Two claimants, knight, and the lords split between them. ${cr.claim[0].name}: ${cr.claim[0].who}. ${cr.claim[1].name}: ${cr.claim[1].who}.`, 'A sword like yours could tip the scales. Whom will you back?'], [
+      { t: `Back ${cr.claim[0].name}`, fn: () => { q.side = 0; cr.backed = 0; sAdvance(q); closeDialog(); } }, { t: `Back ${cr.claim[1].name}`, fn: () => { q.side = 1; cr.backed = 1; sAdvance(q); closeDialog(); } },
+      { t: 'Stay out of it', fn: () => { closeDialog(); abandonQuest(q); } }]); }),
+    S_FIGHT(q => `Break the rival claimant's retainers`, q => sagaSpot(q, 'rivalspot', () => randomLandSpot(W.places[q.k].x, W.places[q.k].y, 22, 36)), q => [[['knight', 2, { tier: 2, name: 'Sworn Sword', o: { k: q.k, aggroPlayer: true, questFoe: true } }], ['soldier', 3, { tier: 2, name: 'Retainer', o: { k: q.k, aggroPlayer: true, questFoe: true } }]]], { near: 18, msg: 'The rival claimant\'s sworn swords bar the road!', won: q => { const cr = ruler(q.k).crisis; if (cr) cr.until = Math.min(cr.until, dayNum() + 1); } }),
+    S_TALK(q => `Kneel before your claimant in ${KDATA[q.k].castle}`, q => envoyOf(q.k, 'crisis_herald'), (q, e) => { const cr = ruler(q.k).crisis; if (cr) { resolveCrisis(q.k, q.side, true); } GF('kingmaker', (GF('kingmaker') || 0) + 1); sChat(SPK(e), [`It is done. ${KDATA[q.k].ruler} remembers who stood by the crown in its hour of need.`], [{ t: 'Rise', fn: () => { addRep(q.k, 20, 'Backed the new ruler'); sAdvance(q); closeDialog(); } }]); }),
+  ] };
+SQ.plot = { saga: true, label: 'Court intrigue', title: q => `A Knife for the Crown of ${KDATA[q.k].name}`, giver: 'A frightened servant', k: q => q.k,
+  desc: q => `A servant of ${KDATA[q.k].castle} swears that ${G.plot && G.plot.k === q.k ? G.plot.by : 'traitors'} plan to murder ${KDATA[q.k].ruler} within the week.`, reward: { gold: 300, xp: 280 },
+  steps: [
+    S_TALK(q => `Hear the servant out near ${KDATA[q.k].castle}`, q => ({ key: 'plot_servant', name: 'A frightened servant', role: `Of the household of ${KDATA[q.k].castle}`, look: { body: '#7a6a5a', head: 'cap', skin: '#e0b890' }, at: soff(W.places[q.k], 4, 11), k: q.k }), (q, e) => sChat(SPK(e), ['They meet at night outside the walls. Men with coin, and a vial.', 'Follow them, sir. Please. If they see me, I am dead.'], goOn(q, '"Show me where."'))),
+    S_FIGHT('Ambush the plotters at their meeting place', q => sagaSpot(q, 'plotspot', () => randomLandSpot(W.places[q.k].x, W.places[q.k].y, 26, 40)), [[['assassin', 3, { tier: 2 }], ['cultist', 1, { tier: 2, name: 'The Paymaster' }]]], { near: 16, msg: 'Cloaked figures draw their knives!' }),
+    S_RULER(q => `Warn ${KDATA[q.k].ruler}`, q => q.k, (q, e) => { if (G.plot && G.plot.k === q.k) G.plot.foiled = true; GF('plotsFoiled', (GF('plotsFoiled') || 0) + 1); sChat(rulerSpk(q.k), ['Poison? In my own house? …Then I owe you my life.', 'The crown does not forget.'], [{ t: 'Bow', fn: () => { addRep(q.k, 18, 'Foiled a plot against the crown'); G.plot = null; sAdvance(q); closeDialog(); } }]); }),
+  ] };
+SQ.revolt = { saga: true, label: 'Unrest', title: q => `Revolt in ${W.places[q.v].name}`, giver: q => `The people of ${W.places[q.v].name}`, k: q => q.k,
+  desc: q => `The villagers of ${W.places[q.v].name} have taken up pitchforks against ${KDATA[q.k].ruler}. Put the revolt down for the crown, or hear the rebels out.`, reward: { xp: 200 },
+  steps: [
+    S_TALK(q => `Meet the rebel leader at ${W.places[q.v].name}`, q => ({ key: 'rebel', name: 'Wat the Rebel', role: `Leader of the revolt in ${W.places[q.v].name}`, look: { body: '#6a5a3a', head: 'hood', hood: '#4a3a24', skin: '#d8a878', weapon: { wk: 'spear', len: 44, col: '#8a8e94' } }, at: soff(W.places[q.v], 3, 2), k: q.k }), (q, e) => sChat(SPK(e), [`Taxes doubled, sons taken for the war, and the granary sold. ${KDATA[q.k].ruler} does not care if we starve. So we don't care for ${KDATA[q.k].ruler}.`], [
+      { t: '<span class="dn">CROWN</span>"Lay down your arms, or I will make you."', fn: () => { q.side = 'crown'; sAdvance(q); closeDialog(); } },
+      { t: `<span class="dn">REBELS</span>"I will carry your grievances to the crown."`, fn: () => { q.side = 'rebels'; sAdvance(q); closeDialog(); } },
+      { t: `<span class="dn">GOLD</span>"Take this for grain, and go home." (300 gold)`, dis: P.gold < 300, fn: () => { P.gold -= 300; q.side = 'gold'; K.unrest[q.k] = clamp(K.unrest[q.k] - 30, 0, 100); addRep(q.k, 4, 'Calmed a revolt'); logEvent(`You bought grain for the rebels of ${W.places[q.v].name}, and they went home.`, [q.k]); sAdvance(q); closeDialog(); } }]) ),
+    S_FIGHT('Put down the revolt', q => W.places[q.v], [[['bandit', 5, { tier: 1, name: 'Rebel', o: { cloth: '#6a5a3a' } }], ['bandit', 1, { tier: 2, name: 'Wat the Rebel', boss: true }]]], { near: 12, msg: 'The rebels charge with pitchforks and scythes!', won: q => { K.unrest[q.k] = clamp(K.unrest[q.k] - 35, 0, 100); addRep(q.k, 10, 'Crushed a revolt'); logEvent(`You crushed the revolt in ${W.places[q.v].name}.`, [q.k]); }, skip: q => q.side !== 'crown' }),
+    S_RULER(q => `Carry the rebels' grievances to ${KDATA[q.k].ruler}`, q => q.k, (q, e) => { const c = ruler(q.k), hard = c.traits.includes('cruel') || c.traits.includes('greedy'); sChat(rulerSpk(q.k), hard ? ['You come to me on behalf of peasants with pitchforks? Get out.'] : ['…The granary was sold? I was not told. Very well. The taxes will be lowered, and the grain returned.'], [{ t: 'Continue', fn: () => { if (hard) { addRep(q.k, -8, 'Spoke for rebels'); K.unrest[q.k] = clamp(K.unrest[q.k] + 10, 0, 100); } else { K.unrest[q.k] = clamp(K.unrest[q.k] - 40, 0, 100); addRep(q.k, 6, 'Brought peace to a village'); } q.done = 1; logEvent(hard ? `${KDATA[q.k].ruler} refused to hear the rebels of ${W.places[q.v].name}.` : `${KDATA[q.k].ruler} heard the rebels of ${W.places[q.v].name} and lowered their taxes.`, [q.k]); sAdvance(q); closeDialog(); } }]); }, { skip: q => q.side !== 'rebels' }),
+    S_COND('The revolt is over', () => true),
+  ] };
+SQ.plague_year = { saga: true, label: 'Plague', title: 'The Plague Year', giver: 'The apothecaries', desc: () => 'Plague is spreading from village to village. Bring a Plague Remedy (mandrake and glowcap, or bought from any apothecary) to three stricken villages before it burns through the realm.', reward: { gold: 250, xp: 300 },
+  steps: [
+    S_MULTI(q => `Bring plague remedies to stricken villages (${(G.plague ? G.plague.cured.length : 0)}/3)`, q => (G.plague ? G.plague.hit.filter(id => !G.plague.cured.includes(id)) : []).map(id => ({ id: 'v' + id, at: () => W.places[id] })), { need: 3, reach: (q, s2, a) => { if (!countItem('plague_cure')) { delete (q.m || {})[s2.id]; if (G.time - (q.nagT || -99) > 20) { q.nagT = G.time; toast(`${a.name} needs a Plague Remedy. You have none.`, 'bad'); } return; } removeItemById('plague_cure', 1); G.plague.cured.push(a.id); GF('plagueCured', (GF('plagueCured') || 0) + 1); addRep(a.owner, 6, 'Brought a plague remedy'); toast(`You bring the remedy to ${a.name}. The sick begin to mend.`, 'good'); } }),
+  ], done: () => { if (G.plague && G.plague.cured.length >= 3) endPlague(); } };
+function sagaSpot(q, key, fn) { if (!q[key]) { const s = fn(); q[key] = { x: Math.round(s.x), y: Math.round(s.y) }; } return q[key]; }
+
+/* ---------------- Hooks ---------------- */
+hook('reset', () => { if (K) { K.court = null; K.unrest = [20, 20, 20, 20]; } G.plague = null; G.plot = null; G.royalDead = []; G.royalNames = {}; G.plotDay = null; G.weddingDay = null; G.plagueDay = null; G.revoltCd = 0; G.lastRoyalDeath = null; });
+hook('newgame', () => { K.court = newCourt(); K.unrest = [20, 22, 30, 16]; applyCourt(); });
+hook('save', d => { d.court = K.court; d.unrest = K.unrest; d.courtG = { plague: G.plague, plot: G.plot, royalDead: G.royalDead, royalNames: G.royalNames, plotDay: G.plotDay, weddingDay: G.weddingDay, plagueDay: G.plagueDay, revoltCd: G.revoltCd, lastRoyalDeath: G.lastRoyalDeath }; });
+hook('load', d => { K.court = d.court || newCourt(); K.unrest = d.unrest || [20, 22, 30, 16]; Object.assign(G, d.courtG || {}); applyCourt(); });
+hook('daily', day => courtDaily(day));
+hook('slow', () => plagueTick());
+hook('recalc', () => { if (P.plague) { P.maxSt = Math.round(P.maxSt * .7); P.S.plague = true; } });
+
+/* =====================================================================
+   DYNASTY — your knight's name, age and house; courtship, marriage and
+   children; and the line going on when you die. Childhood is quick:
+   children grow five years for every year that passes, and come of age
+   at sixteen (a little over three years, about 77 days).
+   ===================================================================== */
+const HAIRS = ['#5a3a22', '#2a1a10', '#8a5a2a', '#c8983e', '#e2d6b4', '#a8401a', '#3a2a1a', '#6a4a2a'], SKINS = ['#e0b48a', '#f0d0b0', '#c89868', '#a87850', '#e8c49a', '#7a5238'];
+const SUITOR_ARCH = {
+  steward: { n: 'Steward', d: 'Keeps your purse and lands in order: +15 gold a day from a well-run household.', likes: ['silk', 'spices', 'wine'] },
+  warrior: { n: 'Sword-Hand', d: 'Rides and fights at your side (G to call them along from home).', likes: ['steel_sword', 'longsword', 'meat', 'ale'] },
+  scholar: { n: 'Scholar', d: 'Studies magic with you: +20 mana and 8% spell power.', likes: ['flowers', 'sapphire', 'relic'] },
+  courtier: { n: 'Courtier', d: 'Charms the courts: reputation gains are 20% larger and shops 5% cheaper.', likes: ['flowers', 'gem', 'wine', 'honey_cake'] },
+};
+const pTitle = (fem = P.fem) => fem ? 'Dame' : 'Sir';
+const pFull = () => `${pTitle()} ${P.pname || 'Knight'}`;
+const pAge = () => cAge(P.born);
+function kidAge(kid) { const t = (dayNum() - kid.born) / YEAR; return t * 5 <= 16 ? Math.floor(t * 5) : Math.floor(16 + (t - 3.2)); }
+const kidAdult = kid => kidAge(kid) >= 16;
+const greying = (hair, age) => age >= 62 ? '#d8d8d0' : age >= 50 ? mix(hair, '#c8c8c0', (age - 49) / 14) : hair;
+function pLook() { const L = P.look || { hair: '#5a3a22', skin: '#e0b48a' }; return { hair: greying(L.hair, pAge()), skin: L.skin, beard: L.beard }; }
+function randLook(par) { const src = par && par.length ? pick(par) : null; return { hair: src && chance(.7) ? src.hair : pick(HAIRS), skin: src && chance(.8) ? src.skin : pick(SKINS), beard: chance(.35) ? 1 : 0 }; }
+function dynastyInit(o) {
+  if (!P) return; o = o || G.opts || {};
+  if (!P.pname) { P.fem = o.fem ? 1 : (P.fem || 0); P.pname = (o.pname || '').trim() || NAMES.first.filter((n, i) => i % 2 === P.fem)[randi(0, 13)]; }
+  if (P.fem == null) P.fem = 0;
+  if (!P.look) P.look = { hair: '#5a3a22', skin: '#e0b48a', beard: 0 };
+  if (P.born == null) P.born = dayNum() - (o.diff === 5 ? 18 : 22) * YEAR - randi(0, YEAR - 1);
+  if (!P.house) P.house = `House ${(W.start && W.start.name) || 'Hale'}`;
+  P.gen = P.gen || 1; P.anc = P.anc || []; P.kids = P.kids || []; P.sibs = P.sibs || [];
+  if (P.spouse === undefined) P.spouse = null;
+}
+function genSuitors() {
+  const out = [], cast = W.places.filter(p => p.type === 'castle'), vil = W.places.filter(p => p.type === 'village').sort(() => Math.random() - .5).slice(0, 5);
+  const mk = (pl, noble, fem) => ({ id: out.length, name: NAMES.first.filter((n, i) => i % 2 === fem)[randi(0, 13)] + (noble ? ` of ${pl.name.replace(/^(Castle|Palace) /, '')}` : ''), fem, k: pl.owner, place: pl.id, noble, arch: pick(Object.keys(SUITOR_ARCH)), look: randLook(), aff: 0, talkDay: 0, favor: null, age: randi(19, 34), gifts: 0 });
+  cast.forEach(pl => { out.push(mk(pl, true, 0)); out.push(mk(pl, true, 1)); }); vil.forEach(pl => out.push(mk(pl, false, chance(.5) ? 1 : 0)));
+  out.forEach(s => { s.likes = pick(SUITOR_ARCH[s.arch].likes); s.born = dayNum() - s.age * YEAR; delete s.age; });
+  return out;
+}
+function suitorLook(s) { const L = s.look; return { body: s.noble ? ['#6a2a4a', '#2a4a6a', '#4a6a2a', '#6a4a2a'][s.id % 4] : ['#7a6a50', '#5a6a7a', '#7a5a4a'][s.id % 3], head: 'hair', hair: L.hair, skin: L.skin, fem: s.fem, beard: !s.fem && L.beard, cape: s.noble ? KDATA[s.k].accent : null, tabard: s.noble ? KDATA[s.k].color : null }; }
+function suitorSpot(s) { const pl = W.places[s.place]; const i = s.id % 3; return pl.type === 'castle' ? findFree(pl.x + (i - 1) * 5 * TS, pl.y + 12.5 * TS) : findFree(pl.x + 2.5 * TS, pl.y + 2.8 * TS); }
+function suitorTick() {
+  if (G.under || !G.suitors || G.mode === 'road') return;
+  for (const s of G.suitors) {
+    if (s.wed || s.gone) continue; const pl = W.places[s.place], near = dist(P.x, P.y, pl.x, pl.y) < 1300, e = ents.find(x => x.role === 'suitor' && x.sid === s.id && !x.dead);
+    const day = tod() > .3 && tod() < .8;
+    if (near && day && !e) { const f = suitorSpot(s); mkActor('npc', f.x, f.y, { role: 'suitor', sid: s.id, name: s.name, k: s.k, _look: suitorLook(s), stand: true, standFace: Math.PI / 2, wanderR: 40 }); }
+    else if (e && (!near || !day)) removeEnt(e);
+  }
+}
+const heartBar = a => '❤'.repeat(Math.round(a / 20)) + '♡'.repeat(5 - Math.round(a / 20));
+function suitorDialog(e) {
+  const s = G.suitors[e.sid], A = SUITOR_ARCH[s.arch], day = dayNum(), opts = [];
+  if (P.spouse) { e.say = { text: pick(['Your spouse is a lucky one.', 'Good day to you, married knight.', 'Give my regards to your household.']), t: 3 }; return; }
+  const bump = (v, why) => { s.aff = clamp(s.aff + v, 0, 100); SND.play(v > 0 ? 'coin' : 'fail'); toast(`${s.name}: ${heartBar(s.aff)}${why ? ` <span style="opacity:.7">(${why})</span>` : ''}`, v > 0 ? 'good' : 'bad'); };
+  opts.push({ t: `<span class="dn">TALK</span>${s.talkDay === day ? 'You have already talked today' : 'Pass the time together'}`, dis: s.talkDay === day, fn: () => { s.talkDay = day; bump(K.rep[s.k] >= 25 ? 6 : 4, 'a pleasant hour'); suitorDialog(e); } });
+  const gifts = ['flowers', 'wine', 'gem', 'sapphire', 'silk', 'spices', 'honey_cake', 'ale', 'meat', 'relic', 'steel_sword', 'longsword'].filter(id => countItem(id));
+  gifts.slice(0, 4).forEach(id => opts.push({ t: `<span class="dn">GIFT</span>Give ${ITEMS[id].name}${id === s.likes ? ' <span class="dn">♥ a favourite</span>' : ''}`, fn: () => { removeItemById(id, 1); s.gifts++; bump((id === s.likes ? 16 : 6) * (s.gifts > 6 ? .5 : 1), id === s.likes ? 'delighted' : 'a kind gift'); suitorDialog(e); } }));
+  if (countItem('love_philter') && !s.philter) opts.push({ t: '<span class="dn">PHILTER</span>Share the Love Philter', fn: () => { removeItemById('love_philter', 1); s.philter = 1; bump(35, 'a rose-pink evening'); suitorDialog(e); } });
+  if (s.favor && countItem(s.favor)) opts.push({ t: `<span class="dn">FAVOR</span>Bring the ${ITEMS[s.favor].name} they asked for`, fn: () => { removeItemById(s.favor, 1); s.favor = null; bump(22, 'a promise kept'); suitorDialog(e); } });
+  else if (!s.favor && s.aff >= 30) opts.push({ t: '<span class="dn">FAVOR</span>"Is there anything you need?"', fn: () => { s.favor = pick(['sapphire', 'silk', 'gem', 'fast_horse', 'relic', 'golden_carp'].filter(id => ITEMS[id])); openDialog({ name: s.name, role: A.n, portrait: e, text: `Now that you ask… I have always wanted ${/^[aeiou]/i.test(ITEMS[s.favor].name) ? 'an' : 'a'} ${ITEMS[s.favor].name}.`, options: [{ t: 'Back', fn: () => suitorDialog(e) }] }); } });
+  const home = (P.houses || []).length || P.fief || (P.forts || []).length || (G.realm && G.realm.founded);
+  if (s.aff >= 80) opts.push({ t: `<span class="dn">PROPOSE</span>Ask for their hand <span class="dn">${home ? 'a wedding feast costs 300 gold' : 'you need a home first: a house, a fief or a fort'}</span>`, dis: !home || P.gold < 300, fn: () => wed(s, e) });
+  opts.push({ t: 'Farewell', fn: closeDialog });
+  openDialog({ name: s.name, role: `${s.noble ? 'Noble' : 'Villager'} of ${KDATA[s.k].name} · ${A.n} · ${heartBar(s.aff)}`, portrait: e, text: s.aff < 20 ? pick([`Oh, a knight. Good day to you, ${pTitle()} ${P.pname}.`, 'Can I help you?']) : s.aff < 60 ? pick(['It is good to see you again.', 'I was hoping you would come by.']) : pick(['There you are! I missed you.', 'Walk with me a while?']), options: opts });
+}
+function wed(s, e) {
+  P.gold -= 300; s.wed = true; if (e) removeEnt(e);
+  P.spouse = { name: s.name, fem: s.fem, arch: s.arch, k: s.k, look: s.look, born: s.born, wedDay: dayNum(), noble: s.noble, rides: false };
+  G.stats.weddings = (G.stats.weddings || 0) + 1; SND.play('bell'); SND.play('level');
+  logEvent(`${pFull()} married ${s.name} of ${KDATA[s.k].name}.`, [s.k]); addRep(s.k, s.noble ? 10 : 4, 'Married into the realm');
+  for (let i = 0; i < 60; i++) addPart(P.x + rand(-80, 80), P.y - rand(0, 60), rand(-40, 40), rand(-90, -20), pick(['#ffd0e0', '#ffffff', '#ffe08a', '#f08ab0']), rand(1, 2), 3, 30);
+  openDialog({ name: s.name, role: 'Your spouse', portrait: e || 'ember', text: `The bells ring, the feast runs late, and ${s.name} is yours, and you are theirs. ${SUITOR_ARCH[s.arch].d}`, options: [{ t: 'Continue', fn: closeDialog }] });
+  recalc();
+}
+/* ---------------- Children and the heir ---------------- */
+function birthDaily(day) {
+  const sp = P.spouse; if (!sp || sp.dead) return;
+  if (P.kids.length >= 6 || day - (P.lastBirth || sp.wedDay) < 18 || pAge() > 58) return;
+  if (!chance(.028)) return;
+  const fem = chance(.5) ? 1 : 0, kid = { name: NAMES.first.filter((n, i) => i % 2 === fem)[randi(0, 13)], fem, born: day, look: randLook([P.look, sp.look]) };
+  if (P.kids.some(k2 => k2.name === kid.name)) kid.name += ' the Younger';
+  P.kids.push(kid); P.lastBirth = day; if (P.heir == null) P.heir = 0;
+  logEvent(`A ${fem ? 'daughter' : 'son'}, ${kid.name}, was born to ${pFull()} and ${sp.name}.`, []);
+  toast(`🍼 <b>A ${fem ? 'daughter' : 'son'} is born!</b> You name ${fem ? 'her' : 'him'} ${kid.name}. (Rename in the House tab, <kbd>H</kbd>)`, 'gold'); SND.play('bell');
+}
+const heirKid = () => { const k = P.kids && P.kids[P.heir != null ? P.heir : 0]; return k || null; };
+const adultHeir = () => { const h = heirKid(); if (h && kidAdult(h)) return h; return (P.kids || []).find(kidAdult) || null; };
+function becomeHeir(kid, cause) {
+  const old = pFull(), oldAge = pAge(), sp = P.spouse;
+  P.anc.push({ name: old, born: P.born, died: dayNum(), cause, lvl: P.lvl, kills: G.kills, fem: P.fem });
+  if (G.under) leaveDungeon(true);
+  Object.assign(P, { pname: kid.name, fem: kid.fem, look: kid.look, born: dayNum() - (P.kids.includes(kid) ? kidAge(kid) : cAge(kid.born)) * YEAR - randi(0, YEAR - 1), gen: (P.gen || 1) + 1 }); P.lastBday = pAge();
+  P.sibs = P.kids.filter(k2 => k2 !== kid).map(k2 => ({ name: k2.name, fem: k2.fem, born: k2.born, look: k2.look })); P.kids = []; P.heir = null;
+  P.elder = sp && !sp.dead ? { name: sp.name, fem: sp.fem } : null; P.spouse = null;
+  const lv = Math.max(1, Math.round(P.lvl * .6)); P.lvl = lv; P.xp = 0; P.skills = {}; P.sp = lv - 1;
+  P.gold = Math.round(P.gold * .9);
+  for (const k in K.rep) K.rep[k] = Math.round(K.rep[k] * (K.rep[k] > 0 ? .6 : .8));
+  const w = P.eq.weapon ? getItem(P.eq.weapon) : null; if (w && !ITEMS[w.id].legend) { w.heirloom = P.house; w.q = Math.min(3, w.q + 1); }
+  if (P.nemesis && P.nemesis.state === 'active') P.nemesis.feud = old;
+  recalc(); P.hp = P.maxHp; P.st = P.maxSt; if (knowsMagic()) P.mp = P.maxMp;
+  const home = (P.houses || [])[0]; if (home != null && W.places[home]) P.respawn = { x: W.places[home].x, y: W.places[home].y + TS * 2.6 };
+  P.x = P.respawn.x; P.y = P.respawn.y; const f = findFree(P.x, P.y); P.x = f.x; P.y = f.y; P.mounted = false; P.kbx = P.kby = 0;
+  ents.forEach(e => { if (e.target === P) e.target = null; e.aggroPlayer = false; });
+  G.bounty = G.bounty.map(v => Math.round(v * .5)); G.state = 'play'; UI.hide('deathScreen'); cam.x = P.x; cam.y = P.y; G.pendingHeir = null; G.ironDead = false;
+  const verb = cause === 'age' ? 'died peacefully in old age' : cause === 'battle' ? 'fell in battle' : 'died';
+  logEvent(`${old} ${verb}, aged ${oldAge}. ${pFull()} took up the sword of ${P.house}.`, []);
+  G.stats.generations = P.gen; SND.play('bell');
+  showAreaTitle(P.house.toUpperCase(), `${pFull()}, of the ${ordinalWord(P.gen)} generation`);
+  setTimeout(() => toast(`You are now <b>${pFull()}</b>, ${pAge()} years old. You inherit the house, the lands and ${P.gold} gold; the realm remembers your parent's deeds, but only in part. Spend your skill points (P).`, 'gold'), 1500);
+  saveGame(true, true);
+}
+const ordinalWord = n => ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth'][n - 1] || n + 'th';
+function cousin() { const fem = chance(.5) ? 1 : 0; return { name: NAMES.first.filter((n, i) => i % 2 === fem)[randi(0, 13)], fem, born: dayNum() - randi(18, 26) * YEAR, look: randLook([P.look]) }; }
+// death in battle: with the Bloodline rule (always on for Forsaken) your adult heir takes up your sword
+function bloodlineDeath(iron) {
+  if (G.mode !== 'sandbox' || !(iron || (G.opts && G.opts.bloodline))) return false;
+  const h = adultHeir(); if (!h) return false;
+  G.pendingHeir = P.kids.indexOf(h);
+  setTimeout(() => {
+    $('deathSub').innerHTML = `${pFull()} has fallen, on day ${dayNum()}. But ${P.house} endures: <b>${h.name}</b>, ${kidAge(h)} years old, takes up the sword.`;
+    $('btnRespawn').textContent = `Continue as ${h.name}`; $('btnRespawn').classList.remove('hidden'); $('btnLoadSave').classList.toggle('hidden', iron); UI.show('deathScreen');
+  }, 900);
+  return true;
+}
+function birthdayCheck(day) {
+  if (!P || P.born == null) return; const age = pAge(), last = P.lastBday || 0;
+  if (age <= last) return; P.lastBday = age; if (!last) return;
+  toast(`🎂 ${pFull()} turns ${age}.`, ''); recalc();
+  if (G.mode !== 'sandbox' || age < 60) return;
+  if (Math.random() < (age - 57) * .045) {
+    const h = adultHeir() || cousin(), isKid = P.kids.includes(h);
+    openDialog({ name: 'The Chronicle', role: P.house, portrait: 'ember', text: `${pFull()} does not wake one winter morning. ${age} years, and a long road behind. ${isKid ? `${h.name} will carry the name on.` : `With no child grown, a cousin, ${h.name}, comes forward to claim the inheritance. Much is lost in the telling.`}`, options: [{ t: `Continue as ${h.name}`, fn: () => { closeDialog(); if (!isKid) { P.gold = Math.round(P.gold * .6); for (const k in K.rep) K.rep[k] = Math.round(K.rep[k] * .7); } becomeHeir(h, 'age'); } }] });
+    SND.play('narrate');
+  } else if (age >= 60 && age % 2 === 0) toast('Your joints ache in the mornings now. See that an heir is ready.', 'bad');
+}
+function spouseDaily(day) {
+  const sp = P.spouse; if (!sp || sp.dead) return;
+  if (sp.arch === 'steward') { P.gold += 15; }
+  if (Math.random() < ageDeathP(cAge(sp.born)) * .8 && G.mode === 'sandbox') { sp.dead = day; removeFamilyRiders(); logEvent(`${sp.name}, spouse of ${pFull()}, died.`, []); toast(`🕯 Your spouse <b>${sp.name}</b> has died. You may marry again, in time.`, 'bad'); SND.play('bell'); P.widowed = sp.name; P.spouse = null; recalc(); }
+}
+/* ---------------- Family at home, and riding with you ---------------- */
+function famLook(m, adult) { return { body: m.arch === 'warrior' ? '#9ba1a8' : ['#6a4a6a', '#4a6a8a', '#7a5a3a'][m.name.length % 3], mail: m.arch === 'warrior' ? 1 : 0, head: 'hair', hair: m.look.hair, skin: m.look.skin, fem: m.fem, beard: !m.fem && m.look.beard && adult, weapon: m.arch === 'warrior' || m.rides ? { wk: 'sword', len: 32, col: '#c8ced4' } : null, cape: P.allegiance != null ? KDATA[P.allegiance].color : null }; }
+function homeFamily(npc) {
+  const sp = P.spouse; if (sp && !sp.rides) npc('npc', 6.8, 5.8, { role: 'family', fam: 'spouse', name: sp.name, _look: famLook(sp, true), standFace: Math.PI });
+  (P.kids || []).forEach((kd, i) => { if (kd.rides) return; const a = kidAge(kd); npc('npc', 2.6 + i * 1.2, 6.4, { role: 'family', fam: 'kid' + i, name: kd.name, _look: famLook(kd, a >= 16), scale: a < 8 ? .62 : a < 16 ? .8 : 1, standFace: -Math.PI / 2, wanderR: 30, stand: a >= 8 }); });
+}
+function spawnRider(m, key) {
+  const f = findFree(P.x + rand(-40, 40), P.y + rand(20, 50));
+  const e = mkActor('knight', f.x, f.y, { k: P.allegiance ?? 0, ally: true, follow: true, comp: 'fam', fam: key, persistent: true, followDist: 55, fox: rand(-30, 30), foy: rand(-30, 30), aggro: 380, leash: 99999, named: true, name: m.name, _look: famLook(m, true), role: 'family', tier: clamp(Math.ceil(P.lvl / 4), 1, 4) });
+  e.hp = e.maxHp = Math.round(e.maxHp * 1.2); return e;
+}
+function removeFamilyRiders() { (G.under && G.over ? ents.concat(G.over.ents) : ents).filter(e => e.fam && e.follow).forEach(e => { removeEnt(e); if (G.over) G.over.ents = G.over.ents.filter(x => x !== e); }); }
+function familyRiders() { removeFamilyRiders(); if (P.spouse && P.spouse.rides && !P.spouse.dead) spawnRider(P.spouse, 'spouse'); (P.kids || []).forEach((kd, i) => { if (kd.rides && kidAdult(kd)) spawnRider(kd, 'kid' + i); }); }
+function familyDialog(e) {
+  const isSp = e.fam === 'spouse', m = isSp ? P.spouse : P.kids[+e.fam.slice(3)]; if (!m) return;
+  const adult = isSp || kidAdult(m), opts = [];
+  if (isSp) opts.push({ t: `<span class="dn">BOON</span>${SUITOR_ARCH[m.arch].n}: ${SUITOR_ARCH[m.arch].d}`, dis: true, fn: () => { } });
+  if (adult && (isSp ? m.arch === 'warrior' : true)) opts.push({ t: m.rides ? '<span class="dn">HOME</span>"Go home and rest."' : '<span class="dn">RIDE</span>"Ride with me."', fn: () => { m.rides = !m.rides; closeDialog(); if (m.rides) { removeEnt(e); spawnRider(m, e.fam); toast(`${m.name} rides with you.`, 'good'); } else { removeEnt(e); toast(`${m.name} heads home.`); } } });
+  if (!isSp && adult && P.heir !== +e.fam.slice(3)) opts.push({ t: '<span class="dn">HEIR</span>Name them your heir', fn: () => { P.heir = +e.fam.slice(3); toast(`${m.name} is now your heir.`, 'gold'); closeDialog(); } });
+  opts.push({ t: 'Farewell', fn: closeDialog });
+  const a = isSp ? cAge(m.born) : kidAge(m);
+  openDialog({ name: m.name, role: isSp ? `Your ${m.fem ? 'wife' : 'husband'} · ${SUITOR_ARCH[m.arch].n}` : `Your ${m.fem ? 'daughter' : 'son'} · ${a} years old${P.heir === +e.fam.slice(3) ? ' · your heir' : ''}`, portrait: e, text: isSp ? pick(['Welcome home, love.', 'You look tired. Sit by the fire.', 'The children missed you.', 'Did you bring me anything?']) : a < 8 ? pick(['Tell me a story!', 'Did you fight a dragon?', 'Can I hold your sword?']) : a < 16 ? pick(['When can I come with you?', 'I have been practising with the old sword!', 'Teach me to ride properly.']) : pick(['Ready when you are.', 'Where do we ride?', 'The name of our house will be sung one day.']), options: opts });
+}
+ROLES.family = { label: e => `Talk to ${e.name}`, talk: e => familyDialog(e) };
+ROLES.suitor = { label: e => `Speak with ${e.name}`, talk: e => suitorDialog(e) };
+
+/* ---------------- The Realm & Court panel (H) ---------------- */
+let courtTab = 'court';
+UI.ids.court = 'courtScreen'; UI.renders.court = renderCourt; PANELS.KeyH = 'court';
+function portraitCanvas(e, size = 72) { const c = document.createElement('canvas'); c.width = c.height = size * 2; drawPortrait(c, e); return c.toDataURL(); }
+function fakeE(look, k) { return { kind: 'npc', _look: look, k }; }
+function renderCourt() {
+  const tabs = [['court', 'The Courts'], ['house', P.house || 'Your House']].concat(TABS_EXT.court || []);
+  $('courtTabs').innerHTML = tabs.map(([k, n]) => `<div class="tab ${courtTab === k ? 'on' : ''}" data-ct="${k}">${esc(n)}</div>`).join('');
+  $('courtTabs').querySelectorAll('[data-ct]').forEach(el => el.onclick = () => { courtTab = el.dataset.ct; renderCourt(); });
+  const body = $('courtBody');
+  if (courtTab === 'court') body.innerHTML = renderCourts();
+  else if (courtTab === 'house') body.innerHTML = renderHouse();
+  else if (TABS_EXT.render && TABS_EXT.render[courtTab]) body.innerHTML = TABS_EXT.render[courtTab]();
+  body.querySelectorAll('[data-act]').forEach(el => el.onclick = () => { const f = COURT_ACTS[el.dataset.act]; if (f) f(el.dataset.arg); });
+  body.querySelectorAll('input[data-nm]').forEach(el => { el.onkeydown = ev => ev.stopPropagation(); el.onchange = () => { const v = el.value.trim().slice(0, 24); if (!v) return; const t = el.dataset.nm; if (t === 'me') P.pname = v; else if (t === 'house') P.house = (/^house /i.test(v) ? '' : 'House ') + v; else { const kd = P.kids[+t]; if (kd) kd.name = v; } SND.play('ui'); renderCourt(); }; });
+}
+const TABS_EXT = { court: [], render: {} };
+const COURT_ACTS = {
+  heir: i => { P.heir = +i; SND.play('ui'); renderCourt(); },
+};
+function renderCourts() {
+  const card = k => {
+    const c = ruler(k), kd = KDATA[k], cr = c.crisis, age = cr && !c.name ? null : cAge(c.born), un = Math.round(K.unrest[k] || 0), h = c.heir;
+    const traits = c.traits.map(t => TRAITS[t] ? `<span class="chip" data-tip="<h4>${TRAITS[t].n}</h4>${esc(TRAITS[t].d)}">${TRAITS[t].n}</span>` : '').join(' ');
+    return `<div class="crCard" style="--kc:${kd.color}"><img class="crPort" src="${portraitCanvas({ royal: true, k })}" alt=""><div class="crInfo">
+      <div class="crName">${esc(kd.ruler)}</div><div class="crSub"><img src="${bannerURL(k)}" alt=""> ${kd.full} · ${c.house || ''}${age != null ? ` · age ${age}` : ''} · reigning since day ${c.since}</div>
+      ${cr ? `<div class="crCrisis">⚖ Succession crisis! ${esc(cr.claim[0].name)} or ${esc(cr.claim[1].name)}. The lords decide by day ${cr.until}.</div>` : `<div class="crTraits">${traits}</div>`}
+      <div class="crLine">Heir: ${h ? `<b>${esc(h.name)}</b>, ${h.fem ? 'princess' : 'prince'}, ${cAge(h.born)}${h.spouseOf != null ? ` · wed into ${KDATA[h.spouseOf].name}` : ''}` : '<i>none named</i>'}</div>
+      <div class="crLine">Unrest <span class="crBar"><span style="width:${un}%;background:${un > 70 ? '#e0503a' : un > 45 ? '#e0a040' : '#8fc060'}"></span></span> ${un > 70 ? 'on the brink of revolt' : un > 45 ? 'restless' : 'content'}</div>
+      <div class="crLine">Your standing: <b>${repTitle(k)}</b> (${Math.round(K.rep[k])})</div></div></div>`;
+  };
+  const dead = (G.royalDead || []).slice(0, 6).map(r => `<div>Day ${r.d}: ${esc(r.name)}, aged ${r.age} (${{ age: 'old age', plot: 'murdered', sick: 'illness', plague: 'plague', battle: 'battle', rebels: 'rebels' }[r.cause] || r.cause})</div>`).join('');
+  const pg = G.plague ? `<div class="crNote"><b>☣ Plague</b>Stricken: ${G.plague.hit.filter(id => !G.plague.cured.includes(id)).map(id => W.places[id].name).join(', ') || 'no village now'}.</div>` : '';
+  return `<div class="crGrid">${CROWNS.map(card).join('')}${(TABS_EXT.courtCards || []).map(f => f()).join('')}</div>${pg}${dead ? `<div class="crNote"><b>The dead</b>${dead}</div>` : ''}`;
+}
+function renderHouse() {
+  const me = P, age = pAge(), sp = P.spouse;
+  const pe = { isPlayer: true, kind: 'player' };
+  const kids = (P.kids || []).map((kd, i) => `<div class="hsKid${P.heir === i ? ' heir' : ''}"><img src="${portraitCanvas(fakeE(famLook(kd, kidAdult(kd)), P.allegiance))}" alt=""><div><b>${esc(kd.name)}</b> <span class="dim">${kd.fem ? 'daughter' : 'son'} · ${kidAge(kd)}${kidAdult(kd) ? ' · of age' : ` · of age in ${Math.max(1, Math.ceil((16 / 5 * YEAR) - (dayNum() - kd.born)))} days`}</span><div class="hsBtns"><input class="txtIn sm" data-nm="${i}" value="${esc(kd.name)}" maxlength="22" title="Rename">${P.heir === i ? '<span class="chip" style="color:#e7c35a">HEIR</span>' : `<button class="btn sm" data-act="heir" data-arg="${i}">Make heir</button>`}</div></div></div>`).join('');
+  const anc = (P.anc || []).slice().reverse().map(a => `<div>${esc(a.name)} <span class="dim">(died aged ${Math.floor((a.died - a.born) / YEAR)}, day ${a.died}) · level ${a.lvl} · ${a.kills} foes slain · ${a.cause === 'age' ? 'died in old age' : 'fell in battle'}</span></div>`).join('');
+  const bl = G.mode !== 'sandbox' ? 'In story mode, death does not pass to your heir.' : (DIFF().ironman || (G.opts && G.opts.bloodline)) ? '<b>Bloodline rule:</b> if you fall, your adult heir takes up your sword.' : 'If you fall you rise again as before. (The Bloodline rule, chosen when a new game begins, passes death to your heir instead.) In old age, your heir always inherits.';
+  return `<div class="hsTop"><img class="crPort" src="${portraitCanvas(P)}" alt=""><div><div class="crName">${pTitle()} <input class="txtIn" data-nm="me" value="${esc(P.pname)}" maxlength="22" title="Rename your knight"></div>
+    <div class="crSub"><input class="txtIn sm" data-nm="house" value="${esc(P.house)}" maxlength="26" title="Rename your house"> · ${ordinalWord(P.gen || 1)} generation · age ${age}${age >= 50 ? ' · <span style="color:#e0a040">growing old</span>' : ''}</div>
+    <div class="crLine">${sp ? `Married to <b>${esc(sp.name)}</b> (${SUITOR_ARCH[sp.arch].n}: ${esc(SUITOR_ARCH[sp.arch].d)})` : P.widowed ? `Widowed. ${esc(P.widowed)} is remembered.` : 'Unmarried. Suitors can be found in the royal cities and some villages: talk, give gifts, do them favours, and when their heart is full, propose. You will need a home.'}</div>
+    <div class="crLine dim">${bl}</div></div></div>
+    ${kids ? `<h3 class="hsH">CHILDREN</h3><div class="hsKids">${kids}</div>` : sp ? '<div class="crNote">No children yet.</div>' : ''}
+    ${P.sibs && P.sibs.length ? `<h3 class="hsH">SIBLINGS</h3><div class="crNote">${P.sibs.map(s => esc(s.name)).join(', ')}</div>` : ''}
+    ${anc ? `<h3 class="hsH">ANCESTORS</h3><div class="crNote">${anc}</div>` : ''}`;
+}
+
+/* ---------------- Hooks ---------------- */
+ACH.push(
+  ['wed', '💍', 'Till Death Do Us Part', 'Marry', () => !!(P.spouse || P.widowed || (P.anc || []).length && G.stats.weddings)],
+  ['firstborn', '🍼', 'An Heir Is Born', 'Have a child', () => (P.kids || []).length > 0 || (P.gen || 1) > 1],
+  ['gen2', '⚜', 'The Line Goes On', 'Play on as your own heir', () => (P.gen || 1) >= 2],
+  ['gen5', '♛', 'A Dynasty of Legend', 'Reach the fifth generation of your house', () => (P.gen || 1) >= 5],
+  ['kingmaker', '⚖', 'Kingmaker', 'Put a claimant on an empty throne', () => !!GF('kingmaker')],
+  ['plots', '🗡', 'The Knife Turned Aside', 'Foil a plot against a crown', () => !!GF('plotsFoiled')],
+  ['plague', '☣', 'Physician of the Realm', 'Bring plague remedies to three stricken villages', () => (GF('plagueCured') || 0) >= 3],
+);
+hook('newgame', (mode, opts) => { dynastyInit(opts); P.lastBday = pAge(); G.suitors = genSuitors(); });
+hook('load', d => { dynastyInit(); if (!P.lastBday) P.lastBday = pAge(); G.suitors = d.suitors || genSuitors(); if (d.P.spouse) P.spouse = d.P.spouse; setTimeout(() => { if (G.state === 'play') familyRiders(); }, 300); });
+hook('save', d => { Object.assign(d.P, { pname: P.pname, fem: P.fem, look: P.look, born: P.born, house: P.house, gen: P.gen, anc: P.anc, kids: P.kids, sibs: P.sibs, spouse: P.spouse, heir: P.heir, elder: P.elder, lastBday: P.lastBday, lastBirth: P.lastBirth, widowed: P.widowed }); d.suitors = G.suitors; });
+hook('daily', day => { if (G.mode === 'road') return; birthdayCheck(day); birthDaily(day); spouseDaily(day); });
+hook('slow', () => suitorTick());
+hook('recalc', () => {
+  const age = P.born != null ? pAge() : 30;
+  if (age >= 50) { P.maxHp = Math.round(P.maxHp * Math.max(.75, 1 - .012 * (age - 49))); P.maxSt = Math.round(P.maxSt * Math.max(.7, 1 - .015 * (age - 49))); }
+  const sp = P.spouse; if (sp && sp.arch === 'scholar' && knowsMagic()) { P.maxMp += 20; P.S.sp += .08; }
+});
 
 /* ---------------- Loop ---------------- */
 let last = performance.now(), mmT = 0, ambT = 0, fpsA = 0;
