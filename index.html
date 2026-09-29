@@ -107,6 +107,23 @@ body.touch #helpTouch{display:block}
 .bar.st .fill{background:linear-gradient(180deg,#b8d86a,#6f9a2c 55%,#46681a)}
 .bar.st.low .fill{background:linear-gradient(180deg,#e0b050,#9a6a1c)}
 .bar.xp{height:6px;width:220px}
+.bar.mp{height:11px}.bar.mp .fill{background:linear-gradient(180deg,#8ab8ff,#3a64c8 55%,#243e8a)}.bar.mp span{font-size:9.5px}
+body.hasMana #questTracker{top:98px}
+#spellBar{position:absolute;left:50%;bottom:92px;transform:translateX(-50%);display:flex;gap:6px;padding:5px;pointer-events:auto}
+.spSlot{position:relative;width:44px;height:44px;border-radius:6px;border:1.5px solid var(--sc);background:radial-gradient(circle at 50% 40%,rgba(60,44,28,.95),rgba(14,10,6,.95));display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden}
+.spSlot .spG{font-size:21px;color:var(--sc);text-shadow:0 0 8px var(--sc);z-index:1}.spSlot.spE{opacity:.45}.spSlot.nomp .spG{filter:grayscale(1);opacity:.5}
+.spSlot kbd{position:absolute;right:2px;bottom:1px;font-size:9px;padding:0 3px;z-index:2}
+.spSlot .spCd{position:absolute;inset:0;background:conic-gradient(transparent var(--p,100%),rgba(0,0,0,.62) 0)}
+body.touch #spellBar{bottom:auto;top:66px;left:auto;right:calc(12px + env(safe-area-inset-right));transform:none;zoom:.85}
+#tCast{right:calc(200px + env(safe-area-inset-right));bottom:112px;border-color:rgba(200,144,255,.85)}
+#spellbook{margin-top:14px;border-top:1px solid rgba(160,122,58,.35);padding-top:10px}
+#spellbook h3{font-family:var(--fh);color:var(--gold-l);margin:0 0 8px;font-size:15px}#spellbook h3 span{font-family:var(--fb, inherit);font-size:12px;color:var(--muted);margin-left:8px;letter-spacing:0}
+.sbEmpty{color:var(--muted);font-size:13.5px}.sbSlots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.sbSlot{border:1.5px solid var(--sc);border-radius:6px;padding:7px 8px;cursor:pointer;background:rgba(0,0,0,.3);font-size:13px}.sbSlot.sbE{opacity:.55;border-style:dashed}.sbSlot b{color:var(--sc)}.sbSlot kbd{margin-right:6px}
+.sbList{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;max-height:260px;overflow:auto}
+.sbSpell{display:flex;gap:9px;align-items:flex-start;padding:6px 8px;border:1px solid rgba(160,122,58,.3);border-radius:6px;cursor:pointer;background:rgba(0,0,0,.22)}.sbSpell.sel{border-color:var(--sc);box-shadow:0 0 10px var(--sc)}
+.sbSpell>b{font-size:22px;color:var(--sc);width:26px;text-align:center}.sbSpell .sn2{font-family:var(--fh);font-size:13px}.sbSpell .sd{font-size:12.5px;color:var(--ink2)}.sbSpell .sm2{font-size:11px;color:var(--muted)}
+@media (max-width:760px){.sbSlots,.sbList{grid-template-columns:1fr 1fr}}
 .bar.xp .fill{background:linear-gradient(90deg,#8a6a2e,#f3dc9c)}
 .bar span{position:absolute;inset:0;font-size:10.5px;line-height:14px;text-align:center;color:#fff;text-shadow:0 1px 2px #000,0 0 3px #000;font-family:var(--fh);font-weight:700;letter-spacing:.05em}
 #questTracker{position:absolute;left:12px;top:84px;width:262px;display:flex;flex-direction:column;gap:6px}
@@ -147,7 +164,7 @@ body.touch #helpTouch{display:block}
 #slotW .sw2.none{display:none}
 #specPip{position:absolute;left:-8px;top:-10px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 10px var(--fh);color:#1b140d;background:conic-gradient(#e7c35a var(--p,100%),rgba(20,14,8,.9) 0);border:1px solid #6b5230;box-shadow:0 0 6px rgba(0,0,0,.5)}
 #skillScreen .panel{width:min(940px,95vw)}
-.skGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:10px}
+.skGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
 .skCol{background:rgba(0,0,0,.25);border:1px solid rgba(160,122,58,.35);border-radius:6px;padding:10px;display:flex;flex-direction:column;gap:6px}
 .skCol h4{font-family:var(--fh);color:var(--gold-l);margin:0;font-size:14px}
 .skPips{display:flex;gap:4px}.skPip{flex:1;height:8px;border-radius:3px;background:#2a2016;border:1px solid #6b5230}.skPip.on{background:linear-gradient(#f0d070,#b8902a)}
@@ -269,7 +286,7 @@ kbd{display:inline-block;min-width:18px;padding:0 4px;height:17px;line-height:15
 #invScreen .panel{width:min(1080px,calc(96vw/var(--ui-scale)));height:min(700px,calc(92vh/var(--ui-scale)));display:flex;flex-direction:column}
 .invBody{display:grid;grid-template-columns:300px 1fr;gap:16px;flex:1;min-height:0}
 .doll{background:rgba(0,0,0,.28);border:1px solid rgba(154,117,54,.4);border-radius:6px;padding:12px;display:flex;flex-direction:column;align-items:center;overflow-y:auto;overflow-x:hidden}
-.dollGrid{display:grid;grid-template-columns:68px 118px 68px;grid-template-rows:auto auto;gap:6px 6px;row-gap:18px;align-items:center;justify-items:center}
+.dollGrid{display:grid;grid-template-columns:68px 118px 68px;grid-template-rows:auto auto auto;gap:6px 6px;row-gap:18px;align-items:center;justify-items:center}
 #dollCanvas{width:118px;height:136px;grid-row:1/3;grid-column:2}
 .eslot{width:66px;height:66px;border-radius:6px;border:1px dashed #8a6a32;background:radial-gradient(circle,#2e2216,#120c07);display:flex;align-items:center;justify-content:center;position:relative;transition:all .15s;cursor:pointer}
 .eslot img{width:52px;height:52px}
@@ -545,6 +562,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <button class="tb" id="tDodge">↻<small>DODGE</small></button>
       <button class="tb" id="tSpec">✦<small>SPECIAL</small></button>
       <button class="tb" id="tUse">✋<small>USE</small></button>
+      <button class="tb hidden" id="tCast">✧<small>CAST</small></button>
       <div id="tSmall">
         <button class="tb sm" id="tSprint">»<small>SPRINT</small></button>
         <button class="tb sm" id="tHorse">🐎<small>HORSE</small></button>
@@ -553,6 +571,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <button class="tb sm" id="tEat">🍖<small>EAT</small></button>
         <button class="tb sm" id="tPot">⚗<small>POTION</small></button>
         <button class="tb sm" id="tParty">⚑<small>PARTY</small></button>
+        <button class="tb sm" id="tTonic">🧪<small>TONIC</small></button>
         <button class="tb sm" id="tFull">⛶<small>FULL</small></button>
       </div>
     </div>
@@ -561,6 +580,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div class="bars">
         <div class="bar hp"><div class="lag" id="hpLag"></div><div class="fill" id="hpFill"></div><span id="hpText"></span></div>
         <div class="bar st" id="stBar"><div class="fill" id="stFill"></div><span id="stText"></span></div>
+        <div class="bar mp hidden" id="mpBar"><div class="fill" id="mpFill"></div><span id="mpText"></span></div>
         <div class="bar xp"><div class="fill" id="xpFill"></div></div>
       </div>
     </div>
@@ -573,6 +593,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div class="hudbox terr"><img id="terrBanner" alt=""><div><div class="tn" id="terrName">—</div><div class="tr" id="terrRep"></div></div></div>
       <div id="mmWrap"><canvas id="minimap" width="176" height="176"></canvas><div class="compass">N</div></div>
     </div>
+    <div id="spellBar" class="hudbox scal hidden"></div>
     <div id="hudBC" class="hudbox scal">
       <div class="slot" id="slotW"><img alt=""><div><div class="sn"></div><div class="ss"></div></div><img class="sw2 none" id="slotW2" alt="" title="Tab: swap to sidearm"><span id="specPip" title="C: special move">C</span></div>
       <div class="slot" id="slotS"><img alt=""><div><div class="sn"></div><div class="ss"></div></div></div>
@@ -713,6 +734,8 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
             <div class="eslot" id="esA" data-slot="armor"><span class="el">ARMOR</span></div>
             <div class="eslot" id="esH" data-slot="horse"><span class="el">HORSE</span></div>
             <div class="eslot" id="esW2" data-slot="weapon2"><span class="el">SIDEARM</span></div>
+            <div class="eslot" id="esR" data-slot="ring"><span class="el">RING</span></div>
+            <div class="eslot" id="esAm" data-slot="amulet"><span class="el">AMULET</span></div>
           </div>
           <table class="statTbl" id="statTbl"></table>
         </div>
@@ -809,8 +832,10 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <div><kbd data-k="KeyP">P</kbd> Skills (one point per level)</div><div><kbd data-k="KeyG">G</kbd> Companions: follow or hold position</div>
         <div><kbd data-k="KeyI">I</kbd> Inventory</div><div><kbd data-k="KeyM">M</kbd> Map</div>
         <div><kbd data-k="KeyK">K</kbd> Diplomacy (kingdoms)</div><div><kbd data-k="KeyJ">J</kbd> Journal: quests and chronicle</div><div><kbd data-k="KeyL">L</kbd> Journal: bestiary and lore</div>
-        <div><kbd>1</kbd>–<kbd>3</kbd> Eat food / drink potion</div><div><kbd>Esc</kbd> Pause / close</div>
+        <div><kbd>1</kbd>–<kbd>3</kbd> Eat food / drink potion / bandage</div><div><kbd data-k="Digit4">4</kbd> Drink your quick tonic (choose one in the pack's Magic tab)</div>
+        <div><kbd data-k="KeyZ">Z</kbd> <kbd data-k="KeyX">X</kbd> <kbd data-k="KeyV">V</kbd> <kbd data-k="KeyB">B</kbd> Cast the spells in your four slots (set them in the spellbook, under Skills)</div><div><kbd>Esc</kbd> Pause / close</div>
       </div>
+      <p style="margin-top:12px"><b style="font-family:var(--fh);color:var(--gold-l)">MAGIC.</b> Any knight can learn a spell or two. Court mages in the royal cities sell tomes; the wizard towers in each kingdom teach stronger magic to those who climb them and pass their trials. Spells cost mana, the blue bar, which returns on its own. A staff (two-handed) looses bolts that cost no mana and strengthens your spells. Rings, amulets and glyphs add mana, spell power and resistances. Herbs grow wild everywhere: brew them into potions at an apothecary, a court mage or a tower laboratory, or anywhere with an Alchemist's Kit.</p>
       <div id="helpTouch" style="margin-top:12px;padding:10px 12px;border:1px solid rgba(154,117,54,.4);border-radius:6px;background:rgba(0,0,0,.25)"><b style="font-family:var(--fh);color:var(--gold-l)">ON A PHONE OR TABLET</b><br>Drag anywhere on the left of the screen to move. <b>⚔</b> attacks (hold it to draw a bow, release to shoot), <b>🛡</b> blocks, <b>↻</b> dodges, <b>✦</b> is your special move and <b>✋</b> talks and interacts (or tap the prompt). Attacks and arrows aim at the nearest foe by themselves. The small buttons sprint, mount, swap weapons, switch arrows, eat, drink a potion, call your companions and go fullscreen. On the map, drag to pan, pinch to zoom, tap a place for details and press and hold to set a waypoint.</div>
       <p style="margin-top:12px">You begin as a poor hedge knight near a village of Albion. Explore the continent, hunt bandits, complete quests, trade goods between kingdoms, and build your reputation with four rival crowns. Your deeds shift the balance between the realms: help one kingdom and its rivals will take notice.</p>
       <p>Bandit camps hide in forests, hills and mountains; harder camps guard better loot. Kingdom soldiers turn hostile if your reputation falls too low, or if you swear allegiance to their enemy. Villages offer work, rest, rumors and trade. Rulers grant audiences in their castles.</p>
@@ -858,6 +883,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div class="orn">✦</div>
       <div class="psub" id="skillPts"></div>
       <div class="skGrid" id="skillBody"></div>
+      <div id="spellbook"></div>
     </div>
   </div>
 
@@ -932,8 +958,12 @@ const sgn = n => (n > 0 ? '+' : '') + Math.round(n);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 /* Hooks: the bigger systems (magic, courts, armies, the realm, the seas, the Tide, the Long Road) each register here
    for reset, save, load and the game clocks, so the core save/load and loop code only needs one call per hook. */
-const HOOKS = { reset: [], save: [], load: [], newgame: [], daily: [], tick: [], slow: [], hud: [] };
+const HOOKS = { reset: [], save: [], load: [], newgame: [], daily: [], tick: [], slow: [], hud: [], draw: [], recalc: [], kill: [], pad: [] };
 const hook = (n, fn) => { HOOKS[n].push(fn); };
+// New NPC roles, world interactions and keys register here: ROLES[role] = { label(e), talk(e) }, IACTS[type] = { label(it, pl), act(it, pl) },
+// KEYFN[code] = fn (the code is the default key; players can rebind it in Settings), PANELS[code] = UI screen to toggle.
+const ROLES = {}, IACTS = {}, KEYFN = {}, PANELS = {}, STRUCTS = {}, PICON = {}, DRAW_KIND = {}, KIND_AI = {}, MUSIC_PICK = [];
+// STRUCTS[k](g, o, t) draws a world object kind, PICON[type](g, p, s) its map icon; DRAW_KIND[kind](g, e, t) draws an actor kind, KIND_AI[kind](e, dt) adds behaviour
 function runHooks(n, a, b, c) { for (const f of HOOKS[n]) { try { f(a, b, c); } catch (e) { console.error(`[${n} hook]`, e); } } }
 
 function mulberry32(s) { return function () { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -973,7 +1003,7 @@ function compass(dx, dy) { const a = Math.atan2(dy, dx); const dirs = ['East', '
 const DEFAULT_SETTINGS = { music: 0.45, sound: 0.7, effects: 0.6, shake: true, dmgNums: true, minimap: true, uiScale: 1, quality: 'high', battery: false, voices: true, voiceVol: .8, noFlash: false, cb: false, textScale: 1, keys: {} };
 let settings = loadSettings();
 /* Key bindings: every action keeps its default code inside the game; settings.keys maps it to the physical key. */
-const KEY_ACTIONS = [['KeyW', 'Move up'], ['KeyS', 'Move down'], ['KeyA', 'Move left'], ['KeyD', 'Move right'], ['ShiftLeft', 'Sprint'], ['Space', 'Dodge'], ['KeyE', 'Interact'], ['KeyF', 'Horse'], ['KeyQ', 'Hit friendlies (hold)'], ['KeyR', 'Switch arrows'], ['Tab', 'Swap weapon'], ['KeyC', 'Special move'], ['KeyG', 'Companions'], ['KeyI', 'Inventory'], ['KeyM', 'Map'], ['KeyK', 'Diplomacy'], ['KeyJ', 'Journal: quests'], ['KeyP', 'Skills'], ['KeyL', 'Journal: bestiary'], ['Digit1', 'Eat food'], ['Digit2', 'Drink potion'], ['Digit3', 'Use bandage']];
+const KEY_ACTIONS = [['KeyW', 'Move up'], ['KeyS', 'Move down'], ['KeyA', 'Move left'], ['KeyD', 'Move right'], ['ShiftLeft', 'Sprint'], ['Space', 'Dodge'], ['KeyE', 'Interact'], ['KeyF', 'Horse'], ['KeyQ', 'Hit friendlies (hold)'], ['KeyR', 'Switch arrows'], ['Tab', 'Swap weapon'], ['KeyC', 'Special move'], ['KeyG', 'Companions'], ['KeyI', 'Inventory'], ['KeyM', 'Map'], ['KeyK', 'Diplomacy'], ['KeyJ', 'Journal: quests'], ['KeyP', 'Skills'], ['KeyL', 'Journal: bestiary'], ['Digit1', 'Eat food'], ['Digit2', 'Drink potion'], ['Digit3', 'Use bandage'], ['Digit4', 'Quick tonic'], ['KeyZ', 'Spell 1'], ['KeyX', 'Spell 2'], ['KeyV', 'Spell 3'], ['KeyB', 'Spell 4']];
 const KEY_LOGICAL = new Set(KEY_ACTIONS.map(a => a[0]));
 let keyRev = {};
 function keyOf(code) { return (settings.keys && settings.keys[code]) || code; }
@@ -1079,6 +1109,17 @@ const SND = {
       case 'thunk': this.noise(.06, .22 * v, 'sfx', 520, 1.2, .5, 'lowpass'); break;
       case 'ignite': this.noise(.32, .12, 'sfx', 1100, .8, 2.3); break;
       case 'frost': this.tone(2350, .28, 'sine', .04, 'sfx', 0, 1.3); this.noise(.22, .12, 'sfx', 5200, 3, .6, 'highpass'); break;
+      // magic
+      case 'cast': this.tone(660, .22, 'sine', .06, 'sfx', 0, 1.6); this.tone(990, .26, 'triangle', .04, 'sfx', .04, 1.4); this.noise(.18, .05, 'sfx', 3000, 2, 1.5); break;
+      case 'firecast': this.noise(.45, .16, 'sfx', 700, .7, 2.2); this.tone(180, .3, 'sawtooth', .04, 'sfx', 0, 1.8); break;
+      case 'boom': this.noise(.9, .38, 'sfx', 260, .5, .35, 'lowpass'); this.noise(.35, .22, 'sfx', 1400, .8, .4); this.tone(70, .6, 'sine', .22, 'sfx', 0, .5); break;
+      case 'zap': this.noise(.16, .2, 'sfx', 4200, 1.2, 1.8, 'highpass'); this.tone(1760, .12, 'square', .03, 'sfx', 0, .4); this.noise(.3, .1, 'sfx', 900, 2, .5, 'bandpass', .05); break;
+      case 'heal': [523, 659, 784].forEach((f, i) => this.tone(f, .45, 'sine', .07, 'sfx', i * .07, 1.02)); this.noise(.5, .03, 'sfx', 6000, 3, 1.2, 'highpass'); break;
+      case 'blink': this.tone(1400, .18, 'sine', .07, 'sfx', 0, .35); this.noise(.2, .08, 'sfx', 5000, 2, .3, 'highpass'); break;
+      case 'ward': this.tone(392, .6, 'triangle', .08, 'sfx', 0, 1.01); this.tone(588, .6, 'sine', .05, 'sfx', .05, 1.01); break;
+      case 'shadow': this.tone(110, .8, 'sawtooth', .05, 'sfx', 0, .7, .1); this.tone(116, .8, 'sine', .07, 'sfx', .05, .72, .1); this.noise(.6, .06, 'sfx', 400, 3, .6); break;
+      case 'brew': this.noise(.7, .06, 'sfx', 1800, 5, 1.2); [0, .12, .26, .41].forEach(w => this.tone(900 + Math.random() * 500, .06, 'sine', .05, 'sfx', w, 1.5)); break;
+      case 'arcane': [880, 1109, 1318, 1760].forEach((f, i) => this.tone(f, .5, 'sine', .05, 'sfx', i * .05)); break;
       // snowfields
       case 'gale': this.noise(2.8, .06, 'fx', 900, 1.4, 1.8); this.noise(2.2, .03, 'fx', 2600, 7, 1.35, 'bandpass', .4); break;
       case 'crunch': this.noise(.07, .09 * v, 'fx', 1500, .9, .5); break;
@@ -1140,6 +1181,7 @@ const SND = {
     if (foes) { if (this.combatT <= 0) this.combatId = this.combatId === 'combat1' ? 'combat2' : 'combat1'; this.combatT = 8; this.combatKind = hol ? 'hollow_fight' : cir ? 'circle_fight' : this.combatId; }
     else this.combatT -= dt;
     if (this.combatT > 0) return this.combatKind;
+    for (const f of MUSIC_PICK) { const m = f(); if (m) return m; }
     if (G.under && G.under.interior) return G.under.kind === 'tavern' ? 'tavern' : G.under.kind === 'cathedral' ? 'cathedral' : 'castle_' + (G.under.owner || 0);
     let best = null, br = 1;
     for (const p of W.places) { const R = PLACE_R[p.type] * TS, d = dist(P.x, P.y, p.x, p.y); if (d < R && d / R < br) { br = d / R; best = p; } }
@@ -1626,10 +1668,11 @@ let uidCounter = 1;
 function mkItem(id, q = 1, n = 1) { const b = ITEMS[id]; if (!b) return null; if (b.type !== 'weapon' && b.type !== 'shield' && b.type !== 'armor') q = 1; return { uid: uidCounter++, id, q, n: b.stack ? n : 1 }; }
 function rollQual(tier) { const r = Math.random(); if (r < .08 + tier * .04) return 3; if (r < .3 + tier * .06) return 2; if (r < .75) return 1; return tier > 2 ? 1 : 0; }
 const ENCH_N = { fire: 'Burning', venom: 'Venomous', frost: 'Frostbitten', life: 'Lifedrinking' }, ENCH_GLOW = { fire: '#ff8a3a', venom: '#7ad04a', frost: '#9fdcff', life: '#e04a5a' };
-function itemName(it) { const b = ITEMS[it.id]; const q = QUAL[it.q]; return (it.ench ? ENCH_N[it.ench] + ' ' : '') + (q && q.n && !b.legend ? q.n + ' ' : '') + b.name; }
+function itemName(it) { const b = ITEMS[it.id]; const q = QUAL[it.q]; return (it.ench ? ENCH_N[it.ench] + ' ' : '') + (q && q.n && !b.legend ? q.n + ' ' : '') + b.name + (it.glyph ? ' ✦' : ''); }
 function itemColor(it) { const b = ITEMS[it.id]; if (b.legend) return '#ff9a4a'; if (b.type === 'quest') return '#ffd76a'; return QUAL[it.q] ? QUAL[it.q].c : '#eadfc4'; }
 function itemStats(it) {
   const b = ITEMS[it.id], m = QUAL[it.q] ? QUAL[it.q].m : 1;
+  if (b.type === 'weapon' && b.wk === 'staff') return { dmg: Math.round(b.dmg * m), spd: Math.min(99, Math.round(b.spd + (it.q - 1) * 3)), rng: b.rng, arc: b.arc };
   if (b.type === 'weapon') return { dmg: Math.round(b.dmg * m), spd: Math.min(99, Math.round(b.spd + (it.q - 1) * 3)), rng: b.rng, arc: b.arc };
   if (b.type === 'shield') return { block: Math.min(.9, b.block * (0.9 + (m - 1) * .8 + .1)), slow: b.slow || 0 };
   if (b.type === 'armor') return { def: Math.round(b.def * m), slow: b.slow || 0 };
@@ -2328,6 +2371,23 @@ function genWorld(seed, gen = 1) { // gen 2 (new games) keeps a league of open s
       break;
     }
   });
+  // ---------- Wizard towers ----------
+  // One in each kingdom and a few in the wilds. Own random stream after everything else; appended to the places list.
+  const wtrr = mulberry32(seed * 191 + 23), wtri = n => Math.floor(wtrr() * n), WTZF = ['Aldous', 'Ysolde', 'Corvane', 'Merrow', 'Ilsabet', 'Theron', 'Vaelis', 'Oswin', 'Rhiannon', 'Belisar', 'Morwen', 'Cassius'];
+  const wtowerOK = (tx, ty) => { if (tx < 14 || ty < 14 || tx >= WW - 14 || ty >= WH - 14 || !freeRect(tx - 1, ty - 2, 3, 3)) return false; for (let y = ty - 3; y <= ty + 3; y++) for (let x = tx - 3; x <= tx + 3; x++) { const t = ter[y * WW + x]; if (W.clear[y * WW + x] || TINFO[t].block || t === T.ROAD || t === T.BRIDGE || t === T.FORD) return false; } return !W.places.some(p => Math.hypot(p.tx - tx, p.ty - ty) < (p.type === 'tower' ? sc(58) : 20)); };
+  const towerWant = [[0, 'ward'], [1, 'ember'], [2, 'rime'], [3, 'life'], [null, 'storm'], [null, 'shadow'], [null, 'arcane']].slice(0, 4 + Math.max(2, Math.min(3, sc(2.4))));
+  towerWant.forEach(([k, school]) => {
+    for (let a = 0; a < 6000; a++) {
+      const tx = 14 + wtri(WW - 28), ty = 14 + wtri(WH - 28), ii = ty * WW + tx, o0 = W.own[ii];
+      if (k != null ? o0 !== k : Math.hypot(tx - caps[o0][0], ty - caps[o0][1]) < sc(70)) continue;
+      if (!wtowerOK(tx, ty)) continue;
+      const pl = P_({ type: 'tower', school, k: o0, owner: o0, name: TOWER_N[school], tx, ty, r: 8 });
+      pl.wizard = (school === 'shadow' ? 'Necromancer ' : 'Archmage ') + WTZF[wtri(WTZF.length)]; pl.adept = (school === 'shadow' ? 'Acolyte ' : 'Adept ') + WTZF[wtri(WTZF.length)];
+      setSolid(tx - 1, ty - 2, 3, 2); for (let y = ty - 4; y <= ty + 3; y++) for (let x = tx - 3; x <= tx + 3; x++) W.clear[y * WW + x] = 1;
+      addObj({ k: 'mtower', x: (tx - 1) * TS, y: (ty - 8) * TS, w: 3 * TS, h: 8 * TS, sy: ty * TS, school, owner: o0 });
+      W.interacts.push({ type: 'mtower', x: (tx + .5) * TS, y: (ty + .45) * TS, place: pl.id }); break;
+    }
+  });
   // ---------- Trees ----------
   for (let i = 0; i < CW * CHH; i++) { W.chunkTrees.push([]); W.chunkObjs.push([]); }
   for (let ty = 1; ty < WH - 1; ty++) for (let tx = 1; tx < WW - 1; tx++) {
@@ -2448,8 +2508,10 @@ function renderSkills() {
   $('skillPts').innerHTML = P.sp ? `You have <b style="color:#e7c35a">${P.sp}</b> skill point${P.sp > 1 ? 's' : ''} to spend.` : 'No skill points to spend. You earn one every level.';
   $('skillBody').innerHTML = SKILLS.map(sk => { const r = SK(sk.id), can = P.sp > 0 && r < 4; return `<div class="skCol"><h4>${sk.n}</h4><div class="skPips">${[0, 1, 2, 3].map(i => `<span class="skPip ${i < r ? 'on' : ''}"></span>`).join('')}</div>${sk.ranks.map((t, i) => `<div class="skRank ${i < r ? 'done' : i === r ? 'next' : ''}">${i < r ? '✓' : (i + 1) + '.'} ${t}</div>`).join('')}<button class="btn sm ${can ? 'gold' : ''}" data-sk="${sk.id}" ${can ? '' : 'disabled'}>${r >= 4 ? 'Mastered' : 'Learn'}</button></div>`; }).join('');
   document.querySelectorAll('[data-sk]').forEach(b => b.onclick = () => { if (!P.sp || SK(b.dataset.sk) >= 4) return; P.skills[b.dataset.sk] = SK(b.dataset.sk) + 1; P.sp--; SND.play('level'); recalc(); renderSkills(); });
+  renderSpellbook();
 }
-function slotOf(type) { return type === 'weapon' ? 'weapon' : type === 'shield' ? 'shield' : type === 'armor' ? 'armor' : type === 'horse' ? 'horse' : null; }
+function slotOf(type) { return type === 'weapon' ? 'weapon' : type === 'shield' ? 'shield' : type === 'armor' ? 'armor' : type === 'horse' ? 'horse' : type === 'ring' ? 'ring' : type === 'amulet' ? 'amulet' : null; }
+const itab = b => b.tab || (b.type === 'ring' || b.type === 'amulet' ? 'jewel' : b.type);
 function equip(uid, silent, slot) {
   const it = getItem(uid); if (!it) return; const s = slot || slotOf(ITEMS[it.id].type); if (!s) return;
   const other = s === 'weapon' ? 'weapon2' : s === 'weapon2' ? 'weapon' : null; if (other && P.eq[other] === uid) P.eq[other] = P.eq[s] || null; // moving between main and sidearm swaps them
@@ -2467,6 +2529,9 @@ function unequip(slot) {
 function loseHorse() { P.mounted = false; if (horseEnt) { removeEnt(horseEnt); horseEnt = null; } }
 function useItem(uid) {
   const it = getItem(uid); if (!it) return; const b = ITEMS[it.id];
+  if (b.use === 'learn') { if (learnSpell(b.spell)) removeItem(uid, 1); else toast('You already know that spell.'); return; }
+  if (b.use === 'tonic') { drinkTonic(it); return; }
+  if (b.use === 'alchkit') { UI.closeAll(); openAlchemy("Alchemist's Kit"); return; }
   if (b.heal) {
     if (P.hp >= P.maxHp && !(b.st && P.st < P.maxSt)) { toast('You are already at full health.'); return; }
     if (G.arena && P.healLock > G.time) { toast(`The grave-cold is in your throat. You can heal again in ${Math.ceil(P.healLock - G.time)}s.`, 'bad'); return; }
@@ -2518,6 +2583,7 @@ function recalc() {
   P.S.glow = w ? (ITEMS[w.id].glow || (w.ench ? ENCH_GLOW[w.ench] : null)) : null; if (w && w.ench) P.S.ench = w.ench;
   P.S.swingT = .17 + (100 - P.S.spd) * .0045; P.S.cool = .16 + (100 - P.S.spd) * .011; P.S.cost = (6 + ws.dmg * .16) * (SK('sword') >= 3 ? .85 : 1);
   P.maxHp = 100 + (P.lvl - 1) * 8 + P.bonusHp; P.maxSt = 100 + (P.lvl - 1) * 5 + P.bonusSt;
+  runHooks('recalc');
   P.hp = Math.min(P.hp, P.maxHp); P.st = Math.min(P.st, P.maxSt);
   if (typeof updateHUD === 'function') updateHUD(true);
 }
@@ -2574,7 +2640,7 @@ function startAttack() {
   SND.play(S.wk === 'great' || S.wk === 'axe' ? 'swingH' : 'swing');
 }
 /* Special moves (C): one per weapon type, on a cooldown. C while blocking bashes with the shield. */
-const SPECS = { sword: { n: 'Whirlwind', cd: 6, st: 30 }, axe: { n: 'Crushing Blow', cd: 7, st: 28 }, great: { n: 'Crushing Blow', cd: 7, st: 30 }, spear: { n: 'Lunge', cd: 5, st: 24 }, bow: { n: 'Piercing Shot', cd: 8, st: 18 }, bash: { n: 'Shield Bash', cd: 4, st: 16 } };
+const SPECS = { sword: { n: 'Whirlwind', cd: 6, st: 30 }, axe: { n: 'Crushing Blow', cd: 7, st: 28 }, great: { n: 'Crushing Blow', cd: 7, st: 30 }, spear: { n: 'Lunge', cd: 5, st: 24 }, bow: { n: 'Piercing Shot', cd: 8, st: 18 }, bash: { n: 'Shield Bash', cd: 4, st: 16 }, staff: { n: 'Arcane Surge', cd: 8, st: 20 } };
 function specKind() { return P.blocking ? 'bash' : SPECS[P.S.wk] ? P.S.wk : null; }
 function useSpecial() {
   if (G.state !== 'play' || P.dodge > 0 || P.spec) return;
@@ -2584,6 +2650,7 @@ function useSpecial() {
   const cost = sp.st * DIFF().stCost; if (P.st < cost) { toast('Not enough stamina.'); return; }
   const cdm = k === 'bash' || k === 'bow' ? 1 : 1 - .06 * SK('sword'); P.st -= cost; P.stDelay = .9; P[cdKey] = sp.cd * cdm; if (k !== 'bash') P.specMax = sp.cd * cdm;
   if (k === 'bash') { doBash(); return; }
+  if (k === 'staff') { staffSurge(); return; }
   if (k === 'bow') { P.pierceNext = true; addText(P.x, P.y - 34, 'Piercing shot ready', '#bfe0ff', 12); SND.play('bowfull'); return; }
   if (G.tut) G.tut.special = true;
   P.spec = { k, t: 0, hit: false, dur: k === 'sword' ? .42 : k === 'spear' ? .32 : .72 };
@@ -2629,7 +2696,10 @@ function doBash() {
 }
 /* Enchanted weapons apply their effect on every hit */
 function applyEnch(e, dmg) {
-  const en = P.S.ench; if (!en) return;
+  const en = P.S.ench || (P.oil ? P.oil.k : null); if (!en) return;
+  if (en === 'storm') { if (!e.dead && Math.random() < .3) magChain(e, 1, dmg * .4, 'storm', P); return; }
+  if (en === 'arcane') { if (knowsMagic()) P.mp = Math.min(P.maxMp, P.mp + 3); return; }
+  if (en === 'holy') return;
   if (en === 'life') { const h = dmg * .1; P.hp = Math.min(P.maxHp, P.hp + h); if (settings.dmgNums && h >= 1) addText(P.x + rand(-6, 6), P.y - 30, '+' + Math.round(h), '#8fe07a', 12); return; }
   if (e.dead || e.important || e.kind === 'horse') return;
   if (en === 'fire') { e.burn = 3; e.burnDps = 2 + dmg * .1; e.dotSrc = P; }
@@ -2681,7 +2751,7 @@ function doPlayerHit() {
     const host = playerHostileTo(e); if (!host && !input.force) continue;
     const d = dist(P.x, P.y, e.x, e.y); if (d > reach + e.r) continue;
     const a = Math.atan2(e.y - P.y, e.x - P.x); if (Math.abs(angDiff(P.face, a)) > S.arc / 2 + (d < e.r + 16 ? .9 : .12)) continue;
-    let dmg = S.dmg * rand(.9, 1.1) * DIFF().dmgDealt; const crit = Math.random() < .1 + (P.luckT > 0 ? .08 : 0); if (crit) dmg *= 1.6;
+    let dmg = S.dmg * rand(.9, 1.1) * DIFF().dmgDealt; const crit = Math.random() < .1 + (P.luckT > 0 ? .08 : 0) + (S.luck || 0); if (crit) dmg *= 1.6;
     if (P.mounted) dmg *= 1.1 + (S.horse && S.horse.dmgB ? S.horse.dmgB : 0) + .06 * (SK('riding') >= 3 ? 3 : SK('riding') >= 1 ? 1 : 0);
     damage(e, dmg, P, { crit, kb: S.wk === 'great' || S.wk === 'axe' ? 1.6 : S.wk === 'spear' ? 1.2 : 1 }); applyEnch(e, dmg); hits++;
   }
@@ -2698,7 +2768,7 @@ function updatePlayer(dt) {
   if (P.mounted) { spd *= P.S.hspd; if (t === T.DENSE || t === T.SWAMP || t === T.FORD) spd *= .55; else if (t === T.FOREST) spd *= .8; spd *= 1 - P.S.slow * .4; }
   else spd *= 1 - P.S.slow;
   if (countItem('supplies')) spd *= .9;
-  spd *= wxMove();
+  spd *= wxMove() * (P.fx && P.fx.swift > 0 ? 1.2 : 1);
   if (curSeason === 3 && t !== T.ROAD && t !== T.BRIDGE && t !== T.DESERT && t !== T.FLOOR && ownerAtPx(P.x, P.y) !== 1) spd *= .92; // winter snow
   P.blocking = input.rmb && P.S.block > 0 && !P.S.bow && !P.mounted && P.st > 1 && P.dodge <= 0 && P.swing <= 0;
   if (P.blocking) spd *= .45;
@@ -2725,6 +2795,7 @@ function updatePlayer(dt) {
   if (P.spec) { }
   else if (G.contest && G.contest.kind === 'snow') { if ((input.lmb || input.clicked) && G.contest.cd <= 0) throwSnowball(); }
   else if (P.S.bow) updateBow(dt);
+  else if (P.S.wk === 'staff') updateStaff(dt);
   else if ((input.lmb || input.clicked) && P.atkCd <= 0 && P.dodge <= 0 && P.st >= P.S.cost * .5) startAttack();
   input.clicked = false;
   if (P.swing > 0) { P.swing -= dt; const prog = 1 - P.swing / P.swingDur; if (!P.hitDone && prog >= .42) { P.hitDone = true; doPlayerHit(); } }
@@ -2871,7 +2942,7 @@ function damage(t, amt, src, o = {}) {
   if (t.dead) return 0;
   if (t.isPlayer) {
     if (P.iframes > 0 || G.state !== 'play') return 0;
-    let a = amt * DIFF().dmgTaken * (P.blessT > 0 ? .88 : 1);
+    let a = amt * DIFF().dmgTaken * (P.blessT > 0 ? .88 : 1) * playerResist(src, o);
     P.combatT = 6;
     if (P.dodge > 0) {
       if (G.tut && src && src.tutYield) G.tut.dodged = true;
@@ -2902,6 +2973,8 @@ function damage(t, amt, src, o = {}) {
     a = Math.max(.5, a);
     if (G.tourney && G.tourney.fighting && src && src.tourney && P.hp - a <= 1) { tourneyLose(); return a; }
     P.lastBlow = { src: src && !src.isPlayer ? { nem: !!src.nemesis, name: src.name, k: src.k, kind: src.kind, boss: !!(src.boss || src.chief || src.named), trap: !!src.isTrap, soldier: !!(src.faction && src.faction[0] === 'k') } : null, dot: o.dot || null };
+    if (P.ward > 0) { const ab = Math.min(P.ward, a); P.ward -= ab; a -= ab; if (settings.dmgNums && ab >= 1) addText(P.x, P.y - 40, 'Warded', '#ffe7a0', 12); if (P.ward <= 0) { P.wardT = 0; SND.play('block'); } if (a <= 0) return 0; }
+    if (P.S.thorns && src && !src.isPlayer && !o.proj && !o.dot && !src.dead) damage(src, a * P.S.thorns, P, { dot: 'thorns' });
     P.hp -= a; P.flash = .15; addShake(3 + a * .25); SND.play('hurt');
     if (!settings.noFlash) $('hurtVignette').style.boxShadow = 'inset 0 0 160px rgba(170,0,0,.55)'; setTimeout(() => $('hurtVignette').style.boxShadow = 'inset 0 0 160px rgba(170,0,0,0)', 180);
     if (settings.dmgNums) addText(P.x + rand(-6, 6), P.y - 28, Math.round(a), '#ff6a5a', 15);
@@ -2914,6 +2987,7 @@ function damage(t, amt, src, o = {}) {
   if (t.dummy && t.fest && G.contest && (G.contest.kind === 'archery' || G.contest.kind === 'snow') && o.proj && src === P) { G.contest.hits++; if (G.contest.kind === 'snow') { t.popT = 0; toast(`Splat! (${G.contest.hits})`, 'good'); return 0; } toast(`Hit! (${G.contest.hits})`, 'good'); }
   if (t.dummy) { if (settings.dmgNums) addText(t.x + rand(-8, 8), t.y - 30, Math.round(amt) + (o.crit ? '!' : ''), o.crit ? '#ffd24a' : '#fff4e0', o.crit ? 19 : 14); t.flash = .15; SND.play('hit', .7); for (let i = 0; i < 5; i++) addPart(t.x, t.y - 12, rand(-70, 70), rand(-90, 10), '#d8b050', .4, 2.5, 200); if (G.tut && src === P) { if (o.proj && t.isTarget) G.tut.arrows++; else if (!o.proj && !t.isTarget) G.tut.hits++; } return amt; } // straw never dies
   const wasHostile = src === P ? playerHostileTo(t) : true;
+  if (src === P && !o.dot) { amt *= playerDmgMul(t, o); if (P.fx && P.fx.shadow > 0) P.fx.shadow = 0; }
   if (src === P) t.lastHitProj = !!o.proj;
   if (src && src.party) amt *= 1 + .08 * (SK('lead') >= 3 ? 3 : SK('lead') >= 1 ? 1 : 0);
   if (t.guard && src && !o.dot && !o.heavy && !(t.guardBroken > 0) && !(t.stun > 0) && o.arrow !== 'bodkin' && Math.abs(angDiff(t.face, Math.atan2(src.y - t.y, src.x - t.x))) < 1.1) {
@@ -2921,6 +2995,8 @@ function damage(t, amt, src, o = {}) {
     for (let i = 0; i < 5; i++) addPart(t.x + Math.cos(t.face) * 12, t.y + Math.sin(t.face) * 12, rand(-90, 90), rand(-90, 40), '#ffe8a0', .25, 2);
   }
   t.hp -= amt; t.flash = .12;
+  if (src === P && !o.dot && P.S.life && !t.dummy) healP(amt * P.S.life, true);
+  if (t.yieldFn && t.hp < t.maxHp * (t.yieldAt || .15)) { t.hp = Math.max(1, t.hp); const f = t.yieldFn; t.yieldFn = null; f(t); return amt; }
   if (t.titan && !o.dot) titanPoise(t, amt);
   if (src && !o.dot && !t.perch) { const d = Math.hypot(t.x - src.x, t.y - src.y) || 1; const kb = (o.kb || 1) * (t.kind === 'bone_wyrm' || t.titan ? 12 : t.kind === 'bear' || t.kind === 'ice_bear' ? 50 : 125); t.kbx = (t.x - src.x) / d * kb; t.kby = (t.y - src.y) / d * kb; }
   const armored = t.faction && t.faction[0] === 'k';
@@ -2958,6 +3034,7 @@ function crime(t) {
 }
 function aggroNearby(k, r) { ents.forEach(e => { if (e.faction === 'k' + k && !e.dead && dist(e.x, e.y, P.x, P.y) < r) { e.aggroPlayer = true; e.target = P; } }); }
 function kill(t, src) {
+  runHooks('kill', t, src);
   t.dead = true; t.hp = 0; t.deadT = 0; t.wind = 0;
   SND.play(t.faction === 'hollow' ? 'bones' : 'death');
   for (let i = 0; i < 14 * QMUL(); i++) addPart(t.x, t.y, rand(-140, 140), rand(-160, 40), '#8a1a12', rand(.4, .9), 3, 260);
@@ -3016,6 +3093,7 @@ function dropItem(x, y, id, q = 1, n = 1) { pickups.push({ x: x + rand(-8, 8), y
 
 function enemyStrike(e, tg) {
   if (!tg || tg.dead) return;
+  const cs = e.caster || ATYPES[e.kind].caster; if (cs) return enemyCast(e, tg, cs);
   if (e.ranged) {
     const ey = e.y - (e.elev || 0), d = dist(e.x, ey, tg.x, tg.y), vs = e.kind === 'xbowman' ? 640 : 430, tt = d / vs; const px = tg.x + (tg.vx || 0) * tt * .5, py = tg.y + (tg.vy || 0) * tt * .5;
     const a = Math.atan2(py - ey, px - e.x) + rand(-.06, .06);
@@ -3028,7 +3106,7 @@ function enemyStrike(e, tg) {
 }
 function nearestHostile(e, r) {
   let best = null, bd = r;
-  if (G.state === 'play' && hostile(e, P)) { const d = dist(e.x, e.y, P.x, P.y); if (d < bd) { bd = d; best = P; } }
+  if (G.state === 'play' && hostile(e, P) && !(P.fx && P.fx.shadow > 0 && !e.titan)) { const d = dist(e.x, e.y, P.x, P.y); if (d < bd) { bd = d; best = P; } }
   for (const o of ents) { if (o === e || o.dead || (o.perch && !e.ranged)) continue; const d = Math.abs(o.x - e.x) + Math.abs(o.y - e.y); if (d > bd * 1.42) continue; if (!hostile(e, o)) continue; const dd = dist(e.x, e.y, o.x, o.y); if (dd < bd) { bd = dd; best = o; } }
   return best;
 }
@@ -3062,6 +3140,7 @@ function updateActor(e, dt) {
   if (e.racer || e.jouster) { if (e.say) { e.say.t -= dt; if (e.say.t <= 0) e.say = null; } return; } // driven by raceTick / joustTick
   if (e.downed > 0) { e.downed -= dt; if (e.downed <= 0) { e.hp = Math.round(e.maxHp * .35); e.say = { text: 'Still breathing…', t: 2.5 }; } return; }
   if (e.burn > 0 || e.poison > 0 || e.chill > 0) tickStatus(e, dt);
+  if (KIND_AI[e.kind] && !e.held) KIND_AI[e.kind](e, dt);
   if (e.kind === 'wyvern' && e.target && !e.dead) { // fire breath
     e.breathT = (e.breathT ?? 3) - dt; const tg = e.target, d = dist(e.x, e.y, tg.x, tg.y);
     if (e.breathT <= 0 && d < 380) { e.breathT = rand(4, 6); const a0 = Math.atan2(tg.y - e.y, tg.x - e.x); for (let i = -4; i <= 4; i++) { const a = a0 + i * .09; projs.push({ x: e.x + Math.cos(a0) * 46, y: e.y + Math.sin(a0) * 46, vx: Math.cos(a) * 320, vy: Math.sin(a) * 320, dmg: e.dmg * .35, src: e, life: 1.3, fireBreath: true }); } SND.play('roar'); SND.play('fire'); }
@@ -3402,6 +3481,7 @@ function tryRecover(p) { const base = DIFF().arrowRec, ch = base ? Math.min(.9, 
 function updateProjs(dt) {
   for (let i = projs.length - 1; i >= 0; i--) {
     const p = projs[i]; p.life -= dt;
+    if (p.mag) { if (magStep(p, dt)) projs.splice(i, 1); continue; }
     if (p.stuck && p.rec && G.state === 'play' && Math.abs(P.x - p.x) < 26 && Math.abs(P.y - p.y) < 26) { // walk over a missed arrow to pick it back up
       const id = p.arrow === 'fire_arrow' ? 'arrow' : p.arrow; addItem(id, 1, 1, true); SND.play('pickup', .5); addText(P.x, P.y - 30, '+1 ' + ITEMS[id].name, '#e8dcb8', 11); projs.splice(i, 1); continue;
     }
@@ -3459,7 +3539,8 @@ function addShake(v) { if (settings.shake) G.shake = Math.min(18, G.shake + v); 
 let DAYLEN = 480;
 const dayNum = () => Math.floor(G.time / DAYLEN + .3) + 1;
 const tod = () => (G.time / DAYLEN + .3) % 1;
-function darkness() { if (G.under) return G.under.interior ? .3 : settings.quality === 'low' ? .55 : .86; const t = tod(); if (t > .27 && t < .73) return 0; const d = t <= .27 ? .27 - t : t - .73; return Math.min(.58, d * 4.2); }
+function darkness() { if (G.under) return (G.under.interior ? .3 : settings.quality === 'low' ? .55 : .86) * nightSight(); const t = tod(); if (t > .27 && t < .73) return 0; const d = t <= .27 ? .27 - t : t - .73; return Math.min(.58, d * 4.2) * nightSight(); }
+const nightSight = () => !P || G.state === 'menu' ? 1 : (P.fx && P.fx.night > 0) || (P.S && P.S.night) ? .35 : P.fx && P.fx.light > 0 ? .6 : 1;
 /* ---------------- Seasons & weather ---------------- */
 const SEASON_DAYS = 6, SEASONS = ['Spring', 'Summer', 'Autumn', 'Winter'];
 let curSeason = 0;
@@ -3772,7 +3853,7 @@ function goToJail(k, days) {
 }
 function canPickpocket(e) { if (!['townsfolk', 'patron', 'guest', 'customer', 'worshipper'].includes(e.role) || e.robbed) return false; const a = Math.atan2(P.y - e.y, P.x - e.x); return Math.abs(angDiff(e.face, a)) > 1.9; }
 function pickpocket(e, k) {
-  e.robbed = true; const ch = .5 + (isNight() ? .15 : 0) + (countItem('shadow_cloak') ? .15 : 0) - (e.noble ? .1 : 0) + Math.min(.15, (G.stats.picks || 0) * .01); // practice makes nimble fingers
+  e.robbed = true; const ch = (P.fx && P.fx.shadow > 0 ? .5 : 0) + .5 + (isNight() ? .15 : 0) + (countItem('shadow_cloak') ? .15 : 0) - (e.noble ? .1 : 0) + Math.min(.15, (G.stats.picks || 0) * .01); // practice makes nimble fingers
   if (Math.random() < ch) {
     const gold = e.noble ? randi(25, 70) : randi(4, 20); P.gold += gold; SND.play('coin'); let extra = '';
     if (chance(e.noble ? .45 : .2)) { const id = pick(e.noble ? ['gold_locket', 'jeweled_brooch', 'silver_ring'] : ['silver_ring', 'silver_ring', 'gold_locket']); addItem(id, 1, 1, true); extra = ` and a <b>${ITEMS[id].name}</b>`; }
@@ -4551,6 +4632,7 @@ function interactLabel(b) {
   if (b.e) {
     const e = b.e;
     if (canPickpocket(e)) return '<span style="color:#e8c060">Pick their pocket</span>';
+    if (ROLES[e.role] && ROLES[e.role].label) return ROLES[e.role].label(e);
     if (e.role === 'guild') return 'Speak to the hooded figure'; if (e.role === 'enc') return `Speak to ${ENC_WHO[e.enc] || e.name}`; if (e.role === 'encmute' || e.role === 'encdone') return `Talk to ${ENC_WHO[e.enc] || 'the ' + e.name.toLowerCase()}`; if (e.role === 'gamesmaster') return `Play the ${FEST[G.festival] ? FEST[G.festival].game : 'festival game'}`;
     switch (e.role) {
       case 'elder': return `Talk to ${e.name}`; case 'merchant': return `Trade with ${e.name}`; case 'ruler': return `Seek an audience with ${e.name}`;
@@ -4561,6 +4643,7 @@ function interactLabel(b) {
     return `Talk to ${e.name.toLowerCase().includes('soldier') || e.name === 'Guard' || e.name === 'Knight' ? KDATA[e.k] ? KDATA[e.k].name + ' ' + e.name.toLowerCase() : e.name : e.name}`;
   }
   const it = b.it, pl = W.places[it.place];
+  if (IACTS[it.type]) return IACTS[it.type].label(it, pl);
   switch (it.type) {
     case 'chest': return pl.chestOpened ? 'Empty stash' : pl.type === 'camp' ? (pl.cleared ? 'Loot the bandit stash' : 'Bandit stash (guarded)') : 'Search the chest';
     case 'door': return 'Knock on the door'; case 'enter': return (!cityOpen() && it.shop.kind !== 'tavern' && it.shop.kind !== 'inn' ? 'Locked: ' : 'Enter ') + it.shop.name; case 'iexit': return 'Go back outside'; case 'ibed': return G.under && G.under.kind === 'house' ? 'Sleep until morning' : 'Bed'; case 'istash': return 'Open your stash'; case 'irooms': return 'Go up to the rooms'; case 'ibox': return 'Offerings box'; case 'istrong': return 'Force the strongbox'; case 'lore': return (P.lore || []).includes(it.lore) ? `Reread: ${LORE[it.lore].t}` : 'Read the weathered scroll'; case 'ilore': return 'Browse the cathedral library'; case 'ferry': return 'Take the ferry across (3 gold)'; case 'harbor': return `Board a ship at ${pl.name}`; case 'itrophy': { const tr = (P.trophies || [])[it.idx]; return tr ? `Trophy: ${tr.n}` : 'An empty pedestal'; } case 'fountain': return 'Toss a coin into the fountain'; case 'statue': return 'Read the inscription'; case 'cathedral': return `Enter the ${pl.city && pl.city.cath ? pl.city.cath.name : 'cathedral'}`;
@@ -4578,6 +4661,7 @@ function doInteract() {
   if (b.grave) return readGrave();
   if (b.e) return talkTo(b.e);
   const it = b.it, pl = W.places[it.place];
+  if (IACTS[it.type]) return IACTS[it.type].act(it, pl);
   if (it.type === 'chest') openChest(it, pl);
   else if (it.type === 'sign') readSign(pl);
   else if (it.type === 'fish') startFishing(it);
@@ -4760,9 +4844,9 @@ const INTERIOR_OF = { tavern: 'tavern', inn: 'inn', baker: 'shop', apothecary: '
 const strHash = s2 => { let h = 2166136261; for (const ch of String(s2)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0; return h; };
 function genInterior(b) {
   const n = 32, N = n * n, r = mulberry32(strHash(b.key)), rnd = (a, c) => a + r() * (c - a);
-  const dims = { tavern: [16, 11], inn: [13, 10], cathedral: [12, 20], shop: [10, 8], house: [11, 8] }[b.kind];
+  const dims = { tavern: [16, 11], inn: [13, 10], cathedral: [12, 20], shop: [10, 8], house: [11, 8], tower: [14, 11] }[b.kind];
   const rw = dims[0], rh = dims[1], rx = (n - rw) >> 1, ry = ((n - rh) >> 1) + 1, at = (x, y) => y * n + x;
-  const stone = b.kind === 'cathedral', ter = new Uint8Array(N).fill(T.VOID), solid = new Uint8Array(N);
+  const stone = b.kind === 'cathedral' || b.kind === 'tower', ter = new Uint8Array(N).fill(T.VOID), solid = new Uint8Array(N);
   for (let y = ry - 2; y <= ry + rh; y++) for (let x = rx - 1; x <= rx + rw; x++) ter[at(x, y)] = y >= ry && y < ry + rh && x >= rx && x < rx + rw ? (stone ? T.NAVE : T.PLANK) : (stone ? T.BRICK : T.IWALL);
   const objs = [], ints = [], npcs = [], X = t => (rx + t) * TS, Y = t => (ry + t) * TS;
   const obj = (k2, tx, ty, w, h, o, sol) => { const ob = Object.assign({ k: k2, x: X(tx), y: Y(ty), w, h, owner: b.owner }, k2 === 'f_rug' ? { sy: Y(ty) } : null, o || {}); objs.push(ob); if (sol) for (let yy = Math.floor(ob.y / TS); yy < Math.ceil((ob.y + ob.h) / TS); yy++) for (let xx = Math.floor(ob.x / TS); xx < Math.ceil((ob.x + ob.w) / TS); xx++) solid[at(xx, yy)] = 1; return ob; };
@@ -4808,6 +4892,7 @@ function genInterior(b) {
     if (b.shopKind === 'baker') obj('f_hearth', 7.4, -1.35, 70, 50, { v: 'oven' });
     obj('f_barrel', .3, 5.8, 24, 28, {}, true); obj('f_crate', 8.5, 6, 28, 26, {}, true); obj('f_rug', 3, 4.4, 4 * TS, 2 * TS, { v: b.owner });
     if (r() < .6) patron(2.4, 4.8, -Math.PI / 2, { role: 'customer' });
+    if (b.shopKind === 'apothecary') { obj('f_lab', 6.4, 4.3, 60, 40, { v: 'life' }, true); ints.push({ type: 'talch', x: X(7.3), y: Y(5.9) }); }
     if (b.breakIn && !b.robbed) { obj('f_chest', 7.6, 1.1, 32, 24, {}, true); ints.push({ type: 'istrong', x: X(8.1), y: Y(2.3) }); }
   } else if (b.kind === 'house') {
     obj('f_bed', .3, .15, 40, 64, {}, true); ints.push({ type: 'ibed', x: X(1.7), y: Y(1.6) });
@@ -4817,7 +4902,7 @@ function genInterior(b) {
     const spots = [[7.3, .2], [8.5, .2], [9.7, .2], [9.8, 1.7], [9.8, 3.2], [9.8, 4.7], [7.9, 6.2], [.4, 5.4], [1.6, 5.4]];
     const tro = P.trophies || []; spots.forEach(([tx, ty], i) => { obj('f_pedestal', tx, ty, 30, 34, { tr: tro[i] || null, idx: i }, true); ints.push({ type: 'itrophy', x: X(tx) + 15, y: Y(ty) + 44, idx: i }); });
     if (P.allegiance != null) obj('f_banner', 2, -1.4, 26, 40, { k2: P.allegiance });
-  }
+  } else if (b.kind === 'tower') towerRoom(b, obj, npc, ints, X, Y, rw, rh);
   const cw = Math.ceil(n / CH), DW = { size: n, seed: W.seed, ter, own: new Uint8Array(N).fill(b.owner || 0), solid, wall: new Uint8Array(N), clear: new Uint8Array(N).fill(1), bord: new Uint8Array(N), hgt: new Float32Array(N), places: W.places, objs, chunkTrees: [], chunkObjs: [], interacts: ints, startK: W.startK };
   for (let i = 0; i < cw * cw; i++) { DW.chunkTrees.push([]); DW.chunkObjs.push([]); }
   objs.forEach(o => { o.sy = o.sy ?? (o.y + o.h); const ci = Math.floor((o.y + o.h / 2) / (CH * TS)) * cw + Math.floor((o.x + o.w / 2) / (CH * TS)); if (DW.chunkObjs[ci]) DW.chunkObjs[ci].push(o); });
@@ -5024,7 +5109,7 @@ function enterInterior(b) {
   party.forEach(e => { const f = findFree(P.x + rand(-40, 40), P.y - rand(10, 40)); e.x = f.x; e.y = f.y; });
   if (!b.breakIn) D.npcs.forEach(n0 => mkActor(n0.kind, n0.x, n0.y, n0.o));
   G.under = Object.assign({ interior: true, id: 'i' + b.key }, b); $('mmWrap').classList.add('hidden'); SND.play('door');
-  showAreaTitle(b.name.toUpperCase(), { tavern: 'Ale, song and gossip', inn: 'A bed for every traveller', cathedral: 'Hush. The saints are listening', shop: CITY_SHOPS[b.shopKind] ? CITY_SHOPS[b.shopKind].n : 'A shop', house: 'Home, sweet home' }[b.kind] || '');
+  if (b.kind !== 'tower') showAreaTitle(b.name.toUpperCase(), { tavern: 'Ale, song and gossip', inn: 'A bed for every traveller', cathedral: 'Hush. The saints are listening', shop: CITY_SHOPS[b.shopKind] ? CITY_SHOPS[b.shopKind].n : 'A shop', house: 'Home, sweet home' }[b.kind] || '');
 }
 /* ---------------- Trophies: relics of the great foes you have slain ---------------- */
 function whereAt(x, y) {
@@ -5691,6 +5776,7 @@ function talkTo(e) {
   if (e.party) return partyDialog(e);
   const k = e.k != null ? e.k : ownerAtPx(e.x, e.y);
   if (canPickpocket(e)) return pickpocket(e, k);
+  if (ROLES[e.role]) return ROLES[e.role].talk(e, k);
   if (e.role === 'guild') return guildDialog(e);
   if (e.role === 'enc') return encDialog(e);
   if (e.role === 'ferryman') return ferryDialog(e.ferryIt, e);
@@ -5974,6 +6060,7 @@ function drawShieldIcon(g, b, x, y, s, kcol) {
 }
 function drawMiscIcon(g, id, b) {
   g.translate(32, 32); g.lineWidth = 2;
+  if (b.mi) { drawMagicIcon(g, id, b); return; }
   const S = (c) => { g.strokeStyle = c; g.stroke(); };
   switch (id) {
     case 'arrow': case 'broadhead': case 'bodkin': case 'fire_arrow': case 'venom_arrow': case 'frost_arrow': {
@@ -6107,6 +6194,10 @@ function drawWeaponShape(g, wk, len, col, icon, wooden, draw, arrowCol) {
     g.strokeStyle = '#7a7e86'; g.lineWidth = 2.2; g.beginPath(); g.moveTo(12, -10); g.quadraticCurveTo(15, 0, 12, 10); g.stroke();
     g.strokeStyle = '#ddd'; g.lineWidth = .8; g.beginPath(); g.moveTo(12, -10); g.lineTo(draw ? 2 : 8, 0); g.lineTo(12, 10); g.stroke();
     if (draw) { g.fillStyle = '#4a3a2a'; g.fillRect(2, -.8, 16, 1.6); }
+  } else if (wk === 'staff') {
+    g.fillStyle = '#6a4a2a'; g.fillRect(-8, -1.2 * W2, len - 4, 2.4 * W2); g.fillStyle = '#c8a04a'; g.fillRect(len - 12, -1.8 * W2, 3, 3.6 * W2);
+    g.strokeStyle = '#8a6a3a'; g.lineWidth = 1.2 * W2; g.beginPath(); g.moveTo(len - 6, -3 * W2); g.quadraticCurveTo(len + 1, 0, len - 6, 3 * W2); g.stroke();
+    g.save(); g.shadowColor = col; g.shadowBlur = 10; g.fillStyle = col; circ(g, len - 1, 0, 3.4 * W2); g.restore(); g.fillStyle = 'rgba(255,255,255,.7)'; circ(g, len - 2, -1 * W2, 1.1 * W2);
   } else if (wk === 'bow') {
     const Rr = len * .65 * (icon ? 1.5 : 1), ex = -6 + Math.cos(1.2) * Rr, ey = Math.sin(1.2) * Rr, pull = ex - (draw || 0) * Rr * .75;
     g.strokeStyle = col; g.lineWidth = icon ? 4.2 : 2.4; g.beginPath(); g.arc(-6, 0, Rr, -1.2, 1.2); g.stroke();
@@ -6412,6 +6503,7 @@ function drawCaveEntrance(g, o, t, cx, by) {
   }
 }
 function drawStruct(g, o, t) {
+  if (STRUCTS[o.k]) { STRUCTS[o.k](g, o, t); return; }
   const x = o.x, y = o.y, w = o.w, h = o.h; const k = o.owner != null ? o.owner : 0; const kd = KDATA[k];
   switch (o.k) {
     case 'house': case 'barracks': case 'smithy': case 'stable': case 'chapel': case 'tent_k': {
@@ -7202,9 +7294,10 @@ function lookFor0(e) {
     const kc = P.allegiance != null ? KDATA[P.allegiance].color : null;
     return { body: al.body, head: al.head, mail: al.mail, pauld: al.pauld, shiny: al.shiny, skin: '#e0b48a', hair: '#5a3a22', tabard: kc, cape: S.aid === 'plate' || S.aid === 'scale' ? (kc || '#6a1e1a') : kc, plume: kc || '#c0302a',
       weapon: S.wid ? { wk: ITEMS[S.wid].wk, len: ITEMS[S.wid].len, col: ITEMS[S.wid].col, glow: S.glow, wooden: S.wid === 'wooden_sword' } : null,
-      shield: S.sid && !S.bow ? { b: ITEMS[S.sid], col: S.sid === 'knight_shield' && P.allegiance != null ? KDATA[P.allegiance].color : null } : null };
+      shield: S.sid && !S.bow && S.wk !== 'staff' ? { b: ITEMS[S.sid], col: S.sid === 'knight_shield' && P.allegiance != null ? KDATA[P.allegiance].color : null } : null };
   }
   if (e._look) return e._look;
+  if (MAGIC_LOOK[e.kind]) return (e._look = MAGIC_LOOK[e.kind]);
   let L;
   const kc = e.k != null ? KDATA[e.k].color : '#777';
   switch (e.kind) {
@@ -7534,6 +7627,7 @@ function buildMapLayers() {
 function placeIcon(g, p, x, y, s) {
   const kc = p.owner != null ? KDATA[p.owner].color : '#888';
   g.save(); g.translate(x, y); g.lineWidth = 1.5; g.strokeStyle = '#120c07';
+  if (PICON[p.type]) { PICON[p.type](g, p, s); g.restore(); return; }
   switch (p.type) {
     case 'castle': g.fillStyle = kc; g.fillRect(-s, -s * .6, s * 2, s * 1.4); g.strokeRect(-s, -s * .6, s * 2, s * 1.4); for (let i = -1; i <= 1; i++) { g.fillRect(i * s * .75 - s * .22, -s, s * .44, s * .45); } g.fillStyle = '#f5e6bd'; g.fillRect(-s * .22, s * .2, s * .44, s * .6); break;
     case 'village': g.fillStyle = kc; g.beginPath(); g.moveTo(-s * .7, s * .6); g.lineTo(-s * .7, -s * .1); g.lineTo(0, -s * .75); g.lineTo(s * .7, -s * .1); g.lineTo(s * .7, s * .6); g.closePath(); g.fill(); g.stroke(); break;
@@ -7625,7 +7719,7 @@ function openDialog(d) {
 function closeDialog() { dialogOpen = false; $('dialog').classList.remove('show'); }
 
 /* ---------------- Inventory ---------------- */
-const INV_TABS = [['weapon', 'Weapons'], ['ammo', 'Arrows'], ['shield', 'Shields'], ['armor', 'Armor'], ['horse', 'Horses'], ['misc', 'Miscellaneous'], ['quest', 'Quest Items']];
+const INV_TABS = [['weapon', 'Weapons'], ['ammo', 'Arrows'], ['shield', 'Shields'], ['armor', 'Armor'], ['jewel', 'Jewelry'], ['horse', 'Horses'], ['magic', 'Magic'], ['misc', 'Misc'], ['quest', 'Quest']];
 let invTab = 'weapon', invSel = null, discardArm = null;
 function isEquipped(uid) { return Object.values(P.eq).includes(uid); }
 function statSummary(it) {
@@ -7636,12 +7730,14 @@ function statSummary(it) {
   if (b.type === 'shield') return `Block ${Math.round(s.block * 100)}%${s.slow ? ' · slow' : ''}`;
   if (b.type === 'armor') return `Armor ${s.def}${s.slow ? ` · −${Math.round(s.slow * 100)}% spd` : ''}`;
   if (b.type === 'horse') return `Speed ×${b.hspd}`;
+  if (b.type === 'ring' || b.type === 'amulet') return jewelSummary(it);
+  if (b.type === 'weapon' && b.wk === 'staff') return `${s.dmg} dmg bolts · +${Math.round((b.sp || 0) * 100)}% spells`;
   return `${it.n > 1 ? '×' + it.n + ' · ' : ''}${b.val ? itemValue(it) + 'g ea.' : 'Quest item'}`;
 }
 function renderInventory() {
-  $('invTabs').innerHTML = INV_TABS.map(([k, n]) => { const c = P.inv.filter(i => ITEMS[i.id].type === k).length; return `<div class="tab ${invTab === k ? 'on' : ''}" data-tab="${k}">${n} <span style="opacity:.6">${c}</span></div>`; }).join('');
+  $('invTabs').innerHTML = INV_TABS.map(([k, n]) => { const c = P.inv.filter(i => itab(ITEMS[i.id]) === k).length; return `<div class="tab ${invTab === k ? 'on' : ''}" data-tab="${k}">${n} <span style="opacity:.6">${c}</span></div>`; }).join('');
   $('invTabs').querySelectorAll('.tab').forEach(el => el.onclick = () => { invTab = el.dataset.tab; invSel = null; renderInventory(); });
-  const items = P.inv.filter(i => ITEMS[i.id].type === invTab).sort((a, b) => (isEquipped(b.uid) - isEquipped(a.uid)) || (itemValue(b) - itemValue(a)));
+  const items = P.inv.filter(i => itab(ITEMS[i.id]) === invTab).sort((a, b) => (isEquipped(b.uid) - isEquipped(a.uid)) || (itemValue(b) - itemValue(a)));
   const grid = $('invGrid');
   grid.innerHTML = items.length ? items.map(it => `<div class="icard ${isEquipped(it.uid) ? 'eq' : ''} ${invSel === it.uid ? 'sel' : ''}" data-uid="${it.uid}" draggable="${slotOf(ITEMS[it.id].type) ? 'true' : 'false'}"><img src="${itemIcon(it.id)}" alt=""><div><div class="in" style="color:${itemColor(it)}">${itemName(it)}${it.n > 1 ? ` ×${it.n}` : ''}</div><div class="is">${statSummary(it)}</div></div></div>`).join('') : `<div class="empty">No ${INV_TABS.find(t => t[0] === invTab)[1].toLowerCase()} yet. Explore, loot and trade to find more.</div>`;
   grid.querySelectorAll('.icard').forEach(el => {
@@ -7651,12 +7747,12 @@ function renderInventory() {
     el.ondragstart = ev => { ev.dataTransfer.setData('text/plain', String(uid)); ev.dataTransfer.effectAllowed = 'move'; };
   });
   // slots
-  [['esW', 'weapon'], ['esW2', 'weapon2'], ['esS', 'shield'], ['esA', 'armor'], ['esH', 'horse']].forEach(([id, slot]) => {
+  [['esW', 'weapon'], ['esW2', 'weapon2'], ['esS', 'shield'], ['esA', 'armor'], ['esH', 'horse'], ['esR', 'ring'], ['esAm', 'amulet']].forEach(([id, slot]) => {
     const el = $(id); const uid = P.eq[slot]; const it = uid ? getItem(uid) : null; const lbl = slot === 'weapon2' ? 'sidearm' : slot;
     el.classList.toggle('filled', !!it);
     el.innerHTML = (it ? `<img src="${itemIcon(it.id)}" alt="">` : '') + `<span class="el">${lbl.toUpperCase()}</span>`;
     el.dataset.tip = it ? `<h4 style="color:${itemColor(it)}">${itemName(it)}</h4>${statSummary(it)}<div class="tsub">${slot === 'weapon2' ? 'Press Tab to swap it with your main weapon · ' : ''}Click to unequip · drag items here to equip</div>` : `<h4>${lbl}</h4><div class="tsub">${slot === 'weapon2' ? 'Drag a second weapon here, then press Tab to swap mid-fight' : 'Empty — drag an item here'}</div>`;
-    el.onclick = () => { if (it) { unequip(slot); renderInventory(); } else { invTab = slot === 'weapon2' ? 'weapon' : slot; renderInventory(); } };
+    el.onclick = () => { if (it) { unequip(slot); renderInventory(); } else { invTab = slot === 'weapon2' ? 'weapon' : slot === 'ring' || slot === 'amulet' ? 'jewel' : slot; renderInventory(); } };
     el.ondragover = ev => { ev.preventDefault(); el.classList.add('drop'); };
     el.ondragleave = () => el.classList.remove('drop');
     el.ondrop = ev => { ev.preventDefault(); el.classList.remove('drop'); const u = +ev.dataTransfer.getData('text/plain'); const di = getItem(u); if (di && (slot === 'weapon2' ? ITEMS[di.id].type === 'weapon' : slotOf(ITEMS[di.id].type) === slot)) { equip(u, false, slot); renderInventory(); } else toast('That item does not fit this slot.', 'bad'); };
@@ -7666,7 +7762,7 @@ function renderInventory() {
   const S = P.S; const mv = Math.round((1 - S.slow) * 100);
   $('statTbl').innerHTML = [
     ['Damage', Math.round(S.dmg)], [S.bow ? 'Draw Speed' : 'Attack Speed', S.spd], [S.bow ? 'Range' : 'Reach', S.rng], ['Block', S.bow ? 'None (bow)' : Math.round(S.block * 100) + '%'], ['Armor', S.def + ` (−${Math.round((1 - 100 / (100 + S.def * 6.5)) * 100)}% dmg)`],
-    ['Move Speed', mv + '%'], ['Horse', S.horse ? `×${S.hspd} ${P.mounted ? '(riding)' : ''}` : 'None'], ['Level', `${P.lvl} (${P.xp}/${xpNeed(P.lvl)} XP)`], ['Health', `${Math.ceil(P.hp)} / ${P.maxHp}`], ['Stamina', `${Math.ceil(P.st)} / ${P.maxSt}`], ['Gold', fmt(P.gold)], ['Foes Slain', G.kills],
+    ['Move Speed', mv + '%'], ['Horse', S.horse ? `×${S.hspd} ${P.mounted ? '(riding)' : ''}` : 'None'], ['Level', `${P.lvl} (${P.xp}/${xpNeed(P.lvl)} XP)`], ['Health', `${Math.ceil(P.hp)} / ${P.maxHp}`], ['Stamina', `${Math.ceil(P.st)} / ${P.maxSt}`], ...(knowsMagic() ? [['Mana', `${Math.floor(P.mp)} / ${P.maxMp}`], ['Spell Power', Math.round(P.S.sp * 100) + '%' + (P.S.school ? ` (+25% ${SCHOOLS[P.S.school].n})` : '')]] : []), ['Gold', fmt(P.gold)], ['Foes Slain', G.kills],
   ].map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('');
   // detail
   const det = $('invDetail'); const it = invSel ? getItem(invSel) : (P.eq[invTab] ? getItem(P.eq[invTab]) : null);
@@ -7678,19 +7774,22 @@ function renderInventory() {
   else if (b.type === 'weapon') st = `<span>Damage: ${cmp(s.dmg, es && es.dmg)}</span><span>Speed: ${cmp(s.spd, es && es.spd)}</span><span>Range: ${cmp(s.rng, es && es.rng)}</span><span>Arc: <b>${Math.round(s.arc * 57)}°</b></span>`;
   else if (b.type === 'shield') st = `<span>Block: ${cmp(s.block, es && es.block, x => Math.round(x * 100) + '%')}</span>${s.slow ? `<span>Move: <b class="dn">−${Math.round(s.slow * 100)}%</b></span>` : ''}`;
   else if (b.type === 'armor') st = `<span>Armor: ${cmp(s.def, es && es.def)}</span><span>Move: <b>${s.slow ? '−' + Math.round(s.slow * 100) + '%' : 'no penalty'}</b></span>`;
+  else if (b.type === 'ring' || b.type === 'amulet') st = `<span>${jewelSummary(it)}</span>${it.glyph ? `<span style="color:#c890ff">${GLYPHS[it.glyph].n}</span>` : ''}`;
   else if (b.type === 'horse') st = `<span>Speed: ${cmp(b.hspd, eqIt ? ITEMS[eqIt.id].hspd : null, x => '×' + (+x).toFixed(2))}</span>${b.dmgB ? '<span>Mounted dmg <b>+20%</b></span>' : ''}`;
   if (b.val) st += `<span>Value: <b>${itemValue(it)}g</b></span>`;
   const eq = isEquipped(it.uid);
   const acts = [];
   if (slot) acts.push(`<button class="btn sm gold" id="actEq">${eq ? 'Unequip' : 'Equip'}</button>`);
   if (b.type === 'weapon' && P.eq.weapon2 !== it.uid) acts.push(`<button class="btn sm" id="actSide">Set as sidearm</button>`);
-  if (b.heal || b.use) acts.push(`<button class="btn sm gold" id="actUse">${b.heal ? 'Consume' : b.use === 'nock' ? (P.ammo === it.id ? 'Nocked' : 'Nock') : 'Read'}</button>`);
+  if (b.heal || b.use) acts.push(`<button class="btn sm gold" id="actUse">${b.heal ? 'Consume' : b.use === 'nock' ? (P.ammo === it.id ? 'Nocked' : 'Nock') : b.use === 'tonic' ? 'Drink' : b.use === 'learn' ? 'Study' : b.use === 'alchkit' ? 'Brew' : 'Read'}</button>`);
+  if (b.use === 'tonic' && (TONICS[it.id].fx || TONICS[it.id].mp)) acts.push(`<button class="btn sm" id="actTonic">${P.tonic === it.id ? 'Quick tonic [4]' : 'Set as quick tonic [4]'}</button>`);
   if (b.wear) acts.push(`<button class="btn sm gold" id="actWear">${(P.worn || []).includes(it.id) ? 'Take off' : 'Wear'}</button>`);
   if (b.type !== 'quest' && !eq) acts.push(`<button class="btn sm red" id="actDrop">${discardArm === it.uid ? 'Click again to discard' : 'Discard'}</button>`);
   det.innerHTML = `<img src="${itemIcon(it.id)}" alt=""><div style="flex:1"><h3 style="color:${itemColor(it)}">${itemName(it)}${it.n > 1 ? ' ×' + it.n : ''}${eq ? ' <span class="chip" style="color:#e7c35a">EQUIPPED</span>' : ''}</h3><div class="desc">${b.desc || ''}</div><div class="statline">${st}</div><div class="iacts">${acts.join('')}</div></div>`;
   const ae = $('actEq'); if (ae) ae.onclick = () => { eq ? unequip(P.eq.weapon2 === it.uid ? 'weapon2' : slot) : equip(it.uid); renderInventory(); };
   const as2 = $('actSide'); if (as2) as2.onclick = () => { equip(it.uid, false, 'weapon2'); renderInventory(); };
   const au = $('actUse'); if (au) au.onclick = () => { useItem(it.uid); if (!getItem(it.uid)) invSel = null; renderInventory(); };
+  const at2 = $('actTonic'); if (at2) at2.onclick = () => { P.tonic = it.id; SND.play('ui'); renderInventory(); };
   const aw = $('actWear'); if (aw) aw.onclick = () => { toggleWear(it.id); renderInventory(); };
   const ad = $('actDrop'); if (ad) ad.onclick = () => { if (discardArm === it.uid) { removeItem(it.uid, it.n); invSel = null; discardArm = null; toast(`Discarded ${itemName(it)}.`); } else discardArm = it.uid; renderInventory(); };
 }
@@ -8034,13 +8133,14 @@ function drawEntity(g, e, t) {
     if (P.webbed > 0) { g.strokeStyle = 'rgba(230,230,225,.5)'; g.lineWidth = 1; for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; g.beginPath(); g.moveTo(P.x, P.y); g.lineTo(P.x + Math.cos(a) * 16, P.y + Math.sin(a) * 16); g.stroke(); } }
     return;
   }
-  if (e.dead) { if (e.perch) return; if (e.animal) drawAnimal(g, e); else if (e.kind !== 'horse') drawCorpse(g, e); return; }
+  if (e.dead) { if (e.perch || e.nocorpse) return; if (e.animal) drawAnimal(g, e); else if (e.kind !== 'horse') drawCorpse(g, e); return; }
   if (e.elev) { g.save(); g.translate(0, -e.elev); drawEntityBody(g, e, t); g.restore(); if (e.perch) drawPerchFront(g, e, t); return; }
   if (e.fade > 0) { g.globalAlpha = clamp(1 - e.fade, .06, 1); drawEntityBody(g, e, t); g.globalAlpha = 1; return; } // stepping through the mist
   drawEntityBody(g, e, t);
 }
 function drawEntityBody(g, e, t) {
   if (e.kind === 'dummy') { drawDummy(g, e); return; }
+  if (DRAW_KIND[e.kind]) { DRAW_KIND[e.kind](g, e, t); statusTint(g, e); return; }
   if (e.downed > 0) { drawCorpse(g, Object.assign({}, e, { deadT: 0 })); return; }
   if (e.kind === 'horse') { drawHorse(g, e.x, e.y, e.face, ITEMS[e.hid], e.walk, true, P.allegiance); return; }
   if (e.wind > 0 && !e.ranged && playerHostileTo(e) && dist(e.x, e.y, P.x, P.y) < 300) {
@@ -8120,6 +8220,7 @@ function renderWorld(t) {
   for (const p of pickups) {
     if (p.x < vx - 20 || p.x > vx + VW + 20 || p.y < vy - 20 || p.y > vy + VH + 20) continue;
     if (p.type === 'gold') { g.fillStyle = 'rgba(0,0,0,.3)'; ell(g, p.x + 2, p.y + 4, 6, 2.5); g.fillStyle = '#e8b830'; circ(g, p.x, p.y - 2 + Math.sin(t * 5 + p.x) * 1.5, 5); g.fillStyle = '#fff3a0'; circ(g, p.x - 1.5, p.y - 3.5 + Math.sin(t * 5 + p.x) * 1.5, 2); }
+    else if (p.herb) drawHerb(g, p, t);
     else if (p.type === 'qitem') { const s = 1 + Math.sin(t * 5) * .3; g.fillStyle = `rgba(255,240,160,${.5 + Math.sin(t * 5) * .3})`; for (let i = 0; i < 4; i++) { g.save(); g.translate(p.x, p.y); g.rotate(i * Math.PI / 4 + t); g.fillRect(-1, -9 * s, 2, 18 * s); g.restore(); } g.fillStyle = '#fff'; circ(g, p.x, p.y, 3); }
     else { g.fillStyle = 'rgba(0,0,0,.3)'; ell(g, p.x + 2, p.y + 6, 8, 3); g.fillStyle = '#7a5530'; rrect(g, p.x - 7, p.y - 8 + Math.sin(t * 4 + p.x) * 1.5, 14, 13, 4); g.fill(); g.fillStyle = itemColor({ id: p.id, q: p.q }); circ(g, p.x, p.y - 9 + Math.sin(t * 4 + p.x) * 1.5, 3); }
   }
@@ -8161,6 +8262,7 @@ function renderWorld(t) {
   // projectiles
   g.lineWidth = 2;
   for (const p of projs) {
+    if (p.mag) { drawMagProj(g, p, t); continue; }
     const a = Math.atan2(p.vy, p.vx) || p.a || 0; if (!p.stuck) p.a = a; const aa = p.stuck ? p.a : a, ca = Math.cos(aa), sa = Math.sin(aa);
     if (p.fireBreath) { g.fillStyle = 'rgba(255,170,60,.85)'; circ(g, p.x, p.y, 5.5); g.fillStyle = 'rgba(255,90,20,.4)'; circ(g, p.x - ca * 8, p.y - sa * 8, 8); continue; }
     if (p.snow) { g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, p.x + 3, p.y + 10, 4, 2); g.fillStyle = '#f4f8ff'; circ(g, p.x, p.y, 4); g.fillStyle = '#d8e4f4'; circ(g, p.x + 1.2, p.y + 1.2, 2); continue; }
@@ -8171,6 +8273,7 @@ function renderWorld(t) {
     if (p.rec && (t * 1.3 + p.x * .01) % 1.6 < .18) { g.fillStyle = 'rgba(255,248,210,.95)'; circ(g, p.x - ca * 7, p.y - sa * 7, 2.6); }
     if (p.arrow) { g.fillStyle = ITEMS[p.arrow].col; circ(g, p.x, p.y, 1.8); if (p.arrow === 'fire_arrow' && (!p.stuck || p.life > 1)) { g.fillStyle = 'rgba(255,170,50,.8)'; circ(g, p.x, p.y, 3 + Math.random() * 1.5); } }
   }
+  if (playing) runHooks('draw', g, t);
   if (G.fishing) { const F = G.fishing, bob = F.st === 'bite' ? 3 + Math.sin(t * 30) * 2 : Math.sin(t * 3) * 1.2; g.strokeStyle = 'rgba(230,230,220,.6)'; g.lineWidth = 1; g.beginPath(); g.moveTo(P.x + Math.cos(P.face) * 18, P.y + Math.sin(P.face) * 18 - 8); g.quadraticCurveTo((P.x + F.bx) / 2, (P.y + F.by) / 2 - 20, F.bx, F.by + bob); g.stroke(); g.fillStyle = '#e8e0d0'; circ(g, F.bx, F.by + bob, 3); g.fillStyle = '#c0302a'; circ(g, F.bx, F.by + bob - 1.5, 2); }
   // particles
   for (const p of parts) { g.globalAlpha = clamp(p.life / p.max, 0, 1); g.fillStyle = p.c; g.fillRect(p.x - p.s / 2, p.y - p.s / 2, p.s, p.s); }
@@ -8240,6 +8343,7 @@ const HC = {}; let hudT = 0;
 function setIf(key, val, fn) { if (HC[key] !== val) { HC[key] = val; fn(val); } }
 function updateHUD(force) {
   if (!P || !P.S) return;
+  runHooks('hud', force);
   const hpf = clamp(P.hp / P.maxHp, 0, 1), stf = clamp(P.st / P.maxSt, 0, 1);
   $('hpFill').style.transform = `scaleX(${hpf})`; $('hpLag').style.transform = `scaleX(${hpf})`; $('stFill').style.transform = `scaleX(${stf})`;
   setIf('hpt', Math.ceil(P.hp) + '/' + P.maxHp, v => $('hpText').textContent = v.replace('/', ' / '));
@@ -8390,10 +8494,11 @@ function pollPad() {
     if (press(0)) { const f = document.querySelector('.padFocus'); if (f && padRoot().contains(f)) f.click(); else padNav(0); }
     if (press(1) || press(9)) { if (dialogOpen) closeDialog(); else if (UI.stack.length) UI.close(); }
   } else {
-    padKey('KeyA', lx < -.3 || b(14)); padKey('KeyD', lx > .3 || b(15)); padKey('KeyW', ly < -.3 || b(12)); padKey('KeyS', ly > .3 || b(13)); padKey('ShiftLeft', b(5));
+    const dp = !knowsMagic(); padKey('KeyA', lx < -.3 || (dp && b(14))); padKey('KeyD', lx > .3 || (dp && b(15))); padKey('KeyW', ly < -.3 || (dp && b(12))); padKey('KeyS', ly > .3 || (dp && b(13))); padKey('ShiftLeft', b(5));
     if (rx || ry) PAD.aim = Math.atan2(ry, rx); else if (lx || ly) PAD.aim = Math.atan2(ly, lx);
     input.lmb = b(7); input.rmb = b(6);
     if (press(0)) tryDodge(); if (press(2)) doInteract(); if (press(1)) toggleMount(); if (press(3)) swapWeapons(); if (press(4)) cycleAmmo();
+    runHooks('pad', b, press);
     if (press(11)) useSpecial(); if (press(10)) toggleParty(); if (press(8)) UI.toggle('map'); if (press(9)) UI.open('pause');
   }
   PAD.prevUp = ly < -.6; PAD.prevDn = ly > .6; PAD.prev = gp.buttons.map(x => x.pressed);
@@ -8458,7 +8563,8 @@ document.addEventListener('click', e => { if (TOUCH.on && e.target.closest && e.
   hold('tAtk', () => { input.lmb = true; input.clicked = true; }, () => { input.lmb = false; });
   hold('tBlk', () => { input.rmb = true; }, () => { input.rmb = false; });
   tap('tDodge', tryDodge); tap('tSpec', useSpecial); tap('tUse', doInteract); tap('tHorse', toggleMount); tap('tSwap', swapWeapons); tap('tAmmo', cycleAmmo);
-  tap('tEat', () => quickUse('food')); tap('tPot', () => quickUse('potion')); tap('tParty', toggleParty);
+  tap('tEat', () => quickUse('food')); tap('tPot', () => quickUse('potion')); tap('tParty', toggleParty); tap('tTonic', quickTonic);
+  { let hT = null, held = false; const b = $('tCast'); b.addEventListener('touchstart', ev => { ev.preventDefault(); held = false; hT = setTimeout(() => { held = true; if (knowsMagic()) { const n = P.slots.filter(Boolean).length; if (n) { do P.selSlot = ((P.selSlot || 0) + 1) % 4; while (!P.slots[P.selSlot]); SND.play('ui'); toast(`Spell: <b>${SPELLS[P.slots[P.selSlot]].n}</b>`); updateHUD(true); } } }, 450); }, { passive: false }); b.addEventListener('touchend', ev => { ev.preventDefault(); clearTimeout(hT); if (!held) castSlot(P.selSlot || 0); }, { passive: false }); }
   tap('tSprint', () => { TOUCH.sprint = !TOUCH.sprint; });
   hold('tFull', () => { if (document.fullscreenElement) { try { document.exitFullscreen(); } catch (e) { } } else tryFullscreen(); }, () => { });
   $('prompt').addEventListener('click', () => { if (TOUCH.on && G.state === 'play' && !dialogOpen && !UI.stack.length) doInteract(); });
@@ -8486,7 +8592,7 @@ addEventListener('keydown', ev => {
   if (UI.isOpen('act') && (e.code === 'Enter' || e.code === 'Space')) { e.preventDefault(); UI.close(); return; }
   if (dialogOpen) { const n = parseInt(e.key); if (n >= 1) { const b = $('dOpts').children[n - 1]; if (b && !b.disabled) b.click(); } return; }
   if (G.state !== 'play' || e.repeat) return;
-  const tog = { KeyI: 'inv', KeyM: 'map', KeyK: 'dip', KeyJ: 'quests', KeyP: 'skills', KeyL: 'journal' }[e.code]; if (tog === 'journal') { if (UI.isOpen('quests') && (qTab === 'beasts' || qTab === 'lore')) UI.close(); else UI.open('journal'); return; }
+  const tog = { KeyI: 'inv', KeyM: 'map', KeyK: 'dip', KeyJ: 'quests', KeyP: 'skills', KeyL: 'journal', ...PANELS }[e.code]; if (tog === 'journal') { if (UI.isOpen('quests') && (qTab === 'beasts' || qTab === 'lore')) UI.close(); else UI.open('journal'); return; }
   if (tog === 'quests' && !UI.isOpen('quests') && (qTab === 'beasts' || qTab === 'lore')) qTab = 'active';
   if (tog) { if (tog === 'map' && G.under && !G.under.interior) { toast('Your map is no use down here. Find your way back to the ladder.'); return; } UI.toggle(tog); return; }
   if (UI.stack.length) return;
@@ -8500,6 +8606,7 @@ addEventListener('keydown', ev => {
   else if (e.code === 'Digit1') quickUse('food');
   else if (e.code === 'Digit2') quickUse('potion');
   else if (e.code === 'Digit3') quickUse('band');
+  else if (KEYFN[e.code]) KEYFN[e.code]();
 });
 addEventListener('keyup', ev => { const code = mapKey(ev.code); if (code == null) return; input.keys[code] = false; input.force = !!input.keys.KeyQ; });
 
@@ -10315,6 +10422,891 @@ function storyBegin() {
     `They have warred ever since. You are a hedge knight of Albion, with a wooden sword, a padded coat, ${P.gold} coins and no name worth remembering. Yet.`,
   ], [{ t: 'Begin', fn: closeDialog }])));
 }
+
+/* =====================================================================
+   MAGIC — mana and spells, staffs, rings and amulets, enchanting, alchemy,
+   wizards and their towers, and the foes who wield magic
+   ===================================================================== */
+const SCHOOLS = {
+  ember: { n: 'Ember', c: '#ff8a3a', c2: '#ffe08a', d: 'Fire that keeps burning after it lands.' },
+  rime: { n: 'Rime', c: '#9fdcff', c2: '#f0fbff', d: 'Frost that slows foes and their blows.' },
+  storm: { n: 'Storm', c: '#c8d4ff', c2: '#fff6b0', d: 'Lightning that leaps between foes and staggers them.' },
+  life: { n: 'Life', c: '#8fe07a', c2: '#eaffd8', d: 'Healing for you and those who follow you.' },
+  ward: { n: 'Warding', c: '#ffe7a0', c2: '#ffffff', d: 'Shields and light, and ruin for the Hollow dead.' },
+  shadow: { n: 'Shadow', c: '#b07ae0', c2: '#3a1e4a', d: 'Forbidden arts. Strong, and paid for in blood.' },
+  arcane: { n: 'Arcane', c: '#c890ff', c2: '#f4e8ff', d: 'Pure force, shaped by will alone.' },
+};
+const UNDEAD = ['wight', 'hknight', 'hollow_archer', 'hollow_king', 'bone_wyrm', 'rimeheart'];
+const isUndead = t => !!t && (t.faction === 'hollow' || UNDEAD.includes(t.kind) || !!t.undead);
+const knowsMagic = () => !!(P && P.spells && P.spells.length);
+const cF = () => Math.cos(P.face), sF = () => Math.sin(P.face);
+// Spell power: gear, Arcana and level, +25% when your staff belongs to the spell's school. SPW scales damage, SPH healing.
+const SPW = s => (P.S.sp || 1) * (P.S.school === s ? 1.25 : 1) * (1 + .03 * (P.lvl - 1)) * DIFF().dmgDealt * (P.fx && P.fx.str > 0 ? 1.15 : 1);
+const SPH = s => (P.S.sp || 1) * (P.S.school === s ? 1.25 : 1) * (1 + .02 * (P.lvl - 1));
+
+/* ---------------- Transient spell effects (rings, bolts, cones, warning marks) ---------------- */
+let MAGFX = [];
+function mfx(o) { MAGFX.push(Object.assign({ t: 0, life: .4 }, o)); }
+function updateMagFx(dt) {
+  for (let i = MAGFX.length - 1; i >= 0; i--) { const f = MAGFX[i]; f.t += dt; if (f.follow) { f.x = f.follow.x; f.y = f.follow.y; } if (f.t >= f.life) { MAGFX.splice(i, 1); if (f.fn) f.fn(); } }
+}
+function drawMagFx(g, t) {
+  for (const f of MAGFX) {
+    const p = f.t / f.life, S = SCHOOLS[f.s] || SCHOOLS.arcane;
+    g.save();
+    if (f.k === 'ring') { g.globalAlpha = 1 - p; g.strokeStyle = S.c; g.lineWidth = 6 * (1 - p) + 1; g.beginPath(); g.arc(f.x, f.y, f.r * (.25 + .75 * p), 0, TAU); g.stroke(); g.globalAlpha = (1 - p) * .25; g.fillStyle = S.c2; circ(g, f.x, f.y, f.r * (.25 + .75 * p)); }
+    else if (f.k === 'cone') { g.globalAlpha = (1 - p) * .55; const gr = g.createRadialGradient(f.x, f.y, 4, f.x, f.y, f.r); gr.addColorStop(0, S.c2); gr.addColorStop(1, hexA(S.c, 0)); g.fillStyle = gr; g.beginPath(); g.moveTo(f.x, f.y); g.arc(f.x, f.y, f.r * (.4 + .6 * p), f.a - f.h, f.a + f.h); g.closePath(); g.fill(); }
+    else if (f.k === 'bolt') { g.globalAlpha = 1 - p; g.strokeStyle = S.c2; g.lineWidth = 3; g.shadowColor = S.c; g.shadowBlur = 12; g.beginPath(); g.moveTo(f.x, f.y); const n = 6; for (let i = 1; i < n; i++) { const q = i / n; g.lineTo(lerp(f.x, f.x2, q) + rand(-9, 9), lerp(f.y, f.y2, q) + rand(-9, 9)); } g.lineTo(f.x2, f.y2); g.stroke(); }
+    else if (f.k === 'mark') { g.strokeStyle = S.c; g.globalAlpha = .45 + .4 * Math.sin(t * 20); g.lineWidth = 2; g.setLineDash([6, 5]); g.beginPath(); g.arc(f.x, f.y, f.r, 0, TAU); g.stroke(); g.setLineDash([]); g.globalAlpha = .18 + .3 * p; g.fillStyle = S.c; circ(g, f.x, f.y, f.r * p); }
+    else if (f.k === 'sigil') { g.globalAlpha = (1 - p) * .8; g.strokeStyle = S.c; g.lineWidth = 1.5; g.translate(f.x, f.y + 8); g.scale(1, .45); g.rotate(t * 2); g.beginPath(); g.arc(0, 0, 20, 0, TAU); g.stroke(); for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; g.beginPath(); g.moveTo(Math.cos(a) * 20, Math.sin(a) * 20); g.lineTo(Math.cos(a + 2.1) * 20, Math.sin(a + 2.1) * 20); g.stroke(); } }
+    else if (f.k === 'aura') { g.globalAlpha = .18 + .08 * Math.sin(t * 5); g.strokeStyle = S.c; g.lineWidth = 2; g.beginPath(); g.ellipse(f.x, f.y + 6, f.r, f.r * .5, 0, 0, TAU); g.stroke(); }
+    g.restore();
+  }
+}
+
+/* ---------------- Casting helpers ---------------- */
+function magHostile(src, t) { if (!t || t.dead || t === src) return false; if (t.dummy) return src === P; return src === P ? playerHostileTo(t) : hostile(src, t); }
+function magTarget(x, y, r, src, face, arc) {
+  let best = null, bd = r;
+  for (const e of ents) { if (!magHostile(src, e) || e.perch || e.important || e.kind === 'horse') continue; const d = dist(x, y, e.x, e.y); if (d > bd) continue; if (face != null && Math.abs(angDiff(face, Math.atan2(e.y - y, e.x - x))) > arc) continue; bd = d; best = e; }
+  if (src !== P && magHostile(src, P) && dist(x, y, P.x, P.y) < bd) best = P;
+  return best;
+}
+function magProj(o) {
+  const p = Object.assign({ mag: true, vx: Math.cos(o.a) * o.spd, vy: Math.sin(o.a) * o.spd, life: 1.2, r: 5 }, o);
+  projs.push(p); return p;
+}
+// Moves one magic projectile, returns true once it is spent. Called from updateProjs.
+function magStep(p, dt) {
+  if (p.home) {
+    const tg = p.tgt && !p.tgt.dead ? p.tgt : (p.tgt = magTarget(p.x, p.y, 340, p.src));
+    if (tg) { const want = Math.atan2(tg.y - (tg.elev || 0) - p.y, tg.x - p.x), cur = Math.atan2(p.vy, p.vx), na = turnToward(cur, want, dt * p.home), sp = Math.hypot(p.vx, p.vy); p.vx = Math.cos(na) * sp; p.vy = Math.sin(na) * sp; }
+  }
+  p.x += p.vx * dt; p.y += p.vy * dt;
+  const S = SCHOOLS[p.s] || SCHOOLS.arcane; if (Math.random() < .9 * QMUL()) addPart(p.x, p.y, rand(-18, 18), rand(-18, 18), Math.random() < .5 ? S.c : S.c2, .3, p.r * .55);
+  for (const t of [P, ...ents]) {
+    if ((p.hitSet && p.hitSet.has(t)) || !arrowCanHit(p, t)) continue;
+    const rr = t.r + p.r, hy = t.y - (t.elev || 0);
+    if (Math.abs(t.x - p.x) < rr && Math.abs(hy - p.y) < rr) {
+      if (p.boom) { magBoom(p.x, p.y, p.boom, p.dmg, p.s, p.src); return true; }
+      magHit(t, p.dmg, p.s, p.src, p);
+      if (p.chain) magChain(t, p.chain, p.dmg * .75, p.s, p.src);
+      if (p.pierce > 1) { p.pierce--; (p.hitSet || (p.hitSet = new Set())).add(t); p.dmg *= .8; return false; }
+      magPuff(p); return true;
+    }
+  }
+  if (p.life <= 0 || (blockedPx(p.x, p.y) && !isWaterT(terAtPx(p.x, p.y)))) { if (p.boom) magBoom(p.x, p.y, p.boom, p.dmg, p.s, p.src); else magPuff(p); return true; }
+  return false;
+}
+function magPuff(p) { const S = SCHOOLS[p.s] || SCHOOLS.arcane; for (let i = 0; i < 8 * QMUL(); i++) addPart(p.x, p.y, rand(-70, 70), rand(-70, 70), Math.random() < .5 ? S.c : S.c2, .35, 2.5); }
+function drawMagProj(g, p, t) {
+  const S = SCHOOLS[p.s] || SCHOOLS.arcane, r = p.r;
+  g.save(); g.shadowColor = S.c; g.shadowBlur = 14; g.fillStyle = hexA(S.c, .45); circ(g, p.x, p.y, r * 1.9); g.fillStyle = S.c2; circ(g, p.x, p.y, r); g.restore();
+  if (p.s === 'rime') { g.strokeStyle = '#ffffff'; g.lineWidth = 1.5; const a = Math.atan2(p.vy, p.vx); g.beginPath(); g.moveTo(p.x + Math.cos(a) * r * 1.8, p.y + Math.sin(a) * r * 1.8); g.lineTo(p.x - Math.cos(a) * r * 2.6, p.y - Math.sin(a) * r * 2.6); g.stroke(); }
+}
+function magHit(t, dmg, s, src, p = {}) {
+  if (!t || t.dead) return 0;
+  if (s === 'ward' && isUndead(t)) dmg *= p.undeadMul || 1.8;
+  if (t.magRes) dmg *= 1 - t.magRes;
+  const done = damage(t, dmg, src, { proj: true, mag: s, kb: p.kb ?? .6, crit: p.crit });
+  if (t.isPlayer) {
+    if (s === 'ember') P.mburn = Math.max(P.mburn || 0, 2.5);
+    else if (s === 'rime') P.chillT = Math.max(P.chillT || 0, 1.6);
+    else if (s === 'shadow' && src && !src.dead && done > 0) src.hp = Math.min(src.maxHp, src.hp + done * .5);
+    return done;
+  }
+  if (p.drain && src === P && done > 0) healP(done * p.drain, true);
+  if (t.dead || t.important || t.kind === 'horse') return done;
+  if (s === 'ember') { t.burn = Math.max(t.burn || 0, p.burnT || 2.5); t.burnDps = Math.max(t.burnDps || 0, 2 + dmg * .12); t.dotSrc = src; }
+  else if (s === 'rime') t.chill = Math.max(t.chill || 0, p.chillT || 2.5);
+  else if (s === 'storm' && !t.titan && !t.boss && Math.random() < (p.stunP ?? .35)) t.stun = Math.max(t.stun || 0, p.stun || .35);
+  if (p.stun && !t.titan && s !== 'storm') t.stun = Math.max(t.stun || 0, p.stun);
+  return done;
+}
+function magBoom(x, y, r, dmg, s, src, o = {}) {
+  for (const t of [P, ...ents]) { if (!magHostile(src, t) || t.important || t.kind === 'horse') continue; const d = dist(x, y, t.x, t.y); if (d > r + t.r) continue; magHit(t, dmg * (1 - .4 * Math.min(1, d / r)), s, src, Object.assign({ kb: 1.6 }, o)); }
+  const S = SCHOOLS[s] || SCHOOLS.arcane; mfx({ k: 'ring', x, y, r, s, life: .45 });
+  for (let i = 0; i < 26 * QMUL(); i++) { const a = rand(0, TAU), v = rand(40, 260); addPart(x, y, Math.cos(a) * v, Math.sin(a) * v, pick([S.c, S.c2, S.c]), rand(.3, .7), rand(2, 4.5)); }
+  if (dist(x, y, P.x, P.y) < 700) { SND.play('boom'); addShake(6); }
+}
+function magNova(x, y, r, dmg, s, src, o = {}) {
+  for (const t of [P, ...ents]) {
+    if (!magHostile(src, t) || t.important || t.kind === 'horse') continue; if (o.undeadOnly && !isUndead(t)) continue;
+    if (dist(x, y, t.x, t.y) > r + t.r) continue; magHit(t, dmg, s, src, o);
+  }
+  mfx({ k: 'ring', x, y, r, s, life: .5 });
+  const S = SCHOOLS[s]; for (let i = 0; i < 30 * QMUL(); i++) { const a = i / 30 * TAU; addPart(x + Math.cos(a) * 12, y + Math.sin(a) * 12, Math.cos(a) * r * 2.2, Math.sin(a) * r * 2.2, i % 2 ? S.c : S.c2, .4, 3); }
+}
+function magCone(x, y, a, r, h, dmg, s, src, o = {}) {
+  for (const t of [P, ...ents]) { if (!magHostile(src, t) || t.important || t.kind === 'horse') continue; const d = dist(x, y, t.x, t.y); if (d > r + t.r || Math.abs(angDiff(a, Math.atan2(t.y - y, t.x - x))) > h) continue; magHit(t, dmg, s, src, o); }
+  mfx({ k: 'cone', x, y, a, r, h, s, life: .35 });
+  const S = SCHOOLS[s]; for (let i = 0; i < 34 * QMUL(); i++) { const aa = a + rand(-h, h), v = rand(r * 1.2, r * 3); addPart(x + Math.cos(aa) * 16, y + Math.sin(aa) * 16, Math.cos(aa) * v, Math.sin(aa) * v, pick([S.c, S.c2]), rand(.25, .45), rand(2.5, 4.5)); }
+}
+function magChain(from, n, dmg, s, src) {
+  const hit = new Set([from]); let cur = from;
+  for (let i = 0; i < n; i++) {
+    let nx = null, bd = 160; for (const e of ents) { if (hit.has(e) || !magHostile(src, e) || e.important) continue; const d = dist(cur.x, cur.y, e.x, e.y); if (d < bd) { bd = d; nx = e; } }
+    if (!nx) break; mfx({ k: 'bolt', x: cur.x, y: cur.y - 10, x2: nx.x, y2: nx.y - 10, s, life: .25 }); magHit(nx, dmg, s, src, { stunP: .5 }); hit.add(nx); cur = nx; dmg *= .8;
+  }
+}
+function healP(v, quiet) {
+  if (v <= 0) return; const before = P.hp; P.hp = Math.min(P.maxHp, P.hp + v); const got = P.hp - before;
+  if (!quiet || got >= 3) { if (settings.dmgNums && got >= 1) addText(P.x, P.y - 32, '+' + Math.round(got), '#8fe07a', quiet ? 12 : 15); }
+  if (!quiet) for (let i = 0; i < 12 * QMUL(); i++) addPart(P.x + rand(-10, 10), P.y + rand(-4, 10), rand(-20, 20), rand(-70, -20), Math.random() < .5 ? '#8fe07a' : '#eaffd8', .8, 2.5);
+}
+function blinkDir() {
+  let mx = (input.keys.KeyD ? 1 : 0) - (input.keys.KeyA ? 1 : 0), my = (input.keys.KeyS ? 1 : 0) - (input.keys.KeyW ? 1 : 0);
+  if (TOUCH.on && (TOUCH.mx || TOUCH.my)) { mx = TOUCH.mx; my = TOUCH.my; }
+  if (!mx && !my) { mx = cF(); my = sF(); } const l = Math.hypot(mx, my); return [mx / l, my / l];
+}
+const noFoe = () => { toast('No foe within reach of the spell.'); return false; };
+
+/* ---------------- The spells ---------------- */
+// t: 1 common (court mages sell the tomes), 2 uncommon (towers, rare loot), 3 rare (archmages, trials and the Veiled Circle)
+const SPELLS = {
+  firebolt: { n: 'Firebolt', s: 'ember', mp: 8, cd: .55, t: 1, g: '✹', d: 'Hurl a bolt of fire that sets the target burning.',
+    cast: () => { magProj({ x: P.x + cF() * 14, y: P.y + sF() * 14, a: P.face, spd: 540, dmg: 16 * SPW('ember'), s: 'ember', src: P, life: 1.1, r: 5 }); SND.play('firecast'); } },
+  flame_wave: { n: 'Flame Wave', s: 'ember', mp: 20, cd: 5, t: 2, g: '≋', d: 'A roaring fan of flame scorches everything in front of you.',
+    cast: () => { magCone(P.x, P.y, P.face, 140, .75, 24 * SPW('ember'), 'ember', P, { burnT: 3.5, kb: 1.2 }); SND.play('firecast'); addShake(3); } },
+  fireball: { n: 'Fireball', s: 'ember', mp: 32, cd: 7, t: 3, g: '●', d: 'A slow ball of fire that bursts where it lands, burning all around.',
+    cast: () => { magProj({ x: P.x + cF() * 16, y: P.y + sF() * 16, a: P.face, spd: 410, dmg: 46 * SPW('ember'), s: 'ember', src: P, life: 1.25, r: 8, boom: 84 }); SND.play('firecast'); } },
+  frost_shard: { n: 'Frost Shards', s: 'rime', mp: 10, cd: .8, t: 1, g: '❄', d: 'Three splinters of ice that chill whatever they strike.',
+    cast: () => { for (let i = -1; i <= 1; i++) magProj({ x: P.x + cF() * 14, y: P.y + sF() * 14, a: P.face + i * .16, spd: 620, dmg: 9 * SPW('rime'), s: 'rime', src: P, life: .85, r: 4 }); SND.play('frost'); } },
+  ice_nova: { n: 'Ice Nova', s: 'rime', mp: 24, cd: 9, t: 2, g: '✺', d: 'A ring of frost bursts from you, hurling back and freezing those nearby.',
+    cast: () => { magNova(P.x, P.y, 130, 18 * SPW('rime'), 'rime', P, { chillT: 4.5, kb: 2 }); SND.play('frost'); SND.play('boom'); } },
+  frost_step: { n: 'Frost Step', s: 'rime', mp: 14, cd: 4, t: 2, g: '➶', d: 'Vanish in a swirl of snow and reappear a short way off, chilling where you stood.',
+    cast: () => {
+      const [mx, my] = blinkDir(); let best = 0; for (let d = 12; d <= 180; d += 12) { if (collides(P.x + mx * d, P.y + my * d, P.r * .75)) break; best = d; }
+      if (best < 24) { toast('No room to step.'); return false; }
+      const x0 = P.x, y0 = P.y; P.x += mx * best; P.y += my * best; P.iframes = Math.max(P.iframes, .3);
+      magNova(x0, y0, 64, 7 * SPW('rime'), 'rime', P, { chillT: 3, kb: .3 });
+      for (let i = 0; i < 14 * QMUL(); i++) { const q = i / 14; addPart(lerp(x0, P.x, q), lerp(y0, P.y, q), rand(-20, 20), rand(-20, 20), '#e8f8ff', .5, 3); }
+      SND.play('blink');
+    } },
+  chain_lightning: { n: 'Chain Lightning', s: 'storm', mp: 22, cd: 3, t: 2, g: 'ϟ', d: 'Lightning strikes the foe you face and leaps to three more.',
+    cast: () => {
+      const t0 = magTarget(P.x, P.y, 340, P, P.face, 1.1) || magTarget(P.x, P.y, 200, P); if (!t0) return noFoe();
+      mfx({ k: 'bolt', x: P.x + cF() * 12, y: P.y + sF() * 12 - 8, x2: t0.x, y2: t0.y - 10, s: 'storm', life: .28 });
+      magHit(t0, 26 * SPW('storm'), 'storm', P, { stunP: .6 }); magChain(t0, 3, 20 * SPW('storm'), 'storm', P); SND.play('zap');
+    } },
+  thunderclap: { n: 'Thunderclap', s: 'storm', mp: 18, cd: 7, t: 1, g: '◎', d: 'A crack of thunder around you stuns and throws back your foes.',
+    cast: () => { magNova(P.x, P.y, 105, 12 * SPW('storm'), 'storm', P, { kb: 3.4, stun: 1.1, stunP: 1 }); SND.play('thunder'); addShake(6); } },
+  storm_call: { n: 'Call the Storm', s: 'storm', mp: 45, cd: 22, t: 3, g: '☈', d: 'Six bolts fall from the sky over the next few seconds, each on a foe near you.',
+    cast: () => {
+      if (!magTarget(P.x, P.y, 400, P)) return noFoe();
+      for (let i = 0; i < 6; i++) setTimeout(() => {
+        if (G.state !== 'play') return; const e = magTarget(P.x, P.y, 420, P) && pick(ents.filter(x => magHostile(P, x) && !x.important && dist(P.x, P.y, x.x, x.y) < 420)); if (!e) return;
+        const x = e.x + rand(-12, 12), y = e.y + rand(-12, 12);
+        mfx({ k: 'mark', x, y, r: 55, s: 'storm', life: .5, fn: () => { mfx({ k: 'bolt', x: x + rand(-40, 40), y: y - 420, x2: x, y2: y, s: 'storm', life: .3 }); magBoom(x, y, 55, 38 * SPW('storm'), 'storm', P, { stunP: .8 }); SND.play('zap'); } });
+      }, i * 450);
+      SND.play('thunder');
+    } },
+  mend: { n: 'Mend', s: 'life', mp: 18, cd: 5, t: 1, g: '✚', d: 'Close your wounds with a warm green light.',
+    cast: () => {
+      if (P.hp >= P.maxHp) { toast('You are already at full health.'); return false; }
+      if (G.arena) { if (P.healLock > G.time) { toast(`The grave-cold is in your throat. You can heal again in ${Math.ceil(P.healLock - G.time)}s.`, 'bad'); return false; } P.healLock = G.time + TD().heal; }
+      healP(32 * SPH('life') * DIFF().heal); SND.play('heal');
+    } },
+  regeneration: { n: 'Regeneration', s: 'life', mp: 28, cd: 20, t: 2, g: '❦', d: 'For twelve seconds, you and your companions nearby slowly heal.',
+    cast: () => { P.fx.regen = 12; mfx({ k: 'aura', x: P.x, y: P.y, r: 150, s: 'life', life: 12, follow: P }); SND.play('heal'); } },
+  ward: { n: 'Arcane Ward', s: 'ward', mp: 22, cd: 16, t: 1, g: '⛊', d: 'A shimmering shield soaks up blows until it breaks or fades (15 seconds).',
+    cast: () => { P.ward = Math.round(40 * SPH('ward')); P.wardMax = P.ward; P.wardT = 15; SND.play('ward'); } },
+  cleanse: { n: 'Cleanse', s: 'ward', mp: 14, cd: 5, t: 1, g: '✧', d: 'Burn away fire, frost, venom, webs and sickness, and sear the Hollow dead near you.',
+    cast: () => { P.mburn = 0; P.burn = 0; P.poison = 0; P.chillT = 0; P.webbed = 0; if (P.plague) { P.plague = 0; toast('The sickness leaves you.', 'good'); } magNova(P.x, P.y, 95, 26 * SPW('ward'), 'ward', P, { undeadOnly: true, kb: 1.4 }); SND.play('ward'); } },
+  banish: { n: 'Banish', s: 'ward', mp: 30, cd: 12, t: 3, g: '☀', d: 'A burst of holy light. The Hollow dead suffer terribly; the living are thrown back.',
+    cast: () => { magNova(P.x, P.y, 150, 34 * SPW('ward'), 'ward', P, { undeadMul: 2.6, kb: 2.4 }); SND.play('level'); addShake(4); } },
+  light: { n: 'Wisp-Light', s: 'ward', mp: 6, cd: 2, t: 1, g: '☼', d: 'A little light follows you for three minutes, pushing back the dark.',
+    cast: () => { P.fx.light = 180; SND.play('arcane'); } },
+  drain_life: { n: 'Drain Life', s: 'shadow', mp: 12, cd: 1.2, t: 1, g: '♥', d: 'A bolt of shadow that steals the life it takes.',
+    cast: () => { magProj({ x: P.x + cF() * 14, y: P.y + sF() * 14, a: P.face, spd: 480, dmg: 17 * SPW('shadow'), s: 'shadow', src: P, life: 1, r: 5, drain: .6 }); SND.play('shadow'); } },
+  fear: { n: 'Dread', s: 'shadow', mp: 18, cd: 12, t: 2, hp: 6, g: '☠', d: 'Foes near you are gripped by terror and flee for four seconds. Costs a little blood.',
+    cast: () => {
+      let n = 0; for (const e of ents) { if (!magHostile(P, e) || e.boss || e.titan || e.important || dist(P.x, P.y, e.x, e.y) > 170) continue; e.flee = 4; e.fleeFrom = P; e.wind = 0; n++; addText(e.x, e.y - 30, '!', '#b07ae0', 16); }
+      mfx({ k: 'ring', x: P.x, y: P.y, r: 170, s: 'shadow', life: .6 }); SND.play('shadow'); if (!n) toast('Nothing near you is afraid.');
+    } },
+  raise_thrall: { n: 'Raise Thrall', s: 'shadow', mp: 30, cd: 25, t: 3, hp: 12, g: '⚰', d: 'Raise the nearest fallen foe to fight for you for a minute. Costs blood.',
+    cast: () => {
+      const c = ents.filter(e => e.dead && !e.animal && !e.nocorpse && !e.boss && !e.titan && e.kind !== 'horse' && dist(P.x, P.y, e.x, e.y) < 230).sort((a, b) => dist(P.x, P.y, a.x, a.y) - dist(P.x, P.y, b.x, b.y))[0];
+      if (!c) { toast('There is no body near enough to raise.'); return false; }
+      removeEnt(c); const e = mkActor('wight', c.x, c.y, { ally: true, follow: true, followDist: 60, fox: rand(-30, 30), foy: rand(-30, 30), name: 'Risen Thrall', tier: clamp(Math.ceil(P.lvl / 4), 1, 4), summonT: G.time + 60, nocorpse: true, aggro: 380 });
+      e.dmg *= 1 + SK('arcana') * .1; mfx({ k: 'ring', x: c.x, y: c.y, r: 50, s: 'shadow', life: .7 }); SND.play('hollow');
+    } },
+  arcane_missiles: { n: 'Arcane Missiles', s: 'arcane', mp: 14, cd: 1.2, t: 1, g: '✦', d: 'Three missiles of force that seek out the nearest foes.',
+    cast: () => { for (let i = -1; i <= 1; i++) magProj({ x: P.x + cF() * 14, y: P.y + sF() * 14, a: P.face + i * .45, spd: 360, dmg: 10 * SPW('arcane'), s: 'arcane', src: P, life: 1.8, r: 4, home: 6 }); SND.play('cast'); } },
+  summon_wisp: { n: 'Summon Wisp', s: 'arcane', mp: 26, cd: 30, t: 2, g: '❂', d: 'Call a wisp of living light that fights beside you for 45 seconds.',
+    cast: () => { const f = findFree(P.x + cF() * 30, P.y + sF() * 30); const e = mkActor('wisp', f.x, f.y, { ally: true, follow: true, followDist: 50, fox: rand(-25, 25), foy: rand(-25, 25), summonT: G.time + 45, nocorpse: true, aggro: 420 }); e.dmg *= SPW('arcane') / DIFF().dmgDealt; SND.play('arcane'); } },
+};
+const SPELL_IDS = Object.keys(SPELLS);
+SKILLS.push({ id: 'arcana', n: 'Arcana', ranks: ['+20 mana · spells +10% stronger', 'Mana returns 40% faster · spells cost 10% less · brew two potions at once', '+20 mana · spells +20% stronger · staff bolts pierce a second foe', 'Spells recharge 25% faster · every fifth spell is free'] });
+const spellOfSlot = i => P.slots && P.slots[i] && SPELLS[P.slots[i]] ? P.slots[i] : null;
+function spellCost(id) { const s = SPELLS[id]; return Math.round(s.mp * (SK('arcana') >= 2 ? .9 : 1) * (P.S.mpCost || 1)); }
+function castSlot(i) {
+  if (G.state !== 'play' || UI.stack.length || dialogOpen) return;
+  const id = spellOfSlot(i);
+  if (!id) { if (!knowsMagic()) toast('You know no spells. Court mages and wizards in their towers can teach you.'); else toast(`Slot ${i + 1} is empty. Put a spell in it from your spellbook (P).`); return; }
+  castSpell(id, i);
+}
+function castSpell(id, slot) {
+  const s = SPELLS[id]; if (!s || P.dodge > 0 || P.spec || G.joust) return;
+  if (G.under && G.under.interior && G.under.kind !== 'tower' && s.s !== 'life' && s.s !== 'ward' && id !== 'light') { toast('Not indoors. Wizards frown on scorch marks.'); return; }
+  P.scd = P.scd || {}; const cd = (P.scd[id] || 0) - G.time; if (cd > 0) return;
+  const free = SK('arcana') >= 4 && (P.freeCast || 0) >= 4, mp = free ? 0 : spellCost(id);
+  if (P.mp < mp) { if (G.time - (P.noMpT ?? -9) > 1.5) { P.noMpT = G.time; toast('Not enough mana.', 'bad'); } return; }
+  if (s.hp && P.hp <= s.hp + 1) { toast('You are too weak to pay the blood price.', 'bad'); return; }
+  if (P.fx.shadow > 0) { P.fx.shadow = 0; toast('The shadowcloak falls away as you cast.'); }
+  if (s.cast() === false) return;
+  P.mp -= mp; if (s.hp) { P.hp -= s.hp; addText(P.x, P.y - 32, '-' + s.hp, '#b07ae0', 13); }
+  P.freeCast = free ? 0 : (P.freeCast || 0) + 1;
+  P.scd[id] = G.time + s.cd * (SK('arcana') >= 4 ? .75 : 1) * (P.S.cdMul || 1);
+  P.castT = .3; P.combatT = Math.max(P.combatT || 0, 3); P.atkCd = Math.max(P.atkCd, .18);
+  mfx({ k: 'sigil', x: P.x, y: P.y, s: s.s, life: .45, follow: P });
+  G.stats.spells = (G.stats.spells || 0) + 1; (G.stats.schools || (G.stats.schools = {}))[s.s] = 1;
+  updateHUD(true);
+}
+function learnSpell(id, silent) {
+  P.spells = P.spells || []; if (P.spells.includes(id)) return false;
+  const first = !P.spells.length; P.spells.push(id);
+  const free = P.slots.indexOf(null); if (free >= 0) P.slots[free] = id;
+  if (first) P.mp = P.maxMp || 40;
+  recalc();
+  if (!silent) { toast(`You learn the spell <b style="color:${SCHOOLS[SPELLS[id].s].c}">${SPELLS[id].n}</b>.${free >= 0 ? ` Cast it with <kbd>${keyName(SLOT_KEYS[free])}</kbd>.` : ' Put it in a slot from your spellbook (P).'}`, 'gold'); SND.play('arcane'); }
+  if (first && !silent) setTimeout(() => toast('Your <b style="color:#8fb8ff">mana</b> is the blue bar under your stamina. It returns slowly on its own, faster out of combat.'), 2500);
+  return true;
+}
+const SLOT_KEYS = ['KeyZ', 'KeyX', 'KeyV', 'KeyB'];
+
+/* ---------------- Staffs: bolts instead of swings, and an Arcane Surge for a special ---------------- */
+function updateStaff(dt) {
+  if ((input.lmb || input.clicked) && P.atkCd <= 0 && P.dodge <= 0 && P.st >= P.S.cost * .5) {
+    const S = P.S, sch = S.school || 'arcane', dmg = S.dmg * rand(.92, 1.08) * S.sp * DIFF().dmgDealt * (P.fx.str > 0 ? 1.15 : 1);
+    magProj({ x: P.x + cF() * 22, y: P.y + sF() * 22, a: P.face + rand(-.02, .02), spd: 520, dmg, s: sch, src: P, life: S.rng / 520, r: 4.5, chain: sch === 'storm' ? 1 : 0, drain: sch === 'shadow' ? .2 : 0, home: sch === 'arcane' ? 2.5 : 0, chillT: 1.5, burnT: 1.5, pierce: SK('arcana') >= 3 ? 2 : 0, force: input.force });
+    P.swing = P.swingDur = .2; P.swingArc = .4; P.hitDone = true; P.atkCd = S.cool + .12; P.st -= S.cost * DIFF().stCost * .8; P.stDelay = .6; P.castT = .2;
+    SND.play(sch === 'ember' ? 'firecast' : sch === 'storm' ? 'zap' : 'cast');
+    if (sch === 'life') healP(1.5, true);
+  }
+}
+function staffSurge() {
+  const S = P.S, sch = S.school || 'arcane', dmg = S.dmg * 1.1 * S.sp * DIFF().dmgDealt;
+  for (let i = -2; i <= 2; i++) magProj({ x: P.x + cF() * 20, y: P.y + sF() * 20, a: P.face + i * .2, spd: 500, dmg, s: sch, src: P, life: S.rng / 500, r: 5, home: 1.5 });
+  mfx({ k: 'sigil', x: P.x, y: P.y, s: sch, life: .5, follow: P }); SND.play('arcane'); addShake(3);
+}
+
+/* ---------------- Rings, amulets and glyphs ---------------- */
+// Stat keys on jewellery and glyphs: mp mana, sp spell power (fraction), mpr mana regen (fraction), hp, st, def, dmg melee damage (fraction),
+// resF/resC/resP fire, frost and poison resistance (fraction), luck crit chance, thorns (fraction of melee damage reflected),
+// life lifesteal (fraction), regen health per second, undead bonus damage vs the Hollow (fraction), heal healing received (fraction), night sight
+const GLYPHS = {
+  mana: { n: 'Glyph of the Deep Well', st: { mp: 20 }, d: '+20 mana' }, power: { n: 'Glyph of Sorcery', st: { sp: .1 }, d: '+10% spell power' },
+  vigor: { n: 'Glyph of Vigor', st: { hp: 15 }, d: '+15 health' }, wind: { n: 'Glyph of Second Wind', st: { st: 20 }, d: '+20 stamina' },
+  flame: { n: 'Glyph of the Salamander', st: { resF: .35 }, d: '35% fire resistance' }, frost: { n: 'Glyph of the Bear', st: { resC: .35 }, d: '35% frost resistance' },
+  venom: { n: 'Glyph of the Adder', st: { resP: .35 }, d: '35% poison resistance' }, iron: { n: 'Glyph of Iron Skin', st: { def: 3 }, d: '+3 armor' },
+  saint: { n: 'Glyph of the Saints', st: { undead: .2 }, d: '+20% damage to the Hollow' }, flow: { n: 'Glyph of Flowing Mana', st: { mpr: .3 }, d: 'Mana returns 30% faster' },
+};
+const RING_GEMS = { mp: '#4a7ad0', sp: '#c890ff', resF: '#ff6a2a', resC: '#9fdcff', hp: '#d02a3a', st: '#8fd04a', luck: '#ffd24a', thorns: '#6a8a3a', life: '#a01a2a', regen: '#5ad07a', mpr: '#3ab0d0', def: '#9aa0a6', undead: '#fff0b0', dmg: '#c86a2a' };
+function jewelStats(it) { const b = ITEMS[it.id], m = QUAL[it.q] ? QUAL[it.q].m : 1, o = {}; for (const k in b.js || {}) o[k] = k === 'night' ? 1 : b.js[k] * m; if (it.glyph && GLYPHS[it.glyph]) for (const k in GLYPHS[it.glyph].st) o[k] = (o[k] || 0) + GLYPHS[it.glyph].st[k]; return o; }
+const JSN = { mp: v => `+${Math.round(v)} mana`, sp: v => `+${Math.round(v * 100)}% spell power`, mpr: v => `mana ${Math.round(v * 100)}% faster`, hp: v => `+${Math.round(v)} health`, st: v => `+${Math.round(v)} stamina`, def: v => `+${Math.round(v)} armor`, dmg: v => `+${Math.round(v * 100)}% melee damage`, resF: v => `${Math.round(v * 100)}% fire resist`, resC: v => `${Math.round(v * 100)}% frost resist`, resP: v => `${Math.round(v * 100)}% poison resist`, luck: v => `+${Math.round(v * 100)}% critical hits`, thorns: v => `reflects ${Math.round(v * 100)}% of blows`, life: v => `${Math.round(v * 100)}% lifesteal`, regen: v => `+${(+v).toFixed(1)} health/s`, undead: v => `+${Math.round(v * 100)}% vs the Hollow`, heal: v => `+${Math.round(v * 100)}% healing`, night: () => 'see in the dark' };
+const jewelSummary = it => Object.entries(jewelStats(it)).map(([k, v]) => JSN[k] ? JSN[k](v) : k).join(' · ');
+
+/* ---------------- Items ---------------- */
+const MAGIC_ITEMS = {
+  // staffs (col is the orb)
+  apprentice_staff: { name: "Apprentice's Staff", type: 'weapon', wk: 'staff', dmg: 9, spd: 84, rng: 380, arc: 1, val: 70, len: 44, col: '#bfe0ff', sp: .1, tier: 0, desc: 'Ash wood and a cloudy crystal. Its bolts cost no mana, only stamina. Two-handed.' },
+  oak_staff: { name: 'Oaken Staff', type: 'weapon', wk: 'staff', dmg: 14, spd: 80, rng: 420, arc: 1, val: 210, len: 46, col: '#e8d8a0', sp: .18, tier: 1, desc: 'Druid-cut oak bound with brass. +18% spell power. Two-handed.' },
+  ember_staff: { name: 'Staff of Embers', type: 'weapon', wk: 'staff', dmg: 19, spd: 78, rng: 440, arc: 1, val: 560, len: 46, col: '#ff8a3a', glow: '#ff8a3a', school: 'ember', sp: .25, tier: 2, desc: 'Its bolts set foes burning. +25% spell power, and Ember spells are 25% stronger. Two-handed.' },
+  rime_staff: { name: 'Rimewood Staff', type: 'weapon', wk: 'staff', dmg: 18, spd: 78, rng: 440, arc: 1, val: 560, len: 46, col: '#9fdcff', glow: '#9fdcff', school: 'rime', sp: .25, tier: 2, desc: 'Its bolts chill. +25% spell power, and Rime spells are 25% stronger. Two-handed.' },
+  storm_staff: { name: 'Stormglass Staff', type: 'weapon', wk: 'staff', dmg: 20, spd: 80, rng: 460, arc: 1, val: 620, len: 46, col: '#fff6b0', glow: '#c8d4ff', school: 'storm', sp: .25, tier: 3, desc: 'Its bolts leap to a second foe. +25% spell power, and Storm spells are 25% stronger. Two-handed.' },
+  grove_staff: { name: 'Staff of the Grove', type: 'weapon', wk: 'staff', dmg: 15, spd: 82, rng: 420, arc: 1, val: 540, len: 46, col: '#8fe07a', glow: '#8fe07a', school: 'life', sp: .25, tier: 2, desc: 'Every bolt mends you a little. +25% spell power, and Life spells are 25% stronger. Two-handed.' },
+  warden_staff: { name: "Warden's Crook", type: 'weapon', wk: 'staff', dmg: 17, spd: 80, rng: 420, arc: 1, val: 560, len: 46, col: '#fff0b0', glow: '#ffe7a0', school: 'ward', sp: .25, tier: 2, desc: 'Blessed by the saints. +25% spell power, and Warding spells are 25% stronger. Two-handed.' },
+  warlock_staff: { name: "Warlock's Staff", type: 'weapon', wk: 'staff', dmg: 21, spd: 78, rng: 430, arc: 1, val: 600, len: 46, col: '#b07ae0', glow: '#b07ae0', school: 'shadow', sp: .28, tier: 3, desc: 'Its bolts drink a little life. +28% spell power, and Shadow spells are 25% stronger. Two-handed.' },
+  archmage_staff: { name: 'Starfall, the Archmage\'s Staff', type: 'weapon', wk: 'staff', dmg: 30, spd: 84, rng: 520, arc: 1, val: 2800, len: 48, col: '#f4e8ff', glow: '#c890ff', school: 'arcane', sp: .5, legend: true, tier: 5, desc: 'A staff of star-iron topped with a shard of the night sky. Its bolts seek their foes. +50% spell power.' },
+  // rings and amulets (js = jewel stats)
+  copper_ring: { name: 'Copper Band', type: 'ring', js: { mp: 10 }, val: 40, tier: 0, mi: 'ring', gem: '#4a7ad0', metal: '#c87a4a', desc: 'A plain band with a chip of lapis. A hedge witch swears by them.' },
+  adept_ring: { name: 'Band of the Adept', type: 'ring', js: { mp: 25, mpr: .15 }, val: 240, tier: 2, mi: 'ring', gem: '#4a7ad0', metal: '#d8dce4', desc: 'Worn by the apprentices of the towers.' },
+  sorcery_ring: { name: 'Ring of Sorcery', type: 'ring', js: { sp: .15 }, val: 380, tier: 3, mi: 'ring', gem: '#c890ff', metal: '#e8c050', desc: 'An amethyst that hums faintly when you cast.' },
+  ember_ring: { name: 'Emberstone Ring', type: 'ring', js: { resF: .4 }, val: 260, tier: 2, mi: 'ring', gem: '#ff6a2a', metal: '#e8c050', desc: 'Warm to the touch, even in winter.' },
+  rime_ring: { name: 'Rimestone Ring', type: 'ring', js: { resC: .4 }, val: 260, tier: 2, mi: 'ring', gem: '#9fdcff', metal: '#d8dce4', desc: 'Cold to the touch, even in summer.' },
+  vigor_ring: { name: 'Ring of Vigor', type: 'ring', js: { hp: 20 }, val: 300, tier: 2, mi: 'ring', gem: '#d02a3a', metal: '#e8c050', desc: 'A ruby set in gold. You feel harder to kill.' },
+  runner_ring: { name: "Runner's Ring", type: 'ring', js: { st: 25 }, val: 220, tier: 1, mi: 'ring', gem: '#8fd04a', metal: '#d8dce4', desc: 'Carved with a hare. You breathe easier.' },
+  gambler_ring: { name: "Gambler's Ring", type: 'ring', js: { luck: .06 }, val: 280, tier: 2, mi: 'ring', gem: '#ffd24a', metal: '#e8c050', desc: 'Its last owner won it at dice. Probably.' },
+  thorn_ring: { name: 'Thornring', type: 'ring', js: { thorns: .18 }, val: 320, tier: 3, mi: 'ring', gem: '#6a8a3a', metal: '#8a6a4a', desc: 'Briar wood, grown into a circle. Those who strike you are pricked in turn.' },
+  blood_ring: { name: 'Bloodstone Ring', type: 'ring', js: { life: .05 }, val: 420, tier: 3, mi: 'ring', gem: '#a01a2a', metal: '#2a2a30', desc: 'It drinks a little of what you spill.' },
+  mending_ring: { name: 'Ring of Mending', type: 'ring', js: { regen: .8 }, val: 360, tier: 3, mi: 'ring', gem: '#5ad07a', metal: '#e8c050', desc: 'Your cuts close while you walk.' },
+  sapphire_pendant: { name: 'Sapphire Pendant', type: 'amulet', js: { mp: 30, mpr: .25 }, val: 360, tier: 2, mi: 'amulet', gem: '#2050d0', metal: '#d8dce4', desc: 'A deep blue stone on a silver chain.' },
+  warding_amulet: { name: 'Warding Amulet', type: 'amulet', js: { resF: .2, resC: .2, resP: .2 }, val: 340, tier: 2, mi: 'amulet', gem: '#ffe7a0', metal: '#e8c050', desc: 'An eye of gold that turns aside fire, frost and venom.' },
+  saint_medallion: { name: "Saint's Medallion", type: 'amulet', js: { undead: .3, heal: .2 }, val: 300, tier: 2, mi: 'amulet', gem: '#fff0b0', metal: '#d8dce4', desc: 'Blessed at a cathedral altar. The Hollow fear it.' },
+  wolf_torc: { name: 'Wolf-Tooth Torc', type: 'amulet', js: { dmg: .08, st: 15 }, val: 320, tier: 2, mi: 'amulet', gem: '#e8e0cc', metal: '#8a6a4a', desc: 'Draven warriors wear the teeth of the wolves they killed.' },
+  owl_amulet: { name: 'Owl Amulet', type: 'amulet', js: { night: 1 }, val: 180, tier: 1, mi: 'amulet', gem: '#e8c050', metal: '#8a6a4a', desc: 'An owl in amber. The dark is not so dark.' },
+  archmage_sigil: { name: "Archmage's Sigil", type: 'amulet', js: { sp: .25, mpr: .2 }, val: 1400, tier: 4, mi: 'amulet', gem: '#c890ff', metal: '#f4e8ff', desc: 'The seal of a master of the Veiled Circle.' },
+  // reagents and relics of magic
+  soul_gem: { name: 'Soul Gem', type: 'misc', tab: 'magic', val: 180, stack: 1, mi: 'gem', desc: 'A violet crystal that holds a trapped spark. Enchanters use them to bind glyphs.' },
+  arcane_dust: { name: 'Arcane Dust', type: 'misc', tab: 'magic', val: 20, stack: 1, mi: 'dust', desc: 'Glittering dust left behind by magic. Alchemists and enchanters want it.' },
+  mandrake: { name: 'Mandrake Root', type: 'misc', tab: 'magic', herb: 1, val: 6, stack: 1, mi: 'herb', hc: '#c8a878', desc: 'A forked root from green fields and forests. It screams a little when pulled.' },
+  emberroot: { name: 'Emberroot', type: 'misc', tab: 'magic', herb: 1, val: 8, stack: 1, mi: 'herb', hc: '#e8602a', desc: 'A red desert root, hot enough to blister the tongue.' },
+  frostcap: { name: 'Frostcap', type: 'misc', tab: 'magic', herb: 1, val: 8, stack: 1, mi: 'herb', hc: '#bfe8ff', desc: 'A pale mushroom that grows in the snowfields.' },
+  marsh_lotus: { name: 'Marsh Lotus', type: 'misc', tab: 'magic', herb: 1, val: 9, stack: 1, mi: 'herb', hc: '#f0a0c8', desc: 'A pink flower that opens on still swamp water.' },
+  glowcap: { name: 'Glowcap', type: 'misc', tab: 'magic', herb: 1, val: 10, stack: 1, mi: 'herb', hc: '#7af0c8', desc: 'A mushroom that glows in dark forests at night.' },
+  moonpetal: { name: 'Moonpetal', type: 'misc', tab: 'magic', herb: 1, val: 12, stack: 1, mi: 'herb', hc: '#e8e8ff', desc: 'A white flower that only opens under the moon.' },
+  wolfsbane: { name: 'Wolfsbane', type: 'misc', tab: 'magic', herb: 1, val: 7, stack: 1, mi: 'herb', hc: '#8a6ad0', desc: 'Purple hood-flowers from the hills. Poisonous, and useful.' },
+  desert_bloom: { name: 'Desert Bloom', type: 'misc', tab: 'magic', herb: 1, val: 9, stack: 1, mi: 'herb', hc: '#ffd04a', desc: 'A golden cactus flower full of sweet water.' },
+  alchemy_kit: { name: "Alchemist's Kit", type: 'misc', tab: 'magic', use: 'alchkit', val: 160, mi: 'vial', liq: '#c8a878', desc: 'A leather case of flasks, a pestle and a spirit lamp. Brew potions anywhere.' },
+  sea_kelp: { name: 'Sea Kelp', type: 'misc', tab: 'magic', herb: 1, val: 5, stack: 1, mi: 'herb', hc: '#3a8a5a', desc: 'Salty kelp from the shore.' },
+};
+// potions and tonics: potion:1 makes them healing draughts for key 2; tonic effects run on P.fx
+const TONICS = {
+  mana_potion: { n: 'Mana Draught', c: '#3a7af0', mp: 60, val: 40, d: 'Restores 60 mana.' },
+  greater_heal: { n: 'Greater Healing Draught', c: '#e02a4a', heal: 160, val: 110, d: 'Restores 160 health. [2]' },
+  strength_draught: { n: 'Draught of the Ox', c: '#c86a2a', fx: 'str', t: 90, val: 70, d: 'All your damage is 15% higher for 90 seconds.' },
+  swift_draught: { n: 'Hare\'s Draught', c: '#8fd04a', fx: 'swift', t: 90, val: 60, d: 'You move 20% faster for 90 seconds.' },
+  stoneskin: { n: 'Stoneskin Tonic', c: '#9a9a90', fx: 'stone', t: 90, val: 80, d: '+8 armor for 90 seconds.' },
+  fire_ward: { n: 'Salamander Tonic', c: '#ff6a2a', fx: 'resF', t: 180, val: 55, d: 'Half damage from fire for three minutes.' },
+  frost_ward: { n: 'Bearfat Tonic', c: '#9fdcff', fx: 'resC', t: 180, val: 55, d: 'Half damage from frost and cold for three minutes.' },
+  night_eye: { n: 'Owl-Eye Drops', c: '#e8c050', fx: 'night', t: 240, val: 45, d: 'See in the dark for four minutes.' },
+  shadowcloak: { n: 'Shadowcloak Philter', c: '#3a2a4a', fx: 'shadow', t: 30, val: 150, d: 'Unseen for 30 seconds, or until you strike or cast. Foes lose you, and every pocket is easy.' },
+  clarity: { n: 'Draught of Clarity', c: '#c890ff', fx: 'clarity', t: 90, val: 90, d: 'Mana returns three times as fast for 90 seconds.' },
+  berserk: { n: 'Berserker Brew', c: '#a01a14', fx: 'berserk', t: 45, val: 90, d: 'Your blows land 40% harder, but you take 20% more damage, for 45 seconds.' },
+  antidote: { n: 'Antidote', c: '#5ad07a', cure: 1, val: 30, d: 'Cures poison, burning, frost and sickness.' },
+  fire_oil: { n: 'Flame Oil', c: '#ff8a2a', oil: 'fire', t: 120, val: 50, d: 'Coat your blade: your blows set foes burning for two minutes.' },
+  venom_oil: { n: 'Adder Oil', c: '#6ad04a', oil: 'venom', t: 120, val: 50, d: 'Coat your blade: your blows poison for two minutes.' },
+  frost_oil: { n: 'Rime Oil', c: '#9fdcff', oil: 'frost', t: 120, val: 50, d: 'Coat your blade: your blows chill for two minutes.' },
+  elixir_youth: { n: 'Elixir of Youth', c: '#fff0b0', youth: 5, val: 1500, d: 'Five years fall away from you. Almost nobody has seen one.' },
+  love_philter: { n: 'Love Philter', c: '#f06aa8', philter: 1, val: 200, d: 'A rose-pink draught. A suitor who shares it with you will warm to you quickly.' },
+  plague_cure: { n: 'Plague Remedy', c: '#d8e8a0', cure: 1, plague: 1, val: 60, d: 'Cures the plague and wards against it for a day.' },
+  blight_ward: { n: 'Blightward Tincture', c: '#eaffd8', fx: 'blightward', t: 600, val: 90, d: 'Hollow blight cannot touch you for ten minutes.' },
+};
+for (const id in TONICS) { const T0 = TONICS[id]; MAGIC_ITEMS[id] = { name: T0.n, type: 'misc', tab: 'magic', use: T0.heal ? undefined : 'tonic', heal: T0.heal, potion: T0.heal ? 1 : 0, val: T0.val, stack: 1, mi: 'vial', liq: T0.c, desc: T0.d + (T0.heal ? '' : ' [4 when chosen as your quick tonic]') }; }
+for (const id of SPELL_IDS) { const s = SPELLS[id]; MAGIC_ITEMS['tome_' + id] = { name: `Tome: ${s.n}`, type: 'misc', tab: 'magic', use: 'learn', spell: id, val: [0, 120, 320, 700][s.t], mi: 'tome', tc: SCHOOLS[s.s].c, desc: `${SCHOOLS[s.s].n} magic. ${s.d} Costs ${s.mp} mana${s.hp ? ` and ${s.hp} health` : ''}. Read it to learn the spell.` }; }
+Object.assign(ITEMS, MAGIC_ITEMS);
+ENCH_N.storm = 'Thundering'; ENCH_GLOW.storm = '#c8d4ff'; ENCH_N.holy = 'Hallowed'; ENCH_GLOW.holy = '#fff0b0'; ENCH_N.arcane = 'Runed'; ENCH_GLOW.arcane = '#c890ff';
+LOOT_TIERS[0].push('copper_ring', 'mandrake'); LOOT_TIERS[1].push('apprentice_staff', 'runner_ring', 'owl_amulet', 'mana_potion'); LOOT_TIERS[2].push('oak_staff', 'adept_ring', 'ember_ring', 'rime_ring', 'mana_potion', 'arcane_dust');
+LOOT_TIERS[3].push('ember_staff', 'rime_staff', 'grove_staff', 'vigor_ring', 'gambler_ring', 'sapphire_pendant', 'warding_amulet', 'wolf_torc', 'soul_gem'); LOOT_TIERS[4].push('storm_staff', 'warden_staff', 'sorcery_ring', 'thorn_ring', 'blood_ring', 'mending_ring', 'saint_medallion', 'soul_gem');
+
+/* ---------------- Alchemy ---------------- */
+// Two reagents make one potion. Known recipes can be brewed at any apothecary, alchemist, tower laboratory or your own house;
+// unknown ones are found by experimenting.
+const BREWS = [
+  { out: 'mana_potion', a: 'glowcap', b: 'sea_kelp' }, { out: 'mana_potion', a: 'moonpetal', b: 'mandrake' }, { out: 'greater_heal', a: 'mandrake', b: 'marsh_lotus' },
+  { out: 'strength_draught', a: 'emberroot', b: 'wolfsbane' }, { out: 'swift_draught', a: 'desert_bloom', b: 'mandrake' }, { out: 'stoneskin', a: 'frostcap', b: 'wolfsbane' },
+  { out: 'fire_ward', a: 'frostcap', b: 'emberroot' }, { out: 'frost_ward', a: 'emberroot', b: 'sea_kelp' }, { out: 'night_eye', a: 'glowcap', b: 'moonpetal' },
+  { out: 'shadowcloak', a: 'moonpetal', b: 'wolfsbane', dust: 1 }, { out: 'clarity', a: 'moonpetal', b: 'desert_bloom', dust: 1 }, { out: 'berserk', a: 'emberroot', b: 'marsh_lotus' },
+  { out: 'antidote', a: 'marsh_lotus', b: 'sea_kelp' }, { out: 'fire_oil', a: 'emberroot', b: 'desert_bloom' }, { out: 'venom_oil', a: 'wolfsbane', b: 'marsh_lotus' },
+  { out: 'frost_oil', a: 'frostcap', b: 'sea_kelp' }, { out: 'plague_cure', a: 'mandrake', b: 'glowcap' }, { out: 'blight_ward', a: 'moonpetal', b: 'marsh_lotus', dust: 2 },
+  { out: 'love_philter', a: 'marsh_lotus', b: 'desert_bloom', dust: 1 },
+];
+const brewKey = r => r.out + ':' + r.a + '+' + r.b;
+const HERBS = Object.keys(MAGIC_ITEMS).filter(id => MAGIC_ITEMS[id].herb);
+function brewNeed(r) { const n = [[r.a, 1], [r.b, 1]]; if (r.dust) n.push(['arcane_dust', r.dust]); return n; }
+function openAlchemy(where) {
+  P.recipes = P.recipes || [];
+  const known = BREWS.filter(r => P.recipes.includes(brewKey(r)));
+  openDialog({ name: where || "Alchemist's Bench", role: 'Alchemy', portrait: 'ember', text: known.length ? 'Two reagents to a flask. Choose a recipe you know, or experiment and see what bubbles.' : 'You know no recipes yet. Combine two reagents and see what happens. Herbs grow wild all over the realm; apothecaries sell them too.',
+    options: [...known.map(r => ({ t: `Brew ${ITEMS[r.out].name} <span class="dn">${brewNeed(r).map(([id, n]) => `${n > 1 ? n + ' ' : ''}${ITEMS[id].name} (${countItem(id)})`).join(', ')}</span>`, dis: !hasAll(brewNeed(r), 0), fn: () => { brew(r); openAlchemy(where); } })),
+      { t: '<span class="dn">EXPERIMENT</span>Combine two reagents…', dis: HERBS.filter(id => countItem(id)).length < 1, fn: () => experimentPick(where, null) }, { t: 'Done', fn: closeDialog }] });
+}
+function experimentPick(where, first) {
+  const have = HERBS.filter(id => countItem(id) >= (id === first ? 2 : 1));
+  openDialog({ name: where || "Alchemist's Bench", role: first ? `With ${ITEMS[first].name}…` : 'Experiment', portrait: 'ember', text: first ? 'And the second reagent?' : 'Choose the first reagent.',
+    options: [...have.map(id => ({ t: `${ITEMS[id].name} <span class="dn">×${countItem(id)}</span>`, fn: () => first ? experiment(where, first, id) : experimentPick(where, id) })), { t: 'Back', fn: () => openAlchemy(where) }] });
+}
+function experiment(where, a, b) {
+  const r = BREWS.find(x => (x.a === a && x.b === b) || (x.a === b && x.b === a));
+  if (!r) { removeItemById(a, 1); removeItemById(b, 1); SND.play('brew'); openDialog({ name: where || "Alchemist's Bench", role: 'Experiment', portrait: 'ember', text: `The ${ITEMS[a].name.toLowerCase()} and the ${ITEMS[b].name.toLowerCase()} hiss, turn brown and stink. Nothing worth keeping.`, options: [{ t: 'Try again', fn: () => experimentPick(where, null) }, { t: 'Back', fn: () => openAlchemy(where) }] }); return; }
+  if (r.dust && countItem('arcane_dust') < r.dust) { openDialog({ name: where || "Alchemist's Bench", role: 'Experiment', portrait: 'ember', text: `The mixture shimmers and wants something more: ${r.dust} pinch${r.dust > 1 ? 'es' : ''} of arcane dust. You set the reagents aside.`, options: [{ t: 'Back', fn: () => openAlchemy(where) }] }); if (!P.recipes.includes(brewKey(r))) { P.recipes.push(brewKey(r)); toast(`New recipe learned: <b>${ITEMS[r.out].name}</b>.`, 'gold'); } return; }
+  const fresh = !P.recipes.includes(brewKey(r)); if (fresh) P.recipes.push(brewKey(r));
+  brew(r); if (fresh) { toast(`New recipe learned: <b>${ITEMS[r.out].name}</b>.`, 'gold'); SND.play('quest'); G.stats.recipes = P.recipes.length; }
+  openAlchemy(where);
+}
+function brew(r) { brewNeed(r).forEach(([id, n]) => removeItemById(id, n)); addItem(r.out, 1, SK('arcana') >= 2 ? 2 : 1); SND.play('brew'); G.stats.brews = (G.stats.brews || 0) + 1; }
+function drinkTonic(it) {
+  const T0 = TONICS[it.id]; if (!T0) return false;
+  if (T0.mp) { if (!knowsMagic()) { toast('You have no mana to restore. Learn a spell first.'); return true; } P.mp = Math.min(P.maxMp, P.mp + T0.mp); addText(P.x, P.y - 30, '+' + T0.mp, '#8fb8ff', 14); }
+  if (T0.fx) { P.fx[T0.fx] = T0.t; if (T0.fx === 'stone') recalc(); toast(`<b>${T0.n}</b>: ${T0.d}`, 'good'); }
+  if (T0.oil) { P.oil = { k: T0.oil, t: T0.t }; toast(`You coat your weapon with <b>${T0.n}</b>.`, 'good'); }
+  if (T0.cure) { P.mburn = 0; P.burn = 0; P.poison = 0; P.chillT = 0; P.webbed = 0; if (T0.plague || P.plague) { P.plague = 0; P.fx.plagueWard = DAYLEN; } toast('You feel clean and clear-headed.', 'good'); }
+  if (T0.youth) { if (P.born != null) { P.born += T0.youth * 24; toast('Years fall away from you like dust.', 'gold'); } else toast('You feel young and strong.', 'gold'); }
+  if (T0.philter) { toast('The philter must be shared with someone you are courting.'); return true; }
+  removeItem(it.uid, 1); SND.play('eat'); updateHUD(true); return true;
+}
+function quickTonic() {
+  const id = P.tonic && countItem(P.tonic) ? P.tonic : null;
+  if (!id) { const any = Object.keys(TONICS).find(x => TONICS[x].fx || TONICS[x].mp ? countItem(x) : 0); if (!any) { toast('No quick tonic chosen. Pick one from your pack (Magic tab).'); return; } P.tonic = any; }
+  const it = P.inv.find(i => i.id === P.tonic); if (it) drinkTonic(it);
+}
+
+/* ---------------- Enchanting and learning: court mages, wizards and archmages ---------------- */
+function openGlyphs(who) {
+  const list = P.inv.filter(it => ['armor', 'ring', 'amulet', 'shield'].includes(ITEMS[it.id].type) && !it.glyph).sort((a, b) => isEquipped(b.uid) - isEquipped(a.uid)).slice(0, 9);
+  openDialog({ name: who.name, role: 'Enchanting', portrait: who, text: list.length ? 'I can bind one glyph into armor, a shield or a piece of jewellery. It takes a soul gem and my fee of 250 gold.' : 'Bring me armor, a shield, a ring or an amulet without a glyph, and a soul gem.',
+    options: [...list.map(it => ({ t: `${itemName(it)} <span class="dn">250g + Soul Gem (${countItem('soul_gem')})</span>`, dis: P.gold < 250 || !countItem('soul_gem'), fn: () => openGlyphPick(who, it) })), { t: 'Back', fn: () => magusDialog(who) }] });
+}
+function openGlyphPick(who, it) {
+  openDialog({ name: who.name, role: `Glyph for your ${itemName(it)}`, portrait: who, text: 'Which glyph?', options: [...Object.entries(GLYPHS).map(([k, gl]) => ({ t: `${gl.n} <span class="dn">${gl.d}</span>`, fn: () => { P.gold -= 250; removeItemById('soul_gem', 1); it.glyph = k; recalc(); SND.play('arcane'); G.stats.enchants++; toast(`${gl.n} glows on your <b>${itemName(it)}</b>.`, 'gold'); openGlyphs(who); } })), { t: 'Back', fn: () => openGlyphs(who) }] });
+}
+function openWeaponEnchant(who) {
+  const MATS = { soul_gem: 'arcane', arcane_dust: null }, list = P.inv.filter(it => ITEMS[it.id].type === 'weapon' && ITEMS[it.id].wk !== 'bow' && ITEMS[it.id].wk !== 'staff' && !it.ench && !ITEMS[it.id].ench).sort((a, b) => isEquipped(b.uid) - isEquipped(a.uid)).slice(0, 8);
+  const EN = [['storm', 'Thundering: lightning leaps from your blows'], ['holy', 'Hallowed: +40% damage to the Hollow'], ['arcane', 'Runed: every blow returns a little mana']];
+  openDialog({ name: who.name, role: 'Enchant a weapon', portrait: who, text: list.length ? 'A soul gem and 400 gold, and your blade will carry a spell forever.' : 'You carry no blade that could hold an enchantment.',
+    options: [...list.flatMap(it => EN.map(([k, d]) => ({ t: `${itemName(it)} <span class="dn">${d} · 400g + Soul Gem</span>`, dis: P.gold < 400 || !countItem('soul_gem'), fn: () => { P.gold -= 400; removeItemById('soul_gem', 1); it.ench = k; recalc(); SND.play('arcane'); G.stats.enchants++; toast(`Your blade is now <b style="color:${itemColor(it)}">${itemName(it)}</b>.`, 'gold'); magusDialog(who); } }))).slice(0, 9), { t: 'Back', fn: () => magusDialog(who) }] });
+}
+// what a court mage or wizard will teach: tomes up to their rank, not yet known
+function tomesFor(rank, school) { return SPELL_IDS.filter(id => SPELLS[id].t <= rank && (!school || SPELLS[id].s === school || SPELLS[id].t === 1)).filter(id => !(P.spells || []).includes(id)); }
+function magusDialog(e) {
+  const rank = e.mrank || 1, k = e.k != null ? e.k : ownerAtPx(e.x, e.y);
+  const price = id => Math.round(ITEMS['tome_' + id].val * (k != null && K.rep[k] != null ? repMul(k) : 1) * (1 - .05 * SK('trade')) * (GF('vc_done') ? .8 : 1));
+  const tomes = tomesFor(rank, e.mschool).slice(0, 6);
+  const opts = [];
+  if (!knowsMagic()) opts.push({ t: '<span class="dn">ASK</span>"Can a knight learn magic?"', fn: () => { openDialog({ name: e.name, role: e.srole || 'Mage', portrait: e, text: 'Anyone with patience and coin can learn a spell or two. Buy a tome, read it, and mind your mana. It returns on its own, faster when you are not fighting. A staff will make your spells stronger. Wear a sword if you like; the magic does not mind.', options: [{ t: 'Back', fn: () => magusDialog(e) }] }); } });
+  tomes.forEach(id => opts.push({ t: `<span class="dn">LEARN</span>${SPELLS[id].n} <span class="dn" style="color:${SCHOOLS[SPELLS[id].s].c}">${SCHOOLS[SPELLS[id].s].n} · ${price(id)}g</span>`, dis: P.gold < price(id), fn: () => { P.gold -= price(id); learnSpell(id); G.stats.tomes = (G.stats.tomes || 0) + 1; magusDialog(e); } }));
+  if (!tomes.length) opts.push({ t: '<span class="dn">LEARN</span>You have learned all I can teach. <span class="dn">Seek the towers.</span>', dis: true, fn: () => { } });
+  opts.push({ t: '<span class="dn">TRADE</span>Browse potions, staffs and charms', fn: () => { closeDialog(); openShop(getShop(e), e); } });
+  opts.push({ t: '<span class="dn">GLYPH</span>Bind a glyph into armor or jewellery', fn: () => openGlyphs(e) });
+  if (rank >= 2) opts.push({ t: '<span class="dn">ENCHANT</span>Enchant a weapon', fn: () => openWeaponEnchant(e) });
+  opts.push({ t: '<span class="dn">BREW</span>Use the alchemy bench', fn: () => openAlchemy(e.name + "'s bench") });
+  opts.push({ t: 'Farewell', fn: closeDialog });
+  openDialog({ name: e.name, role: e.srole || 'Court Mage', portrait: e, text: e.mline || pick(['Mind the candles. And the cat.', 'Knowledge has a price, knight. Usually in gold.', 'The stars are restless this season.']), options: opts });
+}
+CITY_SHOPS.magus = { n: 'Mage\'s Wares', who: 'Mage', col: '#5a3a8a', stock: a => { a('mana_potion', 1, randi(3, 6)); a('apprentice_staff', rollQual(1)); a(pick(['oak_staff', 'ember_staff', 'rime_staff', 'grove_staff', 'warden_staff']), rollQual(2)); a('copper_ring'); a(pick(['adept_ring', 'runner_ring', 'ember_ring', 'rime_ring', 'owl_amulet', 'sapphire_pendant'])); a('arcane_dust', 1, randi(3, 7)); if (chance(.5)) a('soul_gem', 1, 1); a(pick(['clarity', 'night_eye', 'antidote']), 1, randi(1, 3)); } };
+{ const apo = CITY_SHOPS.apothecary.stock; CITY_SHOPS.apothecary.stock = a => { apo(a); a('mana_potion', 1, randi(2, 4)); a('antidote', 1, randi(1, 3)); HERBS.filter(() => chance(.55)).forEach(id => a(id, 1, randi(2, 6))); a('alchemy_kit'); }; }
+
+/* ---------------- Court mages in every royal city ---------------- */
+const MAGUS_NAMES = ['Master Aldous', 'Magistra Ivelle', 'Master Corwen', 'Magistra Sabeth', 'Master Oriel', 'Magistra Tamsin', 'Master Faelan', 'Magistra Wynne'];
+const MAGUS_LOOK = [{ body: '#6a2a2a', head: 'hood', hood: '#4a1a1a', skin: '#e8c8a0', cape: '#d8a040' }, { body: '#2a3a7a', head: 'hood', hood: '#1a2a5a', skin: '#e0b890', cape: '#e8e0c0' }, { body: '#3a2a4a', head: 'hood', hood: '#2a1a3a', skin: '#d8b090', cape: '#8a6ad0' }, { body: '#2a5a3a', head: 'hood', hood: '#1a4a2a', skin: '#e8d0b0', cape: '#c8b070' }];
+function magusSpot(pl) { return findFree(pl.x + 7 * TS, pl.y + 9 * TS); }
+function magusTick() {
+  if (G.under || !P) return;
+  for (let k = 0; k < 4; k++) {
+    const pl = W.places[k]; if (!pl || pl.type !== 'castle') continue; const near = dist(P.x, P.y, pl.x, pl.y) < 1500, e = ents.find(x => x.role === 'magus' && x.place === pl.id && !x.dead);
+    if (near && !e && cityOpen()) { const s = magusSpot(pl); const m = mkActor('npc', s.x, s.y, { role: 'magus', place: pl.id, k: pl.owner, name: MAGUS_NAMES[(W.seed + k * 3) % MAGUS_NAMES.length], srole: `Court Mage of ${KDATA[pl.owner].name}`, _look: Object.assign({ weapon: { wk: 'staff', len: 40, col: '#c890ff', glow: '#c890ff' } }, MAGUS_LOOK[k]), stand: true, standFace: Math.PI / 2, mrank: 2, persistent: false }); m.shop = null; }
+    else if (e && (!near || !cityOpen())) removeEnt(e);
+  }
+}
+ROLES.magus = { label: e => `Speak with ${e.name}, the court mage`, talk: e => magusDialog(e) };
+
+/* ---------------- Herbs growing in the wild ---------------- */
+function herbFor(t, night) {
+  const o = [];
+  if (t === T.GRASS || t === T.PLAINS || t === T.FARM) o.push('mandrake', 'mandrake', night ? 'moonpetal' : 'mandrake');
+  if (t === T.FOREST || t === T.DENSE) o.push('mandrake', night ? 'glowcap' : 'wolfsbane', night ? 'glowcap' : 'mandrake', night ? 'moonpetal' : 'mandrake');
+  if (t === T.HILL || t === T.PASS) o.push('wolfsbane', 'wolfsbane', 'mandrake');
+  if (t === T.SWAMP) o.push('marsh_lotus', 'marsh_lotus', night ? 'glowcap' : 'marsh_lotus');
+  if (t === T.DESERT) o.push('emberroot', 'desert_bloom', 'emberroot');
+  if (t === T.TUNDRA) o.push('frostcap', 'frostcap', night ? 'moonpetal' : 'frostcap');
+  if (t === T.SAND) o.push('sea_kelp', 'sea_kelp');
+  return o.length ? pick(o) : null;
+}
+function herbTick() {
+  if (G.under || G.tut || (G.herbT = (G.herbT || 0) - 1) > 0) return; G.herbT = rand(10, 22);
+  if (pickups.filter(p => p.herb).length >= 5) return;
+  for (let a = 0; a < 12; a++) {
+    const ang = rand(0, TAU), d = rand(380, 900), x = P.x + Math.cos(ang) * d, y = P.y + Math.sin(ang) * d, t = terAtPx(x, y);
+    if (blockedPx(x, y) || W.clear[Math.floor(y / TS) * WW + Math.floor(x / TS)]) continue;
+    const id = herbFor(t, isNight()); if (!id) continue;
+    pickups.push({ x, y, vx: 0, vy: 0, type: 'item', id, q: 1, n: randi(1, 2), t: 1, herb: 1 }); return;
+  }
+}
+function drawHerb(g, p, t) {
+  const b = ITEMS[p.id], c = b.hc || '#8fe07a', glow = p.id === 'glowcap' || p.id === 'moonpetal';
+  g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, p.x + 1, p.y + 5, 7, 2.5);
+  g.strokeStyle = '#3a6a2a'; g.lineWidth = 1.5; g.beginPath(); for (let i = -1; i <= 1; i++) { g.moveTo(p.x, p.y + 4); g.quadraticCurveTo(p.x + i * 4, p.y - 2, p.x + i * 6, p.y - 7); } g.stroke();
+  if (glow) { g.save(); g.shadowColor = c; g.shadowBlur = 10 + Math.sin(t * 3 + p.x) * 4; }
+  g.fillStyle = c; for (let i = -1; i <= 1; i++) circ(g, p.x + i * 6, p.y - 7, 2.6);
+  if (glow) g.restore();
+  if ((t * 1.1 + p.x * .013) % 2.2 < .2) { g.fillStyle = 'rgba(255,250,220,.9)'; circ(g, p.x + 3, p.y - 10, 1.6); }
+}
+
+/* ---------------- Magical foes ---------------- */
+Object.assign(ATYPES, {
+  warlock: { name: 'Warlock', hp: 70, dmg: 13, spd: 90, range: 330, cd: 2.1, wind: .55, faction: 'bandit', xp: 45, gold: [18, 45], r: 11, ranged: true, caster: 'shadow' },
+  apprentice: { name: 'Rogue Apprentice', hp: 44, dmg: 9, spd: 96, range: 300, cd: 1.9, wind: .5, faction: 'bandit', xp: 26, gold: [8, 22], r: 11, ranged: true, caster: 'ember' },
+  fire_elemental: { name: 'Fire Elemental', hp: 130, dmg: 15, spd: 100, range: 30, cd: 1.2, wind: .35, faction: 'wild', xp: 60, gold: [0, 0], r: 13, elem: 'ember' },
+  frost_elemental: { name: 'Frost Elemental', hp: 150, dmg: 14, spd: 82, range: 30, cd: 1.3, wind: .4, faction: 'wild', xp: 60, gold: [0, 0], r: 13, elem: 'rime' },
+  storm_elemental: { name: 'Storm Elemental', hp: 110, dmg: 12, spd: 120, range: 220, cd: 1.6, wind: .4, faction: 'wild', xp: 65, gold: [0, 0], r: 12, elem: 'storm', ranged: true, caster: 'storm' },
+  stone_golem: { name: 'Stone Golem', hp: 280, dmg: 26, spd: 66, range: 38, cd: 1.9, wind: .7, faction: 'wild', xp: 80, gold: [0, 0], r: 15, guard: true },
+  animated_armor: { name: 'Animated Armor', hp: 150, dmg: 18, spd: 92, range: 42, cd: 1.3, wind: .45, faction: 'wild', xp: 55, gold: [0, 0], r: 12 },
+  wisp: { name: 'Wisp', hp: 60, dmg: 7, spd: 170, range: 260, cd: 1.1, wind: .2, faction: 'wild', xp: 12, gold: [0, 0], r: 8, ranged: true, caster: 'arcane' },
+  archmage: { name: 'Archmage', hp: 520, dmg: 20, spd: 100, range: 360, cd: 1.6, wind: .5, faction: 'wild', xp: 400, gold: [0, 0], r: 12, ranged: true, caster: 'arcane', important: false },
+});
+const MAGIC_LOOK = {
+  warlock: { body: '#2a1e34', head: 'hood', hood: '#1a1024', skin: '#d8c0b0', cape: '#4a1a4a', weapon: { wk: 'staff', len: 42, col: '#b07ae0', glow: '#b07ae0' } },
+  apprentice: { body: '#5a3a2a', head: 'hood', hood: '#3a2418', skin: '#e0b890', weapon: { wk: 'staff', len: 38, col: '#ff8a3a', glow: '#ff8a3a' } },
+  stone_golem: { body: '#7a7a72', head: 'helm', skin: '#9a9a90', pauld: 1 },
+  animated_armor: { body: '#9aa4ae', shiny: 1, head: 'great', plume: '#5a3a8a', pauld: 1, skin: '#2a2030', weapon: { wk: 'sword', len: 38, col: '#d0d8ff', glow: '#c890ff' }, shield: { b: ITEMS.knight_shield, col: '#3a2a5a' } },
+  archmage: { body: '#2a2a6a', head: 'hood', hood: '#1a1a4a', skin: '#e8d0b8', cape: '#d8c070', weapon: { wk: 'staff', len: 48, col: '#f4e8ff', glow: '#c890ff' } },
+};
+function drawElemental(g, e, t) {
+  const S = SCHOOLS[ATYPES[e.kind].elem || 'arcane'], r = e.r * (e.kind === 'wisp' ? .8 : 1.1), bob = Math.sin(t * 4 + e.id) * 2;
+  g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, e.x, e.y + 10, r, r * .4);
+  g.save(); if (e.flash > 0) g.filter = 'brightness(2)'; g.shadowColor = S.c; g.shadowBlur = 18;
+  const gr = g.createRadialGradient(e.x, e.y - 8 + bob, 1, e.x, e.y - 8 + bob, r * 1.4); gr.addColorStop(0, S.c2); gr.addColorStop(.5, S.c); gr.addColorStop(1, hexA(S.c, 0)); g.fillStyle = gr; circ(g, e.x, e.y - 8 + bob, r * 1.4);
+  if (e.kind !== 'wisp') { g.fillStyle = hexA(S.c2, .9); for (let i = 0; i < 5; i++) { const a = t * 2 + i / 5 * TAU; circ(g, e.x + Math.cos(a) * r * .8, e.y - 8 + bob + Math.sin(a) * r * .5, 2.2); } }
+  g.restore();
+  if (Math.random() < .5 * QMUL()) addPart(e.x + rand(-r, r), e.y - 8 + rand(-r, r), rand(-15, 15), rand(-50, -10), Math.random() < .5 ? S.c : S.c2, .5, 2.5);
+}
+Object.assign(DRAW_KIND, { fire_elemental: drawElemental, frost_elemental: drawElemental, storm_elemental: drawElemental, wisp: drawElemental });
+function enemyCast(e, tg, cs) {
+  const s = cs || e.caster, ey = e.y - (e.elev || 0), a = Math.atan2(tg.y - ey, tg.x - e.x) + rand(-.05, .05);
+  if (e.kind === 'archmage' && Math.random() < .35) { for (let i = -2; i <= 2; i++) magProj({ x: e.x, y: ey, a: a + i * .22, spd: 360, dmg: e.dmg * .7, s: 'arcane', src: e, life: 1.6, r: 5, home: 1.2 }); SND.play('arcane'); return; }
+  magProj({ x: e.x + Math.cos(a) * 14, y: ey + Math.sin(a) * 14, a, spd: s === 'ember' ? 400 : 430, dmg: e.dmg, s, src: e, life: Math.max(1.2, e.range / 380), r: e.kind === 'wisp' ? 3.5 : 5, home: s === 'arcane' ? 2 : 0, boom: e.kind === 'apprentice' && Math.random() < .25 ? 55 : 0 });
+  if (dist(e.x, e.y, P.x, P.y) < 600) SND.play(s === 'ember' ? 'firecast' : s === 'storm' ? 'zap' : s === 'shadow' ? 'shadow' : 'cast', .6);
+}
+// extra behaviour for magic users each frame: warlocks blink away and raise the dead, elementals burn or freeze what touches them, golems slam
+Object.assign(KIND_AI, {
+  warlock: (e, dt) => {
+    const tg = e.target; if (!tg) return; const d = dist(e.x, e.y, tg.x, tg.y);
+    e.blinkT = (e.blinkT ?? 3) - dt; if (e.blinkT <= 0 && d < 110) { e.blinkT = rand(5, 8); const a = Math.atan2(e.y - tg.y, e.x - tg.x) + rand(-.6, .6), f = findFree(e.x + Math.cos(a) * 170, e.y + Math.sin(a) * 170); for (let i = 0; i < 12; i++) addPart(e.x, e.y - 10, rand(-60, 60), rand(-60, 60), '#b07ae0', .4, 3); e.x = f.x; e.y = f.y; SND.play('blink', .6); }
+    e.sumT = (e.sumT ?? 10) - dt; if (e.sumT <= 0 && e.hp < e.maxHp * .7) { e.sumT = rand(16, 22); for (let i = 0; i < 2; i++) { const f = findFree(e.x + rand(-50, 50), e.y + rand(-50, 50)); const s = mkActor('wight', f.x, f.y, { faction: 'bandit', name: 'Summoned Dead', tier: clamp(e.tier || 2, 1, 4), summonT: G.time + 40, nocorpse: true, transient: true, roam: true, aggro: 420 }); s.target = tg; } SND.play('hollow'); mfx({ k: 'ring', x: e.x, y: e.y, r: 60, s: 'shadow', life: .6 }); }
+  },
+  fire_elemental: (e, dt) => { if ((e.auraT = (e.auraT || 0) - dt) <= 0) { e.auraT = .5; for (const t of [P, ...ents]) if (hostile(e, t) && dist(e.x, e.y, t.x, t.y) < 42 + t.r) magHit(t, e.dmg * .18, 'ember', e, { kb: .1 }); } },
+  frost_elemental: (e, dt) => { if ((e.auraT = (e.auraT || 0) - dt) <= 0) { e.auraT = .5; for (const t of [P, ...ents]) if (hostile(e, t) && dist(e.x, e.y, t.x, t.y) < 46 + t.r) magHit(t, e.dmg * .12, 'rime', e, { kb: .1 }); } },
+  stone_golem: (e, dt) => {
+    const tg = e.target; if (!tg) return; e.slamT = (e.slamT ?? 5) - dt;
+    if (e.slamT <= 0 && dist(e.x, e.y, tg.x, tg.y) < 120) { e.slamT = rand(6, 8); const x = e.x, y = e.y; addTell({ k: 'circle', x, y, r: 95, dur: .9, red: true, fn: () => { if (e.dead) return; addShake(9); SND.play('hit'); for (let i = 0; i < 20 * QMUL(); i++) addPart(x + rand(-70, 70), y + rand(-40, 40), rand(-80, 80), rand(-120, -20), '#8a8a80', .6, 3, 200); for (const t of [P, ...ents]) if (hostile(e, t) && dist(x, y, t.x, t.y) < 95 + t.r) damage(t, e.dmg * 1.1, e, { kb: 2.5, unblock: true }); } }); }
+  },
+  archmage: (e, dt) => {
+    const tg = e.target; if (!tg) return;
+    e.blinkT = (e.blinkT ?? 4) - dt; if (e.blinkT <= 0) { e.blinkT = rand(4, 6); const a = rand(0, TAU), f = findFree(tg.x + Math.cos(a) * 220, tg.y + Math.sin(a) * 220); for (let i = 0; i < 16; i++) addPart(e.x, e.y - 10, rand(-80, 80), rand(-80, 80), '#c890ff', .4, 3); e.x = f.x; e.y = f.y; SND.play('blink'); }
+    e.novaT = (e.novaT ?? 7) - dt; if (e.novaT <= 0 && dist(e.x, e.y, tg.x, tg.y) < 150) { e.novaT = rand(8, 11); const x = e.x, y = e.y; addTell({ k: 'circle', x, y, r: 130, dur: 1, red: true, fn: () => { if (e.dead) return; magNova(x, y, 130, e.dmg * 1.3, 'rime', e, { chillT: 3, kb: 2.2 }); SND.play('frost'); } }); }
+    e.stormT = (e.stormT ?? 12) - dt; if (e.stormT <= 0 && e.hp < e.maxHp * .6) { e.stormT = rand(12, 15); for (let i = 0; i < 4; i++) setTimeout(() => { if (e.dead || G.state !== 'play') return; const x = P.x + rand(-40, 40), y = P.y + rand(-40, 40); mfx({ k: 'mark', x, y, r: 50, s: 'storm', life: .8, fn: () => { mfx({ k: 'bolt', x: x + rand(-40, 40), y: y - 400, x2: x, y2: y, s: 'storm', life: .3 }); magBoom(x, y, 50, e.dmg * 1.2, 'storm', e); SND.play('zap'); } }); }, i * 600); }
+  },
+});
+KIND_AI.storm_elemental = (e, dt) => { if ((e.auraT = (e.auraT || 0) - dt) <= 0) { e.auraT = .7; for (const t of [P, ...ents]) if (hostile(e, t) && dist(e.x, e.y, t.x, t.y) < 40 + t.r) magHit(t, e.dmg * .2, 'storm', e, { kb: .4 }); } };
+// wild magic: elementals in the desert and snow at night, storm elementals in thunderstorms, wisps in the dark woods
+function wildMagicTick() {
+  if (G.under || G.tut || G.siege || (G.wmT = (G.wmT || rand(60, 120)) - 1) > 0) return; G.wmT = rand(90, 170);
+  if (ents.filter(e => ATYPES[e.kind] && (ATYPES[e.kind].elem || e.kind === 'wisp') && !e.dead && !e.ally).length >= 3) return;
+  const t = terAtPx(P.x, P.y), night = isNight(); let kind = null;
+  if (t === T.DESERT && night && chance(.5)) kind = 'fire_elemental';
+  else if ((t === T.TUNDRA || inSnow()) && chance(night ? .5 : .2)) kind = 'frost_elemental';
+  else if (wxOf('rain') > .6 && G.lightning !== undefined && chance(.35)) kind = 'storm_elemental';
+  else if ((t === T.FOREST || t === T.DENSE || t === T.SWAMP) && night && chance(.4)) kind = 'wisp';
+  if (!kind || P.lvl < (kind === 'wisp' ? 2 : 4)) return;
+  const a = rand(0, TAU), f = findFree(P.x + Math.cos(a) * 620, P.y + Math.sin(a) * 620); if (blockedPx(f.x, f.y)) return;
+  const n = kind === 'wisp' ? randi(2, 3) : 1;
+  for (let i = 0; i < n; i++) mkActor(kind, f.x + rand(-30, 30), f.y + rand(-30, 30), { tier: clamp(Math.ceil(P.lvl / 4), 1, 4), transient: true, roam: true, nocorpse: true, home: { x: f.x, y: f.y }, leash: 700 });
+}
+
+/* ---------------- Status, mana and buffs each frame ---------------- */
+function magicTick(dt) {
+  if (!P || !P.S) return;
+  if (MAGFX.length) updateMagFx(dt);
+  const fx = P.fx || (P.fx = {});
+  for (const k in fx) if (typeof fx[k] === 'number' && fx[k] > 0) { fx[k] -= dt; if (fx[k] <= 0) { fx[k] = 0; if (k === 'stone') recalc(); if (k === 'shadow') toast('You are visible again.'); } }
+  if (P.oil && (P.oil.t -= dt) <= 0) { P.oil = null; toast('The oil on your blade has worn off.'); }
+  if (P.wardT > 0) { P.wardT -= dt; if (P.wardT <= 0) P.ward = 0; }
+  if (knowsMagic() && P.mp < P.maxMp) { const r = P.S.mpRegen * (P.combatT > 0 ? 1 : 1.6) * (fx.clarity > 0 ? 3 : 1); P.mp = Math.min(P.maxMp, P.mp + r * dt); }
+  if (fx.regen > 0) { if ((P.rgT = (P.rgT || 0) - dt) <= 0) { P.rgT = .5; healP(1.6 * SPH('life') * DIFF().heal, true); partyNow().forEach(e => { if (!e.dead && e.hp < e.maxHp && dist(e.x, e.y, P.x, P.y) < 160) e.hp = Math.min(e.maxHp, e.hp + 2.5 * SPH('life')); }); } }
+  if (P.S.regen && P.hp < P.maxHp && G.state === 'play') P.hp = Math.min(P.maxHp, P.hp + P.S.regen * dt);
+  if (P.mburn > 0) { P.mburn -= dt; if ((P.mbT = (P.mbT || 0) - dt) <= 0) { P.mbT = .5; damage(P, 1.5, null, { dot: 'fire', unblock: true }); } if (Math.random() < 10 * dt * QMUL()) addPart(P.x + rand(-7, 7), P.y - rand(2, 16), rand(-12, 12), rand(-60, -30), pick(['#ff5a1a', '#ff9a2a', '#ffd04a']), .45, 3); }
+  if (P.castT > 0) P.castT -= dt;
+  if (fx.shadow > 0) for (const e of ents) if (e.target === P && !e.titan && !e.boss && dist(e.x, e.y, P.x, P.y) > 45) { e.target = null; e.wind = 0; }
+  for (const e of ents) if (e.summonT && G.time > e.summonT && !e.dead) { e.dead = true; e.deadT = 99; for (let i = 0; i < 12; i++) addPart(e.x, e.y - 8, rand(-50, 50), rand(-70, 10), e.kind === 'wisp' ? '#c890ff' : '#b07ae0', .6, 3); }
+}
+// resistances and buffs on damage you take; bonuses on damage you deal
+function playerResist(src, o) {
+  let m = 1; const fx = P.fx || {}, S = P.S;
+  const fire = o.dot === 'fire' || o.mag === 'ember' || (src && src.kind === 'wyvern'), cold = o.mag === 'rime' || (src && (src.kind === 'bone_wyrm' || src.kind === 'rimeheart')), venom = o.dot === 'venom' || o.arrow === 'venom_arrow';
+  if (fire) m *= (1 - (S.resF || 0)) * (fx.resF > 0 ? .5 : 1);
+  if (cold) m *= (1 - (S.resC || 0)) * (fx.resC > 0 ? .5 : 1);
+  if (venom) m *= 1 - (S.resP || 0);
+  if (fx.berserk > 0) m *= 1.2;
+  return Math.max(.1, m);
+}
+function playerDmgMul(t, o) {
+  let m = 1; const fx = P.fx || {}, S = P.S;
+  if (!o.mag) { if (fx.str > 0) m *= 1.15; m *= 1 + (S.dmgB || 0); }
+  if (fx.berserk > 0) m *= 1.4;
+  if (S.undead && isUndead(t)) m *= 1 + S.undead;
+  if ((P.S.ench === 'holy') && isUndead(t) && !o.mag) m *= 1.4;
+  return m;
+}
+function drawMagicHUDFx(g, t) {
+  if (!P || G.state === 'menu') return;
+  if (P.ward > 0) { const f = P.ward / (P.wardMax || 1); g.save(); g.globalAlpha = .25 + .35 * f; g.strokeStyle = '#ffe7a0'; g.lineWidth = 2; g.shadowColor = '#ffe7a0'; g.shadowBlur = 10; g.beginPath(); g.arc(P.x, P.y - 4, 20 + Math.sin(t * 4) * 1.5, 0, TAU); g.stroke(); g.restore(); }
+  if (P.fx && P.fx.light > 0) { const x = P.x + Math.cos(t * 1.3) * 22, y = P.y - 30 + Math.sin(t * 2.1) * 6; g.save(); g.shadowColor = '#fff4c0'; g.shadowBlur = 16; g.fillStyle = '#fffbe0'; circ(g, x, y, 4); g.restore(); }
+  if (P.fx && P.fx.shadow > 0) { g.save(); g.globalAlpha = .35; g.fillStyle = '#1a1024'; circ(g, P.x, P.y, 16); g.restore(); }
+  if (P.oil && Math.random() < .3 * QMUL()) { const c = { fire: '#ff8a2a', venom: '#6ad04a', frost: '#9fdcff' }[P.oil.k]; addPart(P.x + cF() * 20 + rand(-4, 4), P.y + sF() * 20 + rand(-4, 4), rand(-8, 8), rand(-24, -6), c, .35, 2); }
+}
+
+/* ---------------- Hooks: stats, saving, the HUD ---------------- */
+function magicInit() {
+  if (!P) return;
+  P.spells = P.spells || []; P.slots = Array.isArray(P.slots) ? P.slots.concat([null, null, null, null]).slice(0, 4) : [null, null, null, null];
+  P.fx = P.fx || {}; P.recipes = P.recipes || []; P.scd = {}; if (P.mp == null) P.mp = 0; if (P.eq && P.eq.ring === undefined) P.eq.ring = null; if (P.eq && P.eq.amulet === undefined) P.eq.amulet = null;
+  MAGFX = [];
+}
+hook('newgame', () => { magicInit(); recalc(); });
+hook('load', () => { magicInit(); recalc(); });
+hook('reset', () => { MAGFX = []; });
+hook('save', data => { Object.assign(data.P, { mp: Math.round(P.mp || 0), spells: P.spells || [], slots: P.slots || [], fx: P.fx || {}, recipes: P.recipes || [], tonic: P.tonic || null, oil: P.oil || null, freeCast: P.freeCast || 0 }); });
+hook('recalc', () => {
+  const S = P.S, w = S.wid ? ITEMS[S.wid] : null, wit = P.eq.weapon ? getItem(P.eq.weapon) : null;
+  const st = {}; ['ring', 'amulet', 'armor', 'shield'].forEach(sl => { const it = P.eq[sl] ? getItem(P.eq[sl]) : null; if (!it) return; const s2 = ITEMS[it.id].js || it.glyph ? jewelStats(it) : {}; for (const k in s2) st[k] = (st[k] || 0) + s2[k]; });
+  const arc = SK('arcana');
+  S.sp = 1 + (w && w.sp ? w.sp * (QUAL[wit.q] ? QUAL[wit.q].m : 1) : 0) + (st.sp || 0) + (arc >= 1 ? .1 : 0) + (arc >= 3 ? .2 : 0);
+  S.school = w && w.school ? w.school : null;
+  if (S.wk === 'staff') { S.block = 0; S.cost = 5 + S.dmg * .12; }
+  P.maxMp = knowsMagic() ? Math.round(40 + 4 * (P.lvl - 1) + (arc >= 1 ? 20 : 0) + (arc >= 3 ? 20 : 0) + (st.mp || 0)) : 0;
+  S.mpRegen = (2.2 + .12 * P.lvl) * (1 + (arc >= 2 ? .4 : 0) + (st.mpr || 0));
+  S.resF = Math.min(.8, st.resF || 0); S.resC = Math.min(.8, st.resC || 0); S.resP = Math.min(.8, st.resP || 0);
+  S.luck = st.luck || 0; S.thorns = st.thorns || 0; S.life = st.life || 0; S.regen = st.regen || 0; S.undead = st.undead || 0; S.healB = st.heal || 0; S.night = !!st.night; S.dmgB = st.dmg || 0;
+  P.maxHp += Math.round(st.hp || 0); P.maxSt += Math.round(st.st || 0); S.def += Math.round((st.def || 0) + (P.fx && P.fx.stone > 0 ? 8 : 0));
+  if (P.mp > P.maxMp) P.mp = P.maxMp;
+});
+hook('tick', dt => magicTick(dt));
+hook('slow', () => { magusTick(); herbTick(); wildMagicTick(); });
+hook('draw', (g, t) => { if (MAGFX.length) drawMagFx(g, t); drawMagicHUDFx(g, t); });
+hook('kill', (t, src) => {
+  const b = ATYPES[t.kind] || {}; if (t.summonT || t.ally) return;
+  if (b.caster && (t.kind === 'warlock' || t.kind === 'apprentice')) { if (chance(.5)) dropItem(t.x, t.y, 'arcane_dust', 1, randi(1, 3)); if (chance(t.kind === 'warlock' ? .14 : .06)) dropItem(t.x, t.y, 'tome_' + pick(tomesFor(t.kind === 'warlock' ? 2 : 1, null).concat(['firebolt'])), 1, 1); if (chance(t.kind === 'warlock' ? .18 : .12)) dropItem(t.x, t.y, t.kind === 'warlock' ? pick(['warlock_staff', 'oak_staff', 'mana_potion', 'mana_potion']) : pick(['apprentice_staff', 'mana_potion', 'copper_ring']), rollQual(2), 1); }
+  if (b.elem || t.kind === 'stone_golem' || t.kind === 'animated_armor') { dropItem(t.x, t.y, 'arcane_dust', 1, randi(1, 4)); if (chance(t.kind === 'wisp' ? .03 : .22)) dropItem(t.x, t.y, 'soul_gem', 1, 1); }
+  if ((t.boss || t.chief) && !t.tourney && chance(.35)) dropItem(t.x, t.y, 'soul_gem', 1, 1);
+});
+function renderManaHUD(force) {
+  if (!P.slots) return; const on = knowsMagic(); setIf('mpOn', on, v => { $('mpBar').classList.toggle('hidden', !v); $('spellBar').classList.toggle('hidden', !v); document.body.classList.toggle('hasMana', v); $('tCast') && $('tCast').classList.toggle('hidden', !v); });
+  if (!on) return;
+  $('mpFill').style.transform = `scaleX(${clamp(P.mp / Math.max(1, P.maxMp), 0, 1)})`;
+  setIf('mpt', Math.floor(P.mp) + '/' + P.maxMp, v => $('mpText').textContent = v.replace('/', ' / '));
+  const sig = P.slots.join(',') + '|' + (P.selSlot || 0);
+  setIf('spSig', sig, () => { $('spellBar').innerHTML = P.slots.map((id, i) => { const s = id ? SPELLS[id] : null, c = s ? SCHOOLS[s.s].c : '#6b5230'; return `<div class="spSlot${s ? '' : ' spE'}${(P.selSlot || 0) === i ? ' sel' : ''}" data-ss="${i}" style="--sc:${c}" data-tip="${s ? `<h4 style='color:${c}'>${s.n}</h4>${esc(s.d)}<div class='tsub'>${SCHOOLS[s.s].n} · ${s.mp} mana${s.hp ? ` · ${s.hp} health` : ''} · ${s.cd}s</div>` : `<h4>Empty slot</h4><div class='tsub'>Open your spellbook (P) to fill it</div>`}"><span class="spG">${s ? s.g : '·'}</span><kbd>${esc(keyName(SLOT_KEYS[i]))}</kbd><div class="spCd"></div></div>`; }).join(''); $('spellBar').querySelectorAll('.spSlot').forEach(el => el.onclick = () => castSlot(+el.dataset.ss)); });
+  $('spellBar').querySelectorAll('.spSlot').forEach((el, i) => { const id = P.slots[i]; if (!id) return; const left = Math.max(0, ((P.scd || {})[id] || 0) - G.time), cd = SPELLS[id].cd, low = P.mp < spellCost(id); el.style.setProperty('--p', left > 0 ? (100 - left / cd * 100).toFixed(0) + '%' : '100%'); el.classList.toggle('nomp', low); });
+}
+hook('hud', f => renderManaHUD(f));
+hook('pad', (b, press) => { if (!knowsMagic()) return; [12, 15, 13, 14].forEach((btn, i) => { if (press(btn)) castSlot(i); }); });
+SLOT_KEYS.forEach((k, i) => { KEYFN[k] = () => castSlot(i); });
+KEYFN.Digit4 = () => quickTonic();
+
+/* ---------------- The spellbook, in the Skills screen ---------------- */
+let sbSel = null;
+function renderSpellbook() {
+  const box = $('spellbook'); if (!box) return;
+  if (!knowsMagic()) { box.innerHTML = `<h3>SPELLBOOK</h3><div class="sbEmpty">You know no spells yet. Court mages in the royal cities sell tomes, and the wizards in their towers teach stronger magic. Anyone can learn: a sword and a spell sit happily together.</div>`; return; }
+  box.innerHTML = `<h3>SPELLBOOK <span>Click a spell, then a slot. Cast with ${SLOT_KEYS.map(k => `<kbd>${esc(keyName(k))}</kbd>`).join(' ')}${PAD.on ? ' or the D-pad' : ''}.</span></h3>
+    <div class="sbSlots">${P.slots.map((id, i) => `<div class="sbSlot${id ? '' : ' sbE'}" data-sl="${i}" style="--sc:${id ? SCHOOLS[SPELLS[id].s].c : '#6b5230'}"><kbd>${esc(keyName(SLOT_KEYS[i]))}</kbd>${id ? `<b>${SPELLS[id].g}</b> ${SPELLS[id].n}` : 'Empty'}</div>`).join('')}</div>
+    <div class="sbList">${P.spells.map(id => { const s = SPELLS[id], c = SCHOOLS[s.s].c; return `<div class="sbSpell${sbSel === id ? ' sel' : ''}" data-sp="${id}" style="--sc:${c}"><b>${s.g}</b><div><div class="sn2" style="color:${c}">${s.n}</div><div class="sd">${esc(s.d)}</div><div class="sm2">${SCHOOLS[s.s].n} · ${spellCost(id)} mana${s.hp ? ` · ${s.hp} health` : ''} · ${s.cd}s recharge</div></div></div>`; }).join('')}</div>`;
+  box.querySelectorAll('[data-sp]').forEach(el => el.onclick = () => { sbSel = el.dataset.sp; renderSpellbook(); });
+  box.querySelectorAll('[data-sl]').forEach(el => el.onclick = () => { const i = +el.dataset.sl; if (sbSel) { const j = P.slots.indexOf(sbSel); if (j >= 0) P.slots[j] = P.slots[i]; P.slots[i] = sbSel; sbSel = null; } else P.slots[i] = null; SND.play('ui'); renderSpellbook(); updateHUD(true); });
+}
+
+/* ---------------- Icons ---------------- */
+function drawMagicIcon(g, id, b) {
+  if (b.mi === 'ring') { g.strokeStyle = b.metal; g.lineWidth = 5; g.beginPath(); g.ellipse(0, 6, 14, 10, 0, 0, TAU); g.stroke(); g.strokeStyle = shade(b.metal, .4); g.lineWidth = 1.5; g.beginPath(); g.ellipse(0, 5, 14, 10, 0, Math.PI * 1.1, Math.PI * 1.9); g.stroke(); g.save(); g.shadowColor = b.gem; g.shadowBlur = 10; g.fillStyle = b.gem; g.beginPath(); g.moveTo(-7, -6); g.lineTo(0, -14); g.lineTo(7, -6); g.lineTo(0, 1); g.closePath(); g.fill(); g.restore(); g.fillStyle = 'rgba(255,255,255,.5)'; g.beginPath(); g.moveTo(-4, -7); g.lineTo(0, -12); g.lineTo(0, -6); g.fill(); return; }
+  if (b.mi === 'amulet') { g.strokeStyle = b.metal; g.lineWidth = 1.8; g.beginPath(); g.moveTo(-14, -22); g.quadraticCurveTo(0, 2, 14, -22); g.stroke(); g.fillStyle = b.metal; circ(g, 0, 6, 12); g.save(); g.shadowColor = b.gem; g.shadowBlur = 10; g.fillStyle = b.gem; circ(g, 0, 6, 7.5); g.restore(); g.fillStyle = 'rgba(255,255,255,.55)'; ell(g, -3, 3, 2, 3); return; }
+  if (b.mi === 'tome') { g.fillStyle = shade(b.tc, -.55); rrect(g, -17, -20, 34, 40, 3); g.fill(); g.fillStyle = '#efe4c8'; g.fillRect(-13, -17, 28, 34); g.fillStyle = shade(b.tc, -.4); rrect(g, -17, -20, 30, 40, 3); g.fill(); g.strokeStyle = '#d8b04a'; g.lineWidth = 1.5; g.strokeRect(-13, -16, 22, 32); g.save(); g.shadowColor = b.tc; g.shadowBlur = 10; g.strokeStyle = b.tc; g.lineWidth = 2; g.beginPath(); g.arc(-2, 0, 7, 0, TAU); g.moveTo(-2, -9); g.lineTo(-2, 9); g.moveTo(-11, 0); g.lineTo(7, 0); g.stroke(); g.restore(); return; }
+  if (b.mi === 'vial') { g.fillStyle = '#8a6a4a'; g.fillRect(-4, -25, 8, 7); g.fillStyle = 'rgba(220,230,255,.3)'; g.beginPath(); g.moveTo(-5, -18); g.lineTo(5, -18); g.lineTo(5, -8); g.lineTo(15, 12); g.quadraticCurveTo(16, 22, 0, 22); g.quadraticCurveTo(-16, 22, -15, 12); g.lineTo(-5, -8); g.closePath(); g.fill(); g.strokeStyle = 'rgba(230,236,255,.7)'; g.lineWidth = 1.2; g.stroke(); g.save(); g.shadowColor = b.liq; g.shadowBlur = 8; g.fillStyle = b.liq; g.beginPath(); g.moveTo(-10, 4); g.lineTo(10, 4); g.lineTo(14, 13); g.quadraticCurveTo(14, 20, 0, 20); g.quadraticCurveTo(-14, 20, -14, 13); g.closePath(); g.fill(); g.restore(); g.fillStyle = 'rgba(255,255,255,.5)'; g.fillRect(-2, -14, 2, 18); return; }
+  if (b.mi === 'herb') { g.strokeStyle = '#3a6a2a'; g.lineWidth = 2.5; g.beginPath(); for (let i = -2; i <= 2; i++) { g.moveTo(0, 22); g.quadraticCurveTo(i * 5, 6, i * 8, -10 + Math.abs(i) * 4); } g.stroke(); g.fillStyle = '#5a9a3a'; [[-14, 0], [12, 4], [-6, 10], [8, -4]].forEach(([x, y]) => ell(g, x, y, 5, 2.4, x > 0 ? -.5 : .5)); g.save(); g.shadowColor = b.hc; g.shadowBlur = 8; g.fillStyle = b.hc; for (let i = -2; i <= 2; i++) circ(g, i * 8, -10 + Math.abs(i) * 4, 4); g.restore(); return; }
+  if (b.mi === 'gem') { g.save(); g.shadowColor = '#c890ff'; g.shadowBlur = 16; const gr = g.createLinearGradient(-12, -18, 12, 18); gr.addColorStop(0, '#f0e0ff'); gr.addColorStop(.5, '#a060e0'); gr.addColorStop(1, '#40206a'); g.fillStyle = gr; g.beginPath(); g.moveTo(0, -22); g.lineTo(13, -4); g.lineTo(8, 18); g.lineTo(-8, 18); g.lineTo(-13, -4); g.closePath(); g.fill(); g.restore(); g.fillStyle = 'rgba(255,255,255,.55)'; g.beginPath(); g.moveTo(0, -22); g.lineTo(-5, -4); g.lineTo(-13, -4); g.fill(); g.fillStyle = '#fff'; circ(g, 2, 2, 2.5); return; }
+  if (b.mi === 'dust') { g.fillStyle = '#6a4a8a'; ell(g, 0, 12, 18, 7); g.fillStyle = '#b890e8'; ell(g, 0, 8, 14, 7); for (let i = 0; i < 9; i++) { g.fillStyle = i % 2 ? '#fff' : '#e0c8ff'; circ(g, Math.cos(i * 1.7) * 13, -4 + Math.sin(i * 2.3) * 12, 1.8); } return; }
+}
+
+/* ---------------- Wizard towers ----------------
+   One tower in each kingdom and a few in the wilds (placed in genWorld with their own random stream). Five floors: the Hall of
+   Learning, the Trial of Iron, the Trial of Wits (a rune puzzle), the Trial of the Elements, and the Archmage's Study at the top.
+   The Black Tower belongs to a necromancer: every floor fights back. Progress lives in G.flags (tw<id>_<floor>). */
+const TOWER_N = { ember: 'The Ember Spire', rime: 'The Rime Tower', storm: 'The Stormcrown', life: 'The Greenwood Sanctum', ward: 'The Tower of Saints', arcane: 'The Starfall Observatory', shadow: 'The Black Tower' };
+const TOWER_FLOORS = ['The Hall of Learning', 'The Trial of Iron', 'The Trial of Wits', 'The Trial of the Elements', "The Archmage's Study"];
+const towerKey = pl => 'tw' + pl.id;
+const trialDone = (pl, f) => f === 0 || f === 4 || !!GF(towerKey(pl) + '_' + f);
+const towerDark = pl => pl.school === 'shadow';
+const RUNES = [['ember', '✹', 'the flame'], ['rime', '❄', 'the frost'], ['storm', 'ϟ', 'the storm'], ['arcane', '✦', 'the star']];
+function runeOrder(pl) { const r = mulberry32(W.seed * 7 + pl.id * 131), a = [0, 1, 2, 3]; for (let i = 3; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function mageLook(school, hood) { const S = SCHOOLS[school]; return { body: shade(S.c, -.55), head: 'hood', hood: shade(S.c, -.7), skin: '#e8d0b8', cape: hood || shade(S.c, -.2), weapon: { wk: 'staff', len: 44, col: S.c2, glow: S.c } }; }
+function towerRoom(b, obj, npc, ints, X, Y, rw, rh) {
+  const pl = W.places[b.place], f = b.floor || 0, dark = towerDark(pl), key = towerKey(pl);
+  const foe = (kind, tx, ty, o) => npc(kind, tx, ty, Object.assign({ place: null, stand: false, roam: true, aggro: 520, leash: 900, tier: clamp(Math.ceil(P.lvl / 4) + (f >= 3 ? 1 : 0), 1, 4), towerFoe: 1 }, o));
+  [[.3, 1], [rw - .8, 1], [.3, rh - 2.4], [rw - .8, rh - 2.4]].forEach(([tx, ty]) => obj('f_candle', tx, ty, 14, 32, {}, true));
+  obj('f_window', 3, -1.5, 30, 46, { v: .3 }); obj('f_window', rw - 5, -1.5, 30, 46, { v: .7 });
+  if (f < 4) { obj('f_stairs', rw - 3.2, -.3, 2.4 * TS, 3 * TS, {}, true); ints.push({ type: 'tstairs', x: X(rw - 2), y: Y(3.1) }); }
+  if (f === 0) {
+    obj('f_shelf', .6, -1.05, 90, 28, { v: 'books' }); obj('f_shelf', 4.9, -1.05, 90, 28, { v: 'books' }); obj('f_rug', 3.5, 4, 6 * TS, 3.4 * TS, { v: pl.owner });
+    obj('f_lab', .8, 6.4, 72, 40, { v: pl.school }, true); ints.push({ type: 'talch', x: X(2), y: Y(8.1) });
+    obj('f_orb', rw - 3, 6.6, 34, 40, { v: pl.school }, true);
+    if (dark) { if (!GF(key + '_0')) [[4, 3], [8, 3], [6, 6]].forEach(([tx, ty], i) => foe(i === 2 ? 'warlock' : 'apprentice', tx, ty)); }
+    else npc('npc', 6.4, 2.2, { role: 'magus', name: pl.adept, srole: `Adept of ${pl.name}`, mrank: 2, mschool: pl.school, _look: mageLook(pl.school), mline: `Welcome to ${pl.name}. The tower teaches those who climb it. The trials begin on the stair behind me.` });
+  } else if (f === 1) {
+    obj('f_rug', 3.5, 3.4, 6 * TS, 4 * TS, { v: 'aisle' });
+    if (!trialDone(pl, 1)) { if (dark) { foe('wight', 3, 3); foe('wight', 9, 3); foe('hknight', 6, 5); } else { foe('animated_armor', 3.5, 3); foe('animated_armor', 9, 3); foe('stone_golem', 6.2, 5.5, { scale: 1.35, r: 17 }); } }
+    obj('statue', .4, 3.5, 32, 32, {}, true); obj('statue', rw - 1.4, 3.5, 32, 32, {}, true);
+  } else if (f === 2) {
+    const ord = runeOrder(pl); [[2, 3], [5, 5.4], [8, 5.4], [11, 3]].forEach(([tx, ty], i) => { obj('f_rune', tx, ty, 30, 34, { idx: i, g: RUNES[i][1], s: RUNES[i][0], lit: trialDone(pl, 2) }, true); ints.push({ type: 'trune', x: X(tx) + 15, y: Y(ty) + 44, idx: i }); });
+    obj('f_plaque', 6, .2, 40, 30, {}, true); ints.push({ type: 'tplaque', x: X(6.6), y: Y(1.6), order: ord });
+  } else if (f === 3) {
+    obj('f_orb', 6.1, 3.6, 34, 40, { v: pl.school }, true);
+    if (!trialDone(pl, 3)) { const el = { ember: 'fire_elemental', rime: 'frost_elemental', storm: 'storm_elemental' }[pl.school]; const ks = el ? [el, el, 'stone_golem'] : dark ? ['warlock', 'warlock', 'wight'] : ['fire_elemental', 'frost_elemental', 'storm_elemental']; ks.forEach((k2, i) => foe(k2, [3, 9.5, 6.2][i], [3, 3, 6.5][i], k2 === 'stone_golem' ? { scale: 1.35, r: 17 } : { nocorpse: !!ATYPES[k2].elem })); }
+  } else {
+    obj('f_shelf', .6, -1.05, 90, 28, { v: 'books' }); obj('f_shelf', 4, -1.05, 90, 28, { v: 'books' }); obj('f_rug', 3, 3.4, 7 * TS, 4 * TS, { v: pl.owner });
+    obj('f_orb', rw - 2.6, 1.2, 34, 40, { v: pl.school }, true); obj('f_lab', .8, 6.4, 72, 40, { v: pl.school }, true); ints.push({ type: 'talch', x: X(2), y: Y(8.1) });
+    if (dark) { if (!GF(key + '_4')) foe('archmage', 6.4, 2.2, { name: pl.wizard, boss: true, _look: mageLook('shadow', '#1a0a1a'), caster: 'shadow', necro: 1, hpM: 1 }); }
+    else npc('npc', 6.4, 2.2, { role: 'archmage', name: pl.wizard, srole: `Archmage of ${pl.name}`, mrank: 3, _look: mageLook(pl.school, '#d8c070') });
+  }
+}
+function towerClimb(pl, f) {
+  if (G.under && G.under.kind === 'tower' && ents.some(e => !e.dead && playerHostileTo(e))) { toast('Not with foes still standing!', 'bad'); return; }
+  if (G.under) leaveDungeon(true);
+  enterInterior({ kind: 'tower', place: pl.id, owner: pl.owner, floor: f, name: pl.name, key: towerKey(pl) + 'f' + f, door: { x: pl.x, y: pl.y + TS } });
+  showAreaTitle(pl.name.toUpperCase(), `${TOWER_FLOORS[f]} · floor ${f + 1} of 5`);
+  if ((f === 1 || f === 3) && !trialDone(pl, f)) setTimeout(() => toast(towerDark(pl) ? 'The dead stir. Something below hates the living.' : `${TOWER_FLOORS[f]}: defeat the tower's guardians.`, 'war'), 600);
+  if (f === 2 && !trialDone(pl, 2)) setTimeout(() => toast('Four runes and a plaque. Read the plaque, then touch the runes in its order.', 'gold'), 600);
+  G.stats.towerFloor = Math.max(G.stats.towerFloor || 0, f);
+}
+function towerTick() {
+  const U = G.under; if (!U || U.kind !== 'tower') return; const pl = W.places[U.place], f = U.floor;
+  if ((f === 1 || f === 3 || (towerDark(pl) && (f === 0 || f === 4))) && !GF(towerKey(pl) + '_' + f) && !ents.some(e => !e.dead && e.towerFoe && playerHostileTo(e))) {
+    if (!ents.some(e => e.towerFoe)) return; // nothing was spawned (already passed)
+    GF(towerKey(pl) + '_' + f, 1); SND.play('level'); gainXP(60 + f * 30);
+    if (f === 4) { towerVictory(pl); return; }
+    toast(`<b>${TOWER_FLOORS[f]}</b> is passed. The stair above is open.`, 'gold');
+  }
+}
+function towerVictory(pl) { // the necromancer of the Black Tower is dead
+  toast(`<b>${pl.wizard}</b> is destroyed. The Black Tower falls silent.`, 'gold'); logEvent(`The necromancer of the Black Tower was slain.`, []);
+  ['warlock_staff', 'tome_raise_thrall', 'soul_gem', 'soul_gem'].forEach(id => dropItem(P.x + rand(-30, 30), P.y - 30, id, 2, 1)); G.stats.towers = (G.stats.towers || 0) + 1;
+}
+function runeTouch(it) {
+  const pl = W.places[G.under.place], U = G.under; if (trialDone(pl, 2)) { toast('The runes glow steadily. The trial is passed.'); return; }
+  const ord = runeOrder(pl), o = W.objs.find(x => x.k === 'f_rune' && x.idx === it.idx); U.rstep = U.rstep || 0;
+  if (o.lit) return;
+  if (ord[U.rstep] === it.idx) { o.lit = true; U.rstep++; SND.play('arcane'); for (let i = 0; i < 12; i++) addPart(it.x, it.y - 40, rand(-40, 40), rand(-60, 0), SCHOOLS[o.s].c, .6, 3);
+    if (U.rstep >= 4) { GF(towerKey(pl) + '_2', 1); gainXP(90); SND.play('level'); toast('<b>The Trial of Wits</b> is passed. The stair above is open.', 'gold'); } }
+  else { U.rstep = 0; W.objs.forEach(x => { if (x.k === 'f_rune') x.lit = false; }); SND.play('fail'); toast('Wrong! The runes go dark, and something answers.', 'bad'); for (let i = 0; i < 2; i++) { const f = findFree(it.x + rand(-60, 60), it.y - 60); mkActor('wisp', f.x, f.y, { tier: clamp(Math.ceil(P.lvl / 4), 1, 4), nocorpse: true, transient: true, aggro: 500, towerFoe: 0 }); } }
+}
+function plaqueRead(it) {
+  const pl = W.places[G.under.place], o = it.order.map(i => RUNES[i][2]);
+  openDialog({ name: 'The Plaque', role: TOWER_FLOORS[2], portrait: 'sign', text: `<i>"Wake the stones as the world was made: first ${o[0]}, then ${o[1]}, then ${o[2]}, and last of all ${o[3]}."</i><br><br>Four pedestals stand in the chamber: ${RUNES.map(r => `<b style="color:${SCHOOLS[r[0]].c}">${r[1]}</b> ${r[2]}`).join(', ')}.`, options: [{ t: 'Continue', fn: closeDialog }] });
+}
+function archmageDialog(e) {
+  const pl = W.places[e.place], key = towerKey(pl), opts = [];
+  const tomes = tomesFor(3, null).filter(id => SPELLS[id].t >= 2).slice(0, 5), price = id => Math.round(ITEMS['tome_' + id].val * 1.2 * (1 - .05 * SK('trade')));
+  tomes.forEach(id => opts.push({ t: `<span class="dn">LEARN</span>${SPELLS[id].n} <span class="dn" style="color:${SCHOOLS[SPELLS[id].s].c}">${SCHOOLS[SPELLS[id].s].n} · ${price(id)}g</span>`, dis: P.gold < price(id), fn: () => { P.gold -= price(id); learnSpell(id); archmageDialog(e); } }));
+  if (!GF(key + '_duel')) opts.push({ t: '<span class="dn">DUEL</span>"Test me. Magic against magic."', fn: () => { closeDialog(); archDuel(e, pl); } });
+  opts.push({ t: '<span class="dn">GLYPH</span>Bind a glyph', fn: () => openGlyphs(e) }, { t: '<span class="dn">ENCHANT</span>Enchant a weapon', fn: () => openWeaponEnchant(e) }, { t: 'Farewell', fn: closeDialog });
+  if (!GF(key + '_met')) { GF(key + '_met', 1); G.stats.towers = (G.stats.towers || 0) + 1; }
+  openDialog({ name: e.name, role: e.srole, portrait: e, text: GF(key + '_duel') ? 'You climbed my tower and bested me in my own study. Ask what you will.' : `You passed the trials. Few do. I can teach you magic no court mage knows${tomes.length ? '' : ' (though you seem to know it already)'}, or you may test yourself against me. Beat me, and my staff is yours.`, options: opts });
+}
+function archDuel(npcE, pl) {
+  const key = towerKey(pl), x = npcE.x, y = npcE.y; removeEnt(npcE);
+  const e = mkActor('archmage', x, y, { name: npcE.name, _look: npcE._look, boss: true, aggro: 600, leash: 900, roam: true, tier: clamp(Math.ceil(P.lvl / 4), 1, 4), place: pl.id, yieldAt: .15 });
+  e.hp = e.maxHp = Math.round(e.maxHp * (.5 + P.lvl * .04)); e.target = P; e.say = { text: 'Let us see what you have learned!', t: 3 };
+  e.yieldFn = t => { t.dead = true; t.deadT = 99; t.nocorpse = true; GF(key + '_duel', 1); SND.play('yield'); gainXP(250);
+    const n = mkActor('npc', t.x, t.y, { role: 'archmage', place: pl.id, k: pl.owner, name: t.name, srole: `Archmage of ${pl.name}`, _look: t._look, stand: true, standFace: Math.PI / 2 }); n.say = { text: 'Enough! Enough. Well fought.', t: 3 };
+    addItem(GF('arch_staff') ? 'archmage_sigil' : 'archmage_staff', 2, 1); GF('arch_staff', 1); addItem('soul_gem', 1, 2); G.stats.archDuels = (G.stats.archDuels || 0) + 1;
+    toast(`${t.name} yields, and hands you a prize worthy of the duel.`, 'gold'); };
+  SND.play('duel');
+}
+function drawMTower(g, o, t) {
+  const S = SCHOOLS[o.school] || SCHOOLS.arcane, cx = o.x + o.w / 2, base = o.sy, dark = o.school === 'shadow', stone = dark ? '#3a343c' : '#9a9488', W2 = 72, H = 146;
+  g.fillStyle = 'rgba(0,0,0,.28)'; ell(g, cx + 10, base - 2, W2 * .62, 14);
+  const gr = g.createLinearGradient(cx - W2 / 2, 0, cx + W2 / 2, 0); gr.addColorStop(0, shade(stone, -.35)); gr.addColorStop(.45, shade(stone, .12)); gr.addColorStop(1, shade(stone, -.45));
+  g.fillStyle = gr; g.beginPath(); g.moveTo(cx - W2 / 2, base - 8); g.lineTo(cx - W2 * .42, base - H); g.lineTo(cx + W2 * .42, base - H); g.lineTo(cx + W2 / 2, base - 8); g.ellipse(cx, base - 8, W2 / 2, 9, 0, 0, Math.PI); g.closePath(); g.fill();
+  g.strokeStyle = 'rgba(0,0,0,.18)'; g.lineWidth = 1; for (let yy = base - 20; yy > base - H; yy -= 12) { const f = (base - yy) / H, hw = W2 / 2 - f * W2 * .08; g.beginPath(); g.moveTo(cx - hw, yy); g.quadraticCurveTo(cx, yy + 5, cx + hw, yy); g.stroke(); for (let i = 0; i < 4; i++) { const xx = cx - hw + ((i + ((yy / 12) % 2) * .5) / 4) * hw * 2; g.beginPath(); g.moveTo(xx, yy); g.lineTo(xx, yy + 11); g.stroke(); } }
+  const glow = .65 + Math.sin(t * 2 + o.x) * .2;
+  [[base - 58, 0], [base - 96, -13], [base - 126, 11]].forEach(([yy, dx]) => { g.fillStyle = '#1a1410'; rrect(g, cx + dx - 5, yy - 12, 10, 18, 5); g.fill(); g.fillStyle = hexA(S.c, glow * (isNight() ? 1 : .55)); rrect(g, cx + dx - 3.5, yy - 10, 7, 15, 3.5); g.fill(); });
+  g.fillStyle = '#2a1c12'; rrect(g, cx - 11, base - 36, 22, 30, 10); g.fill(); g.strokeStyle = shade(stone, -.5); g.lineWidth = 3; g.beginPath(); g.arc(cx, base - 25, 13, Math.PI, 0); g.stroke(); g.fillStyle = '#c8a04a'; circ(g, cx + 5, base - 18, 1.6);
+  g.fillStyle = shade(stone, -.2); g.fillRect(cx - W2 * .47, base - H - 8, W2 * .94, 12); for (let i = 0; i < 6; i++) g.fillRect(cx - W2 * .47 + i * W2 * .94 / 5.5, base - H - 18, 8, 12);
+  const roof = dark ? '#1a1024' : shade(S.c, -.5); g.fillStyle = roof; g.beginPath(); g.moveTo(cx - W2 * .5, base - H - 8); g.lineTo(cx, base - H - 78); g.lineTo(cx + W2 * .5, base - H - 8); g.closePath(); g.fill(); g.fillStyle = 'rgba(255,255,255,.12)'; g.beginPath(); g.moveTo(cx - W2 * .5, base - H - 8); g.lineTo(cx, base - H - 78); g.lineTo(cx - W2 * .12, base - H - 8); g.closePath(); g.fill();
+  const cy = base - H - 86 + Math.sin(t * 1.5 + o.x) * 3; g.save(); g.shadowColor = S.c; g.shadowBlur = 20; g.fillStyle = S.c2; g.beginPath(); g.moveTo(cx, cy - 12); g.lineTo(cx + 7, cy); g.lineTo(cx, cy + 12); g.lineTo(cx - 7, cy); g.closePath(); g.fill(); g.restore();
+  if (Math.random() < .25 * QMUL()) addPart(cx + rand(-6, 6), cy, rand(-10, 10), rand(-30, -8), Math.random() < .5 ? S.c : S.c2, 1, 2);
+  g.fillStyle = dark ? '#4a1a4a' : KDATA[o.owner != null ? o.owner : 0].color; g.beginPath(); g.moveTo(cx - W2 * .4, base - H + 4); g.lineTo(cx - W2 * .4, base - H + 40); g.lineTo(cx - W2 * .33, base - H + 34); g.lineTo(cx - W2 * .26, base - H + 40); g.lineTo(cx - W2 * .26, base - H + 4); g.fill();
+}
+function drawTowerFurniture(g, o, t) {
+  const x = o.x, y = o.y, w = o.w, h = o.h;
+  if (o.k === 'f_rune') { const S = SCHOOLS[o.s]; g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, x + w / 2, y + h, 15, 4); g.fillStyle = '#6a6460'; g.fillRect(x + 4, y + 10, w - 8, h - 10); g.fillStyle = '#8a847e'; g.fillRect(x + 1, y + 6, w - 2, 8); g.save(); if (o.lit) { g.shadowColor = S.c; g.shadowBlur = 16; } g.fillStyle = o.lit ? S.c2 : '#3a3632'; g.font = 'bold 18px Georgia, serif'; g.textAlign = 'center'; g.fillText(o.g, x + w / 2, y + 30); g.restore(); if (o.lit && Math.random() < .2 * QMUL()) addPart(x + w / 2 + rand(-6, 6), y + 12, 0, -30, S.c, .8, 2.2); return true; }
+  if (o.k === 'f_plaque') { g.fillStyle = '#4a3a2a'; g.fillRect(x + w / 2 - 2, y + 14, 4, h - 14); g.fillStyle = '#b8903a'; rrect(g, x, y, w, 18, 3); g.fill(); g.fillStyle = '#5a3a1a'; for (let i = 0; i < 3; i++) g.fillRect(x + 6, y + 4 + i * 4, w - 12, 1.5); return true; }
+  if (o.k === 'f_lab') { const S = SCHOOLS[o.v] || SCHOOLS.arcane; g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(x + 4, y + h - 4, w, 8); g.fillStyle = '#6a4424'; g.fillRect(x, y + 12, w, h - 14); g.fillStyle = '#8a5a30'; g.fillRect(x - 2, y + 8, w + 4, 8); [['#e02a4a', 10], ['#3a7af0', 24], [S.c, 40], ['#8fe07a', 56]].forEach(([c, dx], i) => { g.fillStyle = 'rgba(220,230,255,.35)'; circ(g, x + dx, y + 4, 5); g.fillStyle = c; circ(g, x + dx, y + 5.5, 3.5); g.fillStyle = 'rgba(220,230,255,.4)'; g.fillRect(x + dx - 1.5, y - 6, 3, 6); if (Math.random() < .08 * QMUL()) addPart(x + dx, y - 6, rand(-4, 4), -20, c, .8, 2); }); return true; }
+  if (o.k === 'f_orb') { const S = SCHOOLS[o.v] || SCHOOLS.arcane; g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, x + w / 2, y + h, 13, 4); g.fillStyle = '#5a4a3a'; g.beginPath(); g.moveTo(x + 6, y + h); g.lineTo(x + w / 2 - 3, y + 18); g.lineTo(x + w / 2 + 3, y + 18); g.lineTo(x + w - 6, y + h); g.fill(); g.save(); g.shadowColor = S.c; g.shadowBlur = 16 + Math.sin(t * 2) * 6; const gr = g.createRadialGradient(x + w / 2 - 4, y + 8, 1, x + w / 2, y + 12, 13); gr.addColorStop(0, '#fff'); gr.addColorStop(.4, S.c2); gr.addColorStop(1, S.c); g.fillStyle = gr; circ(g, x + w / 2, y + 12, 12); g.restore(); return true; }
+  return false;
+}
+STRUCTS.mtower = drawMTower; ['f_rune', 'f_plaque', 'f_lab', 'f_orb'].forEach(k => { STRUCTS[k] = drawTowerFurniture; });
+PICON.tower = (g, p, s) => { const S = SCHOOLS[p.school] || SCHOOLS.arcane; g.fillStyle = p.school === 'shadow' ? '#3a2a4a' : '#b8b0a4'; g.fillRect(-s * .35, -s * .55, s * .7, s * 1.2); g.strokeRect(-s * .35, -s * .55, s * .7, s * 1.2); g.fillStyle = S.c; g.beginPath(); g.moveTo(-s * .5, -s * .5); g.lineTo(0, -s * 1.15); g.lineTo(s * .5, -s * .5); g.closePath(); g.fill(); g.stroke(); };
+IACTS.mtower = { label: (it, pl) => `Enter ${pl.name}`, act: (it, pl) => { if (towerDark(pl) && P.lvl < 6 && !GF(towerKey(pl) + '_warned')) { GF(towerKey(pl) + '_warned', 1); toast('A cold voice whispers from the door: "Come back when you are worth killing."', 'bad'); } towerClimb(pl, 0); } };
+IACTS.tstairs = { label: () => { const pl = W.places[G.under.place]; return trialDone(pl, G.under.floor) || GF(towerKey(pl) + '_' + G.under.floor) ? `Climb to ${TOWER_FLOORS[G.under.floor + 1]}` : 'The stair is sealed by magic'; }, act: () => { const pl = W.places[G.under.place], f = G.under.floor; if (!(trialDone(pl, f) || GF(towerKey(pl) + '_' + f))) { toast('A shimmering seal bars the stair. Pass this floor\'s trial first.', 'bad'); return; } towerClimb(pl, f + 1); } };
+IACTS.talch = { label: () => 'Use the alchemy bench', act: () => openAlchemy(G.under.kind === 'tower' ? W.places[G.under.place].name + ' laboratory' : "The Apothecary's Bench") };
+IACTS.trune = { label: it => { const o = W.objs.find(x => x.k === 'f_rune' && x.idx === it.idx); return `Touch the rune of ${RUNES[it.idx][2]}${o && o.lit ? ' (glowing)' : ''}`; }, act: it => runeTouch(it) };
+IACTS.tplaque = { label: () => 'Read the plaque', act: it => plaqueRead(it) };
+ROLES.archmage = { label: e => `Speak with ${e.name}`, talk: e => archmageDialog(e) };
+hook('slow', () => towerTick());
+
+/* ---------------- Bestiary, achievements and music for magic ---------------- */
+BEASTS.push(
+  ['apprentice', 'Magic and Mystery', 'Bandit camps and the lower floors of the Black Tower', 'A runaway student who learned just enough to be dangerous. Its firebolts sometimes burst.', 'Arcane dust, staffs and potions'],
+  ['warlock', 'Magic and Mystery', 'The larger bandit camps, and the Black Tower', 'Hurls shadow and steps away when you close in. Wounded, it raises the dead. Rush it down.', 'Arcane dust, tomes and staffs'],
+  ['fire_elemental', 'Magic and Mystery', "Valoria's deserts at night, and the Ember Spire", 'Living flame. Burns whatever stands close. Frost and distance are your friends.', 'Arcane dust, soul gems'],
+  ['frost_elemental', 'Magic and Mystery', "Draven's snowfields, and the Rime Tower", 'A walking blizzard. Its touch chills the blood.', 'Arcane dust, soul gems'],
+  ['storm_elemental', 'Magic and Mystery', 'Thunderstorms, and the Stormcrown', 'Crackling lightning that strikes from afar. Close the distance quickly.', 'Arcane dust, soul gems'],
+  ['wisp', 'Magic and Mystery', 'Dark woods and marshes at night', 'Will-o\'-the-wisps that lure travellers off the road. Weak, fast and many.', 'Arcane dust, rarely a soul gem'],
+  ['stone_golem', 'Magic and Mystery', 'The trials of the wizard towers', 'A giant of carved stone. Watch the ground: when it glows red, the golem is about to slam it.', 'Arcane dust, soul gems'],
+  ['animated_armor', 'Magic and Mystery', 'The trials of the wizard towers', 'An empty suit of plate that fights like a knight. Magic slides off it a little.', 'Arcane dust'],
+  ['archmage', 'Magic and Mystery', 'The top of every wizard tower', 'The masters of the towers. They blink, freeze and call down the storm. The necromancer of the Black Tower fights to the death.', 'Starfall, and their respect'],
+);
+BEASTS.forEach((b, i) => BEAST_I[b[0]] = i);
+Object.assign(BEAST_Z, { fire_elemental: 1.4, frost_elemental: 1.4, storm_elemental: 1.4, wisp: 1.9, stone_golem: 1.2, archmage: 1.6, warlock: 1.7, apprentice: 1.7, animated_armor: 1.6 });
+ACH.push(
+  ['first_spell', '✧', 'Hedge Wizard', 'Cast your first spell', () => (G.stats.spells || 0) >= 1],
+  ['battlemage', '✧', 'Battle Mage', 'Cast 250 spells', () => (G.stats.spells || 0) >= 250],
+  ['spells10', '📖', 'Spellbinder', 'Know 10 spells', () => (P.spells || []).length >= 10],
+  ['schools7', '✺', 'Seven Schools', 'Cast a spell of every school of magic', () => Object.keys(G.stats.schools || {}).length >= 7],
+  ['alchemist', '⚗', 'Alchemist', 'Discover 8 potion recipes', () => (P.recipes || []).length >= 8],
+  ['glyph', '✦', 'Glyphwright', 'Bind a glyph into a piece of gear', () => P.inv.some(it => it.glyph)],
+  ['tower_top', '♜', 'The Top of the Stair', "Reach the Archmage's Study at the top of a wizard tower", () => (G.stats.towerFloor || 0) >= 4],
+  ['arch_duel', '⚡', 'Magic Against Magic', 'Win a duel against an archmage', () => (G.stats.archDuels || 0) >= 1],
+  ['black_tower', '☠', 'Silence in the Black Tower', 'Destroy the necromancer of the Black Tower', () => W.places.some(p => p.type === 'tower' && p.school === 'shadow' && GF(towerKey(p) + '_4'))],
+  ['veiled', '👁', 'Magister of the Veil', 'Rise to Magister of the Veiled Circle', () => !!GF('vc_done')],
+);
+SONGS.arcane = { title: 'The Starlit Stair', vol: 3, root: 52, mode: 'lyd', bpm: 66, prog: [0, 1, 4, 0, 5, 1, 4, 3], seed: 911, lead: { i: 'flute', r: R_CALM, v: .11 }, arp: { i: 'harp', p: '0.2.4.2.' }, pad: { i: 'strings', v: .035 }, counter: { i: 'bell', o: 0, r: R_LONG, v: .04 }, drone: { n: [0, 7], o: -12, v: .03, t: 'triangle' } };
+SONGS.black_tower = { title: 'The Black Tower', vol: 3.2, root: 45, mode: 'phrd', bpm: 58, prog: [0, 1, 0, 6, 0, 1, 5, 1], seed: 917, lead: { i: 'choir', o: 0, r: R_LONG, v: .1 }, pad: { i: 'organ', v: .04 }, counter: { i: 'bell', o: -12, r: R_LONG, v: .05 }, drone: { n: [0, 1], o: -24, v: .05, t: 'sawtooth' } };
+MUSIC_PICK.push(() => G.under && G.under.kind === 'tower' ? (W.places[G.under.place] && W.places[G.under.place].school === 'shadow' ? 'black_tower' : 'arcane') : null);
+
+/* ---------------- The Veiled Circle ----------------
+   The society of mages behind the towers notices anyone who learns three spells. Five jobs (a saga), ending with the rank of Magister:
+   a better price on magic, a sigil, and the rarest tome. Works in sandbox and story alike. */
+const VC_LOOK = { body: '#3a2a5a', head: 'hood', hood: '#241a3a', skin: '#e8d0b8', cape: '#8a6ad0', weapon: { wk: 'staff', len: 42, col: '#c890ff', glow: '#c890ff' } };
+const vcCap = q => W.places[q.cap != null ? q.cap : 0];
+const VELANE = q => ({ key: 'velane', name: 'Magister Velane', role: 'Envoy of the Veiled Circle', look: VC_LOOK, at: soff(vcCap(q), -6, 10), k: vcCap(q).owner });
+const vcSpot = (q, key, fn) => { if (!q[key]) { const s = fn(); q[key] = { x: Math.round(s.x), y: Math.round(s.y), name: s.name }; } return q[key]; };
+const vcRuin = q => vcSpot(q, 'ruin', () => { const p = nearestPlace(vcCap(q).x, vcCap(q).y, p => p.type === 'ruin' && dist(p.x, p.y, vcCap(q).x, vcCap(q).y) > 40 * TS) || nearestPlace(P.x, P.y, p => p.type === 'ruin'); return Object.assign(randomLandSpot(p.x, p.y, 2, 6), { name: p.name }); });
+const vcWild = q => vcSpot(q, 'wild', () => { const v = nearestPlace(P.x, P.y, p => p.type === 'village' && dist(p.x, p.y, P.x, P.y) > 30 * TS) || W.start; return Object.assign(randomLandSpot(v.x, v.y, 14, 22), { name: v.name }); });
+const vcCrypt = q => vcSpot(q, 'crypt', () => { const p = nearestPlace(P.x, P.y, p => (p.type === 'ruin' || p.type === 'hidden') && dist(p.x, p.y, P.x, P.y) > 50 * TS) || nearestPlace(P.x, P.y, p => p.type === 'ruin'); return Object.assign(randomLandSpot(p.x, p.y, 3, 7), { name: p.name }); });
+SQ.vc1 = { saga: true, label: 'The Veiled Circle', title: 'An Invitation in Violet', giver: 'Magister Velane', k: q => vcCap(q).owner,
+  desc: q => `A letter sealed in violet wax: "You have been learning. We have been watching. Come to ${vcCap(q).name}, by the city gate, and ask for Velane."`, reward: { gold: 100, xp: 120 },
+  steps: [
+    S_TALK(q => `Meet Magister Velane outside ${vcCap(q).name}`, VELANE, (q, e) => sChat(SPK(e), ['So you are the knight who reads spellbooks between sword fights. Good. The Veiled Circle keeps the old magic safe, from the kings and from itself.', 'A rogue warlock stole a grimoire from the Circle. It teaches the raising of the dead. We want it back, and we want him stopped.'], [{ t: '"Where is he?"', fn: () => { sAdvance(q); closeDialog(); } }])),
+    S_FIGHT(q => `Stop the warlock hiding at ${vcRuin(q).name}`, q => vcRuin(q), [[['apprentice', 2, { tier: 2 }], ['warlock', 1, { tier: 2, name: 'Oskar the Grave-Reader', boss: true, hpM: 1.6 }]]], { near: 18, msg: 'The warlock turns, and his apprentices raise their staffs!' }),
+    S_ITEM('Take the stolen grimoire', q => vcRuin(q), 'vc_grimoire'),
+    S_TALK('Return the grimoire to Velane', VELANE, (q, e) => sChat(SPK(e), ['You have it. Unread, I hope. Some books read you back.', 'The Circle is grateful. Take this, and keep your ears open.'], goOn(q, 'Take the reward'))),
+  ], done: () => sStart('vc2', { cap: GF('vc_cap') }) };
+SQ.vc2 = { saga: true, label: 'The Veiled Circle', title: 'Wild Magic', giver: 'Magister Velane', k: q => vcCap(q).owner,
+  desc: q => `Storm elementals have broken loose near ${vcWild(q).name} and are setting the hayricks alight. The Circle wants them unmade before the crown starts hanging hedge witches.`, reward: { gold: 150, xp: 180, items: [['mana_potion', 1, 3]] },
+  steps: [
+    S_FIGHT(q => `Unmake the storm elementals near ${vcWild(q).name}`, q => vcWild(q), [[['storm_elemental', 2, { tier: 2 }]], [['storm_elemental', 1, { tier: 3, name: 'The Thunderhead', boss: true, hpM: 1.8, o: { scale: 1.3 } }]]], { near: 18, msg: 'The air crackles. Something in the storm has seen you.', waveMsg: { 1: 'The storm gathers itself into one great shape!' } }),
+    S_TALK('Report to Magister Velane', VELANE, (q, e) => sChat(SPK(e), ['I felt the storm break from here. Well done.', 'Next, a gentler task, and a test of patience: the Circle needs an alchemist.'], goOn(q))),
+  ], done: () => sStart('vc3', { cap: GF('vc_cap') }) };
+SQ.vc3 = { saga: true, label: 'The Veiled Circle', title: 'Reagents for the Circle', giver: 'Magister Velane', k: q => vcCap(q).owner,
+  desc: () => 'Brew a Draught of Clarity (moonpetal, desert bloom and a pinch of arcane dust) and bring it to Velane. Moonpetal opens only at night.', reward: { gold: 120, xp: 160, items: [['arcane_dust', 1, 5]] },
+  steps: [
+    S_COND('Brew a Draught of Clarity (moonpetal, desert bloom and arcane dust)', () => countItem('clarity') > 0, { at: q => vcCap(q) }),
+    S_TALK('Bring the Draught of Clarity to Velane', VELANE, (q, e) => { if (!countItem('clarity')) { e.say = { text: 'The draught, knight. I can wait.', t: 3 }; return; } sChat(SPK(e), ['Clear as a mountain spring. You have a gift for this.', 'Now the hard part. Something old has woken where it should not have.'], [{ t: 'Hand it over', fn: () => { removeItemById('clarity', 1); sAdvance(q); closeDialog(); } }]); }),
+  ], done: () => sStart('vc4', { cap: GF('vc_cap') }) };
+SQ.vc4 = { saga: true, label: 'The Veiled Circle', title: 'The Hollow Scholar', giver: 'Magister Velane', k: q => vcCap(q).owner,
+  desc: q => `A Circle scholar went to study the dead at ${vcCrypt(q).name} and has not come back. The Circle fears he studied too well.`, reward: { gold: 260, xp: 320, items: [['soul_gem', 1, 2]] },
+  steps: [
+    S_GO(q => `Search for the scholar at ${vcCrypt(q).name}`, q => vcCrypt(q), 8, q => toast('Scratches on the stones: circles within circles. The ground is cold.', 'bad')),
+    S_FIGHT(q => `Destroy what the scholar has become`, q => vcCrypt(q), [[['wight', 4, { tier: 3 }]], [['archmage', 1, { name: 'Brother Hesk, the Hollow Scholar', boss: true, hpM: .45, o: { _look: mageLook('shadow', '#101418'), caster: 'shadow', faction: 'hollow' } }], ['wight', 2, { tier: 3 }]]], { near: 16, msg: 'The dead rise to meet you!', waveMsg: { 1: 'Brother Hesk steps out of the grave-mist, eyes cold and empty.' } }),
+    S_TALK('Tell Velane what you found', VELANE, (q, e) => sChat(SPK(e), ['Then Hesk is at peace, one way or another. Thank you.', 'The Council of the Circle wishes to meet you. They sit only where the tower-masters sit: at the top of a tower. Climb one, and the Archmage there will speak for us.'], goOn(q))),
+  ], done: () => sStart('vc5', { cap: GF('vc_cap') }) };
+SQ.vc5 = { saga: true, label: 'The Veiled Circle', title: 'The Veiled Council', giver: 'Magister Velane', k: q => vcCap(q).owner,
+  desc: () => "Climb any wizard tower (except the Black Tower) to its top, pass its trials, and speak with the Archmage there.", reward: { gold: 500, xp: 600 },
+  steps: [
+    S_COND("Speak with an Archmage at the top of a wizard tower", () => !!GF('vc_council'), { at: () => nearestPlace(P.x, P.y, p => p.type === 'tower' && p.school !== 'shadow') }),
+  ], done: () => { GF('vc_done', 1); addItem('archmage_sigil', 1, 1); if (!(P.spells || []).includes('storm_call')) addItem('tome_storm_call', 1, 1); toast('You are named <b>Magister of the Veiled Circle</b>. Mages everywhere sell to you for less.', 'gold'); logEvent('You were named a Magister of the Veiled Circle.', []); } };
+ITEMS.vc_grimoire = { name: 'The Stolen Grimoire', type: 'quest', val: 0, desc: 'Bound in something that is not leather. The pages are cold.' };
+// the Circle notices anyone who knows three spells
+hook('slow', () => {
+  if (GF('vc_start') || !P || (P.spells || []).length < 3 || G.under || G.tut || storyBusy()) return;
+  const k = nearestPlace(P.x, P.y, p => p.type === 'castle' && K.rep[p.owner] > -40); if (!k) return;
+  GF('vc_start', 1); GF('vc_cap', k.id); sStart('vc1', { cap: k.id }); SND.play('arcane');
+});
+const storyBusy = () => !!(G.arena || G.siege || G.tourney && G.tourney.fighting || G.joust || G.race);
+{ const _ad = archmageDialog; archmageDialog = e => { if (Q.active.some(q => q.sid === 'vc5') && !GF('vc_council')) { GF('vc_council', 1); sChat(SPK(e), [`So Velane sent you. The Council has heard of the grimoire, the storm and poor Hesk.`, `Kneel, knight. Rise a Magister of the Veiled Circle. Our towers are open to you, and our secrets a little less secret.`], [{ t: 'Rise', fn: () => { closeDialog(); } }]); return; } _ad(e); }; }
+// camps of the larger bands sometimes shelter a warlock (appended, so saved kill flags keep their indices)
+{ const _ps = placeSpecs; placeSpecs = pl => { if (pl._specs) return pl._specs; const s = _ps(pl); if (pl.type === 'camp' && pl.tier >= 2 && hash2(pl.id * 17, W.seed % 9973) < .32) s.push({ kind: pl.tier >= 3 ? 'warlock' : 'apprentice', dx: -2.5, dy: -2 }); return s; }; }
 
 /* ---------------- Loop ---------------- */
 let last = performance.now(), mmT = 0, ambT = 0, fpsA = 0;
