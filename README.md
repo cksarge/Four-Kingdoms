@@ -57,6 +57,8 @@ Before a new game you can set:
 | J | Journal: quests and the chronicle |
 | L | Journal: bestiary and lore |
 | 1 / 2 / 3 | Eat food / drink potion / use bandage |
+| 4 | Drink your quick tonic (choose one in the pack's Magic tab) |
+| Z / X / V / B | Cast the spells in your four spell slots |
 | Shift (hold) | Sprint, draining stamina |
 | Q + left click | Hit characters who aren't hostile, such as villagers, guards or peaceful animals. Normally your attacks pass through them. Attacking people costs reputation and turns guards against you |
 | G | Companions: follow me / hold position |
@@ -133,6 +135,37 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 - Companions and soldiers: hire spearmen, bowmen and knights from castle captains (daily pay), or recruit four named sellswords found in the villages, including a healer and a venom archer. Named companions are knocked down, never killed.
 - Property: buy a house in a friendly village (rest, a safe stash, and you wake there if you fall), or restore a ruined fort that pays a daily income and can be garrisoned.
 - Crafting: fletch every arrow type at market benches, and at the royal forges improve gear up to Masterwork or bind a dungeon relic into a blade to enchant it.
+- **Magic:** any knight can learn it, and a sword and a spell sit happily together.
+  - **Mana and spells:** learning your first spell gives you a mana bar, which refills on its own (faster out of combat). There are 20 spells in seven schools:
+    - **Ember:** Firebolt, Flame Wave and Fireball.
+    - **Rime:** Frost Shards, Ice Nova and Frost Step, a short blink.
+    - **Storm:** Chain Lightning, Thunderclap and Call the Storm.
+    - **Life:** Mend and Regeneration.
+    - **Warding:** Arcane Ward, Cleanse, Banish and Wisp-Light.
+    - **Shadow:** Drain Life, Dread and Raise Thrall. Some Shadow spells cost blood as well as mana.
+    - **Arcane:** Arcane Missiles and Summon Wisp.
+  - **The spellbook:** put spells into four slots from the spellbook (in the Skills screen) and cast them with Z, X, V and B, the D-pad on a controller, or the ✧ button on a phone (hold it to pick a spell). The **Arcana** skill adds mana and power, cheaper and faster spells, and every fifth spell free.
+  - **Staffs** are two-handed and loose bolts that cost only stamina. They make your spells stronger, especially spells of the staff's own school. With a staff, the special move (C) is an Arcane Surge.
+  - **Court mages** stand in every royal city. They sell tomes, potions, staffs and charms, bind glyphs, enchant weapons and let you use their alchemy bench.
+  - **Wizard towers:** there is one in each kingdom and a few in the wilds. Each has five floors:
+    - the Hall of Learning
+    - the Trial of Iron (animated armor and a stone golem)
+    - the Trial of Wits (a rune puzzle)
+    - the Trial of the Elements
+    - the Archmage's Study at the top, where the archmage teaches the rarest spells and can be challenged to a duel for the legendary staff Starfall.
+  - **The Black Tower** belongs to a necromancer, and every floor fights back.
+  - **Rings and amulets** fill two new equipment slots. They add mana, spell power, health, stamina, resistances, critical hits, thorns, lifesteal, regeneration, night sight or bonus damage to the Hollow. Mages can bind a **glyph** into armor, a shield or jewellery for a soul gem, and enchant weapons as Thundering, Hallowed or Runed.
+  - **Herbs and alchemy:** nine herbs grow wild according to the land and the hour: mandrake, emberroot, frostcap, marsh lotus, glowcap, moonpetal, wolfsbane, desert bloom and sea kelp. Brew two at a time into 19 potions and tonics at an apothecary, a mage's bench, a tower laboratory, or anywhere with an Alchemist's Kit. Recipes are discovered by experimenting. Brews include:
+    - mana and greater healing
+    - strength, swiftness and stoneskin
+    - fire and frost wards, and night eye
+    - a shadowcloak that hides you
+    - clarity and berserker brew
+    - weapon oils and antidotes
+    - a plague remedy and a blightward tincture
+    - a love philter, and the rare Elixir of Youth.
+  - **Magical foes:** warlocks and rogue apprentices sometimes shelter in bandit camps. Fire, frost and storm elementals and will-o'-the-wisps haunt the wilds at night and in storms.
+  - **The Veiled Circle:** the society of mages behind the towers notices anyone who learns three spells. Its five jobs end with the rank of Magister, which brings cheaper magic, the Archmage's Sigil and the rarest tome.
 - Fishing at little jetties on rivers, lakes and the coast (buy a rod at a village market), and hermits in the wilds who sell tonics, training and secrets.
 - **Settings:**
   - Battery Saver (30 fps, fewer particles, lighter weather) and optional chattering NPC voices with their own volume.
@@ -141,7 +174,7 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 
 ## Achievements and statistics
 
-56 achievements are shared by every game in your browser (see the main menu or pause menu). The pause menu's *Your Journey* page tracks time played, distance, kills, arrows, dungeons, sieges, tourneys and more, and the story's closing screen shows it too.
+66 achievements are shared by every game in your browser (see the main menu or pause menu). The pause menu's *Your Journey* page tracks time played, distance, kills, arrows, dungeons, sieges, tourneys and more, and the story's closing screen shows it too.
 
 ## License
 
