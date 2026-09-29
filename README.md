@@ -138,6 +138,12 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 - Companions and soldiers: hire spearmen, bowmen and knights from castle captains (daily pay), or recruit four named sellswords found in the villages, including a healer and a venom archer. Named companions are knocked down, never killed.
 - Property: buy a house in a friendly village (rest, a safe stash, and you wake there if you fall), or restore a ruined fort that pays a daily income and can be garrisoned.
 - Crafting: fletch every arrow type at market benches, and at the royal forges improve gear up to Masterwork or bind a dungeon relic into a blade to enchant it.
+- **The Fifth Kingdom (sandbox):**
+  - **Founding:** with a seat of your own (a fief or a restored fort), a company of at least four, level 10 and 3,000 gold for the coronation, you can crown yourself from the Realm tab (H).
+  - **Your banner:** name the realm and choose its colours, one of eight emblems and a motto. It becomes a fifth crown on the map and in the diplomacy council. Your former liege calls it treason and goes to war, unless they love you dearly.
+  - **Ruling:** set the laws: taxes, the levy, and whether magic is banned, tolerated or patronised. Name lords for your holdings from your family, companions and friends, and collect taxes and tribute every day. Keep unrest down, or peasants will march on your villages.
+  - **War:** muster the host against enemy villages, outposts and even royal castles. It fights beside you when you ride with it. Declare war, and demand fealty from a crown you have beaten. A crown that loses its castle and its lands falls, and its country becomes yours.
+  - **Victory:** bring all four crowns to heel, by conquest or fealty, to unite the realm. You become High King or High Queen, the tale gets an epilogue, and your reign carries on.
 - **Field armies and open battles:**
   - **Armies on the march:** kingdoms at war raise armies under named warlords and march them along the roads to besiege enemy outposts and villages. You can see them on the map and minimap.
   - **Far away,** armies fight and besiege on their own.
@@ -201,7 +207,7 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 
 ## Achievements and statistics
 
-77 achievements are shared by every game in your browser (see the main menu or pause menu). The pause menu's *Your Journey* page tracks time played, distance, kills, arrows, dungeons, sieges, tourneys and more, and the story's closing screen shows it too.
+81 achievements are shared by every game in your browser (see the main menu or pause menu). The pause menu's *Your Journey* page tracks time played, distance, kills, arrows, dungeons, sieges, tourneys and more, and the story's closing screen shows it too.
 
 ## License
 
