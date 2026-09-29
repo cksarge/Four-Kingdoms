@@ -61,6 +61,7 @@ Before a new game you can set:
 | 4 | Drink your quick tonic (choose one in the pack's Magic tab) |
 | Z / X / V / B | Cast the spells in your four spell slots |
 | H | Realm & Court: the rulers, their heirs and your own house |
+| T | Orders for your warband: follow, hold, charge, shield wall, hold or loose fire |
 | Shift (hold) | Sprint, draining stamina |
 | Q + left click | Hit characters who aren't hostile, such as villagers, guards or peaceful animals. Normally your attacks pass through them. Attacking people costs reputation and turns guards against you |
 | G | Companions: follow me / hold position |
@@ -137,6 +138,15 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 - Companions and soldiers: hire spearmen, bowmen and knights from castle captains (daily pay), or recruit four named sellswords found in the villages, including a healer and a venom archer. Named companions are knocked down, never killed.
 - Property: buy a house in a friendly village (rest, a safe stash, and you wake there if you fall), or restore a ruined fort that pays a daily income and can be garrisoned.
 - Crafting: fletch every arrow type at market benches, and at the royal forges improve gear up to Masterwork or bind a dungeon relic into a blade to enchant it.
+- **Field armies and open battles:**
+  - **Armies on the march:** kingdoms at war raise armies under named warlords and march them along the roads to besiege enemy outposts and villages. You can see them on the map and minimap.
+  - **Far away,** armies fight and besiege on their own.
+  - **Near you,** they take the field as real soldiers (spearmen, bowmen, crossbowmen, knights and mounted knights) and fight an open battle. Morale bars show each side, and a side whose morale breaks routs.
+  - **Warlords:** kill the enemy warlord and the chronicle remembers it; let them live and they win fame.
+  - **Territory:** captured villages and outposts take their land with them, and the borders on the map move. Sworn knights who fight in the front rank earn their liege's favour, and a fief lost to the enemy pays nothing until it is won back.
+  - **Your warband** is much bigger now. Leadership, level, a fief and forts all raise how many soldiers you command. Captains also hire crossbowmen, mounted knights and battle mages.
+  - **Orders:** press T (or the company button) to order your warband to follow, hold a line, charge, form a shield wall, or hold or loose their fire.
+  - **The couched lance:** lances (War Lance, Knight's Lance) are a new weapon. On a galloping horse, hold attack to lower the lance and ride your foes down: the faster you ride, the harder it hits, and mounted foes are unhorsed.
 - **Living courts:** the four rulers are people, not portraits.
   - **Rulers:** each has an age, traits (warlike, just, cruel, greedy, paranoid, beloved, pious and more) and an heir. Their traits shape how their kingdom behaves.
   - **Deaths and successions:** rulers grow old, fall ill and die, or are murdered. A grown heir is crowned. A child heir or a missing one causes a **succession crisis**: two claimants, a few days for the lords to choose, and a chance for you to back one and win their favour.
@@ -191,7 +201,7 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 
 ## Achievements and statistics
 
-73 achievements are shared by every game in your browser (see the main menu or pause menu). The pause menu's *Your Journey* page tracks time played, distance, kills, arrows, dungeons, sieges, tourneys and more, and the story's closing screen shows it too.
+77 achievements are shared by every game in your browser (see the main menu or pause menu). The pause menu's *Your Journey* page tracks time played, distance, kills, arrows, dungeons, sieges, tourneys and more, and the story's closing screen shows it too.
 
 ## License
 

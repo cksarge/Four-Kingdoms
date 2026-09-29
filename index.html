@@ -107,6 +107,9 @@ body.touch #helpTouch{display:block}
 .bar.st .fill{background:linear-gradient(180deg,#b8d86a,#6f9a2c 55%,#46681a)}
 .bar.st.low .fill{background:linear-gradient(180deg,#e0b050,#9a6a1c)}
 .bar.xp{height:6px;width:220px}
+#battleBar{position:absolute;left:50%;top:92px;transform:translateX(-50%);display:flex;gap:10px;align-items:center;padding:6px 12px;background:rgba(15,10,5,.82);border:1px solid #6b5230;border-radius:6px;pointer-events:none}
+.btSide{width:200px}.btN{font-family:var(--fh);font-size:11.5px;color:#f5e6bd;text-align:center;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.btT{height:8px;background:#1a120a;border:1px solid #5d4526;border-radius:3px;overflow:hidden}.btF{height:100%;transition:width .3s}.btVs{font-size:18px;color:#ffd24a}
+body.touch #battleBar{top:60px;zoom:.8}
 .txtIn{background:#120c07;border:1px solid #6b5230;border-radius:4px;color:var(--ink);font:inherit;font-size:15px;padding:6px 9px;width:100%;box-sizing:border-box}.txtIn.sm{font-size:13px;padding:3px 7px;width:auto;max-width:220px}.crName .txtIn{width:auto;font-family:var(--fh);font-size:16px}
 #courtBody{max-height:min(70vh,640px);overflow:auto;margin-top:8px}
 .crGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -627,6 +630,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <button class="hbtn" data-open="pause" title="Menu (Esc)">Esc</button>
       </div>
     </div>
+    <div id="battleBar" class="hidden"><div class="btSide"><div class="btN" id="btAn"></div><div class="btT"><div class="btF" id="btAf"></div></div></div><div class="btVs">⚔</div><div class="btSide"><div class="btN" id="btBn"></div><div class="btT"><div class="btF" id="btBf"></div></div></div></div>
     <div id="siegeBar" class="hidden"><div class="sgN" id="sgN"></div><div class="sgT"><div class="sgF" id="sgF"></div></div></div>
     <div id="bossBar" class="hidden"><div class="bbN" id="bbN"></div><div class="bbT"><div class="bbF" id="bbF"></div></div></div>
     <div id="prompt" class="hudbox"></div>
@@ -987,7 +991,7 @@ const sgn = n => (n > 0 ? '+' : '') + Math.round(n);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 /* Hooks: the bigger systems (magic, courts, armies, the realm, the seas, the Tide, the Long Road) each register here
    for reset, save, load and the game clocks, so the core save/load and loop code only needs one call per hook. */
-const HOOKS = { reset: [], save: [], load: [], newgame: [], daily: [], tick: [], slow: [], hud: [], draw: [], recalc: [], kill: [], pad: [], succession: [] };
+const HOOKS = { reset: [], save: [], load: [], newgame: [], daily: [], tick: [], slow: [], hud: [], draw: [], recalc: [], kill: [], pad: [], succession: [], bigmap: [], minimap: [], owner: [], captured: [] };
 const hook = (n, fn) => { HOOKS[n].push(fn); };
 // New NPC roles, world interactions and keys register here: ROLES[role] = { label(e), talk(e) }, IACTS[type] = { label(it, pl), act(it, pl) },
 // KEYFN[code] = fn (the code is the default key; players can rebind it in Settings), PANELS[code] = UI screen to toggle.
@@ -1032,7 +1036,7 @@ function compass(dx, dy) { const a = Math.atan2(dy, dx); const dirs = ['East', '
 const DEFAULT_SETTINGS = { music: 0.45, sound: 0.7, effects: 0.6, shake: true, dmgNums: true, minimap: true, uiScale: 1, quality: 'high', battery: false, voices: true, voiceVol: .8, noFlash: false, cb: false, textScale: 1, keys: {} };
 let settings = loadSettings();
 /* Key bindings: every action keeps its default code inside the game; settings.keys maps it to the physical key. */
-const KEY_ACTIONS = [['KeyW', 'Move up'], ['KeyS', 'Move down'], ['KeyA', 'Move left'], ['KeyD', 'Move right'], ['ShiftLeft', 'Sprint'], ['Space', 'Dodge'], ['KeyE', 'Interact'], ['KeyF', 'Horse'], ['KeyQ', 'Hit friendlies (hold)'], ['KeyR', 'Switch arrows'], ['Tab', 'Swap weapon'], ['KeyC', 'Special move'], ['KeyG', 'Companions'], ['KeyI', 'Inventory'], ['KeyM', 'Map'], ['KeyK', 'Diplomacy'], ['KeyJ', 'Journal: quests'], ['KeyP', 'Skills'], ['KeyL', 'Journal: bestiary'], ['Digit1', 'Eat food'], ['Digit2', 'Drink potion'], ['Digit3', 'Use bandage'], ['Digit4', 'Quick tonic'], ['KeyZ', 'Spell 1'], ['KeyX', 'Spell 2'], ['KeyV', 'Spell 3'], ['KeyB', 'Spell 4'], ['KeyH', 'Realm & Court']];
+const KEY_ACTIONS = [['KeyW', 'Move up'], ['KeyS', 'Move down'], ['KeyA', 'Move left'], ['KeyD', 'Move right'], ['ShiftLeft', 'Sprint'], ['Space', 'Dodge'], ['KeyE', 'Interact'], ['KeyF', 'Horse'], ['KeyQ', 'Hit friendlies (hold)'], ['KeyR', 'Switch arrows'], ['Tab', 'Swap weapon'], ['KeyC', 'Special move'], ['KeyG', 'Companions'], ['KeyI', 'Inventory'], ['KeyM', 'Map'], ['KeyK', 'Diplomacy'], ['KeyJ', 'Journal: quests'], ['KeyP', 'Skills'], ['KeyL', 'Journal: bestiary'], ['Digit1', 'Eat food'], ['Digit2', 'Drink potion'], ['Digit3', 'Use bandage'], ['Digit4', 'Quick tonic'], ['KeyZ', 'Spell 1'], ['KeyX', 'Spell 2'], ['KeyV', 'Spell 3'], ['KeyB', 'Spell 4'], ['KeyH', 'Realm & Court'], ['KeyT', 'Warband orders']];
 const KEY_LOGICAL = new Set(KEY_ACTIONS.map(a => a[0]));
 let keyRev = {};
 function keyOf(code) { return (settings.keys && settings.keys[code]) || code; }
@@ -1139,6 +1143,7 @@ const SND = {
       case 'ignite': this.noise(.32, .12, 'sfx', 1100, .8, 2.3); break;
       case 'frost': this.tone(2350, .28, 'sine', .04, 'sfx', 0, 1.3); this.noise(.22, .12, 'sfx', 5200, 3, .6, 'highpass'); break;
       // magic
+      case 'battlecry': this.noise(1.1, .12, 'fx', 500, .6, .9); this.noise(.8, .08, 'fx', 1200, 1.2, 1.1, 'bandpass', .15); [196, 247, 294].forEach((f, i) => this.tone(f, .9, 'sawtooth', .025, 'fx', .05 * i, 1.02, .08)); break;
       case 'cast': this.tone(660, .22, 'sine', .06, 'sfx', 0, 1.6); this.tone(990, .26, 'triangle', .04, 'sfx', .04, 1.4); this.noise(.18, .05, 'sfx', 3000, 2, 1.5); break;
       case 'firecast': this.noise(.45, .16, 'sfx', 700, .7, 2.2); this.tone(180, .3, 'sawtooth', .04, 'sfx', 0, 1.8); break;
       case 'boom': this.noise(.9, .38, 'sfx', 260, .5, .35, 'lowpass'); this.noise(.35, .22, 'sfx', 1400, .8, .4); this.tone(70, .6, 'sine', .22, 'sfx', 0, .5); break;
@@ -2530,7 +2535,7 @@ const SKILLS = [
   { id: 'sword', n: 'Swordsmanship', ranks: ['+6% melee damage', '+12% melee damage · specials recharge 6% faster', '+18% melee damage · melee attacks cost 15% less stamina', '+24% melee damage · specials recharge 24% faster'] },
   { id: 'archery', n: 'Archery', ranks: ['Draw 7% faster · +10% arrow recovery', 'Draw 14% faster · +5% crit at full draw', 'Draw 21% faster · +30% arrow recovery', 'Draw 28% faster · full draws pierce a second foe'] },
   { id: 'riding', n: 'Riding', ranks: ['Horses 5% faster · +6% mounted damage', 'Horses 10% faster · take 12% less damage mounted', 'Horses 15% faster · +18% mounted damage', 'Horses 20% faster · take 24% less damage mounted'] },
-  { id: 'lead', n: 'Leadership', ranks: ['Command 2 hired soldiers · allies +8% damage', 'Command 3 · hiring 20% cheaper', 'Command 4 · allies +24% damage', 'Command 5 · hiring 40% cheaper'] },
+  { id: 'lead', n: 'Leadership', ranks: ['Command 2 more soldiers · allies +8% damage', 'Command 2 more · hiring 20% cheaper', 'Command 2 more · allies +24% damage', 'Command 2 more · hiring 40% cheaper'] },
   { id: 'trade', n: 'Trade', ranks: ['Buy 5% cheaper · sell 5% dearer', 'Buy 10% cheaper · sell 10% dearer', 'Buy 15% cheaper · sell 15% dearer', 'Buy 20% cheaper · sell 20% dearer'] },
 ];
 function renderSkills() {
@@ -2825,6 +2830,7 @@ function updatePlayer(dt) {
   else if (G.contest && G.contest.kind === 'snow') { if ((input.lmb || input.clicked) && G.contest.cd <= 0) throwSnowball(); }
   else if (P.S.bow) updateBow(dt);
   else if (P.S.wk === 'staff') updateStaff(dt);
+  else if (P.S.wk === 'lance') updateLance(dt);
   else if ((input.lmb || input.clicked) && P.atkCd <= 0 && P.dodge <= 0 && P.st >= P.S.cost * .5) startAttack();
   input.clicked = false;
   if (P.swing > 0) { P.swing -= dt; const prog = 1 - P.swing / P.swingDur; if (!P.hitDone && prog >= .42) { P.hitDone = true; doPlayerHit(); } }
@@ -2917,6 +2923,7 @@ function mkActor(kind, x, y, opt = {}) {
   if (b.faction === 'k') { e.faction = 'k' + (opt.k ?? 0); e.k = opt.k ?? 0; }
   if (kind === 'leader') e.name = opt.chief ? opt.chief : e.name;
   if (b.important) e.important = true;
+  if (kind === 'cavalry' && opt.mounted !== false) e.mounted = true;
   ents.push(e); return e;
 }
 function removeEnt(e) { const i = ents.indexOf(e); if (i >= 0) ents.splice(i, 1); }
@@ -3209,7 +3216,7 @@ function updateActor(e, dt) {
       if (e.perch) { }
       else if (d < 150) { gx = e.x - Math.cos(a) * 50; gy = e.y - Math.sin(a) * 50; }
       else if (d > e.range * .85) { gx = tg.x; gy = tg.y; }
-      if (d < e.range * wxRange() && e.atkCd <= 0 && e.wind <= 0) e.wind = e.windT;
+      if (d < e.range * wxRange() && e.atkCd <= 0 && e.wind <= 0 && !e.holdFire) e.wind = e.windT;
     } else {
       if (d > e.range * .75 + tg.r) { gx = tg.x; gy = tg.y; }
       else if (d < e.r + tg.r + 2) { gx = e.x - Math.cos(a) * 20; gy = e.y - Math.sin(a) * 20; sm = .5; }
@@ -3741,7 +3748,7 @@ function captureOutpost(a, b) {
   const cand = W.places.filter(p => p.type === 'outpost' && p.owner === lose).sort((p, q) => dist(p.tx, p.ty, W.caps[win][0], W.caps[win][1]) - dist(q.tx, q.ty, W.caps[win][0], W.caps[win][1]));
   const o = cand[0]; if (!o || dist(o.tx, o.ty, W.caps[win][0], W.caps[win][1]) > 210) return;
   if (!G.siege && !G.under && G.state === 'play' && (dist(P.x, P.y, o.x, o.y) < 2500 || P.allegiance === win || P.allegiance === lose)) { startSiege(o, win, lose); return; } // fought for real
-  o.owner = win; if (o.spawned) despawnPlace(o);
+  setOwner(o, win);
   K.mil[lose] -= 150;
   const txt = `${KDATA[win].name} captured ${o.name} from ${KDATA[lose].name}!`;
   pairEvent(win, lose, txt); toast('⚔ ' + txt, 'war', bannerURL(win));
@@ -5367,7 +5374,7 @@ const COMPANIONS = [
 ];
 function compHome(c) { const vs = W.places.filter(p => p.type === 'village' && p.owner === c.k).sort((a, b) => a.id - b.id); return vs.length ? vs[(W.seed + c.id.length * 7) % vs.length].id : -1; }
 const partyNow = () => (G.under && G.over ? ents.concat(G.over.ents) : ents).filter(e => e.party && !e.dead);
-const hiredCap = () => 1 + SK('lead');
+const hiredCap = () => 2 + SK('lead') * 2 + Math.floor(P.lvl / 5) + (P.fief ? 2 : 0) + Math.min(3, (P.forts || []).length) + (G.realm && G.realm.founded ? 4 : 0);
 function spawnPartyMember(m, x = P.x, y = P.y) {
   const c = m.comp && COMPANIONS.find(cc => cc.id === m.comp), f = findFree(x + rand(-50, 50), y + rand(20, 60));
   const o = { k: c ? c.k : (m.k ?? P.allegiance ?? 0), ally: true, follow: true, party: true, persistent: true, followDist: 60 + rand(0, 40), fox: rand(-40, 40), foy: rand(-40, 40), aggro: 360, leash: 99999, named: true };
@@ -5448,14 +5455,16 @@ function updateSiege(dt) {
 }
 function endSiege(taken) {
   const S = G.siege, o = W.places[S.o]; G.siege = null;
+  if (S.att === 'rebel') { ents.forEach(e => { if (e.siege) { e.siege = null; e.foeOf = null; } }); armySiegeEnded(S, taken); return; }
   ents.forEach(e => { if (e.siege) { e.siege = null; e.foeOf = null; e.transient = true; e.roam = true; e.target = null; e.home = { x: e.x + rand(-600, 600), y: e.y + rand(-600, 600) }; } });
   if (S.att === 'bandit') {
     if (taken) { const lost = Math.min(P.gold, 150); P.gold -= lost; toast(`The bandits sacked <b>${o.name}</b> and carried off ${lost} gold.`, 'bad'); }
     else { gainXP(80); toast(`<b>${o.name}</b> holds! The raiders flee.`, 'gold'); SND.play('quest'); }
     return;
   }
-  if (taken) { o.owner = S.att; if (o.spawned) despawnPlace(o); K.mil[S.def] -= 150; const txt = `${KDATA[S.att].name} stormed ${o.name} and took it from ${KDATA[S.def].name}!`; pairEvent(S.att, S.def, txt); toast('⚔ ' + txt, 'war', bannerURL(S.att)); }
+  if (taken) { setOwner(o, S.att); K.mil[S.def] -= 150; const txt = `${KDATA[S.att].name} stormed ${o.name} and took it from ${KDATA[S.def].name}!`; pairEvent(S.att, S.def, txt); toast('⚔ ' + txt, 'war', bannerURL(S.att)); }
   else { K.mil[S.att] -= 120; const txt = `${o.name} held against ${KDATA[S.att].name}'s assault.`; pairEvent(S.att, S.def, txt); toast('🛡 ' + txt, 'good', bannerURL(S.def)); }
+  if (S.army) armySiegeEnded(S, taken);
   if (S.pk.att + S.pk.def >= 2) G.stats.sieges++;
   if (S.pk.att >= 2) { addRep(S.def, 8, `Defended ${o.name}`); gainXP(60); }
   if (S.pk.def >= 2) { addRep(S.att, 8, `Helped storm ${o.name}`); gainXP(60); }
@@ -5592,6 +5601,7 @@ function grantFief(k) {
 }
 function fiefWeek() {
   const F = P.fief, v = W.places[F.v];
+  if (F.seized != null) { toast(`<b>${v.name}</b> is held by ${KDATA[F.seized] ? KDATA[F.seized].name : 'your enemies'}. No taxes come from an occupied fief.`, 'bad'); return; }
   F.pros = clamp(F.pros + [6, 1, -8][F.tax], 0, 100); F.loyal = clamp(F.loyal + [5, 0, -9][F.tax], 0, 100);
   if (F.loyal < 5) { P.fief = null; toast(`The people of <b>${v.name}</b> rise up and drive out your stewards. You have lost your fief.`, 'bad'); SND.play('fail'); return; }
   if (F.loyal < 20) { toast(`Unrest in <b>${v.name}</b>: the villagers refuse to pay. Lower taxes or hold a feast.`, 'bad'); return; }
@@ -6227,6 +6237,10 @@ function drawWeaponShape(g, wk, len, col, icon, wooden, draw, arrowCol) {
     g.strokeStyle = '#7a7e86'; g.lineWidth = 2.2; g.beginPath(); g.moveTo(12, -10); g.quadraticCurveTo(15, 0, 12, 10); g.stroke();
     g.strokeStyle = '#ddd'; g.lineWidth = .8; g.beginPath(); g.moveTo(12, -10); g.lineTo(draw ? 2 : 8, 0); g.lineTo(12, 10); g.stroke();
     if (draw) { g.fillStyle = '#4a3a2a'; g.fillRect(2, -.8, 16, 1.6); }
+  } else if (wk === 'lance') {
+    g.fillStyle = col; g.beginPath(); g.moveTo(0, -1.6 * W2); g.lineTo(len - 4, -.8 * W2); g.lineTo(len + 3, 0); g.lineTo(len - 4, .8 * W2); g.lineTo(0, 1.6 * W2); g.closePath(); g.fill();
+    g.fillStyle = '#8a8e94'; g.beginPath(); g.moveTo(10, -4.5 * W2); g.lineTo(16, -1.6 * W2); g.lineTo(16, 1.6 * W2); g.lineTo(10, 4.5 * W2); g.closePath(); g.fill(); g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = .8; g.stroke();
+    g.fillStyle = '#c03a2a'; for (let i = 0; i < 3; i++) g.fillRect(22 + i * 12, -1.3 * W2, 5, 2.6 * W2);
   } else if (wk === 'staff') {
     g.fillStyle = '#6a4a2a'; g.fillRect(-8, -1.2 * W2, len - 4, 2.4 * W2); g.fillStyle = '#c8a04a'; g.fillRect(len - 12, -1.8 * W2, 3, 3.6 * W2);
     g.strokeStyle = '#8a6a3a'; g.lineWidth = 1.2 * W2; g.beginPath(); g.moveTo(len - 6, -3 * W2); g.quadraticCurveTo(len + 1, 0, len - 6, 3 * W2); g.stroke();
@@ -7362,6 +7376,8 @@ function lookFor0(e) {
       else L = { body: pick(['#8a5a2a', '#5a6a8a', '#7a3a4a']), head: 'cap', skin: e.skin };
       break;
   }
+  if (!L && typeof armyLook === 'function') L = armyLook(e.kind, e.k ?? 0);
+  if (!L) L = { body: e.cloth || '#8a7a5a', head: 'hair', hair: '#4a3020', skin: e.skin || '#e0b48a' };
   if (e.torch) L = Object.assign({}, L, { torch: 1 });
   e._look = L; return L;
 }
@@ -7691,6 +7707,7 @@ function drawMinimap() {
   for (const e of ents) { if (e.dead) continue; const [mx, my] = toM(e.x, e.y); if (mx < 0 || my < 0 || mx > S || my > S) continue; if (playerHostileTo(e)) { g.fillStyle = '#ff4a3a'; circ(g, mx, my, 2); } else if (e.ally || e.role === 'traveler') { g.fillStyle = '#6ad0ff'; circ(g, mx, my, 2); } else if (e === horseEnt) { g.fillStyle = '#f5e6bd'; circ(g, mx, my, 2.2); } }
   Q.active.forEach(q => { const tg = questTarget(q); if (!tg) return; let [mx, my] = toM(tg.x, tg.y); const inside = mx > 6 && my > 6 && mx < S - 6 && my < S - 6; const tracked = Q.tracked === q.id; if (!inside) { const a = Math.atan2(my - S / 2, mx - S / 2); mx = S / 2 + Math.cos(a) * (S / 2 - 9); my = S / 2 + Math.sin(a) * (S / 2 - 9); } g.save(); g.translate(mx, my); g.rotate(Math.PI / 4); g.fillStyle = tracked ? '#ffd24a' : '#d8b25a'; g.globalAlpha = tracked ? 1 : .7; g.fillRect(-3.5, -3.5, 7, 7); g.strokeStyle = '#000'; g.strokeRect(-3.5, -3.5, 7, 7); g.restore(); });
   if (G.wboss) { const [mx, my] = toM(G.wboss.x, G.wboss.y); const cx0 = clamp(mx, 6, S - 6), cy0 = clamp(my, 6, S - 6); g.fillStyle = '#ff4a2a'; g.beginPath(); g.arc(cx0, cy0, 4.5, 0, TAU); g.fill(); g.strokeStyle = '#000'; g.lineWidth = 1; g.stroke(); }
+  runHooks('minimap', g, toM, S);
   if (P && P.grave && !G.under) { const [mx, my] = toM(P.grave.x, P.grave.y); if (mx > 4 && my > 4 && mx < S - 4 && my < S - 4) { g.fillStyle = '#c8c4bc'; g.beginPath(); g.moveTo(mx - 2.5, my + 3); g.lineTo(mx - 2.5, my - 1); g.arc(mx, my - 1, 2.5, Math.PI, 0); g.lineTo(mx + 2.5, my + 3); g.closePath(); g.fill(); } }
   if (G.mapWaypoint) { const [mx, my] = toM(G.mapWaypoint.x, G.mapWaypoint.y); g.strokeStyle = '#6ad0ff'; g.lineWidth = 2; g.beginPath(); g.arc(clamp(mx, 6, S - 6), clamp(my, 6, S - 6), 4, 0, TAU); g.stroke(); }
   g.save(); g.translate(S / 2, S / 2); g.rotate(P.face); g.fillStyle = '#fff'; g.strokeStyle = '#000'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(7, 0); g.lineTo(-5, -5); g.lineTo(-2, 0); g.lineTo(-5, 5); g.closePath(); g.fill(); g.stroke(); g.restore();
@@ -7898,6 +7915,7 @@ function drawBigMap() {
   if (G.wboss) { const [bx, by] = toS(G.wboss.x, G.wboss.y); const pul = 1 + Math.sin(performance.now() / 300) * .15; g.fillStyle = 'rgba(255,60,30,.25)'; circ(g, bx, by, 16 * dpr * pul); g.fillStyle = '#1a0e08'; circ(g, bx, by, 10 * dpr); g.fillStyle = '#ff5a2a'; g.font = `bold ${13 * dpr}px Georgia`; g.textAlign = 'center'; g.fillText(G.wboss.kind === 'wyvern' ? '⚡' : '⛰', bx, by + 5 * dpr); g.font = `italic ${11 * dpr}px 'EB Garamond', Georgia, serif`; g.lineWidth = 3 * dpr; g.strokeStyle = 'rgba(15,10,5,.85)'; g.strokeText(G.wboss.name, bx, by + 24 * dpr); g.fillStyle = '#ffb0a0'; g.fillText(G.wboss.name, bx, by + 24 * dpr); }
   if (P && P.grave && !G.under) { const [gx, gy] = toS(P.grave.x, P.grave.y); g.fillStyle = 'rgba(15,10,5,.8)'; circ(g, gx, gy, 9 * dpr); g.fillStyle = '#b8b4ac'; g.beginPath(); g.moveTo(gx - 4.5 * dpr, gy + 5 * dpr); g.lineTo(gx - 4.5 * dpr, gy - 1.5 * dpr); g.arc(gx, gy - 1.5 * dpr, 4.5 * dpr, Math.PI, 0); g.lineTo(gx + 4.5 * dpr, gy + 5 * dpr); g.closePath(); g.fill(); if (mapView.z >= 2.2) { g.font = `italic ${11 * dpr}px 'EB Garamond', Georgia, serif`; g.textAlign = 'center'; g.lineWidth = 3 * dpr; g.strokeStyle = 'rgba(15,10,5,.85)'; g.strokeText('Your last grave', gx, gy + 20 * dpr); g.fillStyle = '#d8d0c0'; g.fillText('Your last grave', gx, gy + 20 * dpr); } }
   (P.pins || []).forEach(pn => { const [sx, sy] = toS(pn.x, pn.y), [ic, col] = PIN_ICONS[pn.icon]; g.fillStyle = 'rgba(15,10,5,.8)'; circ(g, sx, sy, 11 * dpr); g.fillStyle = col; g.font = `bold ${14 * dpr}px Georgia`; g.fillText(ic, sx, sy + 5 * dpr); if (pn.text && mapView.z >= 2.2) { g.font = `italic ${11 * dpr}px 'EB Garamond', Georgia, serif`; g.lineWidth = 3 * dpr; g.strokeStyle = 'rgba(15,10,5,.85)'; g.strokeText(pn.text, sx, sy + 22 * dpr); g.fillStyle = '#f5e6bd'; g.fillText(pn.text, sx, sy + 22 * dpr); } });
+  runHooks('bigmap', g, toS, dpr);
   if (MAPF.player) { const [sx, sy] = toS(P.x, P.y); const pulse = 1 + Math.sin(performance.now() / 250) * .2; g.fillStyle = 'rgba(255,255,255,.25)'; circ(g, sx, sy, 14 * dpr * pulse); g.save(); g.translate(sx, sy); g.rotate(P.face); g.fillStyle = '#fff'; g.strokeStyle = '#000'; g.lineWidth = 2 * dpr; g.beginPath(); g.moveTo(11 * dpr, 0); g.lineTo(-7 * dpr, -7 * dpr); g.lineTo(-3 * dpr, 0); g.lineTo(-7 * dpr, 7 * dpr); g.closePath(); g.fill(); g.stroke(); g.restore(); }
   // compass
   g.save(); g.translate(w - 44 * dpr, 44 * dpr); g.fillStyle = 'rgba(20,14,8,.7)'; circ(g, 0, 0, 30 * dpr); g.fillStyle = '#d8b25a'; g.beginPath(); g.moveTo(0, -24 * dpr); g.lineTo(6 * dpr, 0); g.lineTo(0, 24 * dpr); g.lineTo(-6 * dpr, 0); g.fill(); g.fillStyle = '#f5e6bd'; g.font = `bold ${11 * dpr}px Cinzel,Georgia`; g.fillText('N', 0, -30 * dpr + 2); g.restore();
@@ -8156,13 +8174,13 @@ function drawCorpse(g, e) {
 }
 function drawLance(g, x, y, face, low) { g.save(); g.translate(x, y); g.rotate(face - (1 - (low || 0)) * .9); g.strokeStyle = '#d8c8a0'; g.lineWidth = 3.5; g.beginPath(); g.moveTo(-6, 0); g.lineTo(64, 0); g.stroke(); g.fillStyle = '#c8302a'; g.fillRect(6, -4, 8, 8); g.fillStyle = '#9ba1a8'; g.beginPath(); g.moveTo(64, -2.5); g.lineTo(72, 0); g.lineTo(64, 2.5); g.fill(); g.restore(); }
 function drawEntity(g, e, t) {
-  if ((e.jouster || e.racer) && !e.dead) { drawHorse(g, e.x, e.y + 2, e.face, ITEMS[e.horse || 'war_horse'], e.walk || 0, true, e.k); }
+  if ((e.jouster || e.racer || e.mounted) && !e.dead) { drawHorse(g, e.x, e.y + 2, e.face, ITEMS[e.horse || 'war_horse'], e.walk || 0, true, e.k); }
   if (e.jouster) drawLance(g, e.x, e.y - 6, e.face, .8);
   if (e.isPlayer) {
     if (P.dodge > 0) g.globalAlpha = .75;
     if (P.mounted || G.joust) drawHorse(g, P.x, P.y + 2, G.joust ? 0 : P.hface, P.S.horse || ITEMS.riding_horse, P.walk, true, P.allegiance);
-    if (G.joust) drawLance(g, P.x, P.y - 6, 0, G.joust.lance);
-    drawHuman(g, P.x, P.y - (P.mounted || G.joust ? 3 : 0), P.face, G.joust ? Object.assign({}, lookFor(P), { weapon: null }) : lookFor(P), { walk: P.walk, mounted: P.mounted || !!G.joust, flash: P.flash, blocking: P.blocking, draw: P.S.bow ? (P.drawing ? P.draw : 0) : undefined, arrowCol: P.S.bow && curAmmo() ? ITEMS[curAmmo()].col : null, swing: P.swing > 0 ? { p: 1 - P.swing / P.swingDur, dir: P.swingDir, arc: P.swingArc || P.S.arc } : null, trail: true, trailR: P.S.rng * .72 });
+    if (G.joust) drawLance(g, P.x, P.y - 6, 0, G.joust.lance); else if (P.S.wk === 'lance' && P.mounted) drawLance(g, P.x, P.y - 6, P.face, P.lanceLow || 0);
+    drawHuman(g, P.x, P.y - (P.mounted || G.joust ? 3 : 0), P.face, G.joust || (P.S.wk === 'lance' && P.mounted) ? Object.assign({}, lookFor(P), { weapon: null }) : lookFor(P), { walk: P.walk, mounted: P.mounted || !!G.joust, flash: P.flash, blocking: P.blocking, draw: P.S.bow ? (P.drawing ? P.draw : 0) : undefined, arrowCol: P.S.bow && curAmmo() ? ITEMS[curAmmo()].col : null, swing: P.swing > 0 ? { p: 1 - P.swing / P.swingDur, dir: P.swingDir, arc: P.swingArc || P.S.arc } : null, trail: true, trailR: P.S.rng * .72 });
     g.globalAlpha = 1;
     if (P.chillT > 0) { g.strokeStyle = 'rgba(200,240,255,.7)'; g.lineWidth = 2; g.beginPath(); g.arc(P.x, P.y, 15, 0, TAU); g.stroke(); }
     if (P.webbed > 0) { g.strokeStyle = 'rgba(230,230,225,.5)'; g.lineWidth = 1; for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; g.beginPath(); g.moveTo(P.x, P.y); g.lineTo(P.x + Math.cos(a) * 16, P.y + Math.sin(a) * 16); g.stroke(); } }
@@ -8184,7 +8202,7 @@ function drawEntityBody(g, e, t) {
   if (e.animal) { drawAnimal(g, e); statusTint(g, e); return; }
   if (e.cart) drawCart(g, e);
   if (e.ally) { g.strokeStyle = 'rgba(106,208,255,.7)'; g.lineWidth = 2; g.beginPath(); g.ellipse(e.x, e.y + 8, 14, 6, 0, 0, TAU); g.stroke(); }
-  const ho = { walk: e.walk, flash: e.flash, swing: e.swing > 0 ? { p: 1 - e.swing / .22, dir: 1, arc: 1.8 } : null, wind: e.wind, blocking: e.guard && !(e.guardBroken > 0) && !(e.stun > 0) && !(e.swing > 0), mounted: !!(e.jouster || e.racer) };
+  const ho = { walk: e.walk, flash: e.flash, swing: e.swing > 0 ? { p: 1 - e.swing / .22, dir: 1, arc: 1.8 } : null, wind: e.wind, blocking: e.guard && !(e.guardBroken > 0) && !(e.stun > 0) && !(e.swing > 0), mounted: !!(e.jouster || e.racer || e.mounted) };
   if (e.scale) { g.save(); g.translate(e.x, e.y); g.scale(e.scale, e.scale); drawHuman(g, 0, 0, e.face, lookFor(e), ho); g.restore(); }
   else drawHuman(g, e.x, e.y - (ho.mounted ? 3 : 0), e.face, lookFor(e), ho);
   statusTint(g, e);
@@ -8534,7 +8552,7 @@ function pollPad() {
     input.lmb = b(7); input.rmb = b(6);
     if (press(0)) tryDodge(); if (press(2)) doInteract(); if (press(1)) toggleMount(); if (press(3)) swapWeapons(); if (press(4)) cycleAmmo();
     runHooks('pad', b, press);
-    if (press(11)) useSpecial(); if (press(10)) toggleParty(); if (press(8)) UI.toggle('map'); if (press(9)) UI.open('pause');
+    if (press(11)) useSpecial(); if (press(10)) { if (warband().length > 1) ordersMenu(); else toggleParty(); } if (press(8)) UI.toggle('map'); if (press(9)) UI.open('pause');
   }
   PAD.prevUp = ly < -.6; PAD.prevDn = ly > .6; PAD.prev = gp.buttons.map(x => x.pressed);
 }
@@ -8598,7 +8616,7 @@ document.addEventListener('click', e => { if (TOUCH.on && e.target.closest && e.
   hold('tAtk', () => { input.lmb = true; input.clicked = true; }, () => { input.lmb = false; });
   hold('tBlk', () => { input.rmb = true; }, () => { input.rmb = false; });
   tap('tDodge', tryDodge); tap('tSpec', useSpecial); tap('tUse', doInteract); tap('tHorse', toggleMount); tap('tSwap', swapWeapons); tap('tAmmo', cycleAmmo);
-  tap('tEat', () => quickUse('food')); tap('tPot', () => quickUse('potion')); tap('tParty', toggleParty); tap('tTonic', quickTonic);
+  tap('tEat', () => quickUse('food')); tap('tPot', () => quickUse('potion')); tap('tParty', () => { if (warband().length > 1) ordersMenu(); else toggleParty(); }); tap('tTonic', quickTonic);
   { let hT = null, held = false; const b = $('tCast'); b.addEventListener('touchstart', ev => { ev.preventDefault(); held = false; hT = setTimeout(() => { held = true; if (knowsMagic()) { const n = P.slots.filter(Boolean).length; if (n) { do P.selSlot = ((P.selSlot || 0) + 1) % 4; while (!P.slots[P.selSlot]); SND.play('ui'); toast(`Spell: <b>${SPELLS[P.slots[P.selSlot]].n}</b>`); updateHUD(true); } } }, 450); }, { passive: false }); b.addEventListener('touchend', ev => { ev.preventDefault(); clearTimeout(hT); if (!held) castSlot(P.selSlot || 0); }, { passive: false }); }
   tap('tSprint', () => { TOUCH.sprint = !TOUCH.sprint; });
   hold('tFull', () => { if (document.fullscreenElement) { try { document.exitFullscreen(); } catch (e) { } } else tryFullscreen(); }, () => { });
@@ -8792,7 +8810,7 @@ function storyToSandbox() { if (G.mode !== 'story') return; G.mode = 'sandbox'; 
 $('btnEndMenu').onclick = () => { UI.hide('endScreen'); toMainMenu(); };
 
 function withLoading(text, fn) { $('loadText').textContent = text; $('loading').classList.remove('done'); setTimeout(() => { try { fn(); } finally { $('loading').classList.add('done'); } }, 60); }
-function prepareWorld(seed, opts = normOpts()) { setWorldSize(SIZES[opts.size].n); genWorld(seed, opts.gen || 1); applyStartKingdom(opts.kingdom); buildPalette(); buildTreeSprites(); buildMapLayers(); chunkCache.clear(); }
+function prepareWorld(seed, opts = normOpts()) { setWorldSize(SIZES[opts.size].n); genWorld(seed, opts.gen || 1); W.own0 = W.own.slice(); applyStartKingdom(opts.kingdom); buildPalette(); buildTreeSprites(); buildMapLayers(); chunkCache.clear(); }
 function resetState() {
   G.under = null; G.over = null;
   ents = []; pickups = []; projs = []; parts = []; texts = []; horseEnt = null; uidCounter = 1; nextEid = 1;
@@ -11811,6 +11829,319 @@ hook('recalc', () => {
   if (age >= 50) { P.maxHp = Math.round(P.maxHp * Math.max(.75, 1 - .012 * (age - 49))); P.maxSt = Math.round(P.maxSt * Math.max(.7, 1 - .015 * (age - 49))); }
   const sp = P.spouse; if (sp && sp.arch === 'scholar' && knowsMagic()) { P.maxMp += 20; P.S.sp += .08; }
 });
+
+/* =====================================================================
+   ARMIES — field armies that march on the roads, open battles, sieges of
+   villages, warlords, territory that changes hands, your own warband
+   with battle orders, mounted soldiers and the couched lance.
+   Armies are abstract (a position, a strength and a goal) until you come
+   near; then they take the field as real soldiers.
+   ===================================================================== */
+const ARMY_SPD = 22, ARMY_SEE = 1500, ARMY_GONE = 2700, ARMY_UNITS = 14;
+const WL_EPI = ['the Iron', 'the Bold', 'Red-Hand', 'the Butcher', 'the Unbroken', 'Oathbreaker', 'the Lion', 'Crow-Feeder', 'the Wall', 'Grey-Cloak', 'the Hammer', 'Storm-Born'];
+Object.assign(ATYPES, {
+  cavalry: { name: 'Mounted Knight', hp: 150, dmg: 20, spd: 175, range: 46, cd: 1.3, wind: .4, faction: 'k', xp: 40, gold: [12, 30], r: 12 },
+  crossbow: { name: 'Crossbowman', hp: 70, dmg: 17, spd: 100, range: 360, cd: 2.6, wind: .6, faction: 'k', xp: 22, gold: [6, 16], r: 11, ranged: true },
+  battlemage: { name: 'Battle Mage', hp: 70, dmg: 15, spd: 100, range: 320, cd: 2, wind: .5, faction: 'k', xp: 30, gold: [8, 20], r: 11, ranged: true, caster: 'ember' },
+});
+Object.assign(HIRE, { crossbow: { n: 'Crossbowman', cost: 110, up: 9 }, cavalry: { n: 'Mounted Knight', cost: 380, up: 26, rep: 40 }, battlemage: { n: 'Battle Mage', cost: 320, up: 22, rep: 30 } });
+MAGIC_LOOK.battlemage = { body: '#5a3a2a', mail: 1, head: 'hood', hood: '#3a2418', skin: '#e0b890', weapon: { wk: 'staff', len: 40, col: '#ff8a3a', glow: '#ff8a3a' } };
+const armyLook = (kind, k) => { const kc = KDATA[k] ? KDATA[k].color : '#777'; if (kind === 'cavalry') return { body: '#c8ced4', shiny: 1, head: 'great', plume: kc, pauld: 1, skin: '#e0b48a', tabard: kc, cape: kc, weapon: { wk: 'spear', len: 52, col: '#e2e8ee' }, shield: { b: ITEMS.knight_shield, col: kc } }; if (kind === 'crossbow') return { body: '#8e8464', mail: 1, head: 'helm', skin: '#e0b48a', tabard: kc, weapon: { wk: 'xbow', len: 18, col: '#5a3a22' } }; return null; };
+
+/* ---------------- Territory: land follows its villages ---------------- */
+const CLAIM_R = { castle: 34, village: 17, outpost: 12 };
+let terrSig = '';
+function recomputeTerritory(force) {
+  if (!W || !W.own0 || G.under) return;
+  const claims = W.places.filter(p => CLAIM_R[p.type]), sig = claims.map(p => p.owner).join(','); if (!force && sig === terrSig) return; terrSig = sig;
+  W.own.set(W.own0);
+  for (const p of claims) {
+    if (p.owner === p.k || p.owner == null) continue; const R = CLAIM_R[p.type], mates = claims.filter(q => q.k === p.k);
+    for (let y = Math.max(0, p.ty - R); y <= Math.min(WH - 1, p.ty + R); y++) for (let x = Math.max(0, p.tx - R); x <= Math.min(WW - 1, p.tx + R); x++) {
+      const dx = x - p.tx, dy = y - p.ty, d2 = dx * dx + dy * dy; if (d2 > R * R) continue; const i = y * WW + x; if (W.own0[i] !== p.k) continue;
+      let best = null, bd = 1e9; for (const q of mates) { const e2 = (q.tx - x) ** 2 + (q.ty - y) ** 2 - (q.type === 'castle' ? 300 : 0); if (e2 < bd) { bd = e2; best = q; } }
+      if (best === p) W.own[i] = p.owner;
+    }
+  }
+  W.landCount = W.landCount.map(() => 0); for (let i = 0; i < WW * WH; i++) if (!TINFO[W.ter[i]].block && W.landCount[W.own[i]] != null) W.landCount[W.own[i]]++;
+  chunkCache.clear(); buildMapLayers(); G.curOwner = -2; dipDirty = true;
+}
+function setOwner(p, k, why) {
+  const old = p.owner; if (old === k) return; p.owner = k; if (p.spawned) despawnPlace(p);
+  if (P.fief && P.fief.v === p.id && k !== P.allegiance && (!G.realm || k !== 4)) { toast(`⚔ Your fief of <b>${p.name}</b> has fallen to ${KDATA[k].name}! Win it back, or lose its income.`, 'war', bannerURL(k)); P.fief.seized = k; }
+  if (P.fief && P.fief.v === p.id && (k === P.allegiance || (G.realm && k === 4))) P.fief.seized = null;
+  recomputeTerritory(); runHooks('owner', p, old, k);
+}
+
+/* ---------------- The armies ---------------- */
+function armyName(a) { return a.k === 'rebel' ? `Rebel host of ${a.rebelOf ? KDATA[a.rebelOf].name : 'the commons'}` : `${KDATA[a.k] ? KDATA[a.k].name : 'A'} army`; }
+const armyCol = a => a.k === 'rebel' ? '#8a7a5a' : kcol(a.k);
+const aHost = (a, b) => a.k !== b.k && (a.k === 'rebel' ? b.k === a.rebelOf : b.k === 'rebel' ? a.k === b.rebelOf : relStatus(a.k, b.k).n === 'At War');
+function newWarlord(k) {
+  const fem = chance(.3) ? 1 : 0, first = NAMES.first.filter((n, i) => i % 2 === fem)[randi(0, 13)];
+  const w = { id: (G.wlN = (G.wlN || 0) + 1), k, name: `${fem ? 'Lady' : 'Lord'} ${first}`, fem, epi: pick(WL_EPI), wins: 0, losses: 0, alive: true, metP: 0 };
+  (G.warlords = G.warlords || []).push(w); return w;
+}
+const wlName = w => w ? `${w.name} ${w.epi}` : 'a captain';
+function raiseArmy(k, target, goal, o = {}) {
+  const home = k === 'rebel' ? W.places[o.from] : k === 4 && G.realm ? W.places[G.realm.seat] : W.places[k];
+  if (!home || !target) return null;
+  const str = o.str || clamp(Math.round((K.mil[k] || 3000) / 110), 18, 70);
+  if (k !== 'rebel' && K.mil[k] != null) K.mil[k] = Math.max(400, K.mil[k] - str * 25);
+  const wl = (G.warlords || []).find(w => w.k === k && w.alive && !(G.armies || []).some(a => a.wl === w.id)) || newWarlord(k);
+  const a = { id: (G.armyN = (G.armyN || 0) + 1), k, str, str0: str, x: home.x, y: home.y + 3 * TS, goal, target: target.id, tx: target.x, ty: target.y, path: null, pi: 0, state: 'march', morale: 100, siegeT: 0, wl: wl.id, born: dayNum(), rebelOf: o.rebelOf, player: !!o.player };
+  a.path = roadPath({ x: a.x, y: a.y }, { x: target.x, y: target.y + TS }) || [[target.x, target.y]];
+  (G.armies = G.armies || []).push(a);
+  if (k !== 'rebel' && goal === 'siege' && !o.quiet) {
+    const t = `${KDATA[k].name} marches on ${target.name} under ${wlName(wl)} (${str} strong).`; logEvent(t, [k, target.owner]);
+    if (dist(P.x, P.y, target.x, target.y) < 120 * TS || P.allegiance === k || P.allegiance === target.owner) toast(`⚔ ${t} ${P.allegiance === k ? 'Ride with them, and your liege will remember it.' : P.allegiance === target.owner ? 'Your liege needs every sword to stop them!' : ''}`, 'war', bannerURL(k));
+  }
+  return a;
+}
+function armyTargets(k) { // enemy-held places, nearest to the army's capital first
+  const cap = k === 4 && G.realm ? W.places[G.realm.seat] : W.places[k], foes = KIDS().filter(j => j !== k && relStatus(k, j).n === 'At War');
+  if (!foes.length || !cap) return [];
+  return W.places.filter(p => (p.type === 'outpost' || (p.type === 'village' && !(STORY && storyOn())) || (p.type === 'castle' && CONQUEST_ON())) && foes.includes(p.owner) && !(G.armies || []).some(a => a.target === p.id && a.k === k))
+    .sort((a, b) => dist(a.x, a.y, cap.x, cap.y) * (a.type === 'castle' ? 2.2 : a.type === 'village' ? 1 : .8) - dist(b.x, b.y, cap.x, cap.y) * (b.type === 'castle' ? 2.2 : b.type === 'village' ? 1 : .8));
+}
+const CONQUEST_ON = () => !!(G.realm && G.realm.founded) || !!(G.opts && G.opts.conquest);
+function armyDaily(day) {
+  if (G.mode === 'road') return; G.armies = G.armies || [];
+  for (const k of KIDS()) {
+    if (k === 4) continue; // your own realm's armies march when you order them
+    const mine = G.armies.filter(a => a.k === k), atWar = KIDS().some(j => j !== k && relStatus(k, j).n === 'At War');
+    if (!atWar) { mine.forEach(a => { if (a.goal !== 'return') { a.goal = 'return'; retarget(a, W.places[k]); } }); continue; }
+    if (mine.length < 2 && K.mil[k] > K.milBase[k] * .55 && chance(.35)) { const t = armyTargets(k)[0]; if (t && dist(t.x, t.y, W.places[k].x, W.places[k].y) < 230 * TS) raiseArmy(k, t, 'siege'); }
+  }
+  // armies that have wandered too long go home and disband
+  G.armies.forEach(a => { if (day - a.born > 14 && a.goal !== 'return') { a.goal = 'return'; retarget(a, a.k === 'rebel' ? null : W.places[a.k] || null); } });
+}
+function retarget(a, place) {
+  if (!place) { a.gone = true; return; }
+  a.target = place.id; a.tx = place.x; a.ty = place.y; a.state = 'march'; a.siegeT = 0;
+  a.path = roadPath({ x: a.x, y: a.y }, { x: place.x, y: place.y + TS }) || [[place.x, place.y]]; a.pi = 0;
+}
+function armyUnits(a) { return ents.filter(e => e.army === a.id && !e.dead); }
+function armyTick() {
+  if (!G.armies || !G.armies.length || G.mode === 'road') return;
+  for (const a of G.armies) {
+    if (a.gone) continue;
+    const mat = a.mat, units = mat ? armyUnits(a) : null;
+    if (mat) { // on the field: the leader's position is the army's
+      const lead = units.find(e => e.armyLead) || units[0];
+      if (lead) { a.x = lead.x; a.y = lead.y; } a.str = Math.max(0, Math.round(a.matStr * units.length / Math.max(1, a.matN)));
+      const lost = 1 - units.length / Math.max(1, a.matN); a.morale = clamp(100 - lost * 110 - (a.leadDead ? 25 : 0), 0, 100);
+      if (!units.length || (a.morale < 30 && !a.routed)) { armyRout(a); continue; }
+      if (dist(P.x, P.y, a.x, a.y) > ARMY_GONE && !(G.battle && (G.battle.a === a.id || G.battle.b === a.id))) dematerialize(a);
+    } else if (a.state === 'march') {
+      let step = ARMY_SPD * (a.routed ? 1.3 : 1);
+      while (step > 0 && a.path && a.pi < a.path.length) { const [wx, wy] = a.path[a.pi], d = dist(a.x, a.y, wx, wy); if (d <= step) { a.x = wx; a.y = wy; a.pi++; step -= d; } else { a.x += (wx - a.x) / d * step; a.y += (wy - a.y) / d * step; step = 0; } }
+      if (!a.path || a.pi >= a.path.length) armyArrive(a);
+    } else if (a.state === 'siege') armySiegeTick(a);
+    if (!a.mat && !G.under && G.state === 'play' && dist(P.x, P.y, a.x, a.y) < ARMY_SEE && a.str > 0) materialize(a);
+  }
+  // armies that meet in the field fight
+  for (let i = 0; i < G.armies.length; i++) for (let j = i + 1; j < G.armies.length; j++) {
+    const a = G.armies[i], b = G.armies[j]; if (a.gone || b.gone || a.routed || b.routed || !aHost(a, b) || dist(a.x, a.y, b.x, b.y) > 260) continue;
+    if (a.mat || b.mat) { if (!a.mat) materialize(a); if (!b.mat) materialize(b); if (!G.battle) startBattle(a, b); }
+    else abstractBattle(a, b);
+  }
+  G.armies = G.armies.filter(a => !a.gone && (a.str > 3 || a.mat));
+}
+function armyArrive(a) {
+  const p = W.places[a.target];
+  if (a.goal === 'return' || !p) { if (a.k !== 'rebel' && K.mil[a.k] != null) K.mil[a.k] += a.str * 18; a.gone = true; return; }
+  if (a.goal === 'siege') { if (!aOwnsFoe(a, p)) { const nx = armyTargets(a.k)[0]; if (nx && a.str > 16) retarget(a, nx); else { a.goal = 'return'; retarget(a, W.places[a.k] || null); } return; } a.state = 'siege'; a.siegeT = 0; }
+}
+const aOwnsFoe = (a, p) => a.k === 'rebel' ? p.owner === a.rebelOf : p.owner !== a.k && relStatus(a.k, p.owner).n === 'At War';
+const SIEGE_NEED = { outpost: 80, village: 110, castle: 360 }, SIEGE_DEF = { outpost: 14, village: 12, castle: 70 };
+function armySiegeTick(a) {
+  const p = W.places[a.target]; if (!p || !aOwnsFoe(a, p)) { armyArrive(a); return; }
+  const near = dist(P.x, P.y, p.x, p.y) < 1400;
+  if (near && !G.siege && !G.under && G.state === 'play') { if (!a.mat) materialize(a); startArmySiege(a, p); return; }
+  if (G.siege && G.siege.army === a.id) return;
+  a.siegeT++; const def = SIEGE_DEF[p.type] + (p.type === 'castle' ? (K.mil[p.owner] || 3000) / 120 : 0);
+  a.str = Math.max(0, Math.round((a.str - def * .006) * 100) / 100);
+  if (a.siegeT >= SIEGE_NEED[p.type]) {
+    if (a.str * rand(.8, 1.3) > def) captureByArmy(a, p); else { const t = `${p.name} held against ${armyName(a)}.`; logEvent(t, a.k === 'rebel' ? [p.owner] : [a.k, p.owner]); a.goal = 'return'; retarget(a, a.k === 'rebel' ? null : W.places[a.k]); }
+  }
+}
+function captureByArmy(a, p) {
+  const from = p.owner, to = a.k === 'rebel' ? (G.realm && G.realm.founded && a.forRealm ? 4 : from) : a.k;
+  if (to === from) { K.unrest[from] = clamp((K.unrest[from] || 20) - 20, 0, 100); logEvent(`Rebels sacked ${p.name}.`, [from]); a.goal = 'return'; retarget(a, null); return; }
+  setOwner(p, to); if (K.mil[from] != null) K.mil[from] -= p.type === 'castle' ? 900 : 200;
+  const wl = (G.warlords || []).find(w => w.id === a.wl); if (wl) { wl.wins++; }
+  const t = `${KDATA[to].name} took ${p.name} from ${KDATA[from].name}${wl ? `, led by ${wlName(wl)}` : ''}.`; pairEvent(to, from, t); toast('⚔ ' + t, 'war', bannerURL(to)); SND.play('horn');
+  runHooks('captured', p, from, to, a);
+  const nx = armyTargets(a.k)[0]; if (nx && a.str > 20 && dist(nx.x, nx.y, a.x, a.y) < 90 * TS) retarget(a, nx); else { a.goal = 'return'; retarget(a, W.places[a.k] || null); }
+}
+function abstractBattle(a, b) {
+  const pa = a.str * rand(.7, 1.3) * (a.morale / 100 + .5), pb = b.str * rand(.7, 1.3) * (b.morale / 100 + .5), [win, lose] = pa >= pb ? [a, b] : [b, a];
+  const ratio = Math.min(pa, pb) / Math.max(pa, pb);
+  lose.str = Math.round(lose.str * rand(.25, .5)); win.str = Math.round(win.str * (1 - rand(.1, .35) * (ratio + .3)));
+  const wlw = (G.warlords || []).find(w => w.id === win.wl), wll = (G.warlords || []).find(w => w.id === lose.wl);
+  if (wlw) wlw.wins++; if (wll) { wll.losses++; if (chance(.25)) { wll.alive = false; logEvent(`${wlName(wll)} fell in battle.`, []); } }
+  const where = nearestPlace(a.x, a.y, p => p.type === 'village' || p.type === 'castle' || p.type === 'outpost');
+  const t = `The ${armyName(win)} routed the ${armyName(lose)}${where ? ` near ${where.name}` : ''}.`; logEvent(t, [win.k, lose.k].filter(k => typeof k === 'number'));
+  if (P.allegiance === win.k || P.allegiance === lose.k || dist(P.x, P.y, a.x, a.y) < 90 * TS) toast('⚔ ' + t, 'war', typeof win.k === 'number' ? bannerURL(win.k) : null);
+  if (typeof win.k === 'number' && typeof lose.k === 'number') addRel(win.k, lose.k, -4, 'Pitched battles');
+  lose.routed = true; lose.goal = 'return'; retarget(lose, typeof lose.k === 'number' ? W.places[lose.k] : null);
+}
+
+/* ---------------- Taking the field ---------------- */
+function materialize(a) {
+  if (a.mat) return; const n = clamp(Math.round(a.str / 4), 3, ARMY_UNITS), k = a.k === 'rebel' ? null : a.k;
+  a.mat = true; a.matN = n; a.matStr = a.str; a.leadDead = false;
+  const wl = (G.warlords || []).find(w => w.id === a.wl), per = a.str / n, tier = clamp(1 + Math.floor((a.str / n) / 2), 1, 4);
+  const face = a.path && a.path[a.pi] ? Math.atan2(a.path[a.pi][1] - a.y, a.path[a.pi][0] - a.x) : 0;
+  let lead = null;
+  for (let i = 0; i < n; i++) {
+    const kind = a.k === 'rebel' ? (i === 0 ? 'leader' : i % 4 === 0 ? 'archer' : 'bandit') : i === 0 ? (chance(.5) ? 'cavalry' : 'knight') : i % 5 === 0 ? 'cavalry' : i % 4 === 0 ? 'crossbow' : i % 3 === 0 ? 'bowman' : i % 7 === 0 ? 'knight' : 'soldier';
+    const row = Math.floor(i / 5), col = i % 5 - 2, ox = -Math.cos(face) * row * 34 - Math.sin(face) * col * 30, oy = -Math.sin(face) * row * 34 + Math.cos(face) * col * 30;
+    const f = findFree(a.x + ox, a.y + oy);
+    const e = mkActor(kind, f.x, f.y, Object.assign({ army: a.id, tier, roam: true, aggro: 420, leash: 2400, home: { x: f.x, y: f.y }, _look: armyLook(kind, k), mounted: kind === 'cavalry' }, k != null ? { k } : { faction: 'bandit', name: 'Rebel', rebel: a.rebelOf, questFoe: false }));
+    if (i === 0) { lead = e; e.armyLead = true; e.boss = true; e.name = wl ? wlName(wl) : e.name; e.hp = e.maxHp = Math.round(e.maxHp * 2.2); e.wl = a.wl; }
+    else { e.followE = lead; e.follow = true; e.followDist = 40 + row * 30; e.fox = ox; e.foy = oy; }
+    if (a.player) { e.ally = true; }
+  }
+  if (lead && a.state === 'march' && a.path) { lead.path = a.path.slice(a.pi); lead.pi = 0; lead.pathSpd = .55; }
+  if (a.routed) armyUnits(a).forEach(e => { e.flee = 99; e.fleeFrom = P; });
+  if (wl && a.k !== P.allegiance && !a.player && !wl.metP && typeof a.k === 'number' && (P.allegiance == null || relStatus(a.k, P.allegiance).n === 'At War')) { wl.metP = 1; setTimeout(() => { if (lead && !lead.dead) lead.say = { text: pick(['Hold the line!', 'For the crown!', `Who is that knight? Take ${P.fem ? 'her' : 'him'} alive!`, 'Forward!']), t: 3 }; }, 1200); }
+}
+function dematerialize(a) {
+  const units = armyUnits(a); a.str = Math.max(0, Math.round(a.matStr * units.length / Math.max(1, a.matN)));
+  units.forEach(e => removeEnt(e)); a.mat = false; if (a.str < 3) a.gone = true;
+  if (a.state === 'march' && a.path) { let best = a.pi, bd = 1e12; for (let i = a.pi; i < a.path.length; i++) { const d = dist(a.x, a.y, a.path[i][0], a.path[i][1]); if (d < bd) { bd = d; best = i; } } a.pi = best; }
+}
+function armyRout(a) {
+  a.routed = true; a.morale = 0; const units = armyUnits(a);
+  units.forEach(e => { e.flee = 30; e.fleeFrom = P; e.transient = true; e.follow = false; e.followE = null; e.path = null; });
+  const wl = (G.warlords || []).find(w => w.id === a.wl); if (wl) wl.losses++;
+  const name = armyName(a); toast(`🏳 The ${name} breaks and flees!`, 'good'); logEvent(`The ${name} was routed${wl ? `, and ${wlName(wl)} ${a.leadDead ? 'lay dead on the field' : 'fled the field'}` : ''}.`, typeof a.k === 'number' ? [a.k] : []);
+  if (G.battle && (G.battle.a === a.id || G.battle.b === a.id)) endBattle(a);
+  if (G.siege && G.siege.army === a.id) endSiege(false);
+  a.goal = 'return'; a.state = 'march'; a.path = null; a.str = Math.round(units.length / Math.max(1, a.matN) * a.matStr * .6);
+  setTimeout(() => { if (a.mat) { armyUnits(a).forEach(e => { if (dist(e.x, e.y, P.x, P.y) > 700) removeEnt(e); }); a.mat = false; retarget(a, typeof a.k === 'number' ? W.places[a.k] : null); } }, 12000);
+}
+function startArmySiege(a, p) {
+  const def = p.owner; G.siege = { o: p.id, att: a.k === 'rebel' ? 'rebel' : a.k, def, t: 0, prog: 0, pk: { att: 0, def: 0 }, army: a.id };
+  armyUnits(a).forEach(e => { e.siege = 'att'; e.foeOf = def; e.follow = false; e.followE = null; e.path = null; e.home = { x: p.x, y: p.y + TS }; e.leash = 400; e.roam = true; });
+  if (!p.spawned) spawnPlace(p);
+  ents.forEach(e => { if (e.place === p.id && e.faction === 'k' + def) { e.siege = 'def'; if (typeof a.k === 'number') e.foeOf = a.k; } });
+  for (let i = 0; i < (p.type === 'village' ? 3 : 4); i++) { const f = findFree(p.x + rand(-60, 60), p.y + rand(-30, 90)); mkActor(i < 1 ? 'bowman' : 'soldier', f.x, f.y, { k: def, siege: 'def', foeOf: typeof a.k === 'number' ? a.k : null, home: { x: p.x, y: p.y + TS }, leash: 220, aggro: 380, transient: true }); }
+  const wl = (G.warlords || []).find(w => w.id === a.wl);
+  toast(`⚔ <b>${armyName(a)}</b>${wl ? ` under ${wlName(wl)}` : ''} is storming <b>${p.name}</b>! ${P.allegiance === a.k ? 'Your liege\'s banners: fight with them!' : P.allegiance === def ? 'Defend it for your liege!' : 'Choose a side, or stay clear.'}`, 'war', typeof a.k === 'number' ? bannerURL(a.k) : null); SND.play('horn');
+}
+// the old siege system ends army sieges too
+function armySiegeEnded(S, taken) {
+  const a = (G.armies || []).find(x => x.id === S.army); if (!a) return; const p = W.places[S.o];
+  if (taken) { if (a.k === 'rebel') { captureByArmy(a, p); } else { runHooks('captured', p, S.def, a.k, a); const nx = armyTargets(a.k)[0]; if (nx && armyUnits(a).length > 5) { a.state = 'march'; armyUnits(a).forEach(e => { e.siege = null; e.foeOf = null; }); dematerialize(a); retarget(a, nx); } else { a.goal = 'return'; a.state = 'march'; dematerialize(a); retarget(a, W.places[a.k] || null); } } }
+  else if (!a.routed) { a.goal = 'return'; a.state = 'march'; dematerialize(a); retarget(a, typeof a.k === 'number' ? W.places[a.k] : null); }
+}
+
+/* ---------------- Open battle ---------------- */
+function startBattle(a, b) {
+  G.battle = { a: a.id, b: b.id, t: 0, pk: 0, start: { a: a.str, b: b.str } };
+  const where = nearestPlace(a.x, a.y, p => p.type === 'village' || p.type === 'castle' || p.type === 'outpost');
+  const t = `Battle${where ? ` near ${where.name}` : ''}: ${armyName(a)} against ${armyName(b)}!`; toast('⚔ ' + t + (P.allegiance === a.k || P.allegiance === b.k ? ' Your liege\'s banners are on the field.' : ''), 'war'); SND.play('horn'); SND.play('battlecry');
+  armyUnits(a).concat(armyUnits(b)).forEach(e => { e.follow = false; e.followE = null; e.path = null; e.aggro = 700; e.roam = true; e.home = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; e.leash = 1600; });
+  G.stats.battles = (G.stats.battles || 0) + 1;
+}
+function endBattle(loser) {
+  const B = G.battle; if (!B) return; G.battle = null; const A = G.armies.find(x => x.id === B.a), Bb = G.armies.find(x => x.id === B.b), win = loser === A ? Bb : A;
+  if (!win) return; const wl = (G.warlords || []).find(w => w.id === win.wl); if (wl) wl.wins++;
+  win.morale = Math.min(100, win.morale + 20);
+  if (B.pk >= 3 && typeof win.k === 'number' && (P.allegiance === win.k || B.side === win.id)) { addRep(win.k, 6 + Math.min(10, B.pk), 'Fought in the battle'); gainXP(60 + B.pk * 10); G.stats.battlesWon = (G.stats.battlesWon || 0) + 1; toast(`Victory! ${KDATA[win.k].name} will remember the knight who fought in the front rank.`, 'gold'); }
+  if (typeof win.k === 'number' && typeof loser.k === 'number') addRel(win.k, loser.k, -5, 'Pitched battles');
+  setTimeout(() => { if (win.mat && G.state === 'play') { const units = armyUnits(win), lead = units.find(e => e.armyLead) || units[0]; units.forEach(e => { if (e !== lead) { e.followE = lead; e.follow = true; } }); if (lead && win.path && win.state === 'march') { lead.path = win.path.slice(win.pi); lead.pi = 0; } } }, 4000);
+}
+function battleHUD() {
+  const B = G.battle; let show = false;
+  if (B) { const a = G.armies.find(x => x.id === B.a), b = G.armies.find(x => x.id === B.b); if (a && b && dist(P.x, P.y, a.x, a.y) < 1600) { show = true; setIf('btA', `${armyName(a)}|${Math.round(a.morale)}|${armyName(b)}|${Math.round(b.morale)}`, () => { $('btAn').textContent = armyName(a); $('btBn').textContent = armyName(b); $('btAf').style.width = a.morale + '%'; $('btBf').style.width = b.morale + '%'; $('btAf').style.background = armyCol(a); $('btBf').style.background = armyCol(b); }); } }
+  setIf('btOn', show, v => $('battleBar').classList.toggle('hidden', !v));
+}
+function battleTick(dt) {
+  const B = G.battle; if (!B) return; B.t += dt;
+  const a = G.armies.find(x => x.id === B.a), b = G.armies.find(x => x.id === B.b);
+  if (!a || !b || a.gone || b.gone) { G.battle = null; return; }
+  if ((B.seekT = (B.seekT || 0) - dt) <= 0) { B.seekT = 1; const ua = armyUnits(a), ub = armyUnits(b); [[ua, ub], [ub, ua]].forEach(([us, them]) => us.forEach(e => { if (e.target && !e.target.dead) return; if (e.flee > 0) return; let best = null, bd = 1e9; them.forEach(o => { const d = dist(e.x, e.y, o.x, o.y); if (d < bd) { bd = d; best = o; } }); if (best) { e.target = best; e.aggro = Math.max(e.aggro, bd + 100); e.home = { x: best.x, y: best.y }; e.leash = Math.max(e.leash, bd + 400); } })); }
+  if (B.t > 360) { endBattle(a.str < b.str ? a : b); (a.str < b.str ? a : b).routed = true; }
+}
+
+/* ---------------- Your warband: orders ---------------- */
+const ORDERS = { follow: 'Follow me', hold: 'Hold this ground', charge: 'Charge!', wall: 'Shield wall', fire: 'Loose at will', hold_fire: 'Hold your fire' };
+function warband() { return partyNow().filter(e => !e.dead); }
+function giveOrder(o) {
+  const band = warband(); if (!band.length) { toast('You have no one to command. Captains in the castles hire soldiers.'); return; }
+  const f = P.face, per = [Math.cos(f + Math.PI / 2), Math.sin(f + Math.PI / 2)];
+  band.forEach((e, i) => {
+    if (o === 'follow') { setFollow(e, true); e.charge = false; e.wall = false; e.guard = !!ATYPES[e.kind].guard; e.aggro = 360; }
+    else if (o === 'hold' || o === 'wall') { const col = i - (band.length - 1) / 2, x = P.x + Math.cos(f) * 50 + per[0] * col * 32, y = P.y + Math.sin(f) * 50 + per[1] * col * 32; const s = findFree(x, y); e.follow = false; e.home = { x: s.x, y: s.y }; e.wanderR = 6; e.leash = o === 'wall' ? 140 : 360; e.charge = false; e.wall = o === 'wall'; if (o === 'wall' && !e.ranged) { e.guard = true; e.standFace = f; } e.aggro = o === 'wall' ? 200 : 360; }
+    else if (o === 'charge') { e.follow = false; e.charge = true; e.wall = false; e.aggro = 900; e.leash = 1800; e.home = { x: P.x + Math.cos(f) * 400, y: P.y + Math.sin(f) * 400 }; e.roam = true; e.target = nearestHostile(e, 900); }
+    else if (o === 'fire' || o === 'hold_fire') { if (e.ranged) e.holdFire = o === 'hold_fire'; }
+  });
+  P.order = o; SND.play(o === 'charge' ? 'battlecry' : 'horn');
+  addText(P.x, P.y - 40, ORDERS[o], '#ffe08a', 15); toast(`<b>${ORDERS[o]}</b> (${band.length} under your command)`, '');
+}
+function ordersMenu() {
+  const band = warband(); if (!band.length) { toggleParty(); return; }
+  openDialog({ name: 'Orders', role: `${band.length} soldier${band.length > 1 ? 's' : ''} under your command`, portrait: band[0], text: 'Give the word. (Number keys choose.)', options: Object.entries(ORDERS).filter(([o]) => (o !== 'fire' && o !== 'hold_fire') || band.some(e => e.ranged)).map(([o, n]) => ({ t: `${n}${P.order === o ? ' <span class="dn">current</span>' : ''}`, fn: () => { closeDialog(); giveOrder(o); } })).concat([{ t: 'Never mind', fn: closeDialog }]) });
+}
+KEYFN.KeyT = ordersMenu;
+
+/* ---------------- The couched lance ---------------- */
+Object.assign(ITEMS, {
+  war_lance: { name: 'War Lance', type: 'weapon', wk: 'lance', dmg: 32, spd: 52, rng: 74, arc: .5, val: 420, len: 70, col: '#d8c8a0', tier: 2, desc: 'Ash, iron-tipped and painted. On horseback at a gallop, hold attack to lower it and ride your foes down: the faster you ride, the harder it strikes. Clumsy on foot.' },
+  knight_lance: { name: "Knight's Lance", type: 'weapon', wk: 'lance', dmg: 44, spd: 56, rng: 78, arc: .5, val: 900, len: 74, col: '#e8e0c8', tier: 3, desc: 'A tournament-grade lance with a steel vamplate. Devastating at full gallop.' },
+});
+LOOT_TIERS[2].push('war_lance'); LOOT_TIERS[3].push('war_lance', 'knight_lance'); LOOT_TIERS[4].push('knight_lance');
+function updateLance(dt) {
+  const spdNow = Math.hypot(P.avx || 0, P.avy || 0);
+  if (!P.mounted) { P.lanceLow = 0; if ((input.lmb || input.clicked) && P.atkCd <= 0 && P.dodge <= 0 && P.st >= P.S.cost * .5) { startAttack(); P.S.dmg *= 1; } return; }
+  if (input.lmb && P.st > 2) { P.lanceLow = Math.min(1, (P.lanceLow || 0) + dt * 3); P.st -= 6 * dt; P.stDelay = .4; } else P.lanceLow = Math.max(0, (P.lanceLow || 0) - dt * 4);
+  if (P.lanceLow < .6 || spdNow < 150) return;
+  const tipX = P.x + Math.cos(P.face) * (P.S.rng - 10), tipY = P.y + Math.sin(P.face) * (P.S.rng - 10);
+  for (const e of ents) {
+    if (e.dead || e.kind === 'horse' || e.important || !playerHostileTo(e) || (e.lanceT || 0) > G.time) continue;
+    if (dist(tipX, tipY, e.x, e.y) > e.r + 22) continue;
+    e.lanceT = G.time + 1.2; const m = clamp(spdNow / 160, 1, 2.3), dmg = P.S.dmg * m * 1.4 * DIFF().dmgDealt * (P.S.horse && P.S.horse.dmgB ? 1 + P.S.horse.dmgB : 1);
+    damage(e, dmg, P, { kb: 3.2, heavy: true, crit: m > 1.8 }); if (!e.dead && !e.titan) { e.stun = Math.max(e.stun || 0, .9); e.wind = 0; if (e.mounted) { e.mounted = false; e._look = null; addText(e.x, e.y - 36, 'Unhorsed!', '#ffe08a', 14); } }
+    addShake(6); G.hitstop = .06; SND.play('hit'); G.stats.lanceHits = (G.stats.lanceHits || 0) + 1;
+  }
+}
+
+/* ---------------- Map markers ---------------- */
+function drawArmyMarker(g, x, y, a, s, big) {
+  g.save(); g.translate(x, y); const col = armyCol(a);
+  g.fillStyle = 'rgba(15,10,5,.85)'; g.beginPath(); g.arc(0, 0, s * 1.15, 0, TAU); g.fill();
+  g.strokeStyle = col; g.lineWidth = s * .25; g.beginPath(); g.moveTo(-s * .55, s * .55); g.lineTo(s * .55, -s * .55); g.moveTo(s * .55, s * .55); g.lineTo(-s * .55, -s * .55); g.stroke();
+  if (a.state === 'siege') { g.strokeStyle = '#ff5a2a'; g.lineWidth = s * .18; g.beginPath(); g.arc(0, 0, s * 1.45, 0, TAU); g.stroke(); }
+  g.restore();
+  if (big) { const wl = (G.warlords || []).find(w => w.id === a.wl); g.font = `italic ${Math.round(s * 1.1)}px 'EB Garamond', Georgia, serif`; g.textAlign = 'center'; g.lineWidth = 3; g.strokeStyle = 'rgba(15,10,5,.85)'; const t = `${armyName(a)} · ${Math.round(a.str)}${a.routed ? ' (routed)' : ''}`; g.strokeText(t, x, y + s * 2.6); g.fillStyle = '#f5e6bd'; g.fillText(t, x, y + s * 2.6); }
+}
+const armyVisible = a => !a.gone && (dist(P.x, P.y, a.x, a.y) < 70 * TS || P.allegiance === a.k || a.player || (EXP && EXP[Math.floor(a.y / TS / EC) * EW + Math.floor(a.x / TS / EC)]));
+
+/* ---------------- Hooks ---------------- */
+ACH.push(
+  ['battle1', '⚔', 'The Front Rank', 'Fight on the winning side of an open battle', () => (G.stats.battlesWon || 0) >= 1],
+  ['warlord', '☠', 'Warlord-Slayer', 'Slay an enemy warlord on the field', () => (G.stats.warlords || 0) >= 1],
+  ['lance10', '🐎', 'Couched Lance', 'Ride down 10 foes with a lance', () => (G.stats.lanceHits || 0) >= 10],
+  ['captain', '⚑', 'Captain of the Company', 'Command 8 soldiers at once', () => warband().length >= 8],
+);
+hook('reset', () => { G.armies = []; G.warlords = []; G.battle = null; G.armyN = 0; G.wlN = 0; terrSig = ''; if (W && W.places) W.places.forEach(p => { if (p.type === 'village' || p.type === 'castle') p.owner = p.k; }); });
+hook('save', d => { d.armies = (G.armies || []).map(a => { const c = Object.assign({}, a); if (a.mat) { c.str = Math.max(1, Math.round(a.matStr * armyUnits(a).length / Math.max(1, a.matN))); } c.mat = false; return c; }); d.warlords = G.warlords; d.armyN = G.armyN; d.wlN = G.wlN; });
+hook('load', d => { G.armies = d.armies || []; G.warlords = d.warlords || []; G.armyN = d.armyN || 0; G.wlN = d.wlN || 0; G.battle = null; recomputeTerritory(true); });
+hook('newgame', () => recomputeTerritory(true));
+hook('daily', day => armyDaily(day));
+hook('slow', () => { armyTick(); recomputeTerritory(); });
+hook('tick', dt => battleTick(dt));
+hook('hud', () => battleHUD());
+hook('kill', (t, src) => {
+  if (t.army) { const a = (G.armies || []).find(x => x.id === t.army); if (a && t.armyLead) { a.leadDead = true; const nl = armyUnits(a).filter(e => e !== t)[0]; if (nl) { nl.armyLead = true; nl.follow = false; nl.followE = null; if (t.path) { nl.path = t.path; nl.pi = t.pi || 0; nl.pathSpd = .55; } armyUnits(a).forEach(e => { if (e !== nl && e.followE === t) e.followE = nl; }); } const wl = (G.warlords || []).find(w => w.id === a.wl); if (wl && (src === P || (src && src.ally))) { wl.alive = false; const n = wlName(wl); logEvent(`${pFull()} slew ${n} on the field.`, typeof a.k === 'number' ? [a.k] : []); toast(`☠ You have slain <b>${n}</b>!`, 'gold'); G.stats.warlords = (G.stats.warlords || 0) + 1; } }
+    if (G.battle && (src === P || (src && src.party))) G.battle.pk++; }
+});
+hook('bigmap', (g, toS, dpr) => { (G.armies || []).forEach(a => { if (!armyVisible(a)) return; const [x, y] = toS(a.x, a.y); drawArmyMarker(g, x, y, a, 7 * dpr, mapView.z >= 2); }); });
+hook('minimap', (g, toM, S) => { (G.armies || []).forEach(a => { if (a.gone) return; const [x, y] = toM(a.x, a.y); if (x < 4 || y < 4 || x > S - 4 || y > S - 4) return; drawArmyMarker(g, x, y, a, 4, false); }); });
 
 /* ---------------- Loop ---------------- */
 let last = performance.now(), mmT = 0, ambT = 0, fpsA = 0;
