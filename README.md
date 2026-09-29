@@ -32,6 +32,7 @@ There are five save slots, and each can hold a story or a sandbox game. The game
 
 Before a new game you can set:
 
+- **Your knight**: a name, Sir or Dame, and the **Bloodline** rule. With Bloodline on, death passes to your grown heir instead of you rising again. Forsaken always uses it: with a grown heir, the game carries on and the save is not erased.
 - **Difficulty**, in six levels: Peasant, Squire, Knight (the standard game), Champion, Warlord and Forsaken. Difficulty changes damage taken and dealt, enemy health, health and stamina regeneration, stamina costs, healing, how much gold you lose when you fall, your starting gear and gold, and how friendly the four kingdoms are at the start. Forsaken is an Ironman mode: you get one life, and dying erases the save.
 - **World size**, from Extra Small to Extra Large. Larger worlds have more villages, ruins and bandit camps.
 - **Homeland**, the kingdom you start in (sandbox only; the story always begins in Albion).
@@ -59,6 +60,7 @@ Before a new game you can set:
 | 1 / 2 / 3 | Eat food / drink potion / use bandage |
 | 4 | Drink your quick tonic (choose one in the pack's Magic tab) |
 | Z / X / V / B | Cast the spells in your four spell slots |
+| H | Realm & Court: the rulers, their heirs and your own house |
 | Shift (hold) | Sprint, draining stamina |
 | Q + left click | Hit characters who aren't hostile, such as villagers, guards or peaceful animals. Normally your attacks pass through them. Attacking people costs reputation and turns guards against you |
 | G | Companions: follow me / hold position |
@@ -135,6 +137,21 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 - Companions and soldiers: hire spearmen, bowmen and knights from castle captains (daily pay), or recruit four named sellswords found in the villages, including a healer and a venom archer. Named companions are knocked down, never killed.
 - Property: buy a house in a friendly village (rest, a safe stash, and you wake there if you fall), or restore a ruined fort that pays a daily income and can be garrisoned.
 - Crafting: fletch every arrow type at market benches, and at the royal forges improve gear up to Masterwork or bind a dungeon relic into a blade to enchant it.
+- **Living courts:** the four rulers are people, not portraits.
+  - **Rulers:** each has an age, traits (warlike, just, cruel, greedy, paranoid, beloved, pious and more) and an heir. Their traits shape how their kingdom behaves.
+  - **Deaths and successions:** rulers grow old, fall ill and die, or are murdered. A grown heir is crowned. A child heir or a missing one causes a **succession crisis**: two claimants, a few days for the lords to choose, and a chance for you to back one and win their favour.
+  - **Unrest** rises with war, cruel or greedy rulers, crises and plague. When it boils over, a village **revolts**: crush it for the crown, carry the rebels' grievances to the throne, or buy them grain and send them home.
+  - **Plots:** now and then a frightened servant warns of a plot against a crown. Ambush the plotters and warn the ruler, or the assassins may strike.
+  - **Royal weddings** join the houses of friendly kingdoms.
+  - **Plague years:** a plague spreads from village to village. You can catch it too. Bring plague remedies to the stricken villages.
+  - **The Courts tab** of the Realm & Court screen (H) shows it all. In story mode, no ruler dies before the story ends.
+- **Your house and bloodline:**
+  - **Age:** your knight ages a year every 24 days (four seasons). From 50 you slowly lose health and stamina, and from 60 each birthday may be your last.
+  - **Courtship:** suitors live in every royal city and a few villages. Talk to them, give gifts (each has a favourite), do them a favour or share a Love Philter. When their heart is full, propose (you need a home, and 300 gold for the feast).
+  - **Your spouse** is a Steward (income), a Sword-Hand (rides and fights with you), a Scholar (mana and spell power) or a Courtier (reputation and prices).
+  - **Children** grow quickly: five years for every year that passes, so they come of age in about 77 days. Name them, choose your heir, and take grown children riding with you.
+  - **Succession:** when you die of old age, or fall in battle under the Bloodline rule, your heir takes over. They inherit the house, lands, gear (your weapon becomes a better-crafted heirloom), most of the gold and part of your name's reputation.
+  - **The House tab** shows your family tree and ancestors.
 - **Magic:** any knight can learn it, and a sword and a spell sit happily together.
   - **Mana and spells:** learning your first spell gives you a mana bar, which refills on its own (faster out of combat). There are 20 spells in seven schools:
     - **Ember:** Firebolt, Flame Wave and Fireball.
@@ -174,7 +191,7 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 
 ## Achievements and statistics
 
-66 achievements are shared by every game in your browser (see the main menu or pause menu). The pause menu's *Your Journey* page tracks time played, distance, kills, arrows, dungeons, sieges, tourneys and more, and the story's closing screen shows it too.
+73 achievements are shared by every game in your browser (see the main menu or pause menu). The pause menu's *Your Journey* page tracks time played, distance, kills, arrows, dungeons, sieges, tourneys and more, and the story's closing screen shows it too.
 
 ## License
 
