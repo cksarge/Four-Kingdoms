@@ -930,6 +930,11 @@ const $ = id => document.getElementById(id);
 const fmt = n => Math.round(n).toLocaleString('en-US');
 const sgn = n => (n > 0 ? '+' : '') + Math.round(n);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+/* Hooks: the bigger systems (magic, courts, armies, the realm, the seas, the Tide, the Long Road) each register here
+   for reset, save, load and the game clocks, so the core save/load and loop code only needs one call per hook. */
+const HOOKS = { reset: [], save: [], load: [], newgame: [], daily: [], tick: [], slow: [], hud: [] };
+const hook = (n, fn) => { HOOKS[n].push(fn); };
+function runHooks(n, a, b, c) { for (const f of HOOKS[n]) { try { f(a, b, c); } catch (e) { console.error(`[${n} hook]`, e); } } }
 
 function mulberry32(s) { return function () { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 let srng = mulberry32(1);
@@ -1460,6 +1465,12 @@ const STATUS_CB = { Allied: '#3aa0f0', Friendly: '#8ac4f0', Neutral: '#b8ae98', 
 function statusOf(v) { let r = STATUS[5]; for (const s of STATUS) if (v >= s.min) { r = s; break; } return settings.cb ? Object.assign({}, r, { c: STATUS_CB[r.n] }) : r; }
 const KCOL_CB = ['#D55E00', '#0072B2', '#CC79A7', '#F0E442'];
 const kcol = k => settings.cb ? KCOL_CB[k] : KDATA[k].color; // kingdom colours on maps and borders
+/* The four generated crowns are always ids 0-3. A realm the player founds becomes id 4 (KDATA[4], a 5th row in K).
+   CROWNS is "the four crowns" (story rallies, crown-wide rewards); KIDS() is every kingdom that exists right now. */
+const CROWNS = [0, 1, 2, 3];
+const KIDS = () => KDATA.map((_, i) => i);
+const KDATA_DEF = KDATA.map(d => ({ ruler: d.ruler, rulerTitle: d.rulerTitle, fem: d.fem || 0, rulerHair: d.rulerHair || null }));
+function resetKData() { KDATA.length = 4; KDATA_DEF.forEach((d, k) => Object.assign(KDATA[k], d)); if (PAIRS.length > 6) PAIRS.length = 6; }
 
 const NAMES = {
   pre: [['Ash', 'Bram', 'Kings', 'Oak', 'Thorn', 'Wick', 'Mill', 'Stone', 'Harrow', 'Elm', 'Fox', 'Red', 'Hollow', 'Brook'],
@@ -2780,7 +2791,7 @@ function drawGrave(g, gv, t) {
 function respawnPlayer() {
   if (G.under) leaveDungeon(true);
   const lost = Math.floor(P.gold * DIFF().goldLoss); P.gold -= lost;
-  let near = null; if (STORY) Q.active.forEach(q => { if (q.type !== 'story' || !q.foes) return; const st = sStep(q); if (!st || !st.reset) return; const tg = storyTarget(q); sFightReset(q); if (tg) near = randomLandSpot(tg.x, tg.y, (st.near || 20) + 3, (st.near || 20) + 7); }); // a boss fight starts over from its checkpoint
+  let near = null; Q.active.forEach(q => { if (q.type !== 'story' || !q.foes) return; const st = sStep(q); if (!st || !st.reset) return; const tg = storyTarget(q); sFightReset(q); if (tg) near = randomLandSpot(tg.x, tg.y, (st.near || 20) + 3, (st.near || 20) + 7); }); // a boss fight starts over from its checkpoint
   P.x = near ? near.x : P.respawn.x; P.y = near ? near.y : P.respawn.y; const f = findFree(P.x, P.y); P.x = f.x; P.y = f.y;
   P.hp = Math.round(P.maxHp * .6); P.st = P.maxSt; P.mounted = false; P.kbx = P.kby = 0; P.dodge = 0;
   ents.forEach(e => { e.aggroPlayer = false; if (e.target === P) e.target = null; });
@@ -4199,7 +4210,7 @@ function failQuest(q, why) {
   pickups = pickups.filter(p => p.qid !== q.id);
   toast(`<b>Quest failed:</b> ${q.title} — ${why}`, 'bad'); SND.play('fail');
 }
-function abandonQuest(q) { failQuest(q, 'abandoned'); if (q.k != null) addRep(q.k, -2, 'Abandoned a quest', true); if (q.ent && !q.ent.dead) { q.ent.follow = false; q.ent.transient = true; } }
+function abandonQuest(q) { if (q.saga && q.foes) sFightEnd(q); failQuest(q, 'abandoned'); if (q.saga && SQ[q.sid] && SQ[q.sid].fail) SQ[q.sid].fail(q); if (q.k != null) addRep(q.k, -2, 'Abandoned a quest', true); if (q.ent && !q.ent.dead) { q.ent.follow = false; q.ent.transient = true; } }
 
 /* ---------------- World events ---------------- */
 /* ---------------- The nemesis: a rival knight who keeps coming back ---------------- */
@@ -5270,6 +5281,7 @@ function toggleParty() {
   const hold = pt.some(e => e.follow); pt.forEach(e => setFollow(e, !hold)); toast(hold ? 'Your companions hold their ground.' : 'Your companions fall in behind you.');
 }
 function dailyTick() {
+  runHooks('daily', dayNum());
   if (G.mode === 'sandbox') { if (!G.tourney && dayNum() % 8 === 3) announceTourney(); else if (G.tourney && dayNum() - G.tourney.day >= 2 && !G.tourney.fighting) { G.tourney = null; ents = ents.filter(e => e.role !== 'herald'); } }
   if ((P.forts || []).length && chance(.12)) raidFort(pick(P.forts));
   if (P.fief && dayNum() - P.fief.lastTax >= 7) { P.fief.lastTax = dayNum(); fiefWeek(); }
@@ -7919,7 +7931,7 @@ function renderQuests() {
   det.innerHTML = `<h2>${esc(q.title)}</h2><div class="psub" style="text-align:left">${q.type === 'story' && q.main ? '<b style="color:#ffcf4a;font-style:normal">✦ Main Quest</b> · ' : ''}Given by ${esc(q.giverName || '')}${q.k != null ? ` · ${KDATA[q.k].full}` : ''}</div><p>${q.desc}</p>
     ${qTab === 'active' ? `<p><b style="color:var(--gold)">Objective:</b> ${esc(questObjective(q))}${tg ? ` — ${leagues(dist(P.x, P.y, tg.x, tg.y))} leagues ${compass(tg.x - P.x, tg.y - P.y)}` : ''}</p>` : `<p><b>${q.failed ? '<span style="color:#f08070">Failed</span>' : '<span style="color:#8fe07a">Completed</span>'}</b> on day ${q.doneDay}</p>`}
     <div style="color:var(--gold);font-family:var(--fh);font-size:12px;letter-spacing:.1em">REWARDS</div><div class="rewards">${rewardText(q).split(' · ').map(r => `<span>${r}</span>`).join('')}</div>
-    ${qTab === 'active' ? `<div class="iacts"><button class="btn sm gold" id="qTrack">${Q.tracked === q.id ? 'Tracking' : 'Track Quest'}</button><button class="btn sm" id="qMap">Show on Map</button>${q.type === 'story' ? '' : '<button class="btn sm red" id="qAb">Abandon</button>'}</div>` : ''}`;
+    ${qTab === 'active' ? `<div class="iacts"><button class="btn sm gold" id="qTrack">${Q.tracked === q.id ? 'Tracking' : 'Track Quest'}</button><button class="btn sm" id="qMap">Show on Map</button>${q.type === 'story' && !q.saga ? '' : '<button class="btn sm red" id="qAb">Abandon</button>'}</div>` : ''}`;
   if (qTab === 'active') {
     $('qTrack').onclick = () => { Q.tracked = q.id; renderQuests(); updateHUD(true); };
     $('qMap').onclick = () => { UI.open('map'); if (tg) { mapView.cx = tg.x / TS; mapView.cy = tg.y / TS; } };
@@ -8064,7 +8076,7 @@ function drawOverlays(g, e, t) {
     g.lineWidth = 3; g.strokeStyle = 'rgba(0,0,0,.8)'; g.strokeText(nm, e.x, top - 5); g.fillStyle = hostileP ? '#ffb0a0' : e.role === 'ruler' ? '#ffd76a' : '#f0e6cc'; g.fillText(nm, e.x, top - 5);
   }
   if (e.role === 'elder' && e.place != null) { const pl = W.places[e.place]; if ((pl.offers && pl.offers.length) || pl.request || !pl.offers) { const b = Math.sin(t * 4) * 3; g.font = 'bold 20px Cinzel, Georgia'; g.textAlign = 'center'; g.lineWidth = 4; g.strokeStyle = '#000'; g.strokeText('!', e.x, top - 18 + b); g.fillStyle = '#ffd24a'; g.fillText('!', e.x, top - 18 + b); } }
-  const sMark = STORY && (e.role === 'story' || e.role === 'ruler') && storyWants(e);
+  const sMark = (e.role === 'story' || e.role === 'ruler') && storyWants(e);
   if (sMark) { const b = Math.sin(t * 4) * 3; g.font = 'bold 20px Cinzel, Georgia'; g.textAlign = 'center'; g.lineWidth = 4; g.strokeStyle = '#000'; g.strokeText('✦', e.x, top - 18 + b); g.fillStyle = '#ffcf4a'; g.fillText('✦', e.x, top - 18 + b); }
   else if (e.role === 'ruler' && !Q.active.some(q => q.royal === e.k) && K.rep[e.k] >= -10) { const b = Math.sin(t * 4) * 3; g.font = 'bold 18px Cinzel, Georgia'; g.textAlign = 'center'; g.lineWidth = 4; g.strokeStyle = '#000'; g.strokeText('♛', e.x, top - 18 + b); g.fillStyle = '#ffd24a'; g.fillText('♛', e.x, top - 18 + b); }
   if (e.say) {
@@ -8642,7 +8654,9 @@ function resetState() {
   (W.towers || []).forEach(t => { t.spawned = false; t.ent = null; }); (W.hermits || []).forEach(h => { h.spawned = false; h.ent = null; }); G.wx = null; G.fishing = null; G.seasonInit = false; G.lastPay = null; G.siege = null; G.tourney = null; G.stats = newStats(); G.tut = null;
   G.bounty = [0, 0, 0, 0]; G.contest = null; G.festival = null; G.wboss = null; G.wbossNext = 0; G.wbossCount = 0; G.enc = null; G.encT = null; G.race = null; G.joust = null; G.seen = {}; G.fromStory = null; G.tourney = null; G.arena = null; tells = [];
   Object.assign(G, { time: 0, dipT: 0, eventT: 50, spawnT: 0, wildT: 3, autosaveT: 0, fogT: 0, curOwner: -1, shake: 0, hitstop: 0, kills: 0, mapWaypoint: null, questT: 0 });
-  newKingdoms(); newQuests(); newFog();
+  resetKData(); newKingdoms(); newQuests(); newFog();
+  G.flags = {}; G.sagaDone = [];
+  runHooks('reset');
 }
 function beginPlay() {
   G.state = 'play'; G.ironDead = false; if (P && W && !G.under) setupWorldExtras(); if (P) { P.drawing = false; P.draw = 0; P.spec = null; P.swingArc = null; } UI.hide('mainMenu'); UI.hide('endScreen'); UI.closeAll(); $('hud').classList.remove('off');
@@ -8654,7 +8668,7 @@ function startNew(mode = 'sandbox', opts) {
     opts = normOpts(opts); opts.gen = 2; if (mode === 'story') opts.kingdom = 0; // the story begins in Albion
     if (DIFFS[opts.diff].ironman) { opts.wild = 2; opts.explored = false; }
     G.mode = mode; G.opts = opts; DAYLEN = DAYS[opts.day].len; STORY = mode === 'story' ? newStory() : null;
-    prepareWorld(Math.floor(Math.random() * 1e9), opts); resetState(); newPlayer(); applyNewGameOpts();
+    prepareWorld(Math.floor(Math.random() * 1e9), opts); resetState(); newPlayer(); applyNewGameOpts(); runHooks('newgame', mode, opts);
     const s = W.start; s.disc = true; W.places[opts.kingdom].disc = true; revealArea(s.tx, s.ty, 22);
     genVillageOffers(s); const easy = makeQuest('camp', s, s.owner); if (easy) s.offers[0] = easy;
     beginPlay(); saveGame(true, true);
@@ -8683,7 +8697,7 @@ function saveGame(silent, quiet) {
   if (!P || G.state === 'menu' || G.ironDead) return;
   const qStrip = q => { const c = Object.assign({}, q); delete c.ent; delete c.foes; return c; };
   const data = {
-    v: 1, seed: W.seed, time: G.time, kills: G.kills, uid: uidCounter, waypoint: G.mapWaypoint, savedAt: Date.now(),
+    v: 2, seed: W.seed, time: G.time, kills: G.kills, uid: uidCounter, waypoint: G.mapWaypoint, savedAt: Date.now(),
     P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, skills: P.skills, sp: P.sp, comps: P.comps, houses: P.houses, stash: P.stash, forts: P.forts, fortGuards: P.fortGuards, fief: P.fief || null, pins: P.pins || [], grave: P.grave || null, trophies: P.trophies || [], guild: P.guild || null, nemesis: P.nemesis || null, lore: P.lore || [], worn: P.worn || [],
       party: partyNow().filter(e => !e.comp || true).map(e => ({ comp: e.comp, kind: e.kind, name: e.name, hp: Math.round(Math.max(1, e.hp)), k: e.k })), mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
     horse: horseEnt ? { x: horseEnt.x, y: horseEnt.y } : null,
@@ -8694,12 +8708,16 @@ function saveGame(silent, quiet) {
   };
   data.opts = G.opts || normOpts(); data.stats = G.stats; data.tut = G.tut && !G.tut.done ? G.tut.step : null;
   data.mode = G.mode; data.slot = G.slot || 1; data.bounty = G.bounty || [0, 0, 0, 0]; data.wboss = G.wboss || null; data.wbossNext = G.wbossNext || 0; data.wbossCount = G.wbossCount || 0; data.seen = G.seen || {}; data.fromStory = G.fromStory || null; data.tourney = G.tourney ? { castle: G.tourney.castle, day: G.tourney.day, round: 0, fighting: false, done: !!G.tourney.done } : null; if (STORY) data.story = STORY;
+  data.flags = G.flags || {}; data.sagaDone = G.sagaDone || [];
+  runHooks('save', data);
   if (WIPED) return;
   try { localStorage.setItem(saveKey(), JSON.stringify(data)); if (quiet) { } else if (!silent) { toast(`Game saved to slot ${G.slot || 1}.`, 'good'); SND.play('pickup'); } else toast('Autosaved.', ''); }
   catch (e) { toast('Could not save: browser storage is unavailable or full.', 'bad'); }
 }
+// Saves before v2 have none of the newer systems; each system's load hook fills in its own defaults, so this only stamps the version
+function migrateSave(d) { if (!d.v || d.v < 2) { d.flags = d.flags || {}; d.sagaDone = d.sagaDone || []; d.v = 2; } return d; }
 function loadGame(d) {
-  resetState();
+  migrateSave(d); resetState();
   G.mode = d.mode === 'story' ? 'story' : 'sandbox'; STORY = d.story || null; // before anything draws the HUD, which reads story quests
   newPlayer();
   Object.assign(P, d.P); P.inv = d.P.inv; P.eq = d.P.eq; P.mounted = false; uidCounter = d.uid || (Math.max(0, ...P.inv.map(i => i.uid)) + 1);
@@ -8724,6 +8742,8 @@ function loadGame(d) {
     if (q.type === 'story') { q.sp = 0; q.amb = 0; q.x0 = 0; }
   });
   G.mode = d.mode === 'story' ? 'story' : 'sandbox'; STORY = d.story || null; G.fromStory = d.fromStory || null; if (G.mode === 'story' && STORY && STORY.done) storyToSandbox(); // a finished story carries on as a sandbox
+  G.flags = d.flags || {}; G.sagaDone = d.sagaDone || [];
+  runHooks('load', d);
   // settings belong to the device, not the save, so an imported game keeps this device's settings
 }
 
@@ -8733,9 +8753,14 @@ function loadGame(d) {
    ===================================================================== */
 let STORY = null;
 const storyOn = () => !!STORY && !STORY.done;
+// Sagas are multi-step quests outside the main story (court intrigue, the realm, the Tide, the seas, the Veiled Circle...).
+// They reuse the story engine: defs live in SQ with saga:true, quests carry saga:true, and their flags live in G.flags.
+const GF = (k, v) => v === undefined ? (G.flags || (G.flags = {}))[k] : ((G.flags || (G.flags = {}))[k] = v);
+const sagaOn = () => Q.active.some(q => q.saga);
+const sQuestOn = q => q.saga || storyOn();
 function newStory() { return { v: 1, path: null, f: {}, refs: {}, spots: {}, deeds: [], qdone: [], saved: 0, lost: 0, lostV: [], raids: false, raidT: 480, done: false, ending: null }; }
 const SF = (k, v) => v === undefined ? STORY.f[k] : (STORY.f[k] = v);
-function deed(t) { STORY.deeds.push({ d: dayNum(), t }); logEvent(t, []); }
+function deed(t) { if (STORY) STORY.deeds.push({ d: dayNum(), t }); logEvent(t, []); }
 const sT = b => clamp(Math.max(b, Math.ceil(P.lvl / 3)), 1, 4);
 const LS = () => 1 + (P.lvl - 1) * .07;
 function sScale(e, hp, dmg) { e.hp = e.maxHp = Math.round(hp * LS() * (e.ally ? 1 : DIFF().enemyHp)); if (dmg) e.dmg = dmg * (1 + (P.lvl - 1) * .04); }
@@ -8844,14 +8869,14 @@ const fv = (v, q) => typeof v === 'function' ? v(q) : v;
 function sSkip(q) { const def = SQ[q.sid]; while (q.stage < def.steps.length && def.steps[q.stage].skip && def.steps[q.stage].skip(q)) q.stage++; }
 function sStart(sid, data) {
   const def = SQ[sid];
-  const q = Object.assign({ id: Q.next++, type: 'story', sid, stage: 0, sp: 0, started: G.time, main: !def.side }, data);
+  const q = Object.assign({ id: Q.next++, type: 'story', sid, stage: 0, sp: 0, started: G.time, main: !def.side && !def.saga }, data); if (def.saga) q.saga = true;
   q.k = def.k != null ? fv(def.k, q) : null;
   q.title = fv(def.title, q); q.desc = fv(def.desc, q); q.giverName = fv(def.giver, q) || '';
   const r = fv(def.reward, q) || {};
   q.reward = { gold: r.gold || 0, xp: r.xp || 0, rep: r.rep || {}, rel: r.rel || [], items: r.items || [] };
-  Q.active.push(q); if (!def.side || !Q.tracked) Q.tracked = q.id;
+  Q.active.push(q); if ((!def.side && !def.saga) || !Q.tracked) Q.tracked = q.id;
   sSkip(q);
-  if (!def.quiet) { toast(`<b>${def.side ? 'Quest' : 'Main quest'}:</b> ${esc(q.title)}`, 'gold'); SND.play(def.side ? 'quest' : 'mainquest'); }
+  if (!def.quiet) { toast(`<b>${def.saga ? (def.label || 'Saga') : def.side ? 'Quest' : 'Main quest'}:</b> ${esc(q.title)}`, 'gold'); SND.play(def.side || def.saga ? 'quest' : 'mainquest'); }
   updateHUD(true);
   return q;
 }
@@ -8864,7 +8889,7 @@ function sAdvance(q, n = 1) {
   updateHUD(true);
 }
 function sFinish(q) {
-  STORY.qdone.push(q.sid);
+  if (q.saga) (G.sagaDone || (G.sagaDone = [])).push(q.sid); else if (STORY) STORY.qdone.push(q.sid);
   completeQuest(q);
   const def = SQ[q.sid]; if (def.done) def.done(q);
 }
@@ -8890,7 +8915,7 @@ function storyTarget(q) {
   }
 }
 function storyUpdate(q) {
-  if (!storyOn()) return;
+  if (!sQuestOn(q)) return;
   const st = sStep(q); if (!st) return;
   const tg = storyTarget(q);
   switch (st.t) {
@@ -8900,7 +8925,7 @@ function storyUpdate(q) {
     case 'cond': if (st.test(q)) sAdvance(q); break;
     case 'fight': case 'duel': sFight(q, st, tg); break;
     case 'escort': sEscort(q, st, tg); break;
-    case 'multi': st.subs(q).forEach(s2 => { if (!s2.talk && s2.at && !(q.m && q.m[s2.id])) { const a = s2.at(q); if (dist(P.x, P.y, a.x, a.y) < 7 * TS) { sSubDone(q, s2.id); toast(SF('blight') === 'burned' ? `${a.name} burns.` : `You bring the cure to ${a.name}.`, SF('blight') === 'burned' ? 'bad' : 'good'); } } }); if (st.need ? Object.keys(q.m || {}).length >= st.need : st.subs(q).every(s => q.m && q.m[s.id])) sAdvance(q); break;
+    case 'multi': st.subs(q).forEach(s2 => { if (!s2.talk && s2.at && !(q.m && q.m[s2.id])) { const a = s2.at(q); if (dist(P.x, P.y, a.x, a.y) < 7 * TS) { sSubDone(q, s2.id); if (st.reach) st.reach(q, s2, a); else toast(SF('blight') === 'burned' ? `${a.name} burns.` : `You bring the cure to ${a.name}.`, SF('blight') === 'burned' ? 'bad' : 'good'); } } }); if (st.need ? Object.keys(q.m || {}).length >= st.need : st.subs(q).every(s => q.m && q.m[s.id])) sAdvance(q); break;
   }
 }
 function storyPickup(q, p) { const st = sStep(q); if (st && st.t === 'item' && p.id === st.item) sAdvance(q); }
@@ -8919,24 +8944,24 @@ function sNpcSpecs(q, st) {
 }
 function storyTalk(e) {
   for (const q of Q.active) {
-    if (q.type !== 'story') continue; const st = sStep(q);
+    if (q.type !== 'story' || !sQuestOn(q)) continue; const st = sStep(q);
     if (st && st.t === 'talk' && st.npc(q).key === e.skey) { st.talk(q, e); return; }
   }
   e.say = { text: SIDLE[e.skey] || 'Well met, knight.', t: 3 };
 }
 function storyRulerStep(k) {
-  if (!storyOn()) return null;
+  if (!storyOn() && !sagaOn()) return null;
   for (const q of Q.active) {
-    if (q.type !== 'story') continue; const st = sStep(q); if (!st) continue;
+    if (q.type !== 'story' || !sQuestOn(q)) continue; const st = sStep(q); if (!st) continue;
     if (st.t === 'ruler' && sK(st, q) === k) return { q, label: sObj(st, q), fn: e => st.talk(q, e) };
     if (st.t === 'multi') { const s = st.subs(q).find(s => s.k === k && !(q.m && q.m[s.id])); if (s) return { q, label: sObj(st, q), fn: e => s.talk(q, e, s.id) }; }
   }
   return null;
 }
 function storyWants(e) {
-  if (!storyOn()) return false;
+  if (!storyOn() && !sagaOn()) return false;
   if (e.role === 'ruler') return !!storyRulerStep(e.k);
-  for (const q of Q.active) { if (q.type !== 'story') continue; const st = sStep(q); if (st && st.t === 'talk' && st.npc(q).key === e.skey) return true; }
+  for (const q of Q.active) { if (q.type !== 'story' || !sQuestOn(q)) continue; const st = sStep(q); if (st && st.t === 'talk' && st.npc(q).key === e.skey) return true; }
   return false;
 }
 
@@ -9043,12 +9068,12 @@ function sEnvoy(q, k, x, y) {
 /* ---------------- Story tick: NPC upkeep and Hollow raids ---------------- */
 let sTickT = 0;
 function storyTick(dt) {
-  if (!storyOn() || (sTickT -= dt) > 0) return; sTickT = .5;
+  if ((!storyOn() && !sagaOn()) || (sTickT -= dt) > 0) return; sTickT = .5;
   const want = new Map();
-  Q.active.forEach(q => { if (q.type !== 'story') return; const st = sStep(q); if (st) sNpcSpecs(q, st).forEach(s => want.set(s.key, [s, q])); });
+  Q.active.forEach(q => { if (q.type !== 'story' || !sQuestOn(q)) return; const st = sStep(q); if (st) sNpcSpecs(q, st).forEach(s => want.set(s.key, [s, q])); });
   want.forEach(([s, q]) => { if (!s.follow && s.at) sEnsure(s, q); });
   ents.filter(e => !e.dead && ((e.role === 'story' && !e.prot && (!want.has(e.skey) || (!e.follow && dist(P.x, P.y, e.x, e.y) > 2600))) || (e.leaveAt && G.time > e.leaveAt && dist(P.x, P.y, e.x, e.y) > 600))).forEach(removeEnt);
-  if (STORY.raids && !Q.active.some(q => q.sid === 'hraid' || q.sid === 'fin' || q.sid === 'coup')) {
+  if (storyOn() && STORY.raids && !Q.active.some(q => q.sid === 'hraid' || q.sid === 'fin' || q.sid === 'coup')) {
     STORY.raidT -= .5;
     if (STORY.raidT <= 0) { STORY.raidT = rand(360, 520) * (SF('raidSlow') ? 1.8 : 1); sRaid(); }
   }
@@ -10243,7 +10268,7 @@ function storyEnding() {
   if (!STORY || STORY.done) return;
   const id = sComputeEnding(), E = ENDINGS[id];
   STORY.ending = id; STORY.done = true;
-  Q.active = Q.active.filter(q => q.type !== 'story'); Q.tracked = Q.active[0] ? Q.active[0].id : null;
+  Q.active = Q.active.filter(q => q.type !== 'story' || q.saga); Q.tracked = Q.active[0] ? Q.active[0].id : null;
   ents = ents.filter(e => e.role !== 'story');
   let seen = []; try { seen = JSON.parse(localStorage.getItem('fk_endings') || '[]'); } catch (e) { }
   if (!seen.includes(id)) seen.push(id); try { localStorage.setItem('fk_endings', JSON.stringify(seen)); } catch (e) { }
@@ -10300,10 +10325,11 @@ function update(dt) {
   const px0 = P.x, py0 = P.y; updatePlayer(dt); if (dt > 0) { P.avx = (P.x - px0) / dt; P.avy = (P.y - py0) / dt; }
   if (G.arena) arenaTick(dt, px0, py0);
   if (tells.length) updateTells(dt);
-  if (STORY && !G.under) storyTick(dt);
+  if (!G.under) storyTick(dt);
   if (G.under && !G.under.interior) updateTraps(dt);
   if (G.tut) tutTick(dt);
   if (G.siege && !G.under) updateSiege(dt);
+  runHooks('tick', dt);
   for (const e of ents) { if (Math.abs(e.x - P.x) > 2600 || Math.abs(e.y - P.y) > 2600) { if (!e.follow) continue; } updateActor(e, dt); }
   separate(); updateProjs(dt); updatePickups(dt); updateFX(dt); updateSpawns(dt);
   if ((G.fogT -= dt) <= 0) { G.fogT = .25; if (!G.under) updateDiscovery(); }
@@ -10313,7 +10339,7 @@ function update(dt) {
   }
   if ((G.dipT += dt) >= 40) { G.dipT = 0; dipTick(); }
   const dnow = dayNum(); if (G.lastPay == null) G.lastPay = dnow; else if (dnow !== G.lastPay) { G.lastPay = dnow; dailyTick(); }
-  if ((G.lawT = (G.lawT || 0) - dt) <= 0) { G.lawT = .25; thiefTick(); if ((G.law2 = (G.law2 || 0) - 1) <= 0) { G.law2 = 4; lawTick(); cityTick(); guildTick(); festivalTick(); encounterTick(); wbossTick(1); seeTick(); dockTick(); if (G.bounty) G.bounty = G.bounty.map(v => v > 1 ? v * Math.pow(.9, 1 / (DAYLEN / 1)) : 0); } }
+  if ((G.lawT = (G.lawT || 0) - dt) <= 0) { G.lawT = .25; thiefTick(); if ((G.law2 = (G.law2 || 0) - 1) <= 0) { G.law2 = 4; lawTick(); cityTick(); guildTick(); festivalTick(); encounterTick(); wbossTick(1); seeTick(); dockTick(); runHooks('slow'); if (G.bounty) G.bounty = G.bounty.map(v => v > 1 ? v * Math.pow(.9, 1 / (DAYLEN / 1)) : 0); } }
   contestTick(dt); raceTick(dt);
   if ((G.eventT -= dt) <= 0) { G.eventT = rand(60, 115); if (!G.under && !G.tut) worldEvent(); } // no raids or ambushes mid-lesson
   if ((G.autosaveT += dt) >= 180) { G.autosaveT = 0; saveGame(true); }
