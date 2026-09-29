@@ -118,7 +118,14 @@ body.touch #battleBar{top:60px;zoom:.8}
 .crInfo{flex:1;min-width:0;font-size:13.5px}.crName{font-family:var(--fh);color:var(--gold-l);font-size:16px}.crSub{color:var(--muted);font-size:12.5px;margin:2px 0 5px}.crSub img{width:12px;height:16px;vertical-align:-3px}
 .crTraits{margin:3px 0}.crLine{margin:3px 0}.crBar{display:inline-block;width:90px;height:7px;background:#1a120a;border:1px solid #5d4526;border-radius:3px;vertical-align:1px;overflow:hidden}.crBar span{display:block;height:100%}
 .crCrisis{color:#ffb060;margin:4px 0}.crNote{margin-top:10px;padding:8px 10px;border:1px solid rgba(160,122,58,.3);border-radius:6px;background:rgba(0,0,0,.2);font-size:13.5px}.crNote>b{display:block;font-family:var(--fh);color:var(--gold-l);margin-bottom:3px}
-.dim{color:var(--muted)}.hsTop{display:flex;gap:14px;align-items:flex-start;padding:10px;border:1px solid rgba(160,122,58,.35);border-radius:6px;background:rgba(0,0,0,.25)}.hsTop .crPort{width:96px;height:96px}
+.dim{color:var(--muted)}
+.rmReqs{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin:10px 0;font-size:13.5px}.rmReqs .ok{color:#8fe07a}.rmReqs .no{color:#e08070}
+.rmForm{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px}.rmForm select,.rmHold select,.crLine select{background:#120c07;color:var(--ink);border:1px solid #6b5230;border-radius:4px;padding:4px 6px;font:inherit;font-size:13.5px}
+.rmSw{display:flex;flex-wrap:wrap;gap:6px}.rmSw span{width:30px;height:30px;border-radius:5px;border:3px solid;cursor:pointer;box-sizing:border-box}.rmSw span.em{width:40px;height:40px;border:2px solid #6b5230;padding:0;overflow:hidden}.rmSw span.em img{width:100%;height:100%}.rmSw span.on{outline:2px solid #ffd24a;outline-offset:2px}
+.rmLaws{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.rmLaws .choice .sb{font-size:12.5px;padding:5px 6px}
+.rmHolds{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}.rmHold{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:6px 8px;border:1px solid rgba(160,122,58,.3);border-radius:6px;background:rgba(0,0,0,.2);font-size:13px}
+.rmCrowns{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.rmCrown{display:flex;gap:8px;padding:8px;border:1px solid rgba(160,122,58,.3);border-left:4px solid var(--kc);border-radius:6px;background:rgba(0,0,0,.2);font-size:13px}.rmCrown img{width:24px;height:34px}.rmCrown .btn{margin-top:4px}
+@media (max-width:760px){.rmForm,.rmLaws,.rmHolds,.rmCrowns,.rmReqs{grid-template-columns:1fr}}.hsTop{display:flex;gap:14px;align-items:flex-start;padding:10px;border:1px solid rgba(160,122,58,.35);border-radius:6px;background:rgba(0,0,0,.25)}.hsTop .crPort{width:96px;height:96px}
 .hsH{font-family:var(--fh);color:var(--gold-l);font-size:14px;margin:14px 0 6px}.hsKids{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .hsKid{display:flex;gap:8px;padding:7px;border:1px solid rgba(160,122,58,.3);border-radius:6px;background:rgba(0,0,0,.2);font-size:13px}.hsKid.heir{border-color:#e7c35a}.hsKid img{width:48px;height:48px;border-radius:5px}.hsBtns{display:flex;gap:6px;margin-top:4px;align-items:center;flex-wrap:wrap}
 @media (max-width:760px){.crGrid,.hsKids{grid-template-columns:1fr}}
@@ -798,7 +805,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
     <div class="panel rv">
       <div class="closeX" data-close>✕</div>
       <div class="ptitle">DIPLOMACY</div>
-      <div class="orn">✦ The Council of Four Crowns ✦</div>
+      <div class="orn" id="dipOrn">✦ The Council of Four Crowns ✦</div>
       <div id="dipScroll">
       <div class="dipTop" id="dipTop"></div>
       <div class="dipGrid">
@@ -991,11 +998,11 @@ const sgn = n => (n > 0 ? '+' : '') + Math.round(n);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 /* Hooks: the bigger systems (magic, courts, armies, the realm, the seas, the Tide, the Long Road) each register here
    for reset, save, load and the game clocks, so the core save/load and loop code only needs one call per hook. */
-const HOOKS = { reset: [], save: [], load: [], newgame: [], daily: [], tick: [], slow: [], hud: [], draw: [], recalc: [], kill: [], pad: [], succession: [], bigmap: [], minimap: [], owner: [], captured: [] };
+const HOOKS = { reset: [], save: [], load: [], newgame: [], daily: [], tick: [], slow: [], hud: [], draw: [], recalc: [], kill: [], pad: [], succession: [], bigmap: [], minimap: [], owner: [], captured: [], preload: [], courtRender: [] };
 const hook = (n, fn) => { HOOKS[n].push(fn); };
 // New NPC roles, world interactions and keys register here: ROLES[role] = { label(e), talk(e) }, IACTS[type] = { label(it, pl), act(it, pl) },
 // KEYFN[code] = fn (the code is the default key; players can rebind it in Settings), PANELS[code] = UI screen to toggle.
-const ROLES = {}, IACTS = {}, KEYFN = {}, PANELS = {}, STRUCTS = {}, PICON = {}, DRAW_KIND = {}, KIND_AI = {}, MUSIC_PICK = [];
+const ROLES = {}, IACTS = {}, KEYFN = {}, PANELS = {}, STRUCTS = {}, PICON = {}, DRAW_KIND = {}, KIND_AI = {}, MUSIC_PICK = [], EMBLEMS = {};
 // STRUCTS[k](g, o, t) draws a world object kind, PICON[type](g, p, s) its map icon; DRAW_KIND[kind](g, e, t) draws an actor kind, KIND_AI[kind](e, dt) adds behaviour
 function runHooks(n, a, b, c) { for (const f of HOOKS[n]) { try { f(a, b, c); } catch (e) { console.error(`[${n} hook]`, e); } } }
 
@@ -3691,7 +3698,7 @@ function addRep(k, v, reason, silent) {
   dipDirty = true;
 }
 const repMul = k => clamp(1 - K.rep[k] / 250, .6, 1.4) * (P && P.spouse && P.spouse.arch === 'courtier' ? .95 : 1);
-function repTitle(k) { const r = K.rep[k]; if (P.allegiance === k) return r >= 80 ? 'Lord Protector' : r >= 55 ? 'Knight Captain' : 'Sworn Knight'; return r >= 60 ? 'Honored' : r >= 25 ? 'Respected' : r > -25 ? 'Stranger' : r > -40 ? 'Distrusted' : 'Outlaw'; }
+function repTitle(k) { if (k === 4 && G.realm && G.realm.founded) return 'Sovereign'; const r = K.rep[k]; if (P.allegiance === k) return r >= 80 ? 'Lord Protector' : r >= 55 ? 'Knight Captain' : 'Sworn Knight'; return r >= 60 ? 'Honored' : r >= 25 ? 'Respected' : r > -25 ? 'Stranger' : r > -40 ? 'Distrusted' : 'Outlaw'; }
 function territoryOf(k) { return Math.round(((G.under && G.over ? G.over.W : W).landCount || [0, 0, 0, 0])[k] * .25); }
 /* Menus that read the world (diplomacy, the map) still work indoors and underground: point at the overworld while they draw,
    with the knight standing at the door they came in by. */
@@ -3737,13 +3744,14 @@ function dipTick() {
   });
   PAIRS.forEach(([a, b]) => {
     if (relStatus(a, b).n !== 'Allied') return;
-    for (let c = 0; c < 4; c++) { if (c === a || c === b) continue; if (relStatus(a, c).n === 'At War' && getRel(b, c) > -90) addRel(b, c, -3, 'Alliance obligations', null, false); if (relStatus(b, c).n === 'At War' && getRel(a, c) > -90) addRel(a, c, -3, 'Alliance obligations', null, false); }
+    for (const c of KIDS()) { if (c === a || c === b) continue; if (relStatus(a, c).n === 'At War' && getRel(b, c) > -90) addRel(b, c, -3, 'Alliance obligations', null, false); if (relStatus(b, c).n === 'At War' && getRel(a, c) > -90) addRel(a, c, -3, 'Alliance obligations', null, false); }
   });
   for (let k = 0; k < 4; k++) K.mil[k] = Math.min(K.milBase[k] * 1.25, K.mil[k] + K.milBase[k] * .012);
-  if (P.allegiance != null) { const g = 10 + Math.max(0, Math.floor((K.rep[P.allegiance] - 30) / 5)); P.gold += g; toast(`Royal stipend from ${KDATA[P.allegiance].name}: +${g} gold`, 'gold', bannerURL(P.allegiance)); }
+  if (P.allegiance != null && P.allegiance < 4) { const g = 10 + Math.max(0, Math.floor((K.rep[P.allegiance] - 30) / 5)); P.gold += g; toast(`Royal stipend from ${KDATA[P.allegiance].name}: +${g} gold`, 'gold', bannerURL(P.allegiance)); }
   for (let k = 0; k < 4; k++) K.gifts[k] = Math.max(0, K.gifts[k] - 1);
 }
 function captureOutpost(a, b) {
+  if (a > 3 || b > 3 || (K.fallen || [])[a] || (K.fallen || [])[b]) return; // the realm's wars are fought by its armies
   const [win, lose] = (K.mil[a] * rand(.7, 1.3) > K.mil[b] * rand(.7, 1.3)) ? [a, b] : [b, a];
   const cand = W.places.filter(p => p.type === 'outpost' && p.owner === lose).sort((p, q) => dist(p.tx, p.ty, W.caps[win][0], W.caps[win][1]) - dist(q.tx, q.ty, W.caps[win][0], W.caps[win][1]));
   const o = cand[0]; if (!o || dist(o.tx, o.ty, W.caps[win][0], W.caps[win][1]) > 210) return;
@@ -4031,7 +4039,8 @@ function spawnPlace(pl) {
     case 'hidden': specsSpawn(1); break;
     case 'castle': {
       const k = pl.owner, sp = pl.spots, T_ = v => v * TS + TS / 2;
-      mkActor('npc', T_(sp.ruler[0]) - TS / 2, T_(sp.ruler[1]), { place: pl.id, role: 'ruler', k, name: KDATA[k].ruler, stand: true, standFace: Math.PI / 2, royal: true });
+      const occ = k !== pl.k, stew = k === 4, hn = pick(NAMES.first);
+      mkActor('npc', T_(sp.ruler[0]) - TS / 2, T_(sp.ruler[1]), { place: pl.id, role: stew ? 'steward' : 'ruler', k, name: stew ? `Steward ${hn}` : occ ? `Castellan ${hn}` : KDATA[k].ruler, stand: true, standFace: Math.PI / 2, royal: !stew && !occ, _look: stew ? { body: KDATA[4].color, head: 'hair', hair: '#5a4a3a', skin: '#e0b890', cape: KDATA[4].accent, beard: 1 } : occ ? knightLook(k) : undefined });
       mkActor('npc', T_(sp.armorer[0]), T_(sp.armorer[1]), { place: pl.id, role: 'armorer', k, name: pick(NAMES.first) + ' the Armorer', stand: true, standFace: Math.PI / 2 });
       if (G.tourney && G.tourney.castle === pl.id && !G.tourney.done) spawnHerald(pl);
       mkActor('npc', pl.x - 6 * TS, pl.y + 7 * TS, { place: pl.id, role: 'captain', k, name: 'Captain ' + pick(NAMES.first), stand: true, standFace: Math.PI / 2 });
@@ -5601,6 +5610,7 @@ function grantFief(k) {
 }
 function fiefWeek() {
   const F = P.fief, v = W.places[F.v];
+  if (G.realm && G.realm.founded) return;
   if (F.seized != null) { toast(`<b>${v.name}</b> is held by ${KDATA[F.seized] ? KDATA[F.seized].name : 'your enemies'}. No taxes come from an occupied fief.`, 'bad'); return; }
   F.pros = clamp(F.pros + [6, 1, -8][F.tax], 0, 100); F.loyal = clamp(F.loyal + [5, 0, -9][F.tax], 0, 100);
   if (F.loyal < 5) { P.fief = null; toast(`The people of <b>${v.name}</b> rise up and drive out your stewards. You have lost your fief.`, 'bad'); SND.play('fail'); return; }
@@ -6043,7 +6053,7 @@ function drawEmblem(g, k, cx, cy, s, col) {
     g.fillRect(-s * .12, -s * .1, s * .24, s * .9);
     g.beginPath(); g.moveTo(-s * .12, s * .8); g.lineTo(-s * .5, s); g.lineTo(s * .5, s); g.lineTo(s * .12, s * .8); g.fill();
     circ(g, 0, -s * .45, s * .5); circ(g, -s * .45, -s * .15, s * .38); circ(g, s * .45, -s * .15, s * .38); circ(g, 0, -s * .05, s * .35);
-  }
+  } else if (EMBLEMS[em]) EMBLEMS[em](g, s, k);
   g.restore();
 }
 function drawBannerShape(g, k, x, y, w, h) {
@@ -6269,9 +6279,10 @@ const SEASON_TINT = [
 ];
 function buildPalette() {
   PAL = []; const st = SEASON_TINT[curSeason];
-  for (let k = 0; k < 4; k++) {
+  for (let k = 0; k < KDATA.length; k++) {
+    const KT = KTINT[k] || KTINT[0];
     PAL[k] = TINFO.map((ti, t) => {
-      let c = ([T.GRASS, T.PLAINS, T.FOREST, T.DENSE, T.HILL, T.SWAMP, T.FARM].includes(t) && KTINT[k][1]) ? mix(ti.c, KTINT[k][0], KTINT[k][1]) : ti.c;
+      let c = ([T.GRASS, T.PLAINS, T.FOREST, T.DENSE, T.HILL, T.SWAMP, T.FARM].includes(t) && KT[1]) ? mix(ti.c, KT[0], KT[1]) : ti.c;
       if (curSeason === 3 && k === 1) { if (t === T.GRASS || t === T.PLAINS || t === T.FOREST) c = mix(c, '#a8a890', .15); return c; } // no snow in sunny Valoria
       const m = st && (t === T.GRASS || t === T.PLAINS ? st.g : t === T.FOREST || t === T.DENSE ? st.f : t === T.FARM ? st.farm : t === T.HILL ? st.h : t === T.SWAMP ? st.sw : null);
       return m ? mix(c, m[0], m[1]) : c;
@@ -7667,7 +7678,7 @@ function buildMapLayers() {
     if (t === T.ROAD || t === T.BRIDGE) put(imgs.roads, i, TINFO[t].mm);
     if (t !== T.SEA) {
       const edge = (x + 1 < WW && W.own[i + 1] !== k && W.ter[i + 1] !== T.SEA) || (y + 1 < WH && W.own[i + WW] !== k && W.ter[i + WW] !== T.SEA) || (x > 0 && W.own[i - 1] !== k && W.ter[i - 1] !== T.SEA) || (y > 0 && W.own[i - WW] !== k && W.ter[i - WW] !== T.SEA);
-      put(imgs.borders, i, kcol(k), edge ? 230 : settings.cb && [(x + y) % 5 === 0, x % 3 === 0 && y % 3 === 0, (x + y) % 6 === 0 || (x - y + 6000) % 6 === 0, y % 4 === 0][k] ? 150 : 38); // colourblind mode: a pattern per kingdom
+      put(imgs.borders, i, kcol(k), edge ? 230 : settings.cb && [(x + y) % 5 === 0, x % 3 === 0 && y % 3 === 0, (x + y) % 6 === 0 || (x - y + 6000) % 6 === 0, y % 4 === 0, x % 4 === 0 && y % 2 === 0][k] ? 150 : 38); // colourblind mode: a pattern per kingdom
     }
   }
   for (const k in imgs) if (k !== 'full') L[k].getContext('2d').putImageData(imgs[k], 0, 0);
@@ -7979,7 +7990,7 @@ function selectKingdom(k) { dipSel = k; dipTgt.alliance = dipTgt.peace = null; r
 function relRow(a, b) { const v = Math.round(getRel(a, b)), s = statusOf(v); const w = Math.abs(v) / 2; return `<div class="relrow" data-tip="${esc(edgeTip(a, b))}"><span class="rn">${KDATA[a].name} → <span style="color:${KDATA[b].color}">${KDATA[b].name}</span></span><div class="minim"><i style="${v >= 0 ? `left:50%;width:${w}%` : `left:${50 - w}%;width:${w}%`};background:${s.c}"></i></div><span class="rv2" style="color:${s.c}">${sgn(v)} ${s.n}</span></div>`; }
 function kCard(k) {
   const kd = KDATA[k], rep = Math.round(K.rep[k]), rs = statusOf(rep), hol = holdings(k); const mil = Math.round(K.mil[k]);
-  const pStatus = P.allegiance === k ? { n: 'Sworn Liege', c: '#ffd24a' } : rep <= -40 ? { n: 'Hunting You', c: '#ff3a24' } : rs;
+  const pStatus = k === 4 ? { n: 'Your Realm', c: '#ffd24a' } : KDATA[4] && relStatus(k, 4).n === 'At War' ? { n: 'At War With You', c: '#ff3a24' } : KDATA[4] && G.realm && G.realm.vassals.includes(k) ? { n: 'Your Vassal', c: '#ffd24a' } : P.allegiance === k ? { n: 'Sworn Liege', c: '#ffd24a' } : rep <= -40 ? { n: 'Hunting You', c: '#ff3a24' } : rs;
   const ev = K.kev[k].slice(0, 3);
   return `<div class="kcard ${dipSel === k ? 'sel' : ''}" style="--kc:${kd.color};animation-delay:${k * .06}s" data-k="${k}">
     <div class="khead"><img src="${bannerURL(k)}" alt=""><div style="flex:1"><div class="kname" style="color:${shade(kd.color, .35)}">${kd.name.toUpperCase()}</div><div class="kruler">${kd.ruler}</div><span class="chip" style="color:${pStatus.c}">${pStatus.n.toUpperCase()}</span></div></div>
@@ -7988,7 +7999,7 @@ function kCard(k) {
       <div><div class="l">MILITARY</div>${fmt(mil)} men<div class="mbar"><i style="width:${clamp(mil / 80, 0, 100)}%"></i></div></div>
       <div style="grid-column:1/-1" data-tip="${esc(repTip(k))}"><div class="l">YOUR REPUTATION · ${repTitle(k).toUpperCase()}</div><div class="repm"><div class="mk" style="left:${(rep + 100) / 2}%"></div></div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)"><span>-100</span><b style="color:${rs.c};font-family:var(--fh)">${sgn(rep)} ${rs.n}</b><span>+100</span></div></div>
     </div>
-    <div class="rels">${[0, 1, 2, 3].filter(j => j !== k).map(j => relRow(k, j)).join('')}</div>
+    <div class="rels">${KIDS().filter(j => j !== k).map(j => relRow(k, j)).join('')}</div>
     <div class="kev">${ev.length ? ev.map(e => `<div title="${esc(e.t)}"><span style="color:var(--gold-d)">D${e.d}</span> ${esc(e.t)}</div>`).join('') : '<div>No recent events.</div>'}</div>
   </div>`;
 }
@@ -8013,20 +8024,20 @@ function renderGraph() {
     let lines = '';
     if (s.n === 'Allied') { const dx = x2 - x1, dy = y2 - y1, l = Math.hypot(dx, dy), nx = -dy / l * 3.5, ny = dx / l * 3.5; lines = `<path d="M${x1 + nx},${y1 + ny} L${x2 + nx},${y2 + ny}" stroke="${s.c}" stroke-width="2.5" filter="url(#glow)"/><path d="M${x1 - nx},${y1 - ny} L${x2 - nx},${y2 - ny}" stroke="${s.c}" stroke-width="2.5" filter="url(#glow)"/>`; }
     else lines = `<path d="${path}" stroke="${s.c}" stroke-width="${sw}" fill="none" stroke-dasharray="${dash}" class="${cls}" ${s.n === 'Friendly' || s.n === 'At War' ? 'filter="url(#glow)"' : ''} stroke-linecap="round" stroke-linejoin="round"/>`;
-    const lt = (a === 0 && b === 3) || (a === 1 && b === 2) ? .3 : .5;
+    const lt = b === 4 ? .32 : (a === 0 && b === 3) || (a === 1 && b === 2) ? .3 : .5;
     const lx = x1 + (x2 - x1) * lt, ly = y1 + (y2 - y1) * lt;
     extra = `<g transform="translate(${lx},${ly})"><rect x="-24" y="-11" width="48" height="22" rx="11" fill="#1a120a" stroke="${s.c}" stroke-width="1.5"/><text x="0" y="4.5" text-anchor="middle" font-family="Cinzel,Georgia" font-weight="700" font-size="12" fill="${s.c}">${sgn(v)}</text></g>`;
     if (s.n === 'At War') { const mx = x1 + (x2 - x1) * (lt === .3 ? .62 : .72), my = y1 + (y2 - y1) * (lt === .3 ? .62 : .72); extra += `<text x="${mx}" y="${my + 6}" text-anchor="middle" font-size="18" class="pulse">⚔</text>`; }
     h += `<g class="edge" data-a="${a}" data-b="${b}">${lines}<path class="hit" d="M${x1},${y1} L${x2},${y2}"/>${extra}</g>`;
   });
-  h += `<g transform="translate(225,200)"><circle r="13" fill="#1a120a" stroke="#d8b25a" stroke-width="1.5"/><text y="5" text-anchor="middle" fill="#d8b25a" font-size="14">✦</text></g>`;
+  if (!KDATA[4]) h += `<g transform="translate(225,200)"><circle r="13" fill="#1a120a" stroke="#d8b25a" stroke-width="1.5"/><text y="5" text-anchor="middle" fill="#d8b25a" font-size="14">✦</text></g>`;
   GNODE.forEach(([x, y], k) => {
     const kd = KDATA[k]; const sel = dipSel === k;
     h += `<g class="gnode" data-k="${k}" style="cursor:pointer" transform="translate(${x},${y})">
       <circle r="${sel ? 40 : 36}" fill="url(#gbg)" stroke="${kd.color}" stroke-width="${sel ? 4 : 3}" ${sel ? 'filter="url(#glow)"' : ''}/>
       <image href="${bannerURL(k)}" x="-15" y="-27" width="30" height="43"/>
-      <text y="${k === 3 ? 58 : -46}" text-anchor="middle" font-family="Cinzel,Georgia" font-weight="900" font-size="14" letter-spacing="2" fill="${shade(kd.color, .45)}" stroke="#000" stroke-width="3" paint-order="stroke">${kd.name.toUpperCase()}</text>
-      <text y="${k === 3 ? 72 : -32}" text-anchor="middle" font-family="EB Garamond,Georgia" font-size="11.5" fill="#c7b48c" stroke="#000" stroke-width="2.5" paint-order="stroke">You: ${sgn(K.rep[k])} ${repTitle(k)}</text>
+      <text y="${k === 3 || k === 4 ? 58 : -46}" text-anchor="middle" font-family="Cinzel,Georgia" font-weight="900" font-size="14" letter-spacing="2" fill="${shade(kd.color, .45)}" stroke="#000" stroke-width="3" paint-order="stroke">${kd.name.toUpperCase()}</text>
+      <text y="${k === 3 || k === 4 ? 72 : -32}" text-anchor="middle" font-family="EB Garamond,Georgia" font-size="11.5" fill="#c7b48c" stroke="#000" stroke-width="2.5" paint-order="stroke">You: ${sgn(K.rep[k])} ${repTitle(k)}</text>
     </g>`;
   });
   svg.innerHTML = h;
@@ -8034,7 +8045,9 @@ function renderGraph() {
   svg.querySelectorAll('.gnode').forEach(el => { const k = +el.dataset.k; el.addEventListener('click', () => selectKingdom(k)); el.addEventListener('mouseenter', e => tipShow(`<h4>${KDATA[k].full}</h4>${KDATA[k].ruler}<br><i>"${KDATA[k].motto}"</i><div class="tsub">Click to select</div>`, e.clientX, e.clientY)); el.addEventListener('mouseleave', tipHide); });
 }
 function renderActions() {
-  const k = dipSel, kd = KDATA[k]; const others = [0, 1, 2, 3].filter(j => j !== k);
+  if (dipSel >= KDATA.length) dipSel = 0;
+  if (dipSel === 4) { $('actPanel').innerHTML = `<h3 style="color:${shade(KDATA[4].color, .4)}">${KDATA[4].full.toUpperCase()}</h3><div class="psub" style="margin:0 0 8px">Your own realm. Declare wars, demand fealty, set laws and muster the host from the Realm tab of the Realm &amp; Court screen.</div><button class="btn gold" id="toRealm">Open the Realm tab (H)</button>`; $('toRealm').onclick = () => { courtTab = 'realm'; UI.open('court'); }; return; }
+  const k = dipSel, kd = KDATA[k]; const others = KIDS().filter(j => j !== k);
   if (dipTgt.alliance == null || dipTgt.alliance === k) dipTgt.alliance = others.slice().sort((a, b) => getRel(k, b) - getRel(k, a))[0];
   if (dipTgt.peace == null || dipTgt.peace === k) dipTgt.peace = others.slice().sort((a, b) => getRel(k, a) - getRel(k, b))[0];
   const B = (act, label, tgt) => { const st = dipActionState(k, act, tgt); return `<button class="btn ${st.ok ? '' : 'dis'}" style="${st.ok ? '' : 'opacity:.45;filter:grayscale(.6)'}" data-act="${act}" data-tip="${esc(`<h4>${label}</h4>${st.why}`)}">${label}</button>`; };
@@ -8056,7 +8069,8 @@ function renderDiplomacy() {
   if (!UI.isOpen('dip')) return;
   const cur = ownerAtPx(P.x, P.y); const wars = PAIRS.filter(([a, b]) => relStatus(a, b).n === 'At War').map(([a, b]) => `${KDATA[a].name}–${KDATA[b].name}`);
   $('dipTop').innerHTML = `<span>Day <b>${dayNum()}</b></span><span>Allegiance: <b>${P.allegiance != null ? KDATA[P.allegiance].name : 'None (free knight)'}</b></span><span>Standing in: <b>${KDATA[cur].name}</b></span><span>Wars: <b style="color:${wars.length ? '#ff6a4a' : '#8fe07a'}">${wars.length ? wars.join(', ') : 'None — an uneasy peace'}</b></span>`;
-  $('dipColL').innerHTML = kCard(0) + kCard(1); $('dipColR').innerHTML = kCard(2) + kCard(3);
+  $('dipOrn').textContent = KDATA[4] ? '✦ The Council of Five Crowns ✦' : '✦ The Council of Four Crowns ✦';
+  $('dipColL').innerHTML = kCard(0) + kCard(1) + (KDATA[4] ? kCard(4) : ''); $('dipColR').innerHTML = kCard(2) + kCard(3);
   document.querySelectorAll('.kcard').forEach(el => el.onclick = e => { if (e.target.closest('[data-tip]') && e.target.closest('.relrow')) return; selectKingdom(+el.dataset.k); });
   renderGraph(); renderActions(); dipDirty = false;
 }
@@ -8805,7 +8819,7 @@ $('btnAch').onclick = () => UI.open('ach');
 $('btnRespawn').onclick = () => respawnPlayer();
 $('btnLoadSave').onclick = () => { UI.hide('deathScreen'); if (hasSave()) continueGame(G.slot); else { toast('No save found — rising again instead.', 'bad'); respawnPlayer(); } };
 $('btnDeathMenu').onclick = () => { UI.hide('deathScreen'); toMainMenu(); };
-$('btnEndSandbox').onclick = () => { UI.hide('endScreen'); G.state = 'play'; storyToSandbox(); saveGame(true); toast(`The tale is told, but the realm endures. Slot ${G.slot || 1} is now a <b>sandbox</b> game: tourneys, free roaming and everything else the realm offers.`, 'gold'); };
+$('btnEndSandbox').onclick = () => { if (G.sandboxEnd) { G.sandboxEnd = false; UI.hide('endScreen'); G.state = 'play'; $('btnEndSandbox').textContent = 'Continue in Sandbox'; document.querySelector('#endScreen .endKicker').textContent = 'THE END'; saveGame(true); toast('The realm endures, and so does your reign.', 'gold'); return; } UI.hide('endScreen'); G.state = 'play'; storyToSandbox(); saveGame(true); toast(`The tale is told, but the realm endures. Slot ${G.slot || 1} is now a <b>sandbox</b> game: tourneys, free roaming and everything else the realm offers.`, 'gold'); };
 function storyToSandbox() { if (G.mode !== 'story') return; G.mode = 'sandbox'; G.fromStory = { ending: STORY && STORY.ending, day: dayNum() }; }
 $('btnEndMenu').onclick = () => { UI.hide('endScreen'); toMainMenu(); };
 
@@ -8881,7 +8895,7 @@ function saveGame(silent, quiet) {
 // Saves before v2 have none of the newer systems; each system's load hook fills in its own defaults, so this only stamps the version
 function migrateSave(d) { if (!d.v || d.v < 2) { d.flags = d.flags || {}; d.sagaDone = d.sagaDone || []; d.v = 2; } return d; }
 function loadGame(d) {
-  migrateSave(d); resetState();
+  migrateSave(d); resetState(); runHooks('preload', d);
   G.mode = d.mode === 'story' ? 'story' : 'sandbox'; STORY = d.story || null; // before anything draws the HUD, which reads story quests
   newPlayer();
   Object.assign(P, d.P); P.inv = d.P.inv; P.eq = d.P.eq; P.mounted = false; uidCounter = d.uid || (Math.max(0, ...P.inv.map(i => i.uid)) + 1);
@@ -11414,7 +11428,7 @@ function applyCourt() {
     kd.fem = c.fem; kd.rulerHair = c.hair || (c.name === INIT_COURT[k].name ? D.rulerHair : (c.fem ? pick(['#c8983e', '#e2d6b4', '#6a3a1a', '#2a1a10']) : null)); c.hair = kd.rulerHair;
     const P0 = D.pers, p = { aggr: P0.aggr, trade: P0.trade, honor: P0.honor }; c.traits.forEach(t => { const T0 = TRAITS[t]; if (!T0) return; ['aggr', 'trade', 'honor'].forEach(x => { if (T0[x]) p[x] = clamp(p[x] + T0[x], .05, .98); }); }); kd.pers = p;
   }
-  ents.forEach(e => { if (e.role === 'ruler' && e.k != null && e.k < 4) { e.name = KDATA[e.k].ruler; e._look = null; } });
+  ents.forEach(e => { if (e.role === 'ruler' && e.royal && e.k != null && e.k < 4) { e.name = KDATA[e.k].ruler; e._look = null; } });
   dipDirty = true;
 }
 function traitUnrest(k) { return ruler(k).traits.reduce((a, t) => a + ((TRAITS[t] && TRAITS[t].unrest) || 0), 0); }
@@ -11772,6 +11786,7 @@ function renderCourt() {
   if (courtTab === 'court') body.innerHTML = renderCourts();
   else if (courtTab === 'house') body.innerHTML = renderHouse();
   else if (TABS_EXT.render && TABS_EXT.render[courtTab]) body.innerHTML = TABS_EXT.render[courtTab]();
+  runHooks('courtRender', body);
   body.querySelectorAll('[data-act]').forEach(el => el.onclick = () => { const f = COURT_ACTS[el.dataset.act]; if (f) f(el.dataset.arg); });
   body.querySelectorAll('input[data-nm]').forEach(el => { el.onkeydown = ev => ev.stopPropagation(); el.onchange = () => { const v = el.value.trim().slice(0, 24); if (!v) return; const t = el.dataset.nm; if (t === 'me') P.pname = v; else if (t === 'house') P.house = (/^house /i.test(v) ? '' : 'House ') + v; else { const kd = P.kids[+t]; if (kd) kd.name = v; } SND.play('ui'); renderCourt(); }; });
 }
@@ -11850,20 +11865,22 @@ const armyLook = (kind, k) => { const kc = KDATA[k] ? KDATA[k].color : '#777'; i
 
 /* ---------------- Territory: land follows its villages ---------------- */
 const CLAIM_R = { castle: 34, village: 17, outpost: 12 };
+const claimR = p => CLAIM_R[p.type] || (p.type === 'ruin' && p.fort && p.owner === 4 ? 10 : 0);
 let terrSig = '';
 function recomputeTerritory(force) {
   if (!W || !W.own0 || G.under) return;
-  const claims = W.places.filter(p => CLAIM_R[p.type]), sig = claims.map(p => p.owner).join(','); if (!force && sig === terrSig) return; terrSig = sig;
+  const claims = W.places.filter(p => claimR(p)), sig = claims.map(p => p.owner).join(','); if (!force && sig === terrSig) return; terrSig = sig;
   W.own.set(W.own0);
   for (const p of claims) {
-    if (p.owner === p.k || p.owner == null) continue; const R = CLAIM_R[p.type], mates = claims.filter(q => q.k === p.k);
+    if (p.owner === p.k || p.owner == null) continue; const R = claimR(p), mates = claims.filter(q => q.k === p.k);
     for (let y = Math.max(0, p.ty - R); y <= Math.min(WH - 1, p.ty + R); y++) for (let x = Math.max(0, p.tx - R); x <= Math.min(WW - 1, p.tx + R); x++) {
       const dx = x - p.tx, dy = y - p.ty, d2 = dx * dx + dy * dy; if (d2 > R * R) continue; const i = y * WW + x; if (W.own0[i] !== p.k) continue;
       let best = null, bd = 1e9; for (const q of mates) { const e2 = (q.tx - x) ** 2 + (q.ty - y) ** 2 - (q.type === 'castle' ? 300 : 0); if (e2 < bd) { bd = e2; best = q; } }
       if (best === p) W.own[i] = p.owner;
     }
   }
-  W.landCount = W.landCount.map(() => 0); for (let i = 0; i < WW * WH; i++) if (!TINFO[W.ter[i]].block && W.landCount[W.own[i]] != null) W.landCount[W.own[i]]++;
+  (K && K.fallen || []).forEach((d, k) => { if (!d) return; const to = W.places[k].owner; if (to === k || to == null) return; for (let i = 0; i < WW * WH; i++) if (W.own[i] === k) W.own[i] = to; });
+  W.landCount = KDATA.map(() => 0); for (let i = 0; i < WW * WH; i++) if (!TINFO[W.ter[i]].block && W.landCount[W.own[i]] != null) W.landCount[W.own[i]]++;
   chunkCache.clear(); buildMapLayers(); G.curOwner = -2; dipDirty = true;
 }
 function setOwner(p, k, why) {
@@ -11901,14 +11918,14 @@ function raiseArmy(k, target, goal, o = {}) {
 function armyTargets(k) { // enemy-held places, nearest to the army's capital first
   const cap = k === 4 && G.realm ? W.places[G.realm.seat] : W.places[k], foes = KIDS().filter(j => j !== k && relStatus(k, j).n === 'At War');
   if (!foes.length || !cap) return [];
-  return W.places.filter(p => (p.type === 'outpost' || (p.type === 'village' && !(STORY && storyOn())) || (p.type === 'castle' && CONQUEST_ON())) && foes.includes(p.owner) && !(G.armies || []).some(a => a.target === p.id && a.k === k))
+  return W.places.filter(p => (p.type === 'outpost' || (p.type === 'village' && !(STORY && storyOn() && p.owner !== 4)) || (p.type === 'castle' && CONQUEST_ON() && (k === 4 || p.owner === 4))) && foes.includes(p.owner) && !(G.armies || []).some(a => a.target === p.id && a.k === k))
     .sort((a, b) => dist(a.x, a.y, cap.x, cap.y) * (a.type === 'castle' ? 2.2 : a.type === 'village' ? 1 : .8) - dist(b.x, b.y, cap.x, cap.y) * (b.type === 'castle' ? 2.2 : b.type === 'village' ? 1 : .8));
 }
 const CONQUEST_ON = () => !!(G.realm && G.realm.founded) || !!(G.opts && G.opts.conquest);
 function armyDaily(day) {
   if (G.mode === 'road') return; G.armies = G.armies || [];
   for (const k of KIDS()) {
-    if (k === 4) continue; // your own realm's armies march when you order them
+    if (k === 4 || (K.fallen || [])[k]) continue; // your own realm's armies march when you order them; fallen crowns raise none
     const mine = G.armies.filter(a => a.k === k), atWar = KIDS().some(j => j !== k && relStatus(k, j).n === 'At War');
     if (!atWar) { mine.forEach(a => { if (a.goal !== 'return') { a.goal = 'return'; retarget(a, W.places[k]); } }); continue; }
     if (mine.length < 2 && K.mil[k] > K.milBase[k] * .55 && chance(.35)) { const t = armyTargets(k)[0]; if (t && dist(t.x, t.y, W.places[k].x, W.places[k].y) < 230 * TS) raiseArmy(k, t, 'siege'); }
@@ -12128,7 +12145,7 @@ ACH.push(
   ['lance10', '🐎', 'Couched Lance', 'Ride down 10 foes with a lance', () => (G.stats.lanceHits || 0) >= 10],
   ['captain', '⚑', 'Captain of the Company', 'Command 8 soldiers at once', () => warband().length >= 8],
 );
-hook('reset', () => { G.armies = []; G.warlords = []; G.battle = null; G.armyN = 0; G.wlN = 0; terrSig = ''; if (W && W.places) W.places.forEach(p => { if (p.type === 'village' || p.type === 'castle') p.owner = p.k; }); });
+hook('reset', () => { G.armies = []; G.warlords = []; G.battle = null; G.armyN = 0; G.wlN = 0; terrSig = ''; if (W && W.places) W.places.forEach(p => { if (p.type === 'village' || p.type === 'castle' || (p.type === 'ruin' && p.k != null)) p.owner = p.k; }); });
 hook('save', d => { d.armies = (G.armies || []).map(a => { const c = Object.assign({}, a); if (a.mat) { c.str = Math.max(1, Math.round(a.matStr * armyUnits(a).length / Math.max(1, a.matN))); } c.mat = false; return c; }); d.warlords = G.warlords; d.armyN = G.armyN; d.wlN = G.wlN; });
 hook('load', d => { G.armies = d.armies || []; G.warlords = d.warlords || []; G.armyN = d.armyN || 0; G.wlN = d.wlN || 0; G.battle = null; recomputeTerritory(true); });
 hook('newgame', () => recomputeTerritory(true));
@@ -12142,6 +12159,242 @@ hook('kill', (t, src) => {
 });
 hook('bigmap', (g, toS, dpr) => { (G.armies || []).forEach(a => { if (!armyVisible(a)) return; const [x, y] = toS(a.x, a.y); drawArmyMarker(g, x, y, a, 7 * dpr, mapView.z >= 2); }); });
 hook('minimap', (g, toM, S) => { (G.armies || []).forEach(a => { if (a.gone) return; const [x, y] = toM(a.x, a.y); if (x < 4 || y < 4 || x > S - 4 || y > S - 4) return; drawArmyMarker(g, x, y, a, 4, false); }); });
+
+/* =====================================================================
+   THE FIFTH KINGDOM — found your own realm from a fief or a fort, choose
+   its colours, laws and lords, muster its host, bring the four crowns to
+   heel, and unite the realm. The realm is kingdom id 4 (KDATA[4], a fifth
+   row in K); it exists only in games where it has been founded.
+   ===================================================================== */
+const REALM_COLS = [['#b8862a', '#1a120a'], ['#1e7a8a', '#f2e6c0'], ['#8a2a5a', '#f0d070'], ['#3a4a5a', '#e8e0cc'], ['#c85a2a', '#f4ecd8'], ['#4a6a2a', '#f0e090'], ['#e8e0d0', '#2a3a6a'], ['#1a1a24', '#d8b04a']];
+const REALM_EMB = ['lion', 'tower', 'star', 'rose', 'ship', 'wolf', 'sword', 'key'];
+const LAWS = { tax: ['Light', 'Fair', 'Heavy'], levy: ['Volunteers', 'Levies', 'Conscription'], magic: ['Banned', 'Tolerated', 'Patronised'] };
+const REALM_COST = 3000;
+Object.assign(EMBLEMS, {
+  lion: (g, s) => { g.beginPath(); g.moveTo(-s * .7, s * .8); g.lineTo(-s * .5, 0); g.quadraticCurveTo(-s * .8, -s * .7, -s * .1, -s * .8); g.quadraticCurveTo(s * .6, -s * .9, s * .5, -s * .3); g.lineTo(s * .8, -s * .1); g.lineTo(s * .45, 0); g.lineTo(s * .7, s * .8); g.lineTo(s * .3, s * .8); g.lineTo(s * .1, s * .2); g.lineTo(-s * .2, s * .8); g.closePath(); g.fill(); circ(g, -s * .15, -s * .45, s * .42); },
+  tower: (g, s) => { g.fillRect(-s * .5, -s * .5, s, s * 1.4); for (let i = 0; i < 3; i++) g.fillRect(-s * .6 + i * s * .45, -s * .85, s * .3, s * .4); g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(-s * .15, s * .45, s * .3, s * .45); },
+  rose: (g, s) => { for (let i = 0; i < 5; i++) { const a = i / 5 * TAU - Math.PI / 2; circ(g, Math.cos(a) * s * .45, Math.sin(a) * s * .45, s * .38); } g.globalAlpha = .55; g.fillStyle = '#000'; circ(g, 0, 0, s * .22); g.globalAlpha = 1; },
+  ship: (g, s) => { g.beginPath(); g.moveTo(-s, s * .3); g.lineTo(s, s * .3); g.lineTo(s * .7, s * .8); g.lineTo(-s * .7, s * .8); g.closePath(); g.fill(); g.fillRect(-s * .05, -s * .9, s * .1, s * 1.2); g.beginPath(); g.moveTo(s * .08, -s * .85); g.lineTo(s * .75, s * .15); g.lineTo(s * .08, s * .15); g.closePath(); g.fill(); g.beginPath(); g.moveTo(-s * .08, -s * .6); g.lineTo(-s * .6, s * .15); g.lineTo(-s * .08, s * .15); g.closePath(); g.fill(); },
+  wolf: (g, s) => { g.beginPath(); g.moveTo(-s * .55, -s * .9); g.lineTo(-s * .25, -s * .35); g.lineTo(s * .25, -s * .35); g.lineTo(s * .55, -s * .9); g.lineTo(s * .7, -s * .1); g.lineTo(s * .25, s * .85); g.lineTo(-s * .25, s * .85); g.lineTo(-s * .7, -s * .1); g.closePath(); g.fill(); },
+  sword: (g, s) => { g.beginPath(); g.moveTo(0, -s); g.lineTo(s * .14, -s * .75); g.lineTo(s * .14, s * .35); g.lineTo(-s * .14, s * .35); g.lineTo(-s * .14, -s * .75); g.closePath(); g.fill(); g.fillRect(-s * .55, s * .32, s * 1.1, s * .16); g.fillRect(-s * .09, s * .45, s * .18, s * .4); circ(g, 0, s * .92, s * .13); },
+  key: (g, s) => { g.lineWidth = s * .22; g.beginPath(); g.arc(0, -s * .45, s * .38, 0, TAU); g.stroke(); g.fillRect(-s * .1, -s * .1, s * .2, s * 1.05); g.fillRect(0, s * .5, s * .45, s * .16); g.fillRect(0, s * .78, s * .35, s * .16); },
+});
+EMBLEMS.star = (g, s) => { g.beginPath(); for (let i = 0; i < 10; i++) { const a = i / 10 * TAU - Math.PI / 2, r = i % 2 ? s * .42 : s; g.lineTo(Math.cos(a) * r, Math.sin(a) * r); } g.closePath(); g.fill(); };
+const realmOn = () => !!(G.realm && G.realm.founded && KDATA[4]);
+const realmPlaces = (type) => W.places.filter(p => p.owner === 4 && (!type || p.type === type || (type === 'fort' && p.type === 'ruin' && p.fort)));
+function realmKData(R, pl = P) {
+  const title = pl.fem ? 'Queen' : 'King', hi = R.united ? (pl.fem ? 'High Queen' : 'High King') : title;
+  return { name: R.name, full: `Kingdom of ${R.name}`, color: R.color, dark: shade(R.color, -.55), accent: R.accent, ruler: `${hi} ${pl.pname}`, rulerTitle: `${hi} of ${R.name}`, emblem: R.emblem, roof: shade(R.color, -.25), stone: '#b0a898', castle: W.places[R.seat] ? W.places[R.seat].name : R.name, motto: R.motto, pers: { aggr: .45, trade: .6, honor: .7 }, produces: 'iron', wants: 'silk', tint: '#000000', spec: KDATA[0].spec, fem: pl.fem, realm: true };
+}
+// make every per-kingdom table in K, the diplomacy graph and the palette ready for a fifth kingdom
+function realmTables(pl) {
+  if (!G.realm || !G.realm.founded) return;
+  const kd = realmKData(G.realm, pl || P); if (KDATA.length < 5) KDATA.push(kd); else Object.assign(KDATA[4], kd);
+  for (let j = 0; j < 4; j++) if (!PAIRS.some(([a, b]) => a === j && b === 4)) PAIRS.push([j, 4]);
+  GNODE[4] = [225, 200]; KTINT[4] = [G.realm.color, .06]; KCOL_CB[4] = '#56B4E9';
+  ITEMS.map_4 = { name: `Map of ${G.realm.name}`, type: 'misc', use: 'kmap', k: 4, val: 90, stack: 1, desc: `Charts the lands of ${G.realm.name}.` };
+  delete _bannerCache[4]; delete _bannerURL[4]; delete _icons.map_4;
+}
+function realmPadK() {
+  const n = KDATA.length; if (n < 5) return;
+  ['rep', 'mil', 'milBase', 'gifts'].forEach(f => { while (K[f].length < n) K[f].push(f === 'rep' ? 100 : f === 'gifts' ? 0 : 2000); });
+  ['kev', 'repWhy'].forEach(f => { while (K[f].length < n) K[f].push([]); });
+  [K.rel, K.aff].forEach(M => { M.forEach(r => { while (r.length < n) r.push(0); }); while (M.length < n) M.push(new Array(n).fill(0)); M[4][4] = 100; });
+  for (let j = 0; j < 4; j++) { const key = pk(j, 4); K.reasons[key] = K.reasons[key] || []; K.events[key] = K.events[key] || []; }
+  K.unrest = K.unrest || []; if (K.unrest[4] == null) K.unrest[4] = 15; K.rep[4] = 100;
+}
+function realmRefresh() { if (!realmOn()) return; Object.assign(KDATA[4], realmKData(G.realm)); delete _bannerCache[4]; delete _bannerURL[4]; buildPalette(); chunkCache.clear(); buildMapLayers(); dipDirty = true; }
+/* ---------------- Founding ---------------- */
+function realmReqs() {
+  const seatOK = !!(P.fief || (P.forts || []).length), band = partyNow().filter(e => !e.dead).length;
+  return [
+    [P.lvl >= 10, `Reach level 10 (you are ${P.lvl})`],
+    [seatOK, 'Hold a seat: a fief granted by your liege, or a restored fort'],
+    [band >= 4, `Command at least 4 soldiers or companions (you have ${band})`],
+    [P.gold >= REALM_COST, `Gather ${fmt(REALM_COST)} gold for the coronation (you have ${fmt(P.gold)})`],
+    [G.mode !== 'story' || !!GF('crownPath'), 'In story mode, only the Fifth Crown storyline leads to a realm of your own'],
+  ];
+}
+let realmForm = null;
+function foundRealm() {
+  const f = realmForm; if (!f || realmReqs().some(r => !r[0])) return;
+  const name = (f.name || '').trim().slice(0, 18) || (W.places[f.seat] ? W.places[f.seat].name : 'Marchland');
+  P.gold -= REALM_COST;
+  const L = P.allegiance, grant = L != null && K.rep[L] >= 90 && KDATA[L].pers.honor >= .6 && !ruler(L).traits.includes('cruel');
+  G.realm = { founded: true, name, color: REALM_COLS[f.col][0], accent: REALM_COLS[f.col][1], emblem: REALM_EMB[f.emb], motto: (f.motto || '').trim().slice(0, 40) || 'By Our Own Hand', seat: f.seat, laws: { tax: 1, levy: 1, magic: 1 }, lords: {}, day: dayNum(), vassals: [], united: false, liege: L };
+  realmTables(); realmPadK();
+  // the seat, the fief and the forts become crown land
+  const seat = W.places[f.seat]; seat.owner = 4; if (seat.spawned) despawnPlace(seat);
+  if (P.fief) { const v = W.places[P.fief.v]; v.owner = 4; if (v.spawned) despawnPlace(v); }
+  (P.forts || []).forEach(id => { W.places[id].owner = 4; });
+  K.mil[4] = K.milBase[4] = 1500 + realmPlaces('village').length * 400 + (P.forts || []).length * 300;
+  for (let j = 0; j < 4; j++) { const base = clamp((K.rep[j] - 10) * .5, -30, 30); K.rel[j][4] = K.rel[4][j] = K.aff[j][4] = K.aff[4][j] = base; K.reasons[pk(j, 4)] = [{ t: 'A new crown among them', v: Math.round(base) }]; }
+  if (L != null && L < 4) {
+    if (grant) { K.rel[L][4] = K.rel[4][L] = K.aff[L][4] = K.aff[4][L] = 45; K.reasons[pk(L, 4)] = [{ t: 'Granted kingship in friendship', v: 45 }]; }
+    else { K.rel[L][4] = K.rel[4][L] = -90; K.aff[L][4] = K.aff[4][L] = -70; K.reasons[pk(L, 4)] = [{ t: 'Rebellion against the crown', v: -90 }]; addRep(L, -40, 'Declared yourself a king', true); }
+  }
+  P.allegiance = 4; recomputeTerritory(true); realmRefresh();
+  const t = `${pFull()} was crowned ${KDATA[4].rulerTitle} at ${seat.name}.`; logEvent(t, [4]); SND.play('bell'); SND.play('level');
+  G.stats.realmDay = dayNum();
+  UI.closeAll();
+  openDialog({ name: 'The Chronicle', role: 'A fifth crown', portrait: 'ember', text: `${t} The banners of ${name} fly over ${seat.name}.${L != null && L < 4 ? (grant ? ` ${KDATA[L].ruler} grants your kingship in friendship.` : ` ${KDATA[L].ruler} calls it treason. <b>${KDATA[L].name} is at war with you.</b>`) : ''}<br><br>Manage your realm in the Realm tab (H): laws, lords, the host and your wars. Bring all four crowns to heel (by conquering them or making them swear fealty) to unite the realm.`, options: [{ t: 'Long live the crown!', fn: closeDialog }] });
+  if (L != null && L < 4 && !grant) announceStatus(L, 4, statusOf(0), statusOf(-90));
+}
+/* ---------------- Ruling ---------------- */
+function realmDaily(day) {
+  if (!realmOn()) return; const R = G.realm, lw = R.laws;
+  CROWNS.forEach(j => { const c = ruler(j); if (!c || (K.fallen || [])[j]) return; if (c.traits.includes('pious')) addRel(4, j, lw.magic === 0 ? .6 : lw.magic === 2 ? -.6 : 0, null, null, false); if (c.traits.includes('scholarly') && lw.magic === 2) addRel(4, j, .6, null, null, false); });
+  const vil = realmPlaces('village'), cas = realmPlaces('castle'), outp = realmPlaces('outpost'), lords = Object.keys(R.lords).filter(id => W.places[id] && W.places[id].owner === 4).length;
+  const taxM = [.6, 1, 1.5][lw.tax], inc = Math.round((vil.length * 45 + cas.length * 220 + outp.length * 20) * taxM * (1 + lords * .02)) + (R.vassals || []).reduce((a, k) => a + 80, 0);
+  P.gold += inc; R.income = inc; if (inc) toast(`${R.name} pays ${fmt(inc)} gold in taxes${(R.vassals || []).length ? ' and tribute' : ''}.`, 'gold', bannerURL(4));
+  K.milBase[4] = 1500 + vil.length * 400 + cas.length * 2200 + outp.length * 250; K.mil[4] = Math.min(K.milBase[4] * 1.3, K.mil[4] + K.milBase[4] * [.02, .045, .08][lw.levy]);
+  const wars = CROWNS.filter(j => relStatus(4, j).n === 'At War' && !(K.fallen || [])[j]).length;
+  const target = clamp(12 + [-10, 0, 15][lw.tax] + [-5, 0, 12][lw.levy] + wars * 7 - lords * 4 + (G.plague && G.plague.hit.some(id => W.places[id].owner === 4) ? 12 : 0), 0, 95);
+  K.unrest[4] = clamp(K.unrest[4] + clamp(target - K.unrest[4], -3, 3) + rand(-1, 1), 0, 100);
+  if (K.unrest[4] > 70 && chance(.12) && vil.length && !(G.armies || []).some(a => a.k === 'rebel' && a.rebelOf === 4)) {
+    const v = pick(vil), from = nearestPlace(v.x, v.y, p => p !== v && (p.type === 'village' || p.type === 'ruin'));
+    const a = raiseArmy('rebel', v, 'siege', { from: (from || v).id, rebelOf: 4, str: 22 }); if (a) { toast(`🔥 <b>Revolt!</b> Peasants of ${R.name} march on ${v.name}. Lower the taxes, name lords, or crush them.`, 'war', bannerURL(4)); logEvent(`Rebels rose against ${KDATA[4].ruler} near ${v.name}.`, [4]); }
+  }
+  (R.vassals || []).forEach(k => { if (relStatus(4, k).n !== 'Allied') { K.rel[4][k] = K.rel[k][4] = Math.max(K.rel[4][k], 65); } });
+  checkUnity();
+}
+function muster(targetId) {
+  const t = W.places[targetId]; if (!t) return; const str = Math.round(clamp(K.mil[4] / 100, 10, 70) * [1, 1, 1.3][G.realm.laws.levy]);
+  if (K.mil[4] < 1200) { toast('Your levies are spent. Give them time to muster again.', 'bad'); return; }
+  const a = raiseArmy(4, t, 'siege', { player: true, str, quiet: true }); if (!a) return;
+  toast(`⚑ The host of ${G.realm.name} (${str} strong) marches on <b>${t.name}</b>. Ride with them: they fight beside you.`, 'war', bannerURL(4)); SND.play('horn');
+  logEvent(`${G.realm.name} marched on ${t.name}.`, [4, t.owner]); renderCourt();
+}
+function declareWar(j) { if (relStatus(4, j).n === 'At War') return; addRel(4, j, -200, 'Declared war', `${KDATA[4].ruler} declared war on ${KDATA[j].name}.`); (G.realm.vassals || []).splice((G.realm.vassals || []).indexOf(j) >>> 0, (G.realm.vassals || []).includes(j) ? 1 : 0); renderCourt(); }
+function fealtyChance(j) {
+  const lostCap = W.places[j].owner !== j, hold = holdings(j), ratio = K.mil[j] / Math.max(1, K.mil[4]);
+  return clamp((lostCap ? .55 : 0) + (hold.v <= 2 ? .3 : hold.v <= 4 ? .12 : 0) + (1 - ratio) * .35 + (K.rep[j] > 20 ? .1 : 0), 0, .95);
+}
+function demandFealty(j) {
+  if (relStatus(4, j).n !== 'At War') { toast('A crown bends the knee only in defeat. You must be at war with them.', 'bad'); return; }
+  const c = fealtyChance(j); K.cd['fealty' + j] = G.time;
+  if (Math.random() < c) {
+    G.realm.vassals.push(j); K.rel[4][j] = K.rel[j][4] = 70; K.aff[4][j] = K.aff[j][4] = 60; K.reasons[pk(j, 4)].unshift({ t: 'Sworn to your crown', v: 70 });
+    const t = `${KDATA[j].ruler} bent the knee to ${KDATA[4].ruler}. ${KDATA[j].name} is now a vassal of ${G.realm.name}.`; logEvent(t, [4, j]); toast('👑 ' + t, 'gold', bannerURL(j)); SND.play('bell');
+    (G.armies || []).filter(a => a.k === j).forEach(a => { a.goal = 'return'; retarget(a, W.places[j].owner === j ? W.places[j] : null); });
+    checkUnity();
+  } else { addRel(4, j, -8, 'Demanded their surrender'); toast(`${KDATA[j].ruler} refuses: "Never, while I still have swords."`, 'bad'); }
+  renderCourt();
+}
+function crownFallCheck(k) {
+  if (k > 3 || (K.fallen || [])[k]) return;
+  const hold = W.places.filter(p => p.owner === k && (p.type === 'village' || p.type === 'castle'));
+  if (W.places[k].owner !== k && hold.length <= 1) {
+    (K.fallen = K.fallen || [])[k] = dayNum(); const by = W.places[k].owner;
+    W.places.filter(p => p.owner === k && CLAIM_R[p.type]).forEach(p => setOwner(p, by));
+    K.rel[k].forEach((_, j) => { if (j !== k) { K.rel[k][j] = K.rel[j][k] = 0; } });
+    const t = `The Kingdom of ${KDATA[k].name} has fallen. ${KDATA[k].ruler} flees into exile.`; logEvent(t, [k]); toast('🏴 ' + t, 'war', bannerURL(k)); SND.play('hollow');
+    (G.armies || []).filter(a => a.k === k).forEach(a => a.gone = true);
+    recomputeTerritory(true); if (by === 4) checkUnity();
+  }
+}
+hook('captured', (p, from, to) => { if (p.type === 'castle') { const t = `${KDATA[to].name} has taken ${p.name}, the seat of ${KDATA[from] ? KDATA[from].name : 'a crown'}!`; toast('🏰 ' + t, 'war', bannerURL(to)); if (typeof from === 'number') setTimeout(() => crownFallCheck(from), 50); } if (typeof from === 'number' && from < 4) setTimeout(() => crownFallCheck(from), 60); });
+hook('owner', (p, old, k) => { if (typeof old === 'number' && old < 4) crownFallCheck(old); });
+const subdued = j => (K.fallen || [])[j] || (G.realm && (G.realm.vassals || []).includes(j));
+function checkUnity() {
+  if (!realmOn() || G.realm.united) return;
+  if (!CROWNS.every(subdued)) return;
+  G.realm.united = true; realmRefresh(); G.stats.united = dayNum();
+  logEvent(`${pFull()} united the five crowns. ${KDATA[4].ruler} rules from ${KDATA[4].castle}.`, [4]); SND.play('level'); SND.play('bell');
+  showSandboxEpilogue('unite');
+}
+/* ---------------- Sandbox epilogues (uniting the realm, surviving the Tide, a dynasty of legend) ---------------- */
+const SANDBOX_END = {
+  unite: () => ({ t: 'The Five Crowns', pages: [
+    { h: 'THE REALM UNITED', html: `<p>It began with ${P.anc && P.anc.length ? `${esc(P.anc[0].name)}, a poor hedge knight` : 'a poor hedge knight'}, a borrowed horse and a wooden sword. It ends with a crown that no one else can claim.</p><p><b>${esc(KDATA[4].ruler)}</b> rules the lands of Albion, Valoria, Draven and Eldoria from ${esc(KDATA[4].castle)}, under the banner of ${esc(G.realm.name)}: <i>"${esc(G.realm.motto)}"</i>.</p>` },
+    { h: 'THE OLD CROWNS', html: CROWNS.map(k => `<p><b>${esc(KDATA[k].name)}</b>: ${(K.fallen || [])[k] ? `fell to the sword on day ${K.fallen[k]}, and ${esc(KDATA[k].ruler)} lives in exile.` : `bent the knee. ${esc(KDATA[k].ruler)} rules as your vassal and pays tribute.`}</p>`).join('') },
+    { h: 'YOUR HOUSE', html: `<p>${esc(P.house)}, in its ${ordinalWord(P.gen || 1)} generation.${P.spouse ? ` ${esc(P.spouse.name)} rules beside you.` : ''}${(P.kids || []).length ? ` Your heir is ${esc((heirKid() || P.kids[0]).name)}.` : ''}</p>${(P.anc || []).length ? `<p>Remembered: ${P.anc.map(a => esc(a.name)).join(', ')}.</p>` : ''}` },
+    { h: 'AND AFTER', html: `<p>The realm is yours, and it will need ruling. Revolts, plagues and the old grudges of fallen houses do not end because a chronicle says so.</p><p>Your reign continues.</p>` },
+  ] }),
+};
+function showSandboxEpilogue(kind, extra) {
+  const E = (SANDBOX_END[kind] || extra)(); G.sandboxEnd = true;
+  epiPages = E.pages; epiI = 0; $('endTitle').textContent = E.t.toUpperCase(); document.querySelector('#endScreen .endKicker').textContent = 'A TALE COMPLETE';
+  $('endStats').innerHTML = ''; $('endPips').innerHTML = ''; $('btnEndSandbox').textContent = 'Continue your reign'; renderEpi();
+  setTimeout(() => { G.state = 'ending'; UI.show('endScreen'); }, 1500); saveGame(true, true);
+}
+/* ---------------- The Realm tab ---------------- */
+function realmLords() {
+  const out = [];
+  if (P.spouse && !P.spouse.dead) out.push(['spouse', P.spouse.name]);
+  (P.kids || []).forEach((k2, i) => { if (kidAdult(k2)) out.push(['kid' + i, k2.name]); });
+  (P.sibs || []).forEach((s2, i) => out.push(['sib' + i, s2.name]));
+  (P.comps || []).forEach(id => { const c = COMPANIONS.find(cc => cc.id === id); if (c) out.push(['comp:' + id, c.name]); });
+  if (P.nemesis && P.nemesis.state === 'spared') out.push(['nem', nemName(P.nemesis)]);
+  return out;
+}
+function renderRealmTab() {
+  if (!realmOn()) {
+    const reqs = realmReqs(), ok = reqs.every(r => r[0]);
+    const seats = [...(P.fief ? [W.places[P.fief.v]] : []), ...(P.forts || []).map(id => W.places[id])];
+    realmForm = realmForm || { name: '', col: 0, emb: 0, motto: '', seat: seats[0] ? seats[0].id : null };
+    if (seats.length && !seats.some(s => s.id === realmForm.seat)) realmForm.seat = seats[0].id;
+    const f = realmForm, prevK = { color: REALM_COLS[f.col][0], accent: REALM_COLS[f.col][1] };
+    return `<div class="crNote"><b>A CROWN OF YOUR OWN</b>Every king was once something less. With a seat, a company and gold for the coronation, you can declare a realm of your own: a fifth crown among the four. Your liege will call it treason, unless they love you dearly.</div>
+      <div class="rmReqs">${reqs.map(([o, t]) => `<div class="${o ? 'ok' : 'no'}">${o ? '✓' : '✗'} ${esc(t)}</div>`).join('')}</div>
+      <div class="rmForm">
+        <div><div class="setH">NAME OF THE REALM</div><input class="txtIn" data-rf="name" maxlength="18" placeholder="${esc(seats[0] ? seats[0].name : 'Marchland')}" value="${esc(f.name)}"></div>
+        <div><div class="setH">MOTTO</div><input class="txtIn" data-rf="motto" maxlength="40" placeholder="By Our Own Hand" value="${esc(f.motto)}"></div>
+        <div><div class="setH">COLOURS</div><div class="rmSw">${REALM_COLS.map(([c, a], i) => `<span class="${f.col === i ? 'on' : ''}" data-rc="${i}" style="background:${c};border-color:${a}"></span>`).join('')}</div></div>
+        <div><div class="setH">EMBLEM</div><div class="rmSw">${REALM_EMB.map((e, i) => `<span class="em ${f.emb === i ? 'on' : ''}" data-re="${i}"><img src="${emblemURL(e, prevK)}" alt=""></span>`).join('')}</div></div>
+        <div><div class="setH">SEAT</div>${seats.length ? `<select data-rs>${seats.map(s => `<option value="${s.id}" ${s.id === f.seat ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select>` : '<i class="dim">You hold no fief or fort.</i>'}</div>
+      </div>
+      <div style="text-align:center;margin-top:12px"><button class="btn gold" data-act="found" ${ok ? '' : 'disabled'}>Found the realm (${fmt(REALM_COST)} gold)</button></div>`;
+  }
+  const R = G.realm, vil = realmPlaces('village'), cas = realmPlaces('castle'), forts = realmPlaces('fort'), outp = realmPlaces('outpost'), un = Math.round(K.unrest[4] || 0), lordsAvail = realmLords();
+  const hold = [...cas, ...vil, ...outp, ...forts].map(p => `<div class="rmHold"><b>${esc(p.name)}</b> <span class="dim">${p.type === 'ruin' ? 'fort' : p.type}${p.id === R.seat ? ' · the seat' : ''}</span><select data-lord="${p.id}"><option value="">No lord</option>${lordsAvail.map(([key, n]) => `<option value="${key}" ${R.lords[p.id] === key ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></div>`).join('');
+  const enemies = CROWNS.filter(j => !(K.fallen || [])[j]);
+  const tgts = W.places.filter(p => CLAIM_R[p.type] && typeof p.owner === 'number' && p.owner < 4 && relStatus(4, p.owner).n === 'At War' && !(K.fallen || [])[p.owner]).sort((a, b) => dist(a.x, a.y, W.places[R.seat].x, W.places[R.seat].y) - dist(b.x, b.y, W.places[R.seat].x, W.places[R.seat].y)).slice(0, 12);
+  const host = (G.armies || []).filter(a => a.k === 4 && !a.gone);
+  return `<div class="hsTop"><img class="crPort" src="${bannerURL(4)}" alt="" style="object-fit:contain;background:#120c07"><div><div class="crName">${esc(KDATA[4].full)}${R.united ? ' <span class="chip" style="color:#ffd24a">UNITED</span>' : ''}</div>
+      <div class="crSub">${esc(KDATA[4].ruler)} · <i>"${esc(R.motto)}"</i> · founded day ${R.day} · seat: ${esc(W.places[R.seat].name)}</div>
+      <div class="crLine">${cas.length} castle${cas.length === 1 ? '' : 's'} · ${vil.length} village${vil.length === 1 ? '' : 's'} · ${outp.length} outposts · ${forts.length} forts · income <b>${fmt(R.income || 0)}</b> gold a day · the host: <b>${fmt(Math.round(K.mil[4]))}</b> men</div>
+      <div class="crLine">Unrest <span class="crBar"><span style="width:${un}%;background:${un > 70 ? '#e0503a' : un > 45 ? '#e0a040' : '#8fc060'}"></span></span> ${un > 70 ? 'on the brink of revolt' : un > 45 ? 'restless' : 'content'}</div></div></div>
+    <h3 class="hsH">LAWS</h3><div class="rmLaws">${Object.entries(LAWS).map(([key, opts]) => `<div><span class="dim">${{ tax: 'Taxes', levy: 'The levy', magic: 'Magic' }[key]}</span><div class="choice">${opts.map((o, i) => `<div class="sb ${R.laws[key] === i ? 'on' : ''}" data-law="${key}:${i}">${o}</div>`).join('')}</div></div>`).join('')}</div>
+    <div class="dim" style="font-size:12.5px;margin-top:4px">Heavy taxes and conscription fill the purse and the host but stir unrest. Patronising magic makes your spells 10% cheaper; banning it pleases the pious crowns.</div>
+    <h3 class="hsH">HOLDINGS AND THEIR LORDS</h3><div class="rmHolds">${hold}</div><div class="dim" style="font-size:12.5px">Each holding with a lord (family, companions, a friend) is steadier and pays a little more.</div>
+    <h3 class="hsH">THE CROWNS · ${CROWNS.filter(subdued).length}/4 BROUGHT TO HEEL</h3><div class="rmCrowns">${CROWNS.map(j => { const st = relStatus(4, j), fal = (K.fallen || [])[j], vas = R.vassals.includes(j); return `<div class="rmCrown" style="--kc:${KDATA[j].color}"><img src="${bannerURL(j)}" alt=""><div><b>${KDATA[j].name}</b> <span style="color:${st.c}">${fal ? 'Fallen' : vas ? 'Your vassal' : st.n}</span><div class="dim">${fal ? `fell on day ${fal}` : `${holdings(j).v} villages · ${fmt(Math.round(K.mil[j]))} men`}</div>${fal || vas ? '' : st.n === 'At War' ? `<button class="btn sm gold" data-act="fealty" data-arg="${j}">Demand fealty (${Math.round(fealtyChance(j) * 100)}%)</button>` : `<button class="btn sm red" data-act="war" data-arg="${j}">Declare war</button>`}</div></div>`; }).join('')}</div>
+    <h3 class="hsH">THE HOST</h3>${host.length ? host.map(a => `<div class="crLine">⚑ ${Math.round(a.str)} men ${a.state === 'siege' ? 'besieging' : 'marching on'} <b>${esc(W.places[a.target] ? W.places[a.target].name : '?')}</b>${a.routed ? ' (routed)' : ''}</div>`).join('') : '<div class="dim">The host is at home.</div>'}
+    ${tgts.length ? `<div class="crLine" style="margin-top:6px">Muster the host against: <select data-muster>${tgts.map(p => `<option value="${p.id}">${esc(p.name)} (${KDATA[p.owner].name}, ${p.type})</option>`).join('')}</select> <button class="btn sm gold" data-act="muster">March</button></div>` : '<div class="dim">You are at war with no one. Declare war to muster the host.</div>'}`;
+}
+const _emb = {};
+function emblemURL(e, kc) { const key = e + kc.color; if (_emb[key]) return _emb[key]; const c = document.createElement('canvas'); c.width = c.height = 40; const g = c.getContext('2d'); g.fillStyle = kc.color; rrect(g, 1, 1, 38, 38, 6); g.fill(); g.translate(20, 20); g.fillStyle = g.strokeStyle = kc.accent; EMBLEMS[e](g, 11); _emb[key] = c.toDataURL(); return _emb[key]; }
+TABS_EXT.court.push(['realm', 'The Realm']); TABS_EXT.render.realm = renderRealmTab;
+Object.assign(COURT_ACTS, {
+  found: () => foundRealm(),
+  muster: () => { const s = document.querySelector('[data-muster]'); if (s) muster(+s.value); },
+  war: j => { askConfirm('DECLARE WAR', `Declare war on <b>${KDATA[+j].name}</b>? Their armies will march on your lands.`, 'War', () => declareWar(+j)); },
+  fealty: j => demandFealty(+j),
+});
+hook('courtRender', body => {
+  body.querySelectorAll('[data-rf]').forEach(el => { el.onkeydown = ev => ev.stopPropagation(); el.oninput = () => { realmForm[el.dataset.rf] = el.value; }; });
+  body.querySelectorAll('[data-rc]').forEach(el => el.onclick = () => { realmForm.col = +el.dataset.rc; SND.play('ui'); renderCourt(); });
+  body.querySelectorAll('[data-re]').forEach(el => el.onclick = () => { realmForm.emb = +el.dataset.re; SND.play('ui'); renderCourt(); });
+  body.querySelectorAll('[data-rs]').forEach(el => el.onchange = () => { realmForm.seat = +el.value; });
+  body.querySelectorAll('[data-law]').forEach(el => el.onclick = () => { const [key, v] = el.dataset.law.split(':'); G.realm.laws[key] = +v; SND.play('ui'); renderCourt(); });
+  body.querySelectorAll('[data-lord]').forEach(el => el.onchange = () => { const id = +el.dataset.lord; if (el.value) { for (const k2 in G.realm.lords) if (G.realm.lords[k2] === el.value) delete G.realm.lords[k2]; G.realm.lords[id] = el.value; } else delete G.realm.lords[id]; SND.play('ui'); renderCourt(); });
+});
+// your stewards speak for you in the castles you hold
+ROLES.steward = { label: e => `Speak with ${e.name}`, talk: e => openDialog({ name: e.name, role: `Steward of ${W.places[e.place].name}`, portrait: e, text: pick(['Your Majesty. The realm awaits your word.', 'The granaries are full and the walls are manned, Your Majesty.', 'Petitioners, taxes, a dispute over sheep. The usual, Your Majesty.']), options: [{ t: 'Show me the realm', fn: () => { closeDialog(); courtTab = 'realm'; UI.open('court'); } }, { t: 'Carry on', fn: closeDialog }] }) };
+/* ---------------- Hooks ---------------- */
+ACH.push(
+  ['crowned', '♛', 'A Crown of My Own', 'Found your own realm', () => !!(G.realm && G.realm.founded)],
+  ['vassal', '🙇', 'Bend the Knee', 'Make a crown swear fealty to your realm', () => !!(G.realm && (G.realm.vassals || []).length)],
+  ['capital', '🏰', 'The Keys to the City', "Take a crown's royal castle", () => !!W && W.places.slice(0, 4).some((p, k) => p.owner !== k)],
+  ['united', '👑', 'The Five Crowns', 'Unite the realm under your crown', () => !!(G.realm && G.realm.united)],
+);
+hook('reset', () => { G.realm = null; GNODE.length = 4; KTINT.length = 4; KCOL_CB.length = 4; if (K) K.fallen = []; realmForm = null; });
+hook('preload', d => { G.realm = d.realm || null; if (G.realm && G.realm.founded) realmTables(d.P); });
+hook('load', d => { if (d.fallen && K) K.fallen = d.fallen; if (realmOn()) { realmPadK(); realmRefresh(); } recomputeTerritory(true); });
+hook('save', d => { d.realm = G.realm; d.fallen = K.fallen || []; });
+hook('daily', day => realmDaily(day));
+hook('slow', () => { if (realmOn() && KDATA[4].ruler !== realmKData(G.realm).ruler) realmRefresh(); });
+hook('recalc', () => { if (realmOn() && G.realm.laws.magic === 2) P.S.mpCost = .9; });
 
 /* ---------------- Loop ---------------- */
 let last = performance.now(), mmT = 0, ambT = 0, fpsA = 0;
