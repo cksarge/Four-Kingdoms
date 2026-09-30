@@ -35,9 +35,21 @@ When you start a new game you choose a mode:
   - **Epilogue:** a closing section of several pages covers how it ended, what became of each kingdom, the fates of the people you met, and your legacy and deeds.
   - When the story ends you can keep playing the same world as a sandbox or return to the main menu.
 - **Sandbox**: the open world with no story.
+- **The Long Road**: a roguelite mode. Each run crosses three realms, drawn at random from eight, then ends in the Hollow Reach against the Hollow King Unbound.
+  - **The realms:** the Greenmarch, the Sunscorch Sands, the Frostcrown Heights, the Rotfen, the Shattered Isles, the Emberwaste, the Fey Wood and the Sunken Kingdom. Each has its own ground, weather, foes and master: a hill giant, a sand queen, Rimeheart, the Rot Mother, a pirate lord, an ember drake, an archlich and a drowned guardian.
+  - **The route:** each realm is a branching map of about ten rows. You pick your next stop from the ones joined to where you stand. Every realm ends with a campfire, then its master.
+  - **Stops on the road:**
+    - **Battles** come with an objective: rout the foe, hold a pass through three waves, guard a supply wagon until help arrives, slay a captain, hold a banner, or break the totems that call up the dead.
+    - **Champions** are named elites with one or two gifts, such as Giant, Swift, Summoner, Frenzied, Ironclad, Undying or Burning.
+    - **Duels, boarding actions and delves.** A duel is one on one, to the yield. A boarding action is a fight across two ships lashed together. A delve is a full dungeon with traps and a guardian.
+    - **Other stops:** about 35 events with choices and consequences, merchants, roadside forges, wizards' towers, shrines, campfires, treasure and mysteries.
+  - **Building your hero:** 38 relics, blessings and curses, spells, enchanted jewellery, tempered and enchanted gear, and hirelings who join you on the road. Relics range from simple ones (+40 health) to ones that change how you fight: a war drum that stacks damage with every kill, a phoenix feather that raises you once, blades of ember, frost or storm, a spellblade sigil, an executioner's hood.
+  - **Stakes:** wounds do not heal on their own out here, and if you fall the run ends. The game saves after every stop, so you can quit between fights.
+  - **Renown and unlocks:** every run earns renown, kept in your browser. Spend it to unlock seven more heroes (Ranger, Battlemage, Crusader, Berserker, Lancer, Witch and Corsair), each with their own gear, spells and starting relic.
+  - **Oaths and the Daily Road:** win under your highest oath to unlock the next, up to Oath 10, each making the road harder for more renown. The **Daily Road** gives everyone the same hero, oath and twist for the day, with one attempt, based on your computer's date (no internet needed).
 - **Tutorial**: a five-minute lesson with a drill sergeant in a training yard (movement, sprinting, combat, blocking and dodging, archery, riding and the menus). When it ends, the same world carries on as an endless sandbox game. It uses Knight difficulty and a Medium world, and shares the sandbox save slot.
 
-There are five save slots, and each can hold a story or a sandbox game. The game also saves itself whenever the tab is hidden or closed. Saves can be downloaded as a file and loaded back from the main menu, so you can keep backups or move a game between a phone and a computer. The pause menu's *Save Slots* page lets you switch to another game without quitting, and deleting a slot (or all save data, in Settings) always asks first. Finishing the story turns that slot into a sandbox game, marked *Formerly Story*, so you can keep playing in the world you shaped.
+There are five save slots, and each can hold a story, a sandbox game or a Long Road run. The game also saves itself whenever the tab is hidden or closed. Saves can be downloaded as a file and loaded back from the main menu, so you can keep backups or move a game between a phone and a computer. The pause menu's *Save Slots* page lets you switch to another game without quitting, and deleting a slot (or all save data, in Settings) always asks first. Finishing the story turns that slot into a sandbox game, marked *Formerly Story*, so you can keep playing in the world you shaped.
 
 ## New game options
 
@@ -64,7 +76,7 @@ Before a new game you can set:
 | E | Interact |
 | F | Mount / dismount / call horse |
 | I | Inventory |
-| M | Map |
+| M | Map (on the Long Road: your route) |
 | K | Diplomacy |
 | J | Journal: quests and the chronicle |
 | L | Journal: bestiary and lore |
@@ -243,7 +255,7 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 
 ## Achievements and statistics
 
-89 achievements are shared by every game in your browser (see the main menu or pause menu). The pause menu's *Your Journey* page tracks time played, distance, kills, arrows, dungeons, sieges, tourneys and more, and the story's closing screen shows it too.
+97 achievements are shared by every game in your browser (see the main menu or pause menu). The pause menu's *Your Journey* page tracks time played, distance, kills, arrows, dungeons, sieges, tourneys and more, and the story's closing screen shows it too.
 
 ## License
 
