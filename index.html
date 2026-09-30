@@ -268,6 +268,8 @@ kbd{display:inline-block;min-width:18px;padding:0 4px;height:17px;line-height:15
 /* ---------- Panels / screens ---------- */
 .screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(12,8,4,.5),rgba(0,0,0,.82));opacity:0;visibility:hidden;transition:opacity .28s ease,visibility 0s linear .28s;pointer-events:auto}
 .screen.show{opacity:1;visibility:visible;transition:opacity .28s ease}
+/* a screen taller than the window scrolls instead of spilling off it; auto margins keep it centred when it fits */
+.screen{overflow-y:auto;overflow-x:hidden;padding:18px 0;overscroll-behavior:contain}.screen>*{margin:auto;flex-shrink:0}
 .screen .panel{transform:translateY(22px) scale(.975);transition:transform .35s cubic-bezier(.2,.85,.25,1)}
 .screen.show .panel{transform:none}
 .panel{position:relative;zoom:var(--ui-scale);color:var(--ink);padding:22px 26px;border-radius:8px;
@@ -310,7 +312,7 @@ kbd{display:inline-block;min-width:18px;padding:0 4px;height:17px;line-height:15
 #loading .spin{width:44px;height:44px;border:3px solid #3a2a16;border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px}
 
 /* dialog */
-#dialog{position:fixed;left:50%;bottom:92px;transform:translate(-50%,20px);opacity:0;visibility:hidden;transition:all .25s ease;pointer-events:auto;width:640px;max-width:94vw}
+#dialog{position:fixed;left:50%;bottom:92px;transform:translate(-50%,20px);opacity:0;visibility:hidden;transition:all .25s ease;pointer-events:auto;width:640px;max-width:94vw;max-height:calc((100vh - 104px) / var(--text-scale,1));overflow-y:auto;overflow-x:hidden;padding-top:10px;overscroll-behavior:contain}
 #dialog.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
 #dialog .panel{padding:14px 18px;display:flex;gap:14px}
 .dPortrait{width:64px;flex:none;display:flex;flex-direction:column;align-items:center;gap:4px}
@@ -519,7 +521,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .confirmBox{margin-top:14px;padding:12px;border:1px solid #9a4a3a;border-radius:6px;background:rgba(80,20,10,.25);text-align:center}
 #modeScreen .panel,#contScreen .panel{width:min(420px,calc(94vw/var(--ui-scale)))}
 #modeScreen .panel.wide{width:min(820px,calc(96vw/var(--ui-scale)))}
-#setupBox{max-height:calc(94vh/var(--ui-scale) - 130px);overflow-y:auto;overflow-x:hidden;padding-right:8px;margin-right:-8px}
+#setupBox,#roadSetup{max-height:calc(94vh/var(--ui-scale) - 130px);overflow-y:auto;overflow-x:hidden;padding-right:8px;margin-right:-8px}
 .setLocked{opacity:.45;pointer-events:none}
 .lockNote{font-size:13px;color:#f08070;font-style:italic;margin-top:5px}
 .setH{font-family:var(--fh);font-weight:700;color:var(--gold);font-size:12px;letter-spacing:.16em;margin:14px 0 6px}
