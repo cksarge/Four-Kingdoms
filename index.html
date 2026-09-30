@@ -9375,6 +9375,7 @@ SQ.p4 = {
       { t: '<span class="dn">JUSTICE</span>You will answer to Lady Wren. On your feet.', fn: () => { sBranch('conspiracy'); sAdvance(q); sChat(NARR, ["You bind Corvin's hands. Behind you, the cracked seal lets out a long, cold breath.", 'The Circle is real, and it has friends in high places. You mean to find every one of them.']); } },
       { t: '<span class="dn">THE SEAL</span>Stand aside. I want to see what lies beneath.', fn: () => { sBranch('ancient'); sAdvance(q); sChat(NARR, ['You push past Corvin and lay your hand on the seal. The stone is cold as a grave, and under your palm it splits.', 'A howl rises from the dark below. Corvin runs into the night, laughing.']); } },
       { t: '<span class="dn">AMBITION</span>...Tell me more about this Vesper.', fn: () => { sBranch('rise'); addItem('ashen_token', 1, 1, true); sAdvance(q); sChat(SPK(e), [`Wise. She waits in ${sMeetV().name}. Show her this.`, [NARR, 'Corvin presses a token of grey iron into your palm and limps off into the dark. A hedge knight need not stay a hedge knight forever.']]); } },
+      { t: '<span class="dn">BLOOD</span>Why does the seal burn warm under my hand?', fn: () => { sBranch('crown'); sAdvance(q); sChat(SPK(e), ['Warm? It should be cold as the grave. Unless… no. No, it cannot be.', `The seal knows one blood, knight. <b>Aurek's.</b> You are of the First King's line! The Circle will want you dead, or crowned. Run, heir. Run to Aldhaven, before they find you.`, [NARR, 'Corvin scrambles away into the dark. The seal glows warm under your palm, and then goes quiet, as if it had been waiting a very long time.']]); } },
     ])),
   ],
   done: () => sStart({ conspiracy: 'c1', ancient: 'b1', rise: 'r1' }[STORY.path]),
@@ -11711,10 +11712,10 @@ function wed(s, e) {
   recalc();
 }
 /* ---------------- Children and the heir ---------------- */
-function birthDaily(day) {
+function birthDaily(day, force) {
   const sp = P.spouse; if (!sp || sp.dead) return;
-  if (P.kids.length >= 6 || day - (P.lastBirth || sp.wedDay) < 18 || pAge() > 58) return;
-  if (!chance(.028)) return;
+  if (!force && (P.kids.length >= 6 || day - (P.lastBirth || sp.wedDay) < 18 || pAge() > 58)) return;
+  if (!force && !chance(.028)) return;
   const fem = chance(.5) ? 1 : 0, kid = { name: NAMES.first.filter((n, i) => i % 2 === fem)[randi(0, 13)], fem, born: day, look: randLook([P.look, sp.look]) };
   if (P.kids.some(k2 => k2.name === kid.name)) kid.name += ' the Younger';
   P.kids.push(kid); P.lastBirth = day; if (P.heir == null) P.heir = 0;
@@ -12199,6 +12200,7 @@ const REALM_COLS = [['#b8862a', '#1a120a'], ['#1e7a8a', '#f2e6c0'], ['#8a2a5a', 
 const REALM_EMB = ['lion', 'tower', 'star', 'rose', 'ship', 'wolf', 'sword', 'key'];
 const LAWS = { tax: ['Light', 'Fair', 'Heavy'], levy: ['Volunteers', 'Levies', 'Conscription'], magic: ['Banned', 'Tolerated', 'Patronised'] };
 const REALM_COST = 3000;
+const realmCost = () => G.mode === 'story' && GF('crownPath') ? 1500 : REALM_COST;
 Object.assign(EMBLEMS, {
   lion: (g, s) => { g.beginPath(); g.moveTo(-s * .7, s * .8); g.lineTo(-s * .5, 0); g.quadraticCurveTo(-s * .8, -s * .7, -s * .1, -s * .8); g.quadraticCurveTo(s * .6, -s * .9, s * .5, -s * .3); g.lineTo(s * .8, -s * .1); g.lineTo(s * .45, 0); g.lineTo(s * .7, s * .8); g.lineTo(s * .3, s * .8); g.lineTo(s * .1, s * .2); g.lineTo(-s * .2, s * .8); g.closePath(); g.fill(); circ(g, -s * .15, -s * .45, s * .42); },
   tower: (g, s) => { g.fillRect(-s * .5, -s * .5, s, s * 1.4); for (let i = 0; i < 3; i++) g.fillRect(-s * .6 + i * s * .45, -s * .85, s * .3, s * .4); g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(-s * .15, s * .45, s * .3, s * .45); },
@@ -12248,7 +12250,7 @@ let realmForm = null;
 function foundRealm() {
   const f = realmForm; if (!f || realmReqs().some(r => !r[0])) return;
   const name = (f.name || '').trim().slice(0, 18) || (W.places[f.seat] ? W.places[f.seat].name : 'Marchland');
-  P.gold -= REALM_COST;
+  P.gold -= realmCost();
   const L = P.allegiance, grant = L != null && K.rep[L] >= 90 && KDATA[L].pers.honor >= .6 && !ruler(L).traits.includes('cruel');
   G.realm = { founded: true, name, color: REALM_COLS[f.col][0], accent: REALM_COLS[f.col][1], emblem: REALM_EMB[f.emb], motto: (f.motto || '').trim().slice(0, 40) || 'By Our Own Hand', seat: f.seat, laws: { tax: 1, levy: 1, magic: 1 }, lords: {}, day: dayNum(), vassals: [], united: false, liege: L };
   realmTables(); realmPadK();
@@ -12373,7 +12375,7 @@ function renderRealmTab() {
         <div><div class="setH">EMBLEM</div><div class="rmSw">${REALM_EMB.map((e, i) => `<span class="em ${f.emb === i ? 'on' : ''}" data-re="${i}"><img src="${emblemURL(e, prevK)}" alt=""></span>`).join('')}</div></div>
         <div><div class="setH">SEAT</div>${seats.length ? `<select data-rs>${seats.map(s => `<option value="${s.id}" ${s.id === f.seat ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select>` : '<i class="dim">You hold no fief or fort.</i>'}</div>
       </div>
-      <div style="text-align:center;margin-top:12px"><button class="btn gold" data-act="found" ${ok ? '' : 'disabled'}>Found the realm (${fmt(REALM_COST)} gold)</button></div>`;
+      <div style="text-align:center;margin-top:12px"><button class="btn gold" data-act="found" ${ok ? '' : 'disabled'}>Found the realm (${fmt(realmCost())} gold)</button></div>`;
   }
   const R = G.realm, vil = realmPlaces('village'), cas = realmPlaces('castle'), forts = realmPlaces('fort'), outp = realmPlaces('outpost'), un = Math.round(K.unrest[4] || 0), lordsAvail = realmLords();
   const hold = [...cas, ...vil, ...outp, ...forts].map(p => `<div class="rmHold"><b>${esc(p.name)}</b> <span class="dim">${p.type === 'ruin' ? 'fort' : p.type}${p.id === R.seat ? ' · the seat' : ''}</span><select data-lord="${p.id}"><option value="">No lord</option>${lordsAvail.map(([key, n]) => `<option value="${key}" ${R.lords[p.id] === key ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></div>`).join('');
@@ -12865,7 +12867,7 @@ function tideDaily(day) {
 function heartDies(h, by) {
   if (!h.alive) return; h.alive = false; h.died = dayNum(); G.tide.killed++; const pl = W.places[h.place];
   logEvent(`The Blight Heart at ${pl.name} was destroyed${by ? ` by the knights of ${by}` : ` by ${pFull()}`}.`, []); toast(`✦ The Blight Heart at <b>${pl.name}</b> is destroyed! The blight around it begins to recede.`, 'gold'); SND.play('level');
-  if (G.tide.hearts.length >= G.tide.max - 1 && G.tide.hearts.every(x => !x.alive) && !G.tide.rift) { G.tide.rift = { x: h.x, y: h.y + 2 * TS }; syncRift(); toast('☠ Where the last Heart died, the ground splits open: a rift into the <b>Hollow Deep</b>. The Tide Mother waits below.', 'war'); logEvent('A rift opened into the Hollow Deep.', []); }
+  if (!G.tide.story && G.tide.hearts.length >= G.tide.max - 1 && G.tide.hearts.every(x => !x.alive) && !G.tide.rift) { G.tide.rift = { x: h.x, y: h.y + 2 * TS }; syncRift(); toast('☠ Where the last Heart died, the ground splits open: a rift into the <b>Hollow Deep</b>. The Tide Mother waits below.', 'war'); logEvent('A rift opened into the Hollow Deep.', []); }
   else if (G.tide.hearts.every(x => !x.alive) && G.tide.hearts.length < G.tide.max) G.tide.next = Math.min(G.tide.next, dayNum() + 2);
 }
 function syncRift() { if (!W || !W.interacts || G.under) return; W.interacts = W.interacts.filter(it => it.type !== 'tiderift'); if (G.tide && G.tide.rift && !G.tide.done) W.interacts.push({ type: 'tiderift', x: G.tide.rift.x, y: G.tide.rift.y }); }
@@ -12982,6 +12984,148 @@ hook('save', d => { d.tide = G.tide; });
 hook('load', d => { G.tide = d.tide || null; if (G.tide) { W.places.forEach(p => { p.hollow = (p.type === 'village' || p.type === 'castle') && blightAt(p.tx, p.ty) > .3; }); setTimeout(syncRift, 100); } });
 hook('daily', day => { if (G.mode !== 'road') tideDaily(day); });
 hook('slow', () => tideSlow());
+
+/* =====================================================================
+   PATH IV: THE FIFTH CROWN — the seal knows your blood. You are a lost
+   descendant of Aurek, the First King. Recover his regalia from the Deep,
+   raise a banner of your own, found a house to hold it, and face the
+   Hollow King as a crown among crowns. Uses the magic, courts, dynasty,
+   armies, realm, seas and Tide systems.
+   ===================================================================== */
+const crownP = () => !!STORY && STORY.path === 'crown';
+const LK4 = { aldous: mageLook('ward', '#d8c070'), brannick: { body: '#4a3a2a', head: 'hair', hair: '#6a5a4a', beard: 1, skin: '#e0b48a', cape: '#2a2018' }, greyknife: { body: '#2a2a30', head: 'hood', hood: '#1a1a20', skin: '#d8c0b0', cape: '#3a1a1a', weapon: { wk: 'sword', len: 26, col: '#d0d6dc' } } };
+const N4 = {
+  aldous: () => ({ key: 'aldous', name: 'Magister Aldous', role: 'Court Mage of Albion', look: LK4.aldous, at: soff(W.places[0], 7, 9.5), k: 0 }),
+  brannick: () => ({ key: 'brannick', name: 'Castellan Brannick', role: `Steward of ${G.realm ? W.places[G.realm.seat].name : 'your seat'}`, look: LK4.brannick, at: soff(W.places[G.realm ? G.realm.seat : 0], 2, 2.5), k: 4 }),
+};
+SIDLE.aldous = 'Blood remembers, even when people forget.'; SIDLE.brannick = 'The realm runs itself, Your Grace. Mostly.';
+const fortRef = () => sref('f_fort', () => nearestPlace(W.start.x, W.start.y, p => p.type === 'ruin' && p.fort && !(P.forts || []).includes(p.id)) || nearestPlace(W.start.x, W.start.y, p => p.type === 'ruin'));
+const redSpot = () => sspot('f_red', () => randomLandSpot(W.start.x, W.start.y, 26, 40));
+function storyGrantFort(pl) { if (!(P.forts || []).includes(pl.id)) P.forts.push(pl.id); pl.cleared = true; setupWorldExtras(); toast(`<b>${pl.name}</b> is yours. Its walls are cracked, but they will hold a banner.`, 'gold'); }
+function storyGrantShip() { if (P.ship) return; const h = W.harbors.slice().sort((a, b) => dist(a.x, a.y, P.x, P.y) - dist(b.x, b.y, P.x, P.y))[0]; if (!h) return; const w = harborWater(h); P.ship = { kind: 'cog', name: 'Brother\'s Oath', hp: SHIPS.cog.hp, x: w.x, y: w.y, a: 0, map: 'w', v: 0 }; syncShipInteract(); toast(`A captain loyal to the old line gives you a ship: the cog <b>Brother's Oath</b>, moored at ${W.places[h.place].name}.`, 'gold'); }
+SQ.f1 = {
+  title: 'The Blood Remembers', giver: 'The cracked seal', k: 0,
+  desc: () => `The seal at ${B().name} burned warm under your hand, and Corvin called you heir. Ask the court mage of Castle Aldhaven what it means.`, reward: { gold: 300, xp: 160 },
+  steps: [
+    S_TALK('Speak with Magister Aldous at Castle Aldhaven', N4.aldous, (q, e) => sChat(SPK(e), [
+      'Give me your hand. …Yes. The seal was made to know one blood, and it knew yours.',
+      'When Aurek died, his youngest son fled with nothing but a name. Your house, knight, is that name worn thin by four hundred years. You are of the First King\'s line.',
+      `The Circle wants Aurek to rise and the crowns to kneel. But a living heir with Aurek's regalia could bind his host, or command it. The Ember Sceptre lies in a temple the sea swallowed. His crown lies on Aldmere, with what is left of him.`,
+      'You will need magic. Take this, and learn it tonight.',
+    ], [{ t: 'Take the tome', fn: () => { addItem('tome_ward', 1, 1); GF('crownPath', 1); deed('Learned the truth of your blood: you are of Aurek\'s line.'); sAdvance(q); closeDialog(); } }])),
+  ], done: () => sStart('f2') };
+SQ.f2 = {
+  title: 'Sellswords and Banners', giver: 'Magister Aldous', k: 0,
+  desc: () => 'An heir needs swords. Hire soldiers from a castle captain or find companions, then break the Red Company, a band of cutthroats who have been hunting you since the barrow.', reward: { gold: 250, xp: 220 },
+  steps: [
+    S_COND('Gather at least 3 soldiers or companions', () => partyNow().filter(e => !e.dead).length >= 3),
+    S_FIGHT(() => 'Break the Red Company', () => redSpot(), [[['bandit', 5, { tier: 2, name: 'Red Company Cutthroat' }], ['archer', 2, { tier: 2 }]], [['leader', 1, { name: 'Captain Scarle of the Red Company', boss: true, hpM: 1.8 }], ['xbowman', 2, { tier: 2 }]]], { near: 16, msg: 'Red cloaks on the ridge: the Red Company!', waveMsg: ['', 'Captain Scarle rides out to finish it himself!'], won: () => deed('Broke the Red Company with a company of your own.') }),
+  ], done: () => sStart('f3') };
+SQ.f3 = {
+  title: 'A Seat of Your Own', giver: 'Lady Wren', k: 0,
+  desc: () => `Lady Wren has heard of you, and of your blood. "Every crown needs a seat. The old fort at ${fortRef().name} has no master. Clear it, and I will see the deeds find their way to you."`, reward: { xp: 240 },
+  steps: [
+    S_CLEAR(() => `Clear the ruins of ${fortRef().name}`, () => fortRef()),
+    S_TALK('Report to Lady Wren', N.wren, (q, e) => sChat(SPK(e), ['Cleared already? Then it is yours. On paper, a gift from a grateful king. In truth, a debt I may call in.', 'Albion watches you now, heir of Aurek. Be careful which way you grow.'], [{ t: 'Take the deeds', fn: () => { storyGrantFort(fortRef()); deed(`Took ${fortRef().name} as your seat.`); sAdvance(q); closeDialog(); } }])),
+  ], done: () => sStart('f4') };
+SQ.f4 = {
+  title: 'The Sunken Temple', giver: 'Magister Aldous', k: 0,
+  desc: () => 'The Ember Sceptre lies in the Sunken Temple, somewhere in the Deep beyond the edge of the map. Sail off the edge of the world, find the temple, and take the sceptre from its guardian.', reward: { gold: 400, xp: 420 },
+  steps: [
+    S_COND('Board the ship given to you by a friend of the old line', () => { storyGrantShip(); return !!P.sailing || (G.under && G.under.isle); }, { at: () => P.ship && P.ship.map === 'w' ? { x: P.ship.x, y: P.ship.y } : null }),
+    S_COND('Find the Sunken Temple in the Deep and defeat its guardian', () => !!(G.isles && G.isles.list[10] && G.isles.list[10].boss), { at: () => null }),
+    S_COND('Take up the Ember Sceptre', () => countItem('ember_sceptre') > 0, { at: () => null }),
+    S_TALK('Bring the sceptre to Magister Aldous', N4.aldous, (q, e) => sChat(SPK(e), ['It is warm. It knows you. Gods, it knows you.', 'Now you must become what the sceptre expects: a sovereign. Raise your banner, heir. The four crowns will not like it. They were never meant to.'], goOn(q, 'Raise my banner'))),
+  ], done: () => { deed('Recovered the Ember Sceptre from the Sunken Temple.'); sStart('f5'); } };
+SQ.f5 = {
+  title: 'The Fifth Banner', giver: 'The Ember Sceptre', k: null,
+  desc: () => 'Found your realm from the Realm tab of the Realm & Court screen (H). You need a seat, a company, and gold for the coronation.', reward: { xp: 500 },
+  steps: [S_COND('Found your realm (Realm & Court, H)', () => realmOn())],
+  done: () => { deed(`Raised the banner of ${G.realm.name}, a fifth crown among the four.`); sAct2(['f6']); } };
+// Act III
+SQ.f6 = {
+  title: 'A Marriage of Crowns', giver: 'Castellan Brannick', k: 4,
+  desc: () => 'A realm with no heir is a realm with a knife at its throat. Marry (a noble suitor, or a royal heir if a crown will have you), and give your house an heir.', reward: { gold: 500, xp: 400 },
+  steps: [
+    S_COND('Marry (court a suitor in any royal city)', () => !!P.spouse),
+    S_COND('An heir is born to your house', () => (P.kids || []).length > 0),
+  ], done: () => { deed(`${(P.kids[0] || {}).name || 'An heir'} was born to ${P.house}.`); sStart('f7'); } };
+SQ.f7 = {
+  title: 'The Knife in the Court', giver: 'Castellan Brannick', k: 4,
+  desc: () => 'Your steward has intercepted letters: someone in your own court means to murder your heir.', reward: { gold: 400, xp: 480 },
+  steps: [
+    S_TALK('Hear your steward out', N4.brannick, (q, e) => sChat(SPK(e), ['The letters are signed with a grey flame, Your Grace. The Circle. They meet at the old mill tonight to pay the knife.', 'Take your guard. I will stay with the child.'], goOn(q, 'Ride'))),
+    S_FIGHT('Ambush the assassins', () => sspot('f_mill', () => randomLandSpot(W.places[G.realm ? G.realm.seat : 0].x, W.places[G.realm ? G.realm.seat : 0].y, 16, 24)), [[['assassin', 3, { tier: 3 }], ['cultist', 2, { tier: 3 }]], [['assassin', 1, { name: 'The Grey Knife', boss: true, hpM: 2.2, yieldAt: .25, key: 'greyknife', yname: 'The Grey Knife', ysay: 'Wait! Wait! Your steward paid us. Brannick!' }]]], { near: 16, msg: 'Knives in the dark!', waveMsg: ['', 'The Grey Knife steps out of the mill.'] }),
+    S_TALK('Confront Castellan Brannick', N4.brannick, (q, e) => sChat(SPK(e), ['…So. The Knife talked.', 'I served your realm for a season. I served the Circle for thirty years. They promised me Albion. What did you ever promise me?'], [
+      { t: '<span class="dn">JUSTICE</span>"Hang him at dawn."', fn: () => { SF('traitor', 'hanged'); deed('Hanged Castellan Brannick for treason.'); sAdvance(q); closeDialog(); } },
+      { t: '<span class="dn">EXILE</span>"Take your life, and leave my lands."', fn: () => { SF('traitor', 'exiled'); deed('Exiled Castellan Brannick.'); sAdvance(q); closeDialog(); } },
+      { t: '<span class="dn">MERCY</span>"Serve me, and I will forget this."', fn: () => { SF('traitor', 'forgiven'); deed('Forgave Castellan Brannick.'); sAdvance(q); closeDialog(); } },
+    ])),
+  ], done: () => sStart('f8') };
+const fenHeart = () => sref('f_fen', () => nearestPlace(W.places[3].x, W.places[3].y, p => (p.type === 'ruin' || p.type === 'hidden') && p.owner === 3) || nearestPlace(W.places[3].x, W.places[3].y, p => p.type === 'ruin'));
+SQ.f8 = {
+  title: 'The Tide Rises', giver: 'Magister Aldous', k: null,
+  desc: () => 'Aurek feels his heir. The Hollow Tide rises from the fens to meet you: Blight Hearts pump the grey into the land. Tear them out before the realm drowns.', reward: { gold: 500, xp: 600 },
+  steps: [
+    S_COND('Destroy the Blight Hearts (see your map)', q => { if (!G.tide || !G.tide.on) { startTide({ story: true, max: 2, at: fenHeart() }); addHeart(); } return G.tide.hearts.filter(h => !h.alive).length >= 2; }, { at: () => { const h = G.tide && G.tide.hearts.find(x => x.alive); return h ? { x: h.x, y: h.y } : null; } }),
+  ], done: () => { G.tide.done = true; deed('Tore out the Blight Hearts of the Hollow Tide.'); sStart('f9'); } };
+SQ.f9 = {
+  title: 'The Field of Five Banners', giver: 'The Ember Sceptre', k: null,
+  desc: () => `Aurek's host will march from ${B().name}. Ask the crowns to ride with you. Those who come will stand beside your banner at the barrow.`, reward: { xp: 500 },
+  steps: [
+    S_MULTI(q => `Ask the crowns to ride with you (${Object.keys(q.m || {}).length}/4 answered)`, () => CROWNS.filter(k => !(K.fallen || [])[k]).map(k => ({ id: 'k' + k, k, talk: (q, e, id) => { const war = relStatus(k, 4).n === 'At War', yes = !war && (K.rep[k] >= 25 || relStatus(k, 4).n === 'Allied' || G.realm.vassals.includes(k)); sChat(rulerSpk(k), yes ? [`The heir of Aurek asks us to fight Aurek. There is a joke in that somewhere. ${KDATA[k].name} will ride.`] : war ? ['You are at war with us, and you ask for our swords? No.'] : ['We do not know you well enough to die for you. No.'], [{ t: 'Continue', fn: () => { SF('ban' + k, yes ? 'yes' : 'no'); sSubDone(q, id); closeDialog(); } }]); } })), { need: 2 }),
+  ], done: () => sStart('fin') };
+// the finale and its choices for the Fifth Crown
+{ const st0 = SQ.fin.steps[0], _fa = st0.allies; st0.allies = (q, x, y) => { if (!crownP()) return _fa(q, x, y); const out = []; if (realmOn()) out.push(...sKAllies(4, x, y, 3, 2)); CROWNS.forEach(k => { if (SF('ban' + k) === 'yes') out.push(...sKAllies(k, x, y, 2, 1)); }); if (SF('thessaly') === 'ally') out.push(sThessAlly(x, y)); if (SF('edric') === 'alive') out.push(sNamedAlly('knight', 'Sir Edric Vale', LK2.edric, x, y)); if (P.spouse && P.spouse.arch === 'warrior') out.push(sNamedAlly('knight', P.spouse.name, famLook(P.spouse, true), x, y)); return out; }; }
+{ const st1 = SQ.fin.steps[1], _fc = st1.talk, _fn = st1.npc; st1.npc = q => crownP() ? Object.assign(N4.aldous(), { at: soff(B(), 2, 2) }) : _fn(q); st1.talk = (q, e) => {
+  if (!crownP()) return _fc(q, e);
+  const pick2 = id => () => { SF('end', id); sAdvance(q); closeDialog(); };
+  const peace = CROWNS.filter(k => !(K.fallen || [])[k] && relStatus(k, 4).n !== 'At War').length, subd = CROWNS.filter(k => subdued(k)).length, heldCap = CROWNS.some(k => W.places[k].owner === 4);
+  const spells = (P.spells || []).length, kid = (P.kids || [])[0], isles = G.isles ? G.isles.list.filter(x => x.visited).length : 0;
+  const opts = [
+    { t: `<span class="dn">FIFTH THRONE</span>Rule as one crown among five, in peace.${peace < 2 ? ' (Requires two crowns at peace with you)' : ''}`, dis: peace < 2, fn: pick2('fifth_crown') },
+    { t: `<span class="dn">EMPIRE</span>Claim all four thrones by blood and by the sword.${subd < 2 && !heldCap ? ' (Requires two crowns subdued, or a royal castle taken)' : ''}`, dis: subd < 2 && !heldCap, fn: pick2('ember_emperor') },
+    { t: `<span class="dn">MAGE-KING</span>Bind Aurek's power with the sceptre, and wield it.${spells < 6 ? ' (Requires six spells)' : ''}`, dis: spells < 6, fn: pick2('mage_king') },
+    { t: `<span class="dn">THE HEIR'S OATH</span>Give the crown to ${kid ? esc(kid.name) : 'your heir'}, and stand guard at the barrow for the rest of your days.${kid ? '' : ' (Requires a child)'}`, dis: !kid, fn: pick2('heirs_oath') },
+    { t: `<span class="dn">THE DROWNED CROWN</span>Take Aurek's regalia to Aldmere, and sink them with his bones.${P.ship ? '' : ' (Requires a ship)'}`, dis: !P.ship, fn: pick2('drowned_crown') },
+    { t: `<span class="dn">SEA KING</span>Leave the four kingdoms to themselves, and rule from the isles.${isles < 4 ? ' (Requires four islands of the Deep visited)' : ''}`, dis: isles < 4, fn: pick2('sea_king') },
+    { t: '<span class="dn">THE FREE MARCHES</span>Break the sceptre, and give your realm to a council of its people.', fn: pick2('free_marches') },
+    { t: '<span class="dn">WALK AWAY</span>Leave it all behind you, and ride on.', fn: pick2('wanderer') },
+  ];
+  sChat(SPK(e), ['He is ash. And he was your blood.', `The sceptre is warm in your hand, heir. ${realmOn() ? `${G.realm.name} waits for you, and the four crowns wait to see what you will be.` : 'The four crowns wait to see what you will be.'}`], opts);
+}; }
+{ const _be = sBaseEnding; sBaseEnding = () => {
+  if (!crownP()) return _be();
+  const choice = SF('end');
+  if (CROWNS.filter(k => K.rep[k] <= -40).length >= 3 && !['ember_emperor', 'mage_king'].includes(choice)) return 'outlaw';
+  if (!realmOn() || !G.realm || W.places[G.realm.seat].owner !== 4) return choice === 'wanderer' ? 'wanderer' : 'broken_fifth';
+  if (W.places.filter(p => p.hollow).length >= 5) return 'tide_ascendant';
+  if (SF('traitor') === 'forgiven' && ['fifth_crown', 'ember_emperor'].includes(choice)) return 'puppet_court';
+  return choice || 'fifth_crown';
+}; }
+{ const _ce = sComputeEnding; sComputeEnding = () => { if (!crownP()) return _ce(); const b = sBaseEnding(); return SF('end') === 'wanderer' ? 'wanderer' : b; }; }
+Object.assign(ENDINGS, {
+  fifth_crown: { t: 'The Fifth Crown', p: () => [`${esc(G.realm ? G.realm.name : 'Your realm')} took its seat among the four crowns, and the others, after a great deal of shouting, made room at the table.`, `Aurek is ash, and his heir rules a small, stubborn, prosperous kingdom that wants nothing more than to be left alone. Five banners fly over the Council now. It is the most peaceful the realm has been in four hundred years.`] },
+  ember_emperor: { t: 'Emperor of the Ember Throne', p: () => ['By blood and by the sword you claimed what Aurek once held, and one by one the crowns knelt or fell. The Ember Throne stands again, and you sit on it.', 'Your heralds call it the Restoration. The old houses call it the Conquest, very quietly. The roads are safe, the taxes are heavy, and the realm is one.'] },
+  heirs_oath: { t: "The Heir's Oath", p: () => [`You set the crown on ${esc(((P.kids || [])[0] || {}).name || 'your heir')}'s head and rode back to the barrow, and you never left it. The dead do not rise while you keep watch.`, `Your child rules ${esc(G.realm ? G.realm.name : 'your lands')} well, and visits every midwinter. You grow old at the barrow gate. The bards call you the Warden of Aldmere's Blood, and your grandchildren call you a stubborn old fool.`] },
+  mage_king: { t: 'The Mage-King', p: () => ["The sceptre drank Aurek's power and gave it to you. You did not become him. You became something he never was: a king who understands what he holds.", 'The towers send their archmages to your court now. Storms come when you call them, and go when you tell them. The realm is safe. It is also, a little, afraid of you.'] },
+  drowned_crown: { t: 'The Drowned Crown', p: () => [`You sailed for Aldmere with Aurek's regalia in the hold, and on a still morning you dropped them into the black water over the Drowned King's tomb.`, 'You did not sail back. Some say the Brother\'s Oath was seen in harbours no chart names. Your realm muddled on without you, and nobody has ever claimed the First King\'s blood again.'] },
+  sea_king: { t: 'The Sea King', p: () => ['You left the four kingdoms to their quarrels and made your throne among the islands of the Deep. Pirates pay you tribute; archmages ask your leave to sail.', 'The crowns pretend you do not exist, and trade with you anyway. Somewhere beyond the edge of every map, a king of salt and islands laughs at them.'] },
+  free_marches: { t: 'The Free Marches', p: () => [`You broke the sceptre over your knee and gave ${esc(G.realm ? G.realm.name : 'your lands')} to a council of its farmers, smiths and elders. No king, no heir, no First King's blood.`, 'The four crowns called it madness. Within a generation, their own people were asking why they could not have the same.'] },
+  puppet_court: { t: 'The Puppet Court', p: () => ['You forgave Castellan Brannick, and he served you faithfully, in public. In private, the Circle ran your court through him, one letter at a time.', 'Your crown is heavy with gold and empty of power. The grey flame burns in every ledger. You found out too late, and by then there was nobody left you could trust to tell.'] },
+  tide_ascendant: { t: 'The Tide Ascendant', p: () => ['Aurek fell, but the Tide he raised did not. Village after village went grey while you fought for your crown, and the blight never fully drew back.', 'You rule a realm of fortified towns and dead countryside. The Hollow walk the fields at night. They say the blood of the First King is the only thing they still fear.'] },
+  broken_fifth: { t: 'The Broken Fifth', p: () => ['Aurek is ash, but so is your realm. Its seat was taken, its banners burned, and the crowns carved up what was left.', 'You ride the borderlands now, an heir without a kingdom, with a sceptre no one will kneel to. There will be another war. There always is.'] },
+});
+ACTS[3] = (_a3 => () => crownP() ? { n: 'The Fifth Crown', t: 'A realm of your own, and a house to hold it. Keep them both alive.' } : _a3())(ACTS[3]);
+{ const _sb = sBranch; sBranch = p => { if (p !== 'crown') return _sb(p); STORY.path = 'crown'; STORY.raids = true; STORY.raidT = 480; GF('crownPath', 1); deed(`The seal beneath ${B().name} knew your blood.`); SND.play('seal'); }; }
+{ const d0 = SQ.p4.done; SQ.p4.done = q => { if (STORY.path === 'crown') sStart('f1'); else d0(q); }; }
+// story-mode realm founding and a quicker first heir for the Fifth Crown
+{ const _rr = realmReqs; realmReqs = () => { const r = _rr(); if (G.mode === 'story' && GF('crownPath')) { r[0] = [P.lvl >= 6, `Reach level 6 (you are ${P.lvl})`]; r[3] = [P.gold >= 1500, `Gather 1,500 gold for the coronation (you have ${fmt(P.gold)})`]; r[2] = [partyNow().filter(e => !e.dead).length >= 3, `Command at least 3 soldiers or companions (you have ${partyNow().filter(e => !e.dead).length})`]; } return r; }; }
+hook('daily', day => { if (crownP() && P.spouse && !(P.kids || []).length && Q.active.some(q => q.sid === 'f6') && day - (P.spouse.wedDay || day) >= 2 && chance(.35)) birthDaily(day, true); });
+{ const _se = storyEnding; storyEnding = () => { _se(); const extra = [];
+  if (P.spouse || (P.kids || []).length || (P.anc || []).length) extra.push({ h: 'YOUR HOUSE', html: `<p>${esc(P.house)}, in its ${ordinalWord(P.gen || 1)} generation.${P.spouse ? ` ${esc(pFull())} and ${esc(P.spouse.name)}.` : ''}</p>${(P.kids || []).length ? `<ul>${P.kids.map(k2 => `<li><b>${esc(k2.name)}</b>, ${kidAge(k2)}, ${kidAdult(k2) ? 'grown, and sure of it' : 'still small enough to be carried'}${P.heir === P.kids.indexOf(k2) ? ' (the heir)' : ''}.</li>`).join('')}</ul>` : ''}` });
+  if (realmOn()) extra.push({ h: 'THE FIFTH REALM', html: `<p><b style="color:${G.realm.color}">${esc(G.realm.name)}</b> ("${esc(G.realm.motto)}") holds ${realmPlaces().length} places from its seat at ${esc(W.places[G.realm.seat].name)}.${G.realm.vassals.length ? ` ${G.realm.vassals.map(k => esc(KDATA[k].name)).join(' and ')} swore fealty.` : ''}</p>` });
+  if (extra.length && epiPages.length) { epiPages.splice(epiPages.length - 1, 0, ...extra); renderEpi(); } }; }
 
 /* ---------------- Loop ---------------- */
 let last = performance.now(), mmT = 0, ambT = 0, fpsA = 0;
