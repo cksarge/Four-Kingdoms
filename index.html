@@ -555,6 +555,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .modeCard .mcD{font-size:14px;color:var(--ink2);line-height:1.3;margin-top:3px}
 .modeCard.story .mcT::before{content:'✦ ';color:#ffcf4a}
 .modeCard.tut .mcT::before{content:'⚑ ';color:#8fd0ff}
+.modeCard.sandbox .mcT::before{content:'❖ ';color:#8fe07a}
 #actScreen{background:radial-gradient(ellipse at center,rgba(46,30,10,.72),rgba(0,0,0,.95))}
 #actScreen .panel{width:min(560px,calc(92vw/var(--ui-scale)));text-align:center;padding:34px 34px 26px}
 .actKicker{font-family:var(--fh);font-weight:700;letter-spacing:.6em;font-size:15px;color:var(--gold);margin-left:.6em}
@@ -695,7 +696,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div class="orn">✦</div>
       <div id="modePick" class="modeBox">
         <div class="modeCard story" data-mode="story"><div class="mcT">STORY MODE</div><div class="mcD">Follow a hedge knight's tale across the four kingdoms. Your choices shape the realm and decide one of many endings.</div></div>
-        <div class="modeCard" data-mode="sandbox"><div class="mcT">SANDBOX</div><div class="mcD">The open realm with no story. Explore, fight, trade and meddle in diplomacy for as long as you like.</div></div>
+        <div class="modeCard sandbox" data-mode="sandbox"><div class="mcT">SANDBOX</div><div class="mcD">The open realm with no story. Explore, fight, trade and meddle in diplomacy for as long as you like.</div></div>
         <div class="modeCard road" data-mode="road"><div class="mcT">THE LONG ROAD</div><div class="mcD">A roguelite journey across three random realms to the Hollow Reach. Choose your path, win relics and blessings, and try to break the Hollow King. When you fall, the run ends, but your renown unlocks new heroes.</div><div class="mcS">8 heroes · 10 oaths · a new Daily Road each day</div></div>
         <div class="modeCard tut" data-mode="tutorial"><div class="mcT">TUTORIAL</div><div class="mcD">A quick lesson in the training yard: moving, fighting, archery, riding and the menus. Afterwards, keep playing the same world as an endless sandbox.</div><div class="mcS">About five minutes · Knight difficulty · Medium world</div></div>
       </div>
