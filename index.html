@@ -699,6 +699,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
           <div><div class="setH">WILDLIFE</div><div class="choice" id="wildSeg"></div><div class="lockNote hidden" id="wildLock">Forsaken: always abundant</div></div>
           <div><div class="setH">DAY LENGTH</div><div class="choice" id="daySeg"></div></div>
         </div>
+        <div id="tideSec"><div class="setH">THE HOLLOW TIDE</div><div class="choice" id="tideSeg"></div><div class="segNote" id="tideNote"></div></div>
         <div class="setH">STARTING SEASON</div>
         <div class="choice" id="seasonSeg"></div>
         <div class="segNote" id="seasonNote"></div>
@@ -1014,7 +1015,7 @@ const sgn = n => (n > 0 ? '+' : '') + Math.round(n);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 /* Hooks: the bigger systems (magic, courts, armies, the realm, the seas, the Tide, the Long Road) each register here
    for reset, save, load and the game clocks, so the core save/load and loop code only needs one call per hook. */
-const HOOKS = { reset: [], save: [], load: [], newgame: [], daily: [], tick: [], slow: [], hud: [], draw: [], recalc: [], kill: [], pad: [], succession: [], bigmap: [], minimap: [], owner: [], captured: [], preload: [], courtRender: [], isleBoss: [] };
+const HOOKS = { reset: [], save: [], load: [], newgame: [], daily: [], tick: [], slow: [], hud: [], draw: [], recalc: [], kill: [], pad: [], succession: [], bigmap: [], minimap: [], owner: [], captured: [], preload: [], courtRender: [], isleBoss: [], chunk: [], tideEnd: [] };
 const hook = (n, fn) => { HOOKS[n].push(fn); };
 // New NPC roles, world interactions and keys register here: ROLES[role] = { label(e), talk(e) }, IACTS[type] = { label(it, pl), act(it, pl) },
 // KEYFN[code] = fn (the code is the default key; players can rebind it in Settings), PANELS[code] = UI screen to toggle.
@@ -1757,7 +1758,7 @@ const SIZES = [
 ];
 const DAYS = [{ name: 'Short', len: 300 }, { name: 'Normal', len: 480 }, { name: 'Long', len: 780 }];
 const WILDS = [{ name: 'Scarce', cap: 2, every: 7 }, { name: 'Normal', cap: 5, every: 4 }, { name: 'Abundant', cap: 9, every: 2.5 }];
-const normOpts = o => Object.assign({ diff: 2, size: 2, kingdom: 0, explored: false, day: 1, wild: 1, season: 0, pname: '', fem: 0, bloodline: 0 }, o || {});
+const normOpts = o => Object.assign({ diff: 2, size: 2, kingdom: 0, explored: false, day: 1, wild: 1, season: 0, pname: '', fem: 0, bloodline: 0, tide: 0 }, o || {});
 const DIFF = () => DIFFS[G.opts ? G.opts.diff : 2];
 function sizeCounts(n) { const f = n / 360; return { vil: Math.round(20 * Math.pow(f, 1.5)), camp: Math.round(18 * f * f) }; }
 function diffEffects(d) {
@@ -3608,7 +3609,7 @@ function addShake(v) { if (settings.shake) G.shake = Math.min(18, G.shake + v); 
 let DAYLEN = 480;
 const dayNum = () => Math.floor(G.time / DAYLEN + .3) + 1;
 const tod = () => (G.time / DAYLEN + .3) % 1;
-function darkness() { if (G.under && !G.under.isle && !G.under.deck) return (G.under.interior ? .3 : settings.quality === 'low' ? .55 : .86) * nightSight(); const t = tod(); if (t > .27 && t < .73) return 0; const d = t <= .27 ? .27 - t : t - .73; return Math.min(.58, d * 4.2) * nightSight(); }
+function darkness() { if (G.under && G.under.rift) return .5 * nightSight(); if (G.under && !G.under.isle && !G.under.deck) return (G.under.interior ? .3 : settings.quality === 'low' ? .55 : .86) * nightSight(); const t = tod(); if (t > .27 && t < .73) return 0; const d = t <= .27 ? .27 - t : t - .73; return Math.min(.58, d * 4.2) * nightSight(); }
 const nightSight = () => !P || G.state === 'menu' ? 1 : (P.fx && P.fx.night > 0) || (P.S && P.S.night) ? .35 : P.fx && P.fx.light > 0 ? .6 : 1;
 /* ---------------- Seasons & weather ---------------- */
 const SEASON_DAYS = 6, SEASONS = ['Spring', 'Summer', 'Autumn', 'Winter'];
@@ -4049,6 +4050,7 @@ function endContest() {
   toast(`🎉 ${msg} ${prize ? `You win ${prize} gold` : 'No prize this time'}${item ? ` and the ${ITEMS[item].name}` : ''}!`, prize ? 'gold' : '');
 }
 function spawnPlace(pl) {
+  if ((pl.type === 'village' || pl.type === 'castle') && pl.hollow && G.tide && G.tide.on) { spawnHollowPlace(pl); return; }
   pl.spawned = true; const X = d => pl.x + d * TS, Y = d => pl.y + d * TS;
   const mk = (kind, tx, ty, o) => { const f = findFree(tx, ty); return mkActor(kind, f.x, f.y, Object.assign({ place: pl.id }, o)); };
   const specsSpawn = (tier) => placeSpecs(pl).forEach((s, i) => { if (pl.dead[i]) return; mk(s.kind, X(s.dx), Y(s.dy), { tier: s.tier || tier, spec: i, leash: 440, wanderR: 90, home: { x: pl.x, y: pl.y }, chief: s.kind === 'leader' ? 'Chief ' + pl.chief : undefined }); });
@@ -6321,7 +6323,7 @@ function getChunk(cx, cy) {
   if (ch) { ch.used = chunkFrame; return ch.c; }
   if (chunksBuilt >= (G.state === 'menu' || chunkCache.size < 12 ? 40 : 3)) return null; chunksBuilt++; // a cold cache fills in one go, so embedded browsers that draw few frames never show bare ground
   const c = document.createElement('canvas'); c.width = c.height = CH * TS; const g = c.getContext('2d');
-  renderChunk(g, cx, cy); chunkCache.set(key, { c, used: chunkFrame });
+  renderChunk(g, cx, cy); runHooks('chunk', g, cx, cy); chunkCache.set(key, { c, used: chunkFrame });
   const lim = settings.quality === 'low' ? 36 : 64;
   if (chunkCache.size > lim) { let old = null, ou = 1e9; chunkCache.forEach((v, k) => { if (v.used < ou) { ou = v.used; old = k; } }); chunkCache.delete(old); }
   return c;
@@ -8808,7 +8810,8 @@ function renderSetup() {
   $('seasonNote').textContent = ['Mild weather and green fields.', 'Long, bright days, and dust storms in the south.', 'Golden woods, cheap food after the harvest.', 'Snow on every road, dear bread and slow travel. For the hardy.'][o.season];
   $('optExplored').checked = !!o.explored; $('optExplored').disabled = iron;
   seg('sexSeg', [{ name: 'Sir (a knight)' }, { name: 'Dame (a lady knight)' }], 'fem');
-  seg('bloodSeg', [{ name: 'Rise again' }, { name: 'Bloodline' }], 'bloodline'); $('bloodSeg').classList.toggle('hidden', pendingMode === 'story');
+  seg('bloodSeg', [{ name: 'Rise again' }, { name: 'Bloodline' }], 'bloodline');
+  seg('tideSeg', [{ name: 'Off' }, { name: 'Late (day 60)' }, { name: 'Early (day 30)' }], 'tide'); $('tideSec').classList.toggle('hidden', pendingMode === 'story'); $('tideNote').textContent = ['The dead stay in their graves (you can still let the Tide rise later, from the Realm & Court screen).', 'A late-game crisis: Blight Hearts erupt, the blight spreads, villages fall to the Hollow. Break it, or live in the Long Night.', 'The Tide rises early, while the realm is still young. A hard road.'][o.tide || 0]; $('bloodSeg').classList.toggle('hidden', pendingMode === 'story');
   $('bloodNote').textContent = pendingMode === 'story' ? 'In the story, you always rise again when you fall.' : iron ? 'Forsaken: when you fall, your grown heir carries on. With no heir, the save is lost.' : o.bloodline ? 'When you fall, your grown heir takes up your sword. With no heir yet, you rise again.' : 'When you fall, you rise again at your last refuge. In old age, your heir inherits.';
   const nm = $('optName'); nm.value = o.pname || ''; nm.oninput = () => { o.pname = nm.value; }; nm.onkeydown = ev => ev.stopPropagation();
   ['wildSeg', 'exploredChk'].forEach(id => $(id).classList.toggle('setLocked', iron)); ['wildLock', 'exploredLock'].forEach(id => $(id).classList.toggle('hidden', !iron));
@@ -12809,6 +12812,177 @@ ACH.push(
   ['aldmere', '👑', 'The Crown of Aldmere', 'Defeat the Drowned King of Aldmere', () => !!(G.isles && G.isles.list[11] && G.isles.list[11].boss)],
 );
 
+/* =====================================================================
+   THE HOLLOW TIDE — a late-game crisis. Blight Hearts erupt from old
+   barrows and ruins and the blight spreads from them day by day: villages
+   fall to the Hollow, the dead walk the grey ground, and wars between the
+   crowns only feed it. Destroy the Hearts to open the rift to the Hollow
+   Deep, and end the Tide Mother. Nothing here is saved per tile: the blight
+   is a set of growing circles around its Hearts, so saves stay small.
+   ===================================================================== */
+const TIDE_START = [0, 60, 30];
+const tideOn = () => !!(G.tide && G.tide.on && !G.tide.done);
+function blightAt(tx, ty) {
+  const T0 = G.tide; if (!T0 || !T0.on || G.under) return 0;
+  let best = 0;
+  for (const h of T0.hearts) { if (h.r <= 0) continue; const d = Math.hypot(tx - h.tx, ty - h.ty) + (hash2(tx * 3 + h.id, ty * 5) - .5) * 6 + (hash2(Math.floor(tx / 4), Math.floor(ty / 4) + h.id) - .5) * 8; if (d < h.r) best = Math.max(best, clamp((h.r - d) / 6, .15, 1)); }
+  if (best && (terAt(tx, ty) === T.SEA || terAt(tx, ty) === T.WATER)) return 0;
+  return best;
+}
+const blightPx = (x, y) => blightAt(Math.floor(x / TS), Math.floor(y / TS));
+function tideHollow(pl) { return tideOn() || (G.tide && G.tide.on) ? blightAt(pl.tx, pl.ty) > .3 : false; }
+function startTide(o = {}) {
+  if (G.tide && G.tide.on) return; G.tide = { on: true, start: dayNum(), hearts: [], next: dayNum(), max: o.max || (WW > 400 ? 5 : 4), killed: 0, council: 0, rift: null, done: false, lost: false, story: !!o.story };
+  addHeart(o.at);
+  toast('☠ <b>The Hollow Tide has begun.</b> A Blight Heart has broken out of the earth. The dead will follow.', 'war'); SND.play('hollow');
+  logEvent('The Hollow Tide rose. A Blight Heart broke out of the earth.', []);
+}
+function addHeart(at) {
+  const T0 = G.tide, used = T0.hearts.map(h => h.place);
+  let pl = at || null;
+  if (!pl) { const cands = W.places.filter(p => (p.type === 'ruin' || p.type === 'hidden' || p.type === 'dungeon') && !used.includes(p.id) && dist(p.x, p.y, P.x, P.y) > 45 * TS && !T0.hearts.some(h => Math.hypot(h.tx - p.tx, h.ty - p.ty) < 45));
+    const w = cands.map(p => { const k = W.own[p.ty * WW + p.tx]; return [p, 1 + (typeof k === 'number' && k < 4 ? warsOf(k) : 0)]; }); let tot = w.reduce((a, x) => a + x[1], 0), r = Math.random() * tot; for (const [p, ww] of w) { r -= ww; if (r <= 0) { pl = p; break; } } }
+  if (!pl) return null;
+  const h = { id: T0.hearts.length + 1, place: pl.id, tx: pl.tx, ty: pl.ty, x: pl.x, y: pl.y + TS, r: 5, hp: 900 + T0.hearts.length * 200, maxHp: 900 + T0.hearts.length * 200, alive: true, born: dayNum() };
+  T0.hearts.push(h); T0.next = dayNum() + randi(7, 10);
+  const k = W.own[pl.ty * WW + pl.tx]; if (T0.hearts.length > 1) { toast(`☠ Another Blight Heart erupts at <b>${pl.name}</b>${KDATA[k] ? `, in ${KDATA[k].name}` : ''}.`, 'war'); SND.play('hollow'); }
+  logEvent(`A Blight Heart erupted at ${pl.name}.`, KDATA[k] ? [k] : []); chunkCache.clear(); return h;
+}
+function tideDaily(day) {
+  if (!G.tide) { const st = G.opts && TIDE_START[G.opts.tide || 0]; if (st && G.mode === 'sandbox' && day >= st) startTide(); return; }
+  const T0 = G.tide; if (!T0.on) return;
+  if (!T0.done && T0.hearts.length < T0.max && day >= T0.next && T0.hearts.filter(h => h.alive).length) addHeart();
+  for (const h of T0.hearts) {
+    const k = W.own[h.ty * WW + h.tx], war = KDATA[k] && k < 4 ? warsOf(k) : 0;
+    if (h.alive && !T0.done) { h.r = Math.min(64, h.r + 2.6 * (1 + war * .45) * (T0.council > day ? .55 : 1)); if (KDATA[k] && k < 4 && !(K.fallen || [])[k]) { const hit = K.mil[k] * (war ? .004 : .012) * (T0.council > day ? 2 : 1); h.hp -= hit; K.mil[k] = Math.max(300, K.mil[k] - hit * .5); if (h.hp <= 0) heartDies(h, KDATA[k].name); } }
+    else h.r = Math.max(0, h.r - (T0.done ? 12 : 5));
+  }
+  // villages the blight has swallowed
+  W.places.forEach(p => { if (p.type !== 'village' && p.type !== 'castle') return; const hol = blightAt(p.tx, p.ty) > .3; if (!!p.hollow !== hol) { p.hollow = hol; if (p.spawned) despawnPlace(p); const k = p.owner; if (hol) { logEvent(`${p.name} fell to the Hollow.`, KDATA[k] ? [k] : []); if (dist(P.x, P.y, p.x, p.y) < 120 * TS) toast(`☠ <b>${p.name}</b> has fallen to the Hollow.`, 'war'); if (KDATA[k] && K.unrest && k < 5) K.unrest[k] = clamp((K.unrest[k] || 20) + 8, 0, 100); } else logEvent(`${p.name} was freed from the blight.`, KDATA[k] ? [k] : []); } });
+  if (!T0.lost && !T0.done && CROWNS.every(k => W.places[k].hollow)) { T0.lost = true; showSandboxEpilogue('long_night'); }
+  chunkCache.clear(); if (typeof buildMapLayers === 'function') dipDirty = true;
+}
+function heartDies(h, by) {
+  if (!h.alive) return; h.alive = false; h.died = dayNum(); G.tide.killed++; const pl = W.places[h.place];
+  logEvent(`The Blight Heart at ${pl.name} was destroyed${by ? ` by the knights of ${by}` : ` by ${pFull()}`}.`, []); toast(`✦ The Blight Heart at <b>${pl.name}</b> is destroyed! The blight around it begins to recede.`, 'gold'); SND.play('level');
+  if (G.tide.hearts.length >= G.tide.max - 1 && G.tide.hearts.every(x => !x.alive) && !G.tide.rift) { G.tide.rift = { x: h.x, y: h.y + 2 * TS }; syncRift(); toast('☠ Where the last Heart died, the ground splits open: a rift into the <b>Hollow Deep</b>. The Tide Mother waits below.', 'war'); logEvent('A rift opened into the Hollow Deep.', []); }
+  else if (G.tide.hearts.every(x => !x.alive) && G.tide.hearts.length < G.tide.max) G.tide.next = Math.min(G.tide.next, dayNum() + 2);
+}
+function syncRift() { if (!W || !W.interacts || G.under) return; W.interacts = W.interacts.filter(it => it.type !== 'tiderift'); if (G.tide && G.tide.rift && !G.tide.done) W.interacts.push({ type: 'tiderift', x: G.tide.rift.x, y: G.tide.rift.y }); }
+/* ---------------- On the grey ground ---------------- */
+Object.assign(ATYPES, { bheart: { name: 'Blight Heart', hp: 900, dmg: 0, spd: 0, range: 0, cd: 99, wind: 1, faction: 'hollow', xp: 300, gold: [0, 0], r: 24 } });
+DRAW_KIND.bheart = (g, e, t) => {
+  const p = 1 + Math.sin(t * 2.4) * .08, x = e.x, y = e.y - 10;
+  g.save(); g.strokeStyle = 'rgba(40,20,50,.7)'; g.lineWidth = 3; for (let i = 0; i < 7; i++) { const a = i / 7 * TAU + Math.sin(t + i) * .2; g.beginPath(); g.moveTo(x, y + 10); g.quadraticCurveTo(x + Math.cos(a) * 30, y + 10 + Math.sin(a) * 18, x + Math.cos(a) * 52, y + 14 + Math.sin(a) * 30); g.stroke(); }
+  if (e.flash > 0) g.filter = 'brightness(1.8)'; g.shadowColor = '#8fd8ff'; g.shadowBlur = 20 * p; const gr = g.createRadialGradient(x - 6, y - 6, 3, x, y, 26 * p); gr.addColorStop(0, '#bfe8ff'); gr.addColorStop(.35, '#4a3a6a'); gr.addColorStop(1, '#140a1a'); g.fillStyle = gr; circ(g, x, y, 24 * p); g.restore();
+  if (Math.random() < .5 * QMUL()) addPart(x + rand(-20, 20), y + rand(-10, 10), rand(-8, 8), rand(-30, -10), Math.random() < .5 ? '#9fdcff' : '#5a4a6a', 1, 3);
+};
+KIND_AI.bheart = (e, dt) => {
+  e.stand = true; e.home = { x: e.x, y: e.y }; e.wind = 0;
+  const h = G.tide && G.tide.hearts.find(x => x.id === e.heart); if (h) h.hp = e.hp;
+  if (dist(e.x, e.y, P.x, P.y) > 650) return;
+  e.sumT = (e.sumT ?? 3) - dt; if (e.sumT <= 0 && ents.filter(x => x.tideSpawn && !x.dead).length < 6) { e.sumT = rand(8, 12); for (let i = 0; i < 2; i++) { const f = findFree(e.x + rand(-80, 80), e.y + rand(-60, 80)); const w = mkActor(chance(.3) ? 'hollow_archer' : 'wight', f.x, f.y, { tier: clamp(Math.ceil(P.lvl / 4), 1, 4), tideSpawn: 1, transient: true, roam: true, aggro: 500 }); w.target = P; } SND.play('hollow'); }
+  e.pulseT = (e.pulseT ?? 5) - dt; if (e.pulseT <= 0) { e.pulseT = rand(5, 7); addTell({ k: 'circle', x: e.x, y: e.y, r: 110, dur: .9, red: true, fn: () => { if (e.dead) return; for (const t of [P, ...ents]) if (hostile(e, t) && dist(e.x, e.y, t.x, t.y) < 110 + t.r) damage(t, 14 + P.lvl * 1.2, e, { kb: 2.4, unblock: true }); SND.play('boom'); } }); }
+};
+function tideSlow() {
+  const T0 = G.tide; if (!T0 || !T0.on || G.under) return;
+  // hearts take form when you come near
+  for (const h of T0.hearts) { const e = ents.find(x => x.heart === h.id && !x.dead); if (!h.alive) { if (e) removeEnt(e); continue; } const near = dist(P.x, P.y, h.x, h.y) < 1500; if (near && !e) { const f = findFree(h.x, h.y); const b = mkActor('bheart', f.x, f.y, { heart: h.id, boss: true, name: `Blight Heart of ${W.places[h.place].name}`, stand: true, untouchable: false, persistent: true }); b.hp = h.hp; b.maxHp = h.maxHp; } else if (e && !near) removeEnt(e); }
+  // the grey ground
+  const b = blightPx(P.x, P.y);
+  if (b > .2 && !(P.fx && P.fx.blightward > 0)) { P.blightT = (P.blightT || 0) + 1; if (P.blightT === 4) toast('The blight gnaws at you. A Blightward Tincture, or the Cleanse spell, keeps it off.', 'bad'); if (P.blightT > 4 && !P.sailing) damage(P, .8 + b, null, { dot: 'blight', unblock: true }); } else P.blightT = 0;
+  if (b > .3 && ents.filter(e => e.tideSpawn && !e.dead).length < 5 && chance(.08)) { const a = rand(0, TAU), f = findFree(P.x + Math.cos(a) * 520, P.y + Math.sin(a) * 520); if (blightPx(f.x, f.y) > .2) mkActor(chance(.25) ? 'hollow_archer' : 'wight', f.x, f.y, { tier: clamp(Math.ceil(P.lvl / 4), 1, 4), tideSpawn: 1, transient: true, roam: true, aggro: 420, name: 'Hollow Dead' }); }
+  if (T0.rift && !W.interacts.some(it => it.type === 'tiderift')) syncRift();
+}
+hook('kill', t => { if (t.kind === 'bheart' && G.tide) { const h = G.tide.hearts.find(x => x.id === t.heart); if (h) { h.hp = 0; heartDies(h); } } if (t.tideMother) tideVictory(); });
+// fallen villages: the Hollow keep their streets
+function spawnHollowPlace(pl) {
+  pl.spawned = true; if (!pl.dead) pl.dead = [];
+  const n = pl.type === 'castle' ? 8 : 4; for (let i = 0; i < n; i++) { const f = findFree(pl.x + rand(-5, 5) * TS, pl.y + rand(-4, 6) * TS); mkActor(i === 0 ? 'hknight' : chance(.3) ? 'hollow_archer' : 'wight', f.x, f.y, { place: pl.id, tier: clamp(Math.ceil(P.lvl / 4) + (pl.type === 'castle' ? 1 : 0), 1, 4), home: { x: pl.x, y: pl.y }, leash: 520, wanderR: 140 }); }
+}
+/* ---------------- The rift and the Tide Mother ---------------- */
+IACTS.tiderift = { label: () => 'Descend into the Hollow Deep', act: () => { if (ents.some(e => !e.dead && playerHostileTo(e) && dist(e.x, e.y, P.x, P.y) < 260)) { toast('Not with enemies at your back!', 'bad'); return; } askConfirm('THE HOLLOW DEEP', 'The rift breathes cold. Whatever waits below made the Tide. <b>Descend?</b>', 'Descend', enterRift); } };
+function genRift() {
+  const n = 48, N = n * n, ter = new Uint8Array(N).fill(T.VOID), solid = new Uint8Array(N), c = n / 2, objs = [], ints = [];
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const d = Math.hypot(x - c, y - c); if (d < 19) ter[y * n + x] = d < 17 ? T.CRYPT : T.ROCK; }
+  for (let i = 0; i < 8; i++) { const a = i / 8 * TAU, x = Math.round(c + Math.cos(a) * 12), y = Math.round(c + Math.sin(a) * 12); solid[y * n + x] = 1; objs.push({ k: 'statue', x: x * TS, y: y * TS, w: 32, h: 32, sy: (y + 1) * TS }); }
+  ints.push({ type: 'riftexit', x: c * TS, y: (c + 15) * TS });
+  const cw = Math.ceil(n / CH), DW = { size: n, seed: W.seed, ter, own: new Uint8Array(N).fill(2), solid, wall: new Uint8Array(N), clear: new Uint8Array(N).fill(1), bord: new Uint8Array(N), hgt: new Float32Array(N), places: W.places, objs, chunkTrees: [], chunkObjs: [], interacts: ints, caps: W.caps, rivers: [], landCount: [0, 0, 0, 0], towers: [], fish: [], hermits: [], start: { x: c * TS, y: (c + 13) * TS } };
+  for (let q = 0; q < cw * cw; q++) { DW.chunkTrees.push([]); DW.chunkObjs.push([]); } objs.forEach(o => { const ci = Math.floor((o.y + o.h / 2) / (CH * TS)) * cw + Math.floor((o.x + o.w / 2) / (CH * TS)); if (DW.chunkObjs[ci]) DW.chunkObjs[ci].push(o); });
+  return { W: DW, n, entry: { x: c * TS, y: (c + 13) * TS }, center: { x: c * TS, y: (c - 2) * TS } };
+}
+function enterRift() {
+  if (P.mounted) dismount(); const D = genRift(), party = ents.filter(e => e.follow && e.ally && !e.dead);
+  G.over = { W, ents: ents.filter(e => !party.includes(e)), projs, pickups, px: P.x, py: P.y - 10 };
+  W = D.W; setWorldSize(D.n); ents = party; projs = []; pickups = []; parts = []; texts = []; chunkCache.clear();
+  P.x = D.entry.x; P.y = D.entry.y; cam.x = P.x; cam.y = P.y; party.forEach(e => { const f = findFree(P.x + rand(-40, 40), P.y + rand(10, 40)); e.x = f.x; e.y = f.y; });
+  G.under = { rift: true, name: 'The Hollow Deep', id: 'rift' }; $('mmWrap').classList.add('hidden');
+  const b = mkActor('hollow_king', D.center.x, D.center.y, { titan: 1, boss: true, tideMother: 1, name: 'The Tide Mother', _look: { body: '#1e2a36', head: 'crown', hair: '#8aa8b0', fem: 1, skin: '#6e8a8c', cape: '#0a1418', pauld: 1, weapon: { wk: 'great', len: 50, col: '#8fd8ff', glow: '#8fd8ff' } } });
+  b.hp = b.maxHp = Math.round(2600 * (1 + P.lvl * .03) * DIFF().enemyHp); b.dmg = 38 + P.lvl; titanInit(b);
+  showAreaTitle('THE HOLLOW DEEP', 'The Tide Mother rises from the black water'); SND.play('hollow'); SND.play('boss');
+}
+IACTS.riftexit = { label: () => G.tide && G.tide.done ? 'Climb back into the light' : 'Flee back up the rift', act: () => leaveDungeon(true) };
+function tideVictory() {
+  const T0 = G.tide; if (!T0 || T0.done) return; T0.done = true; T0.rift = null; T0.hearts.forEach(h => h.alive = false);
+  G.stats.tideEnded = dayNum(); logEvent(`${pFull()} destroyed the Tide Mother in the Hollow Deep. The Hollow Tide is broken.`, []); SND.play('level'); CROWNS.forEach(k => { if (!(K.fallen || [])[k]) addRep(k, 25, 'Ended the Hollow Tide', true); });
+  toast('✦ <b>The Tide Mother is destroyed.</b> Above, the grey ground begins to heal.', 'gold'); if (!T0.story) setTimeout(() => showSandboxEpilogue('tide'), 3000); runHooks('tideEnd');
+}
+Object.assign(SANDBOX_END, {
+  tide: () => ({ t: 'The Tide Is Broken', pages: [
+    { h: 'THE LONG NIGHT ENDS', html: `<p>For ${dayNum() - G.tide.start} days the Hollow Tide rolled across the four kingdoms. ${G.tide.killed} Blight Hearts were torn out of the earth, and at the last ${esc(pFull())} went down into the Hollow Deep and did not come back alone.</p><p>The Tide Mother is gone. The grey ground is already greening.</p>` },
+    { h: 'THE CROWNS', html: CROWNS.map(k => `<p><b>${esc(KDATA[k].name)}</b>: ${(K.fallen || [])[k] ? 'fallen, and not by the Hollow.' : W.places[k].hollow ? 'its capital was lost to the Hollow, but its people endure.' : `${esc(KDATA[k].ruler)} gives thanks, and remembers who came.`}</p>`).join('') },
+    { h: 'AND AFTER', html: '<p>The realm goes on: its wars and weddings, its plagues and harvests. Your road goes on with it.</p>' },
+  ] }),
+  long_night: () => ({ t: 'The Long Night', pages: [
+    { h: 'THE CAPITALS FALL', html: '<p>The last royal city went grey on a windless morning. The four crowns are courts in exile now, and the Hollow walk their halls.</p><p>This is not the end of the world, only the end of the world as it was. Somewhere a rift still waits for someone brave or foolish enough.</p>' },
+    { h: 'AND AFTER', html: '<p>You can go on: burn out the Hearts, open the rift, and take the realm back from the dead.</p>' },
+  ] }),
+});
+/* ---------------- Drawing the blight ---------------- */
+function drawBlightChunk(g, cx, cy) {
+  if (!G.tide || !G.tide.on || G.under) return; const x0 = cx * CH, y0 = cy * CH;
+  if (!G.tide.hearts.some(h => h.r > 0 && Math.hypot(h.tx - (x0 + CH / 2), h.ty - (y0 + CH / 2)) < h.r + CH + 8)) return;
+  for (let ty = y0; ty < y0 + CH; ty++) for (let tx = x0; tx < x0 + CH; tx++) {
+    const b = blightAt(tx, ty); if (!b) continue; const px = (tx - x0) * TS, py = (ty - y0) * TS, h = hash2(tx * 7, ty * 11);
+    g.fillStyle = `rgba(${34 + h * 10},${24 + h * 8},${44 + h * 12},${.28 + b * .34})`; g.fillRect(px, py, TS, TS);
+    if (h < .22) { g.strokeStyle = `rgba(150,210,230,${.15 + b * .25})`; g.lineWidth = 1; g.beginPath(); g.moveTo(px + h * 30, py + 6); g.lineTo(px + 12 + h * 10, py + 16); g.lineTo(px + 8, py + 28); g.stroke(); }
+    else if (h > .85) { g.fillStyle = 'rgba(210,210,200,.45)'; circ(g, px + 10 + h * 8, py + 18, 2.2); }
+  }
+}
+hook('chunk', (g, cx, cy) => drawBlightChunk(g, cx, cy));
+hook('bigmap', (g, toS, dpr) => { if (!G.tide || !G.tide.on) return; G.tide.hearts.forEach(h => { if (h.r <= 0) return; const [x, y] = toS(h.tx * TS, h.ty * TS), [x2] = toS((h.tx + h.r) * TS, h.ty * TS); g.fillStyle = 'rgba(40,20,60,.38)'; circ(g, x, y, Math.abs(x2 - x)); if (h.alive) { g.fillStyle = '#9fdcff'; g.font = `bold ${14 * dpr}px Georgia`; g.textAlign = 'center'; g.fillText('☠', x, y + 5 * dpr); } }); if (G.tide.rift) { const [x, y] = toS(G.tide.rift.x, G.tide.rift.y); g.strokeStyle = '#9fdcff'; g.lineWidth = 3 * dpr; g.beginPath(); g.arc(x, y, 9 * dpr, 0, TAU); g.stroke(); } });
+hook('minimap', (g, toM, S) => { if (!G.tide || !G.tide.on) return; G.tide.hearts.forEach(h => { if (!h.alive) return; const [x, y] = toM(h.x, h.y); if (x < 4 || y < 4 || x > S - 4 || y > S - 4) return; g.fillStyle = '#9fdcff'; circ(g, x, y, 3.5); }); });
+hook('draw', (g, t) => { if (!G.tide || !G.tide.on || G.under) return; const b = blightPx(P.x, P.y); if (b > .1 && Math.random() < b * .6 * QMUL()) addPart(P.x + rand(-300, 300), P.y + rand(-200, 200), rand(-10, 10), rand(-12, -4), 'rgba(160,190,200,.35)', 2.5, 6); });
+MUSIC_PICK.push(() => G.under && G.under.rift ? 'hollowking' : !G.under && G.tide && G.tide.on && !G.tide.done && blightPx(P.x, P.y) > .3 ? 'black_tower' : null);
+/* ---------------- The courts face the Tide ---------------- */
+function grandCouncil() {
+  const ok = CROWNS.filter(k => !(K.fallen || [])[k] && K.rep[k] >= 20).length >= 3; if (!ok || P.gold < 1000) return;
+  P.gold -= 1000; G.tide.council = dayNum() + 20;
+  PAIRS.forEach(([a, b]) => { if (a > 3 || b > 3) return; if (getRel(a, b) < -20) { K.rel[a][b] = K.rel[b][a] = -20; } addRel(a, b, 20, 'The Grand Council against the Tide', null, true); });
+  logEvent(`${pFull()} called a Grand Council. The four crowns swore a truce against the Hollow Tide.`, CROWNS); toast('🕊 <b>The Grand Council</b>: the crowns swear a truce and send their knights against the Hearts for twenty days.', 'peace'); SND.play('bell');
+  (G.armies || []).forEach(a => { if (typeof a.k === 'number' && a.k < 4) { a.goal = 'return'; retarget(a, W.places[a.k]); } }); renderCourt();
+}
+TABS_EXT.courtCards = TABS_EXT.courtCards || [];
+TABS_EXT.courtCards.push(() => {
+  if (G.mode !== 'sandbox' && !(G.tide && G.tide.on)) return '';
+  if (!G.tide || !G.tide.on) return `<div class="crNote" style="grid-column:1/-1"><b>THE HOLLOW TIDE</b>${G.opts && G.opts.tide ? `It will rise around day ${TIDE_START[G.opts.tide]}.` : 'The dead sleep. For now. <button class="btn sm red" data-act="tide">Let the Tide rise</button> <span class="dim">(a late-game crisis: Blight Hearts, fallen villages and the Tide Mother)</span>'}</div>`;
+  const T0 = G.tide, live = T0.hearts.filter(h => h.alive), canC = CROWNS.filter(k => !(K.fallen || [])[k] && K.rep[k] >= 20).length >= 3;
+  return `<div class="crNote" style="grid-column:1/-1"><b>☠ THE HOLLOW TIDE${T0.done ? ' IS BROKEN' : ''}</b>${T0.done ? `Ended on day ${G.stats.tideEnded || '?'}.` : `Rising since day ${T0.start}. ${T0.killed} Heart${T0.killed === 1 ? '' : 's'} destroyed, ${live.length} still beating: ${live.map(h => `<b>${esc(W.places[h.place].name)}</b> (${Math.round(h.hp / h.maxHp * 100)}%)`).join(', ') || 'none'}. ${W.places.filter(p => p.hollow).length} settlements fallen.${T0.rift ? ' <b>The rift to the Hollow Deep is open.</b>' : ''}
+    <div style="margin-top:6px">${T0.council > dayNum() ? `The Grand Council's truce holds until day ${T0.council}.` : `<button class="btn sm gold" data-act="council" ${canC && P.gold >= 1000 ? '' : 'disabled'}>Call a Grand Council (1,000 gold)</button> <span class="dim">Needs standing of 20 with three crowns. Ends their wars and sends their knights against the Hearts.</span>`}</div>`}</div>`;
+});
+Object.assign(COURT_ACTS, { council: () => grandCouncil(), tide: () => askConfirm('THE HOLLOW TIDE', 'Let the Hollow Tide rise in this world? Blight Hearts will erupt, and villages will fall to the dead unless you stop them. <b>This cannot be undone.</b>', 'Let it rise', () => { startTide(); renderCourt(); }) });
+ACH.push(
+  ['heart', '✦', 'Heartbreaker', 'Destroy a Blight Heart', () => !!(G.tide && G.tide.killed)],
+  ['tide', '☀', 'The Tide Is Broken', 'Destroy the Tide Mother in the Hollow Deep', () => !!(G.tide && G.tide.done)],
+  ['council', '🕊', 'The Grand Council', 'Unite the crowns against the Tide', () => !!(G.tide && G.tide.council)],
+);
+BEASTS.push(['bheart', 'The Circle and the Dead', 'Old barrows and ruins, when the Hollow Tide rises', 'A heart of black ice that pumps the blight into the land. It calls the dead and bursts with grave-cold. Destroy it, and the land around it heals.', 'The land itself']); BEASTS.forEach((b, i) => BEAST_I[b[0]] = i); BEAST_Z.bheart = 1.2;
+hook('reset', () => { G.tide = null; });
+hook('save', d => { d.tide = G.tide; });
+hook('load', d => { G.tide = d.tide || null; if (G.tide) { W.places.forEach(p => { p.hollow = (p.type === 'village' || p.type === 'castle') && blightAt(p.tx, p.ty) > .3; }); setTimeout(syncRift, 100); } });
+hook('daily', day => { if (G.mode !== 'road') tideDaily(day); });
+hook('slow', () => tideSlow());
+
 /* ---------------- Loop ---------------- */
 let last = performance.now(), mmT = 0, ambT = 0, fpsA = 0;
 function update(dt) {
@@ -12819,7 +12993,7 @@ function update(dt) {
   if (G.arena) arenaTick(dt, px0, py0);
   if (tells.length) updateTells(dt);
   if (!G.under) storyTick(dt);
-  if (G.under && !G.under.interior && !G.under.isle) updateTraps(dt);
+  if (G.under && !G.under.interior && !G.under.isle && !G.under.rift) updateTraps(dt);
   if (G.tut) tutTick(dt);
   if (G.siege && !G.under) updateSiege(dt);
   runHooks('tick', dt);

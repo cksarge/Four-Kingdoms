@@ -138,6 +138,12 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 - Companions and soldiers: hire spearmen, bowmen and knights from castle captains (daily pay), or recruit four named sellswords found in the villages, including a healer and a venom archer. Named companions are knocked down, never killed.
 - Property: buy a house in a friendly village (rest, a safe stash, and you wake there if you fall), or restore a ruined fort that pays a daily income and can be garrisoned.
 - Crafting: fletch every arrow type at market benches, and at the royal forges improve gear up to Masterwork or bind a dungeon relic into a blade to enchant it.
+- **The Hollow Tide (sandbox):** an optional late-game crisis.
+  - **Starting it:** choose Late (day 60) or Early (day 30) when starting a new game, or let it rise later from the Realm & Court screen.
+  - **Blight Hearts** erupt from old ruins and barrows, and the blight spreads from them day by day. It spreads faster in kingdoms torn by war.
+  - **On the grey ground,** villages and even royal cities fall to the Hollow, the dead walk, and the blight gnaws at anyone without a Blightward Tincture.
+  - **The crowns fight back:** their knights wear the Hearts down on their own, and you can call a **Grand Council** that ends their wars and sends them against the Hearts together.
+  - **The end:** destroy the Hearts and a rift opens into the Hollow Deep, where the Tide Mother waits. Break her, or live on in the Long Night if every capital falls. Either way the tale gets an epilogue and your game carries on.
 - **The seas and the Deep:**
   - **A ship of your own:** buy one at any harbour: a Cog, a Carrack or a War Galley. Walk down the jetty and board her. A/D steer, W makes sail and S slows.
   - **Sailing:** the wind shifts as you sail. Sailing with it is fast; galleys row into it. Click to loose a volley from your crew. Press E to go ashore anywhere, and your crew and horse come with you.
@@ -226,7 +232,7 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 
 ## Achievements and statistics
 
-86 achievements are shared by every game in your browser (see the main menu or pause menu). The pause menu's *Your Journey* page tracks time played, distance, kills, arrows, dungeons, sieges, tourneys and more, and the story's closing screen shows it too.
+89 achievements are shared by every game in your browser (see the main menu or pause menu). The pause menu's *Your Journey* page tracks time played, distance, kills, arrows, dungeons, sieges, tourneys and more, and the story's closing screen shows it too.
 
 ## License
 
