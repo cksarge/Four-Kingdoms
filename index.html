@@ -107,6 +107,11 @@ body.touch #helpTouch{display:block}
 .bar.st .fill{background:linear-gradient(180deg,#b8d86a,#6f9a2c 55%,#46681a)}
 .bar.st.low .fill{background:linear-gradient(180deg,#e0b050,#9a6a1c)}
 .bar.xp{height:6px;width:220px}
+.bar.ship{height:13px}.bar.ship .fill{background:linear-gradient(180deg,#d8a060,#8a5a2a 55%,#5a3a1a)}.bar.ship span{font-size:9.5px}
+.seaBody{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;margin-top:8px}#seaChart{width:100%;border:1px solid #6b5230;border-radius:6px;background:#1c3a5a}
+.seaList{max-height:330px;overflow:auto;margin-top:8px;display:flex;flex-direction:column;gap:5px}.seaRow{padding:6px 8px;border:1px solid rgba(160,122,58,.3);border-radius:6px;background:rgba(0,0,0,.25);cursor:pointer;font-size:13.5px}.seaRow:hover{border-color:#e7c35a}.seaRow .dim{font-size:12.5px}
+#seaChart .isle:hover circle{stroke:#ffd24a;stroke-width:3}
+@media (max-width:760px){.seaBody{grid-template-columns:1fr}}
 #battleBar{position:absolute;left:50%;top:92px;transform:translateX(-50%);display:flex;gap:10px;align-items:center;padding:6px 12px;background:rgba(15,10,5,.82);border:1px solid #6b5230;border-radius:6px;pointer-events:none}
 .btSide{width:200px}.btN{font-family:var(--fh);font-size:11.5px;color:#f5e6bd;text-align:center;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.btT{height:8px;background:#1a120a;border:1px solid #5d4526;border-radius:3px;overflow:hidden}.btF{height:100%;transition:width .3s}.btVs{font-size:18px;color:#ffd24a}
 body.touch #battleBar{top:60px;zoom:.8}
@@ -602,6 +607,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div class="bars">
         <div class="bar hp"><div class="lag" id="hpLag"></div><div class="fill" id="hpFill"></div><span id="hpText"></span></div>
         <div class="bar st" id="stBar"><div class="fill" id="stFill"></div><span id="stText"></span></div>
+        <div class="bar ship hidden" id="shipBar"><div class="fill" id="shipFill"></div><span id="shipText"></span></div>
         <div class="bar mp hidden" id="mpBar"><div class="fill" id="mpFill"></div><span id="mpText"></span></div>
         <div class="bar xp"><div class="fill" id="xpFill"></div></div>
       </div>
@@ -871,6 +877,16 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
     </div>
   </div>
 
+  <!-- THE DEEP -->
+  <div id="seaScreen" class="screen">
+    <div class="panel rv" style="width:min(1060px,96vw)">
+      <div class="closeX" data-close>✕</div>
+      <div class="ptitle">THE DEEP</div>
+      <div class="orn">✦ A chart of the islands beyond the edge of the world ✦</div>
+      <div class="seaBody"><svg id="seaChart" viewBox="0 0 600 420"></svg><div id="seaSide"></div></div>
+    </div>
+  </div>
+
   <!-- REALM & COURT -->
   <div id="courtScreen" class="screen">
     <div class="panel rv" style="width:min(1060px,96vw)">
@@ -998,7 +1014,7 @@ const sgn = n => (n > 0 ? '+' : '') + Math.round(n);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 /* Hooks: the bigger systems (magic, courts, armies, the realm, the seas, the Tide, the Long Road) each register here
    for reset, save, load and the game clocks, so the core save/load and loop code only needs one call per hook. */
-const HOOKS = { reset: [], save: [], load: [], newgame: [], daily: [], tick: [], slow: [], hud: [], draw: [], recalc: [], kill: [], pad: [], succession: [], bigmap: [], minimap: [], owner: [], captured: [], preload: [], courtRender: [] };
+const HOOKS = { reset: [], save: [], load: [], newgame: [], daily: [], tick: [], slow: [], hud: [], draw: [], recalc: [], kill: [], pad: [], succession: [], bigmap: [], minimap: [], owner: [], captured: [], preload: [], courtRender: [], isleBoss: [] };
 const hook = (n, fn) => { HOOKS[n].push(fn); };
 // New NPC roles, world interactions and keys register here: ROLES[role] = { label(e), talk(e) }, IACTS[type] = { label(it, pl), act(it, pl) },
 // KEYFN[code] = fn (the code is the default key; players can rebind it in Settings), PANELS[code] = UI screen to toggle.
@@ -1865,7 +1881,7 @@ const TINFO = [
   { n: 'Darkness', c: '#0c0906', spd: 0, block: 1, mm: '#0c0906' },
 ];
 let W = null;
-function terAt(tx, ty) { if (tx < 0 || ty < 0 || tx >= WW || ty >= WH) return G.under ? (G.under.interior ? T.VOID : T.ROCK) : T.SEA; return W.ter[ty * WW + tx]; }
+function terAt(tx, ty) { if (tx < 0 || ty < 0 || tx >= WW || ty >= WH) return G.under && !G.under.isle && !G.under.deck ? (G.under.interior ? T.VOID : T.ROCK) : T.SEA; return W.ter[ty * WW + tx]; }
 function blockedTile(tx, ty) { if (tx < 0 || ty < 0 || tx >= WW || ty >= WH) return true; const i = ty * WW + tx; return TINFO[W.ter[i]].block === 1 || W.solid[i] === 1; }
 function blockedPx(x, y) { return blockedTile(Math.floor(x / TS), Math.floor(y / TS)); }
 function ownerAtPx(x, y) { const tx = clamp(Math.floor(x / TS), 0, WW - 1), ty = clamp(Math.floor(y / TS), 0, WH - 1); return W.own[ty * WW + tx]; }
@@ -2800,6 +2816,7 @@ function doPlayerHit() {
 }
 function updatePlayer(dt) {
   if (G.joust && joustTick(dt)) return;
+  if (P.sailing && P.ship) { sailTick(dt); return; }
   P.flash -= dt; P.iframes -= dt; P.atkCd -= dt; if (P.blessT > 0) P.blessT -= dt; if (P.luckT > 0) P.luckT -= dt; if (P.restT > 0) P.restT -= dt;
   P.face = PAD.on && PAD.aim != null ? PAD.aim : TOUCH.on ? touchFace() : Math.atan2(input.wy - P.y, input.wx - P.x);
   let mx = (input.keys.KeyD ? 1 : 0) - (input.keys.KeyA ? 1 : 0), my = (input.keys.KeyS ? 1 : 0) - (input.keys.KeyW ? 1 : 0);
@@ -2904,6 +2921,10 @@ function drawGrave(g, gv, t) {
 }
 function respawnPlayer() {
   $('btnRespawn').textContent = 'Rise Again';
+  if (G.under && G.under.deck) leaveDeck();
+  if (G.under && G.under.isle) sailHomeQuiet();
+  if (P.sailing) P.sailing = false;
+  if (P.ship && P.ship.map !== 'w') towShipHome();
   if (G.pendingHeir != null) { const h = P.kids[G.pendingHeir]; if (h) { becomeHeir(h, 'battle'); return; } G.pendingHeir = null; }
   if (G.under) leaveDungeon(true);
   const lost = Math.floor(P.gold * DIFF().goldLoss); P.gold -= lost;
@@ -2986,7 +3007,9 @@ function hostile(a, b) {
 
 function damage(t, amt, src, o = {}) {
   if (t.dead) return 0;
+  if (t.untouchable) return 0;
   if (t.isPlayer) {
+    if (P.sailing && P.ship && !o.dot) return shipHit(amt, src, o);
     if (P.iframes > 0 || G.state !== 'play') return 0;
     let a = amt * DIFF().dmgTaken * (P.blessT > 0 ? .88 : 1) * playerResist(src, o);
     P.combatT = 6;
@@ -3585,7 +3608,7 @@ function addShake(v) { if (settings.shake) G.shake = Math.min(18, G.shake + v); 
 let DAYLEN = 480;
 const dayNum = () => Math.floor(G.time / DAYLEN + .3) + 1;
 const tod = () => (G.time / DAYLEN + .3) % 1;
-function darkness() { if (G.under) return (G.under.interior ? .3 : settings.quality === 'low' ? .55 : .86) * nightSight(); const t = tod(); if (t > .27 && t < .73) return 0; const d = t <= .27 ? .27 - t : t - .73; return Math.min(.58, d * 4.2) * nightSight(); }
+function darkness() { if (G.under && !G.under.isle && !G.under.deck) return (G.under.interior ? .3 : settings.quality === 'low' ? .55 : .86) * nightSight(); const t = tod(); if (t > .27 && t < .73) return 0; const d = t <= .27 ? .27 - t : t - .73; return Math.min(.58, d * 4.2) * nightSight(); }
 const nightSight = () => !P || G.state === 'menu' ? 1 : (P.fx && P.fx.night > 0) || (P.S && P.S.night) ? .35 : P.fx && P.fx.light > 0 ? .6 : 1;
 /* ---------------- Seasons & weather ---------------- */
 const SEASON_DAYS = 6, SEASONS = ['Spring', 'Summer', 'Autumn', 'Winter'];
@@ -4662,6 +4685,7 @@ function getShop(e) {
 
 /* ---------------- Interaction ---------------- */
 function findInteract() {
+  if (P && P.sailing) return sailInteract();
   let best = null, bd = 62;
   if (P && P.grave && !G.under) { const d = dist(P.x, P.y, P.grave.x, P.grave.y + 12); if (d < 44) { bd = d; best = { grave: 1, d }; } }
   for (const e of ents) {
@@ -4694,7 +4718,7 @@ function interactLabel(b) {
   if (IACTS[it.type]) return IACTS[it.type].label(it, pl);
   switch (it.type) {
     case 'chest': return pl.chestOpened ? 'Empty stash' : pl.type === 'camp' ? (pl.cleared ? 'Loot the bandit stash' : 'Bandit stash (guarded)') : 'Search the chest';
-    case 'door': return 'Knock on the door'; case 'enter': return (!cityOpen() && it.shop.kind !== 'tavern' && it.shop.kind !== 'inn' ? 'Locked: ' : 'Enter ') + it.shop.name; case 'iexit': return 'Go back outside'; case 'ibed': return G.under && G.under.kind === 'house' ? 'Sleep until morning' : 'Bed'; case 'istash': return 'Open your stash'; case 'irooms': return 'Go up to the rooms'; case 'ibox': return 'Offerings box'; case 'istrong': return 'Force the strongbox'; case 'lore': return (P.lore || []).includes(it.lore) ? `Reread: ${LORE[it.lore].t}` : 'Read the weathered scroll'; case 'ilore': return 'Browse the cathedral library'; case 'ferry': return 'Take the ferry across (3 gold)'; case 'harbor': return `Board a ship at ${pl.name}`; case 'itrophy': { const tr = (P.trophies || [])[it.idx]; return tr ? `Trophy: ${tr.n}` : 'An empty pedestal'; } case 'fountain': return 'Toss a coin into the fountain'; case 'statue': return 'Read the inscription'; case 'cathedral': return `Enter the ${pl.city && pl.city.cath ? pl.city.cath.name : 'cathedral'}`;
+    case 'door': return 'Knock on the door'; case 'enter': return (!cityOpen() && it.shop.kind !== 'tavern' && it.shop.kind !== 'inn' ? 'Locked: ' : 'Enter ') + it.shop.name; case 'iexit': return G.under && G.under.deck ? 'Back to your own ship' : 'Go back outside'; case 'ibed': return G.under && G.under.kind === 'house' ? 'Sleep until morning' : 'Bed'; case 'istash': return 'Open your stash'; case 'irooms': return 'Go up to the rooms'; case 'ibox': return 'Offerings box'; case 'istrong': return 'Force the strongbox'; case 'lore': return (P.lore || []).includes(it.lore) ? `Reread: ${LORE[it.lore].t}` : 'Read the weathered scroll'; case 'ilore': return 'Browse the cathedral library'; case 'ferry': return 'Take the ferry across (3 gold)'; case 'harbor': return `Board a ship at ${pl.name}`; case 'itrophy': { const tr = (P.trophies || [])[it.idx]; return tr ? `Trophy: ${tr.n}` : 'An empty pedestal'; } case 'fountain': return 'Toss a coin into the fountain'; case 'statue': return 'Read the inscription'; case 'cathedral': return `Enter the ${pl.city && pl.city.cath ? pl.city.cath.name : 'cathedral'}`;
     case 'sign': return 'Signpost, bounty board and carriages'; case 'well': return 'Drink from the well'; case 'fish': return G.fishing ? 'Reel in' : 'Fish here';
     case 'dungeon': return `Enter ${pl.name}${pl.dcleared ? ' (cleared)' : ''}`; case 'home': return 'Enter your house'; case 'fort': return pl.playerFort ? `Your fort: ${pl.name}` : `Look over the ruined fort`; case 'dexit': return 'Climb back outside';
     case 'dchest': return G.under && (G.under.dchests || []).includes(it.idx) ? 'Empty chest' : it.boss ? 'Open the guardian\'s hoard' : 'Open the chest';
@@ -4724,7 +4748,7 @@ function doInteract() {
   else if (it.type === 'cathedral') enterInterior({ kind: 'cathedral', place: pl.id, owner: pl.owner, name: pl.city.cath.name, key: 'cath' + pl.id, door: { x: it.x, y: it.y } });
   else if (it.type === 'enter' && !cityOpen() && it.shop.kind !== 'tavern' && it.shop.kind !== 'inn') breakInDialog(it, pl);
   else if (it.type === 'enter') enterInterior({ kind: INTERIOR_OF[it.shop.kind] || 'shop', shopKind: it.shop.kind, place: pl.id, owner: pl.owner, name: it.shop.name, key: it.shop.key, door: { x: it.x, y: it.y } });
-  else if (it.type === 'iexit') leaveDungeon(true);
+  else if (it.type === 'iexit') { if (G.under && G.under.deck) leaveDeck(); else leaveDungeon(true); }
   else if (it.type === 'ibed') { const hp = W.places[G.under.place]; if (G.under.kind === 'house') { const add = ((.3 - tod()) + 1) % 1 * DAYLEN; G.time += add; P.hp = P.maxHp; P.st = P.maxSt; P.respawn = { x: G.under.door.x, y: G.under.door.y + 12 }; SND.play('eat'); toast('You sleep in your own bed and wake at dawn, fully rested.', 'good'); } }
   else if (it.type === 'istash') { const hp = W.places[G.under.place]; curShop = { stash: true, name: 'Your house in ' + hp.name, k: null, items: P.stash || (P.stash = []) }; curShopE = null; UI.open('shop'); renderShop(); }
   else if (it.type === 'irooms') { const inn = ents.find(e => e.role === 'hotelier'); if (inn) innDialog(inn); }
@@ -4892,9 +4916,9 @@ const INTERIOR_OF = { tavern: 'tavern', inn: 'inn', baker: 'shop', apothecary: '
 const strHash = s2 => { let h = 2166136261; for (const ch of String(s2)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0; return h; };
 function genInterior(b) {
   const n = 32, N = n * n, r = mulberry32(strHash(b.key)), rnd = (a, c) => a + r() * (c - a);
-  const dims = { tavern: [16, 11], inn: [13, 10], cathedral: [12, 20], shop: [10, 8], house: [11, 8], tower: [14, 11] }[b.kind];
+  const dims = { tavern: [16, 11], inn: [13, 10], cathedral: [12, 20], shop: [10, 8], house: [11, 8], tower: [14, 11], deck: [20, 9] }[b.kind];
   const rw = dims[0], rh = dims[1], rx = (n - rw) >> 1, ry = ((n - rh) >> 1) + 1, at = (x, y) => y * n + x;
-  const stone = b.kind === 'cathedral' || b.kind === 'tower', ter = new Uint8Array(N).fill(T.VOID), solid = new Uint8Array(N);
+  const stone = b.kind === 'cathedral' || b.kind === 'tower', ter = new Uint8Array(N).fill(b.kind === 'deck' ? T.SEA : T.VOID), solid = new Uint8Array(N);
   for (let y = ry - 2; y <= ry + rh; y++) for (let x = rx - 1; x <= rx + rw; x++) ter[at(x, y)] = y >= ry && y < ry + rh && x >= rx && x < rx + rw ? (stone ? T.NAVE : T.PLANK) : (stone ? T.BRICK : T.IWALL);
   const objs = [], ints = [], npcs = [], X = t => (rx + t) * TS, Y = t => (ry + t) * TS;
   const obj = (k2, tx, ty, w, h, o, sol) => { const ob = Object.assign({ k: k2, x: X(tx), y: Y(ty), w, h, owner: b.owner }, k2 === 'f_rug' ? { sy: Y(ty) } : null, o || {}); objs.push(ob); if (sol) for (let yy = Math.floor(ob.y / TS); yy < Math.ceil((ob.y + ob.h) / TS); yy++) for (let xx = Math.floor(ob.x / TS); xx < Math.ceil((ob.x + ob.w) / TS); xx++) solid[at(xx, yy)] = 1; return ob; };
@@ -4952,6 +4976,7 @@ function genInterior(b) {
     if (P.allegiance != null) obj('f_banner', 2, -1.4, 26, 40, { k2: P.allegiance });
     homeFamily(npc);
   } else if (b.kind === 'tower') towerRoom(b, obj, npc, ints, X, Y, rw, rh);
+  else if (b.kind === 'deck') deckRoom(b, obj, npc, ints, X, Y, rw, rh);
   const cw = Math.ceil(n / CH), DW = { size: n, seed: W.seed, ter, own: new Uint8Array(N).fill(b.owner || 0), solid, wall: new Uint8Array(N), clear: new Uint8Array(N).fill(1), bord: new Uint8Array(N), hgt: new Float32Array(N), places: W.places, objs, chunkTrees: [], chunkObjs: [], interacts: ints, startK: W.startK };
   for (let i = 0; i < cw * cw; i++) { DW.chunkTrees.push([]); DW.chunkObjs.push([]); }
   objs.forEach(o => { o.sy = o.sy ?? (o.y + o.h); const ci = Math.floor((o.y + o.h / 2) / (CH * TS)) * cw + Math.floor((o.x + o.w / 2) / (CH * TS)); if (DW.chunkObjs[ci]) DW.chunkObjs[ci].push(o); });
@@ -8191,6 +8216,7 @@ function drawEntity(g, e, t) {
   if ((e.jouster || e.racer || e.mounted) && !e.dead) { drawHorse(g, e.x, e.y + 2, e.face, ITEMS[e.horse || 'war_horse'], e.walk || 0, true, e.k); }
   if (e.jouster) drawLance(g, e.x, e.y - 6, e.face, .8);
   if (e.isPlayer) {
+    if (P.sailing && P.ship) { drawPlayerShip(g, t); return; }
     if (P.dodge > 0) g.globalAlpha = .75;
     if (P.mounted || G.joust) drawHorse(g, P.x, P.y + 2, G.joust ? 0 : P.hface, P.S.horse || ITEMS.riding_horse, P.walk, true, P.allegiance);
     if (G.joust) drawLance(g, P.x, P.y - 6, 0, G.joust.lance); else if (P.S.wk === 'lance' && P.mounted) drawLance(g, P.x, P.y - 6, P.face, P.lanceLow || 0);
@@ -8259,10 +8285,10 @@ function renderWorld(t) {
   const g = ctx; g.setTransform(DPR * ZOOM, 0, 0, DPR * ZOOM, 0, 0);
   const shx = G.shake > .3 ? rand(-G.shake, G.shake) * .6 : 0, shy = G.shake > .3 ? rand(-G.shake, G.shake) * .6 : 0;
   const vx = Math.round(cam.x - VW / 2 + shx), vy = Math.round(cam.y - VH / 2 + shy);
-  g.fillStyle = G.under ? (G.under.interior ? '#0c0906' : '#1a1612') : '#24507e'; g.fillRect(0, 0, VW, VH);
+  g.fillStyle = G.under && !G.under.isle && !G.under.deck ? (G.under.interior ? '#0c0906' : '#1a1612') : '#24507e'; g.fillRect(0, 0, VW, VH);
   g.save(); g.translate(-vx, -vy);
   const CS = CH * TS;
-  const sea = !G.under, c0 = sea ? Math.floor(vx / CS) : Math.max(0, Math.floor(vx / CS)), c1 = sea ? Math.floor((vx + VW) / CS) : Math.min(CW - 1, Math.floor((vx + VW) / CS)), r0 = sea ? Math.floor(vy / CS) : Math.max(0, Math.floor(vy / CS)), r1 = sea ? Math.floor((vy + VH) / CS) : Math.min(CHH - 1, Math.floor((vy + VH) / CS));
+  const sea = !G.under || !!G.under.isle, c0 = sea ? Math.floor(vx / CS) : Math.max(0, Math.floor(vx / CS)), c1 = sea ? Math.floor((vx + VW) / CS) : Math.min(CW - 1, Math.floor((vx + VW) / CS)), r0 = sea ? Math.floor(vy / CS) : Math.max(0, Math.floor(vy / CS)), r1 = sea ? Math.floor((vy + VH) / CS) : Math.min(CHH - 1, Math.floor((vy + VH) / CS));
   for (let cy = r0; cy <= r1; cy++) for (let cx = c0; cx <= c1; cx++) { const c = getChunk(cx, cy); if (c) g.drawImage(c, cx * CS, cy * CS, CS + 1, CS + 1); else { g.fillStyle = tcol(cx * CH + (CH >> 1), cy * CH + (CH >> 1)); g.fillRect(cx * CS, cy * CS, CS, CS); } }
   // water shimmer
   if (settings.quality !== 'low') {
@@ -8431,8 +8457,8 @@ function updateHUD(force) {
   const SG = G.siege, sgOn = SG && !G.under && dist(P.x, P.y, W.places[SG.o].x, W.places[SG.o].y) < 2400;
   setIf('sg', sgOn ? SG.o + '|' + Math.round(SG.prog * 20) : '', () => { $('siegeBar').classList.toggle('hidden', !sgOn); if (sgOn) { const o = W.places[SG.o]; $('sgN').textContent = SG.att === 'bandit' ? `RAID ON ${o.name.toUpperCase()}` : `SIEGE OF ${o.name.toUpperCase()} · ${KDATA[SG.att].name.toUpperCase()} ATTACKS`; $('sgF').style.transform = `scaleX(${SG.prog})`; } });
   const own = ownerAtPx(P.x, P.y); const rs = statusOf(K.rep[own]);
-  if (G.under) { setIf('terr', 'u' + G.under.id, () => { $('terrBanner').src = bannerURL(G.under.owner); $('terrName').textContent = G.under.name; }); setIf('terrRep', 'u' + G.under.id, () => $('terrRep').innerHTML = G.under.interior ? (W.places[G.under.place] ? W.places[G.under.place].name : KDATA[G.under.owner || 0].full) : 'Underground'); }
-  else setIf('terr', own, v => { $('terrBanner').src = bannerURL(v); $('terrName').textContent = KDATA[v].full; });
+  if (G.under) { setIf('terr', 'u' + G.under.id, () => { const bu = bannerURL(G.under.owner); $('terrBanner').style.visibility = bu ? '' : 'hidden'; if (bu) $('terrBanner').src = bu; $('terrName').textContent = G.under.name; }); setIf('terrRep', 'u' + G.under.id, () => $('terrRep').innerHTML = G.under.isle ? 'The Deep' : G.under.deck ? 'At sea' : G.under.interior ? (W.places[G.under.place] ? W.places[G.under.place].name : KDATA[G.under.owner || 0].full) : 'Underground'); }
+  else setIf('terr', own, v => { $('terrBanner').style.visibility = ''; $('terrBanner').src = bannerURL(v); $('terrName').textContent = KDATA[v].full; });
   const bnt = G.bounty && G.bounty[own] >= 5 ? G.bounty[own] : 0;
   if (!G.under) setIf('terrRep', `${repTitle(own)}|${Math.round(K.rep[own])}|${rs.c}|${bnt}`, () => $('terrRep').innerHTML = `<span style="color:${K.rep[own] <= -40 ? '#ff5a3a' : rs.c}">${repTitle(own)}</span> · Rep ${sgn(K.rep[own])}${bnt ? ` · <span style="color:#ff8a6a">Wanted ${bnt}g</span>` : ''}`);
   const S = P.S;
@@ -8661,7 +8687,7 @@ addEventListener('keydown', ev => {
   if (G.state !== 'play' || e.repeat) return;
   const tog = { KeyI: 'inv', KeyM: 'map', KeyK: 'dip', KeyJ: 'quests', KeyP: 'skills', KeyL: 'journal', ...PANELS }[e.code]; if (tog === 'journal') { if (UI.isOpen('quests') && (qTab === 'beasts' || qTab === 'lore')) UI.close(); else UI.open('journal'); return; }
   if (tog === 'quests' && !UI.isOpen('quests') && (qTab === 'beasts' || qTab === 'lore')) qTab = 'active';
-  if (tog) { if (tog === 'map' && G.under && !G.under.interior) { toast('Your map is no use down here. Find your way back to the ladder.'); return; } UI.toggle(tog); return; }
+  if (tog) { if (tog === 'map' && G.under && G.under.isle) { toast('The maps of the Four Kingdoms do not reach this far. Sail off the island to see the chart of the Deep.'); return; } if (tog === 'map' && G.under && !G.under.interior) { toast('Your map is no use down here. Find your way back to the ladder.'); return; } UI.toggle(tog); return; }
   if (UI.stack.length) return;
   if (e.code === 'Space') tryDodge();
   else if (e.code === 'KeyE') doInteract();
@@ -8877,7 +8903,7 @@ function saveGame(silent, quiet) {
   const data = {
     v: 2, seed: W.seed, time: G.time, kills: G.kills, uid: uidCounter, waypoint: G.mapWaypoint, savedAt: Date.now(),
     P: { x: G.under ? G.over.px : P.x, y: G.under ? G.over.py + 18 : P.y, hp: P.hp, st: P.st, gold: P.gold, xp: P.xp, lvl: P.lvl, inv: P.inv, eq: P.eq, allegiance: P.allegiance, bonusHp: P.bonusHp, bonusSt: P.bonusSt, ammo: P.ammo, hermit: P.hermit || {}, skills: P.skills, sp: P.sp, comps: P.comps, houses: P.houses, stash: P.stash, forts: P.forts, fortGuards: P.fortGuards, fief: P.fief || null, pins: P.pins || [], grave: P.grave || null, trophies: P.trophies || [], guild: P.guild || null, nemesis: P.nemesis || null, lore: P.lore || [], worn: P.worn || [],
-      party: partyNow().filter(e => !e.comp || true).map(e => ({ comp: e.comp, kind: e.kind, name: e.name, hp: Math.round(Math.max(1, e.hp)), k: e.k })), mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
+      party: partyNow().concat(P._crew || []).filter(e => e.party && !e.dead).map(e => ({ comp: e.comp, kind: e.kind, name: e.name, hp: Math.round(Math.max(1, e.hp)), k: e.k })), mounted: P.mounted, respawn: P.respawn, visited: P.visited, hface: P.hface },
     horse: horseEnt ? { x: horseEnt.x, y: horseEnt.y } : null,
     K: { rel: K.rel, aff: K.aff, rep: K.rep, mil: K.mil, reasons: K.reasons, events: K.events, kev: K.kev, repWhy: K.repWhy, gifts: K.gifts, log: K.log, cd: {} },
     Q: { active: Q.active.filter(q => q.type !== 'raid' && q.type !== 'tut' && q.type !== 'race' && q.sid !== 'hraid').map(qStrip), done: Q.done.map(qStrip), tracked: Q.tracked, next: Q.next },
@@ -12396,17 +12422,404 @@ hook('daily', day => realmDaily(day));
 hook('slow', () => { if (realmOn() && KDATA[4].ruler !== realmKData(G.realm).ruler) realmRefresh(); });
 hook('recalc', () => { if (realmOn() && G.realm.laws.magic === 2) P.S.mpCost = .9; });
 
+/* =====================================================================
+   THE SEAS — a ship of your own, sailing with the wind, sea fights and
+   boarding actions, and the Deep beyond the map's edge: a seeded
+   archipelago of twelve islands, from a pirate haven to Aldmere, the isle
+   of the First King. Nothing here touches world generation: islands are
+   their own maps, built from the world seed when you land.
+   ===================================================================== */
+const SHIPS = {
+  cog: { n: 'Cog', cost: 1600, hp: 260, spd: 180, crew: 6, len: 64, beam: 24, hull: '#6a4424', desc: 'A round-bellied trader. Slow, steady and cheap.' },
+  carrack: { n: 'Carrack', cost: 4200, hp: 420, spd: 215, crew: 10, len: 80, beam: 28, hull: '#5a3a20', desc: 'A tall ocean ship, fast before the wind.' },
+  galley: { n: 'War Galley', cost: 9000, hp: 620, spd: 200, crew: 16, len: 92, beam: 26, hull: '#3a2a1e', oars: true, desc: 'Oars and a ram. Sails against the wind, and fights like a castle.' },
+};
+const SHIP_NAMES2 = ['Sea Wolf', 'Gull\'s Wing', 'Stormchaser', 'Merry Maiden', 'Iron Swan', 'Dawn Treader', 'Salt Rose', 'Grey Heron', 'Brave Hart', 'Lady Fortune'];
+const waterAt = (x, y) => { const tx = Math.floor(x / TS), ty = Math.floor(y / TS); if (tx < 0 || ty < 0 || tx >= WW || ty >= WH) return !G.under || !!(G.under && G.under.isle); const t = W.ter[ty * WW + tx]; return (t === T.SEA || t === T.WATER) && !W.solid[ty * WW + tx]; };
+const seaMapKey = () => G.under && G.under.isle ? 'isle' + G.under.idx : G.under ? 'x' : 'w';
+function windNow() { const w = G.wind || (G.wind = { a: rand(0, TAU), s: .7 }); return w; }
+function windName() { const w = windNow(); return `${compass(Math.cos(w.a), Math.sin(w.a))} wind, ${w.s > .8 ? 'strong' : w.s > .5 ? 'fair' : 'light'}`; }
+
+/* ---------------- Drawing ships from above ---------------- */
+function drawTopShip(g, x, y, a, kind, o = {}) {
+  const S = SHIPS[kind] || SHIPS.cog, L = S.len, B = S.beam, t = performance.now() / 1000;
+  g.save(); g.translate(x, y); g.rotate(a);
+  g.fillStyle = 'rgba(0,0,0,.18)'; ell(g, 4, 6, L * .55, B * .6);
+  g.fillStyle = o.hull || S.hull; g.beginPath(); g.moveTo(L * .55, 0); g.quadraticCurveTo(L * .3, -B * .6, -L * .45, -B * .45); g.lineTo(-L * .5, B * .45); g.quadraticCurveTo(L * .3, B * .6, L * .55, 0); g.closePath(); g.fill();
+  g.strokeStyle = shade(o.hull || S.hull, -.45); g.lineWidth = 2; g.stroke();
+  g.fillStyle = shade(o.hull || S.hull, .25); g.beginPath(); g.moveTo(L * .45, 0); g.quadraticCurveTo(L * .25, -B * .45, -L * .4, -B * .34); g.lineTo(-L * .43, B * .34); g.quadraticCurveTo(L * .25, B * .45, L * .45, 0); g.closePath(); g.fill();
+  g.strokeStyle = 'rgba(60,36,18,.5)'; g.lineWidth = 1; for (let i = -2; i <= 2; i++) { g.beginPath(); g.moveTo(-L * .38, i * B * .12); g.lineTo(L * .35, i * B * .1); g.stroke(); }
+  if (S.oars) { g.strokeStyle = '#3a2412'; g.lineWidth = 1.6; const ph = Math.sin(t * 6) * .3 * (o.moving ? 1 : .1); for (let i = 0; i < 5; i++) { const ox = -L * .3 + i * L * .13; [-1, 1].forEach(sd => { g.beginPath(); g.moveTo(ox, sd * B * .4); g.lineTo(ox - 8 + ph * 10 * sd, sd * (B * .4 + 14)); g.stroke(); }); } }
+  const masts = kind === 'cog' ? [0] : [-L * .15, L * .15];
+  masts.forEach((mx, i) => { const sw = B * (1.05 - i * .1), bell = (o.fill ?? .6) * 7; g.fillStyle = 'rgba(0,0,0,.15)'; g.beginPath(); g.moveTo(mx + 4, -sw / 2 + 3); g.quadraticCurveTo(mx + 4 + bell, 3, mx + 4, sw / 2 + 3); g.closePath(); g.fill(); g.fillStyle = o.sail || '#efe6d0'; g.beginPath(); g.moveTo(mx, -sw / 2); g.quadraticCurveTo(mx + bell + 3, 0, mx, sw / 2); g.lineTo(mx - 3, sw / 2); g.lineTo(mx - 3, -sw / 2); g.closePath(); g.fill(); g.strokeStyle = 'rgba(0,0,0,.25)'; g.lineWidth = 1; g.stroke(); if (o.mark) { g.fillStyle = o.mark; circ(g, mx + bell * .5, 0, B * .14); } g.fillStyle = '#3a2412'; circ(g, mx - 1.5, 0, 2.5); });
+  if (o.flag) { g.fillStyle = o.flag; g.beginPath(); g.moveTo(-L * .45, 0); g.lineTo(-L * .45 - 10, -3 + Math.sin(t * 5) * 2); g.lineTo(-L * .45 - 10, 4 + Math.sin(t * 5) * 2); g.closePath(); g.fill(); }
+  if (o.flash > 0) { g.globalAlpha = .5; g.fillStyle = '#fff'; ell(g, 0, 0, L * .5, B * .5); g.globalAlpha = 1; }
+  g.restore();
+}
+function drawPlayerShip(g, t) {
+  const s = P.ship, kd = P.allegiance != null && KDATA[P.allegiance] ? KDATA[P.allegiance] : null;
+  drawTopShip(g, P.x, P.y, s.a, s.kind, { moving: (s.v || 0) > 20, fill: (s.v || 0) / (SHIPS[s.kind].spd), sail: kd ? '#f2ecdc' : '#efe6d0', mark: kd ? kd.color : null, flag: kd ? kd.color : '#c8b890', flash: P.flash });
+  const fb = Math.cos(s.a), sb = Math.sin(s.a); g.save(); g.translate(P.x - fb * 18, P.y - sb * 18); g.rotate(P.face); g.fillStyle = lookFor(P).cape || '#6a1e1a'; ell(g, -3, 0, 5, 7); g.fillStyle = pLook().skin; circ(g, 1, 0, 4.5); g.restore();
+  if ((s.v || 0) > 40 && Math.random() < .6 * QMUL()) { const bx = P.x - fb * SHIPS[s.kind].len * .45, by = P.y - sb * SHIPS[s.kind].len * .45; addPart(bx + rand(-6, 6), by + rand(-6, 6), -fb * 20 + rand(-10, 10), -sb * 20 + rand(-10, 10), 'rgba(255,255,255,.7)', 1.2, 3); }
+}
+
+/* ---------------- Buying, boarding and sailing ---------------- */
+function harborWater(h) { for (let r = 1; r < 8; r++) for (let a = 0; a < TAU; a += .4) { const x = h.x + Math.cos(a) * r * TS, y = h.y + Math.sin(a) * r * TS; if (waterAt(x, y) && waterAt(x + 30, y) && waterAt(x - 30, y) && waterAt(x, y + 20) && waterAt(x, y - 20)) return { x, y }; } return { x: h.x, y: h.y + 3 * TS }; }
+function buyShip(kind, pl) {
+  const S = SHIPS[kind], h = W.harbors.find(x => x.place === pl.id); if (!h || P.gold < S.cost) return;
+  P.gold -= S.cost; const w = harborWater(h);
+  P.ship = { kind, name: pick(SHIP_NAMES2), hp: S.hp, x: w.x, y: w.y, a: Math.atan2(w.y - h.y, w.x - h.x), map: 'w', v: 0 };
+  SND.play('coin'); SND.play('bell'); toast(`The <b>${P.ship.name}</b>, a ${S.n.toLowerCase()}, is yours! She is moored off ${pl.name}. Walk down the jetty and board her.`, 'gold'); syncShipInteract(); G.stats.ships = (G.stats.ships || 0) + 1;
+}
+function syncShipInteract() {
+  if (!W || !W.interacts) return; W.interacts = W.interacts.filter(it => it.type !== 'myship');
+  const s = P && P.ship; if (!s || P.sailing || s.map !== seaMapKey()) return;
+  // board from the nearest bit of shore
+  let best = null, bd = 1e9; for (let r = 1; r < 6; r++) for (let a = 0; a < TAU; a += .35) { const x = s.x + Math.cos(a) * r * TS, y = s.y + Math.sin(a) * r * TS; if (!blockedPx(x, y)) { const d = dist(x, y, s.x, s.y); if (d < bd) { bd = d; best = { x, y }; } } if (best) break; }
+  if (best) W.interacts.push({ type: 'myship', x: best.x, y: best.y });
+}
+IACTS.myship = { label: () => `Board your ship, the ${P.ship.name}`, act: () => boardShip() };
+function boardShip() {
+  const s = P.ship; if (!s) return; if (s.hp <= 0) { toast('She is holed below the waterline. A harbour can repair her.', 'bad'); return; }
+  if (ents.some(e => !e.dead && playerHostileTo(e) && dist(e.x, e.y, P.x, P.y) < 220)) { toast('Not with enemies at your back!', 'bad'); return; }
+  if (P.mounted) dismount();
+  const crew = partyNow().filter(e => !e.dead && !e.caravan); P._crew = crew; crew.forEach(e => removeEnt(e));
+  if (horseEnt) { removeEnt(horseEnt); horseEnt = null; }
+  P.sailing = true; P.x = s.x; P.y = s.y; s.v = 0; P.face = s.a; cam.x = P.x; cam.y = P.y; syncShipInteract();
+  SND.play('door'); toast(`Aboard the <b>${s.name}</b>. <kbd>A</kbd>/<kbd>D</kbd> steer, <kbd>W</kbd> make sail, <kbd>S</kbd> slow. Click to loose a volley. <kbd>E</kbd> near a shore to land, or alongside an enemy ship to board her. ${windName()}.`, 'gold');
+  G.stats.sailed = (G.stats.sailed || 0) + 1;
+}
+function landSpot() { const s = P.ship; let best = null, bd = 90; for (let a = 0; a < TAU; a += .3) for (let r = 20; r <= 90; r += 14) { const x = P.x + Math.cos(a) * r, y = P.y + Math.sin(a) * r; if (!blockedPx(x, y) && !collides(x, y, 9)) { const d = r; if (d < bd) { bd = d; best = { x, y }; } } } return best; }
+function disembark() {
+  const f = landSpot(); if (!f) { toast('No shore close enough to land.'); return; }
+  const s = P.ship; s.x = P.x; s.y = P.y; s.map = seaMapKey(); s.v = 0; P.sailing = false; P.x = f.x; P.y = f.y; cam.x = P.x; cam.y = P.y;
+  (P._crew || []).forEach(e => { const g = findFree(P.x + rand(-40, 40), P.y + rand(-40, 40)); e.x = g.x; e.y = g.y; ents.push(e); }); P._crew = [];
+  if (P.eq.horse) spawnHorse(P.x + 30, P.y + 10);
+  syncShipInteract(); SND.play('door'); toast(`You wade ashore. The ${s.name} rides at anchor.`);
+}
+function sailTick(dt) {
+  const s = P.ship, S = SHIPS[s.kind], w = windNow();
+  P.flash -= dt; P.iframes -= dt; P.atkCd -= dt;
+  let turn = (input.keys.KeyD ? 1 : 0) - (input.keys.KeyA ? 1 : 0), thr = (input.keys.KeyW ? 1 : 0) - (input.keys.KeyS ? 1 : 0);
+  if (TOUCH.on && (TOUCH.mx || TOUCH.my)) { const want = Math.atan2(TOUCH.my, TOUCH.mx); turn = clamp(angDiff(s.a, want) * 2, -1, 1); thr = 1; }
+  if (PAD.on && PAD.aim != null && !TOUCH.on) { /* the right stick aims volleys; the left stick steers */ }
+  s.a += turn * dt * (1.6 - (s.v || 0) / S.spd * .6);
+  const windF = S.oars ? .65 + .35 * Math.max(0, Math.cos(s.a - w.a)) : .3 + .7 * Math.max(0, Math.cos(s.a - w.a)) * (.6 + w.s * .5);
+  const target = thr > 0 ? S.spd * windF : thr < 0 ? 0 : (s.v || 0) * .985;
+  s.v = (s.v || 0) + clamp(target - (s.v || 0), -120 * dt, 60 * dt);
+  const nx = P.x + Math.cos(s.a) * s.v * dt, ny = P.y + Math.sin(s.a) * s.v * dt, bow = S.len * .5;
+  if (waterAt(nx + Math.cos(s.a) * bow, ny + Math.sin(s.a) * bow) && waterAt(nx, ny)) { P.x = nx; P.y = ny; } else { if (s.v > 90) { addShake(4); SND.play('thunk'); s.hp -= 4; } s.v = 0; }
+  P.face = PAD.on && PAD.aim != null ? PAD.aim : TOUCH.on ? s.a : Math.atan2(input.wy - P.y, input.wx - P.x);
+  if ((input.lmb || input.clicked) && P.atkCd <= 0) shipVolley();
+  input.clicked = false; P.hface = s.a; P.walk = 0; if (G.stats) G.stats.dist += s.v * dt;
+  const off = !G.under ? (P.x < -14 * TS || P.y < -14 * TS || P.x > (WW + 14) * TS || P.y > (WH + 14) * TS) : G.under.isle && (P.x < 2 * TS || P.y < 2 * TS || P.x > (WW - 2) * TS || P.y > (WH - 2) * TS);
+  if (off && G.time > (G.chartCd || 0) && !UI.isOpen('sea')) openChart(G.under ? 'isle' : 'edge');
+  else if (off && !UI.isOpen('sea')) { const want = Math.atan2(WH * TS / 2 - P.y, WW * TS / 2 - P.x); s.a = turnToward(s.a, want, dt * 2); }
+  if (P.hp < P.maxHp) P.hp = Math.min(P.maxHp, P.hp + dt * DIFF().regen);
+  if (P.st < P.maxSt) P.st = Math.min(P.maxSt, P.st + 20 * dt);
+}
+function shipVolley() {
+  const s = P.ship, n = Math.min(7, 2 + Math.floor(SHIPS[s.kind].crew / 3) + ((P._crew || []).filter(e => e.ranged).length)), dmg = (9 + P.lvl * .9) * DIFF().dmgDealt;
+  for (let i = 0; i < n; i++) { const a = P.face + (i - (n - 1) / 2) * .08 + rand(-.03, .03), ox = P.x + Math.cos(s.a) * rand(-20, 20), oy = P.y + Math.sin(s.a) * rand(-20, 20); projs.push({ x: ox, y: oy, vx: Math.cos(a) * 640, vy: Math.sin(a) * 640, dmg, src: P, life: .8, arrow: 'arrow', shipShot: 1 }); }
+  P.atkCd = 1.5; SND.play('bowshot'); SND.play('arrow');
+}
+function shipHit(amt, src) {
+  const s = P.ship; if (P.iframes > 0) return 0; const a = amt * DIFF().dmgTaken * .8; s.hp -= a; P.flash = .12; addShake(2 + a * .1); SND.play('thunk');
+  if (settings.dmgNums) addText(P.x, P.y - 30, Math.round(a), '#e0b060', 14);
+  if (s.hp <= 0) shipwreck(); return a;
+}
+function shipwreck() {
+  const s = P.ship; s.hp = 0; P.sailing = false; toast(`☠ The <b>${s.name}</b> is sinking! You swim for shore.`, 'war'); SND.play('death');
+  if (G.under && G.under.isle) { const f = findFree(W.start.x, W.start.y); P.x = f.x; P.y = f.y; }
+  else { const h = W.harbors.slice().sort((a, b) => dist(a.x, a.y, P.x, P.y) - dist(b.x, b.y, P.x, P.y))[0]; const f = findFree(h ? h.x : P.respawn.x, h ? h.y : P.respawn.y); P.x = f.x; P.y = f.y; }
+  (P._crew || []).forEach(e => { const g = findFree(P.x + rand(-40, 40), P.y + rand(-40, 40)); e.x = g.x; e.y = g.y; ents.push(e); }); P._crew = [];
+  const h = W.harbors && W.harbors.length ? W.harbors.slice().sort((a, b) => dist(a.x, a.y, P.x, P.y) - dist(b.x, b.y, P.x, P.y))[0] : null;
+  if (h && !G.under) { const w = harborWater(h); Object.assign(s, { x: w.x, y: w.y, map: 'w', v: 0 }); toast(`Fishermen tow the wreck of the ${s.name} to ${W.places[h.place].name}. A shipwright there can mend her.`); } else { Object.assign(s, { map: 'w', v: 0 }); }
+  syncShipInteract(); cam.x = P.x; cam.y = P.y;
+}
+/* ---------------- Harbours: ships for sale, repairs ---------------- */
+{ const _hd = harborDialog; harborDialog = (pl, who) => {
+  const h = W.harbors.find(x => x.place === pl.id); if (!h) return; const s = P.ship, opts = [];
+  opts.push({ t: '<span class="dn">PASSAGE</span>Book passage to another harbour', fn: () => _hd(pl, who) });
+  if (!s) Object.entries(SHIPS).forEach(([k, S]) => opts.push({ t: `<span class="dn">BUY</span>A ${S.n} <span class="dn">${fmt(S.cost)}g · ${S.hp} hull · crew of ${S.crew}</span>`, dis: P.gold < S.cost, fn: () => { closeDialog(); buyShip(k, pl); } }));
+  if (s) { const need = Math.round((SHIPS[s.kind].hp - s.hp) * 3); if (need > 0) opts.push({ t: `<span class="dn">REPAIR</span>Mend the ${s.name} <span class="dn">${need}g</span>`, dis: P.gold < need, fn: () => { P.gold -= need; s.hp = SHIPS[s.kind].hp; SND.play('block'); toast(`The shipwrights have the ${s.name} seaworthy again.`, 'good'); harborDialog(pl, who); } });
+    if (dist(s.x, s.y, h.x, h.y) > 12 * TS || s.map !== 'w') opts.push({ t: `<span class="dn">SEND</span>Send for the ${s.name} <span class="dn">150g</span>`, dis: P.gold < 150 || s.map !== 'w', fn: () => { P.gold -= 150; const w = harborWater(h); Object.assign(s, { x: w.x, y: w.y, map: 'w' }); syncShipInteract(); toast(`A pilot brings the ${s.name} round to ${pl.name}.`, 'good'); closeDialog(); } });
+    const up = Object.entries(SHIPS).filter(([k, S]) => S.cost > SHIPS[s.kind].cost);
+    up.forEach(([k, S]) => { const c = S.cost - Math.round(SHIPS[s.kind].cost * .5); opts.push({ t: `<span class="dn">TRADE UP</span>Sell the ${s.name} and buy a ${S.n} <span class="dn">${fmt(c)}g</span>`, dis: P.gold < c, fn: () => { P.gold -= c; Object.assign(s, { kind: k, hp: S.hp }); SND.play('coin'); toast(`The ${s.name} is now a ${S.n.toLowerCase()}.`, 'gold'); closeDialog(); } }); });
+    if (!G.isles || !G.isles.chart) opts.push({ t: '<span class="dn">ASK</span>"What lies beyond the edge of the map?"', fn: () => { openDialog({ name: who ? who.name : 'A captain', role: 'Old salt', portrait: who || 'sign', text: 'The Deep, knight. Sail off the edge of every chart you own and keep going. There are islands out there: a pirate haven, reefs where the serpent sleeps, an ember-mountain, and further than any of them, they say, Aldmere, where the First King lies. Take a stout ship, and a stout heart.', options: [{ t: 'Back', fn: () => harborDialog(pl, who) }] }); } });
+  }
+  opts.push({ t: 'Stay ashore', fn: closeDialog });
+  openDialog({ name: who ? who.name : 'The harbour', role: `Harbour of ${pl.name}`, portrait: who || 'sign', text: s ? `"Your ${SHIPS[s.kind].n.toLowerCase()}, the ${s.name}: hull ${Math.round(s.hp)} of ${SHIPS[s.kind].hp}. What'll it be?"` : '"Passage, or a ship of your own? A cog for coin, a carrack for the ocean, a galley for war."', options: opts });
+}; }
+
+/* ---------------- Pirates at sea ---------------- */
+Object.assign(ATYPES, {
+  pship: { name: 'Pirate Cog', hp: 300, dmg: 11, spd: 150, range: 420, cd: 1.3, wind: .3, faction: 'bandit', xp: 90, gold: [60, 140], r: 24, ranged: true },
+  serpent: { name: 'Sea Serpent', hp: 1600, dmg: 30, spd: 120, range: 70, cd: 1.6, wind: .6, faction: 'wild', xp: 900, gold: [0, 0], r: 30 },
+});
+Object.assign(DRAW_KIND, {
+  pship: (g, e, t) => { drawTopShip(g, e.x, e.y, e.face, e.shipKind || 'cog', { sail: e.ghost ? 'rgba(200,230,230,.6)' : '#2a2420', mark: e.ghost ? '#8fd8ff' : '#e8e0cc', flag: '#111', hull: e.ghost ? '#4a5a5a' : null, flash: e.flash, moving: true, fill: .7 }); },
+  serpent: (g, e, t) => drawSerpent(g, e, t),
+});
+function waterStep(e, a, spd, dt) { const nx = e.x + Math.cos(a) * spd * dt, ny = e.y + Math.sin(a) * spd * dt; if (waterAt(nx + Math.cos(a) * 30, ny + Math.sin(a) * 30)) { e.x = nx; e.y = ny; return true; } return false; }
+KIND_AI.pship = (e, dt) => {
+  const tg = P.sailing && !P.dead ? P : null; let want = e.face;
+  if (tg) { const d = dist(e.x, e.y, P.x, P.y), toP = Math.atan2(P.y - e.y, P.x - e.x); want = d > 320 ? toP : toP + Math.PI / 2 * (e.side || (e.side = chance(.5) ? 1 : -1)); e.target = P; }
+  else { e.wT = (e.wT || 0) - dt; if (e.wT <= 0) { e.wT = rand(3, 7); e.wa = rand(0, TAU); } want = e.wa ?? e.face; }
+  e.face = turnToward(e.face, want, dt * 1.1);
+  if (!waterStep(e, e.face, e.spd * .8, dt)) { e.face += dt * 2.5; e.wa = e.face; }
+  e.home = { x: e.x, y: e.y }; e.stand = true; e.standFace = e.face;
+};
+function spawnPirateShip(x, y, o = {}) { const e = mkActor('pship', x, y, Object.assign({ tier: clamp(Math.ceil(P.lvl / 4), 1, 4), aggro: 700, leash: 99999, name: o.ghost ? 'The Ghost Ship' : pick(['The Black Gull', 'The Red Tide', 'The Hangman', 'Widowmaker', 'The Salt Knife', 'The Drowned Rat']), shipKind: pick(['cog', 'carrack']), nocorpse: true, face: rand(0, TAU) }, o)); e.hp = e.maxHp = Math.round(e.maxHp * (1 + P.lvl * .06)); return e; }
+function pirateTick() {
+  if (!P || !P.sailing || G.under && !G.under.isle) return;
+  if (ents.some(e => e.kind === 'pship' && !e.dead)) return;
+  if ((G.pirT = (G.pirT ?? rand(40, 80)) - 1) > 0) return; G.pirT = rand(90, 180);
+  const edge = !G.under && (P.x < 12 * TS || P.y < 12 * TS || P.x > (WW - 12) * TS || P.y > (WH - 12) * TS);
+  if (!edge && !(G.under && G.under.isle) && !chance(.3)) return;
+  for (let i = 0; i < 20; i++) { const a = rand(0, TAU), x = P.x + Math.cos(a) * 650, y = P.y + Math.sin(a) * 650; if (waterAt(x, y) && waterAt(x + 40, y) && waterAt(x, y + 40)) { spawnPirateShip(x, y, { ghost: isNight() && chance(.25) }); toast(isNight() ? '☠ Sails in the dark: a ship with no lights is bearing down on you!' : '☠ A black sail on the horizon: pirates!', 'war'); SND.play('horn'); return; } }
+}
+hook('kill', (t) => { if (t.kind === 'pship') { for (let i = 0; i < 20; i++) addPart(t.x + rand(-30, 30), t.y + rand(-20, 20), rand(-40, 40), rand(-60, 10), pick(['#5a3a20', '#efe6d0', '#8fb8d8']), 1, 3); toast(`The ${t.name} goes down.`, 'gold'); G.stats.shipsSunk = (G.stats.shipsSunk || 0) + 1; } });
+
+/* ---------------- Boarding actions ---------------- */
+function nearestEnemyShip(r) { return ents.filter(e => e.kind === 'pship' && !e.dead).sort((a, b) => dist(a.x, a.y, P.x, P.y) - dist(b.x, b.y, P.x, P.y)).find(e => dist(e.x, e.y, P.x, P.y) < r) || null; }
+function enterDeck(e, after) {
+  const tier = e.tier || clamp(Math.ceil(P.lvl / 4), 1, 4), frac = clamp(e.hp / (e.maxHp || 1), .3, 1);
+  const b = { kind: 'deck', key: 'deck' + (e.id || rand(1, 1e6)), name: e.name || 'A pirate ship', owner: 0, door: { x: P.x, y: P.y }, pirates: Math.round(2 + 4 * frac + tier * .5), tier, ghost: !!e.ghost };
+  const D = genInterior(b), crew = P._crew || [];
+  if (G.under && G.under.isle) G.over2 = G.over;
+  G.over = { W, ents, projs, pickups, px: P.x, py: P.y, deckOf: e.id || null, after, isleUnder: G.under && G.under.isle ? G.under : null };
+  W = D.W; setWorldSize(D.n); ents = []; projs = []; pickups = []; parts = []; texts = []; chunkCache.clear();
+  P.sailing = false; P.x = D.entry.x; P.y = D.entry.y; P.kbx = P.kby = 0; cam.x = P.x; cam.y = P.y;
+  crew.forEach(c => { const f = findFree(P.x + rand(-50, 50), P.y - rand(10, 40)); c.x = f.x; c.y = f.y; ents.push(c); });
+  D.npcs.forEach(n0 => mkActor(n0.kind, n0.x, n0.y, n0.o));
+  G.under = Object.assign({ interior: true, deck: true, id: 'i' + b.key }, b); $('mmWrap').classList.add('hidden');
+  showAreaTitle('BOARDING ACTION', `${b.name} · ${b.ghost ? 'the dead crew rises' : 'cut them down!'}`); SND.play('battlecry');
+}
+function deckRoom(b, obj, npc, ints, X, Y, rw, rh) {
+  obj('f_mast', rw / 2 - .5, 3, 30, 30, {}, true); obj('f_mast', 3, 3, 30, 30, {}, true); obj('f_mast', rw - 4, 3, 30, 30, {}, true);
+  [[1, 6.5], [rw - 2, 1], [rw - 2.2, 6.4], [6, .6]].forEach(([tx, ty]) => obj(chance(.5) ? 'f_barrel' : 'f_crate', tx, ty, 26, 26, {}, true));
+  obj('f_chest', rw - 3, 5.2, 32, 24, {}, true); ints.push({ type: 'deckchest', x: X(rw - 2.5), y: Y(6.4) });
+  for (let i = 0; i < b.pirates; i++) npc(b.ghost ? 'wight' : i === 0 ? 'leader' : i % 3 === 0 ? 'xbowman' : 'bandit', 3 + (i * 2.3) % (rw - 5), 1.5 + (i % 3) * 2, { place: null, stand: false, roam: true, aggro: 600, tier: b.tier, name: b.ghost ? 'Drowned Sailor' : i === 0 ? 'Pirate Captain' : 'Pirate', boss: i === 0, deckFoe: 1, faction: b.ghost ? 'hollow' : 'bandit' });
+}
+IACTS.deckchest = { label: () => G.under && G.under.looted ? 'An empty sea-chest' : 'Break open the sea-chest', act: () => { if (G.under.looted) return; if (ents.some(e => !e.dead && e.deckFoe && playerHostileTo(e))) { toast('Not while the crew still fights!', 'bad'); return; } G.under.looted = true; const g0 = randi(80, 220) + G.under.tier * 60; P.gold += g0; const items = [pick(LOOT_TIERS[Math.min(4, G.under.tier + 1)]), pick(['silk', 'spices', 'wine', 'gem', 'sapphire', 'relic'])]; items.forEach(id => addItem(id, rollQual(G.under.tier), 1)); if (chance(.3)) addItem(pick(['treasure_map', 'soul_gem', 'mana_potion']), 1, 1); SND.play('chest'); toast(`Plunder! ${g0} gold, and more besides.`, 'gold'); } };
+function deckTick() {
+  const U = G.under; if (!U || !U.deck || U.won) return;
+  if (!ents.some(e => !e.dead && e.deckFoe && playerHostileTo(e))) { U.won = G.time; toast('The ship is yours! Take what you want from her hold, then back to your own deck (the gangplank).', 'gold'); gainXP(120 + U.tier * 40); SND.play('quest'); G.stats.boardings = (G.stats.boardings || 0) + 1; }
+}
+function leaveDeck() {
+  const O = G.over, crew = ents.filter(e => e.follow && e.ally && !e.dead);
+  W = O.W; setWorldSize(W.size); ents = O.ents; projs = O.projs; pickups = O.pickups; parts = []; texts = []; chunkCache.clear();
+  P.x = O.px; P.y = O.py; P.kbx = P.kby = 0; cam.x = P.x; cam.y = P.y; P._crew = crew;
+  const won = G.under && G.under.won, foe = ents.find(e => e.id === O.deckOf);
+  if (won && foe) { foe.dead = true; foe.deadT = 99; runHooks('kill', foe, P); }
+  G.under = O.isleUnder || null; G.over = O.isleUnder ? G.over2 : null; if (!G.under) $('mmWrap').classList.toggle('hidden', !settings.minimap);
+  P.sailing = !!P.ship && P.ship.hp > 0; if (P.sailing) P.ship.v = 0;
+  if (O.after) O.after(won);
+}
+hook('tick', dt => { if (G.under && G.under.deck) deckTick(); });
+
+/* ---------------- The Deep: a chart of twelve islands ---------------- */
+const ISLE_T = [
+  { id: 'haven', n: 'Blackwater Haven', ter: 'grass', own: 0, hub: 'pirate', foes: [['bandit', 3, 2]], boss: { kind: 'leader', name: 'Captain Redmane, the Pirate Lord', hpM: 3.2, dmgM: 1.4, prize: 'corsair_blade' }, chests: 2, d: 'A pirate town of tar and taverns. Everything is for sale, and everyone.' },
+  { id: 'monastery', n: 'The Drowned Monastery', ter: 'swamp', own: 3, foes: [['wight', 4, 3], ['hollow_archer', 2, 3]], boss: { kind: 'hknight', name: 'Abbot Morrow, the Drowned', hpM: 2.6, prize: 'saint_medallion' }, chests: 3, ruin: 1, d: 'Monks drowned in their cloister when the sea rose. They still keep the hours.' },
+  { id: 'reef', n: "Serpent's Reef", ter: 'sand', own: 1, foes: [], boss: { kind: 'serpent', name: 'Nhuul, the Sea Serpent', prize: 'serpent_mail' }, chests: 1, lagoon: 1, d: 'A ring of rock around a still lagoon. Fishermen will not say what lives in it.' },
+  { id: 'mage', n: 'The Isle of Oris', ter: 'grass', own: 3, hub: 'mage', foes: [['wisp', 3, 2]], chests: 1, d: 'A green isle where an old archmage keeps the rarest tomes in the world.' },
+  { id: 'frost', n: 'Frostholm', ter: 'tundra', own: 2, foes: [['snow_wolf', 4, 3], ['ice_bear', 1, 3], ['frost_elemental', 2, 3]], boss: { kind: 'hill_giant', name: 'Jorunn the Frost Giant', hpM: 1.3, frost: 1, prize: 'frostfang_bow' }, chests: 2, d: 'Ice and black rock. A giant walks the glacier.' },
+  { id: 'ember', n: 'The Ember Isle', ter: 'desert', own: 1, foes: [['fire_elemental', 3, 3], ['scorpion', 3, 3]], boss: { kind: 'wyvern', name: 'Cinderwing, the Ember Drake', hpM: 1.2, prize: 'emberbrand' }, chests: 2, d: 'A smoking mountain in the sea. Something with wings nests in the crater.' },
+  { id: 'cove', n: "Smugglers' Cove", ter: 'forest', own: 0, foes: [['bandit', 4, 3], ['xbowman', 2, 3], ['shieldbearer', 1, 3]], boss: { kind: 'leader', name: 'Mother Brinn, Queen of Smugglers', hpM: 2.4, prize: 'blood_ring' }, chests: 4, d: 'Hidden coves and hidden caches, and those who hide them.' },
+  { id: 'wrecks', n: 'The Shipwreck Shoals', ter: 'sand', own: 0, foes: [['wight', 5, 2]], chests: 5, d: 'The bones of a hundred ships, and their cargo still aboard. The drowned walk at night.' },
+  { id: 'siren', n: 'The Siren Rocks', ter: 'sand', own: 3, foes: [['wisp', 4, 3], ['apprentice', 2, 3]], boss: { kind: 'archmage', name: 'Liora, the Siren', hpM: .9, prize: 'siren_charm' }, chests: 2, d: 'Singing carries over the water on still nights. Stop your ears.' },
+  { id: 'kelp', n: 'The Kelp Isles', ter: 'swamp', own: 3, hub: 'hermit', foes: [['boar', 2, 2]], herbs: 1, chests: 1, d: 'Green shallows, rare herbs, and an alchemist who never leaves.' },
+  { id: 'temple', n: 'The Sunken Temple', ter: 'forest', own: 3, foes: [['stone_golem', 2, 3], ['animated_armor', 3, 3]], boss: { kind: 'animated_armor', name: 'The Temple Guardian', hpM: 4.5, scale: 1.5, prize: 'ember_sceptre' }, chests: 3, ruin: 1, d: 'Steps climb out of the sea to a temple older than the four crowns.' },
+  { id: 'aldmere', n: 'Aldmere, Isle of the First King', ter: 'grass', own: 2, far: 1, foes: [['hknight', 3, 4], ['wight', 5, 4]], boss: { kind: 'hollow_king', name: 'The Drowned King', titan: 1, prize: 'crown_aldmere' }, chests: 3, ruin: 1, d: 'Farther than any chart. The First King was buried here, and something still wears his crown.' },
+];
+Object.assign(ITEMS, {
+  corsair_blade: { name: 'The Corsair\'s Grin', type: 'weapon', wk: 'sword', dmg: 38, spd: 98, rng: 44, arc: 1.9, val: 2200, len: 30, col: '#e8d8a0', glow: '#ffd04a', legend: true, tier: 5, desc: 'The pirate lord\'s cutlass. Light as a whisper and quick as a lie.' },
+  serpent_mail: { name: 'Serpentscale Mail', type: 'armor', def: 15, slow: 0, val: 2400, col: '#4a8a7a', tier: 5, legend: true, desc: 'Scales of the sea serpent, lighter than leather and harder than steel. No weight at all.' },
+  siren_charm: { name: 'The Siren\'s Pearl', type: 'amulet', js: { sp: .2, mp: 25, luck: .05 }, val: 1800, tier: 5, mi: 'amulet', gem: '#f0e8ff', metal: '#c8d8e8', desc: 'A black pearl that sings, very quietly, when magic is near.' },
+  ember_sceptre: { name: 'The Ember Sceptre', type: 'quest', val: 0, desc: 'A rod of gold with a coal that never cools. A regalia of the First King.' },
+  crown_aldmere: { name: 'The Crown of Aldmere', type: 'amulet', js: { sp: .2, dmg: .12, hp: 30, mp: 30, regen: 1 }, val: 6000, tier: 5, mi: 'amulet', gem: '#ffb040', metal: '#f0c850', desc: 'The iron crown of the First King, worn on a chain. The old kings of all four crowns claim descent from its wearer.' },
+});
+function newIsles() { const r = mulberry32(W.seed * 211 + 31), list = ISLE_T.map((T0, i) => { const far = T0.far, ang = far ? -Math.PI / 4 : (i / (ISLE_T.length - 1)) * TAU + r() * .35, d = far ? 190 : 118 + r() * 70; return { i, disc: false, visited: false, x: 300 + Math.cos(ang) * d * 1.35, y: 210 + Math.sin(ang) * d, cleared: false, boss: false, dead: [], chests: [] }; }); return { list, chart: false }; }
+function isleOf(i) { return (G.isles || (G.isles = newIsles())).list[i]; }
+let chartFrom = 'edge';
+function openChart(from) {
+  chartFrom = from; G.chartCd = G.time + 5; G.isles = G.isles || newIsles(); G.isles.chart = true;
+  if (from === 'edge') G.deepFrom = { x: clamp(P.x, 0, WW * TS), y: clamp(P.y, 0, WH * TS), a: P.ship.a };
+  P.ship.v = 0; UI.open('sea'); SND.play('open');
+}
+function chartPos() { if (G.under && G.under.isle) { const I = isleOf(G.under.idx); return [I.x, I.y]; } const f = G.deepFrom || { x: P.x, y: P.y }; const a = Math.atan2(f.y / TS - WH / 2, f.x / TS - WW / 2); return [300 + Math.cos(a) * 70, 210 + Math.sin(a) * 52]; }
+function renderSea() {
+  const [cx, cy] = chartPos(), I = G.isles.list;
+  let h = `<rect x="0" y="0" width="600" height="420" fill="#1c3a5a"/>`;
+  for (let i = 0; i < 40; i++) h += `<path d="M${(i * 97) % 600} ${(i * 53) % 420} q 8 -4 16 0 t 16 0" stroke="rgba(255,255,255,.12)" fill="none"/>`;
+  h += `<path d="M248 160 Q 300 128 352 162 Q 380 212 350 262 Q 300 292 250 262 Q 222 212 248 160 Z" fill="#6a8a4a" stroke="#d8c890" stroke-width="2"/><text x="300" y="215" text-anchor="middle" font-family="Cinzel,Georgia" font-size="12" fill="#f5e6bd" stroke="#1a120a" stroke-width="3" paint-order="stroke">THE FOUR KINGDOMS</text>`;
+  I.forEach((s, i) => { const T0 = ISLE_T[i], known = s.disc || s.visited; h += `<g class="isle" data-i="${i}" style="cursor:pointer" transform="translate(${s.x},${s.y})"><circle r="${T0.far ? 13 : 10}" fill="${known ? { grass: '#5a8a3a', swamp: '#4a6a4a', sand: '#c8b070', tundra: '#d8e8f0', desert: '#b8703a', forest: '#2a5a2a' }[T0.ter] : '#3a4a5a'}" stroke="${s.cleared ? '#ffd24a' : '#d8c890'}" stroke-width="2"/><text y="4" text-anchor="middle" font-size="11" fill="#1a120a">${s.cleared ? '✓' : known ? '' : '?'}</text><text y="${T0.far ? 28 : 24}" text-anchor="middle" font-family="EB Garamond,Georgia" font-style="italic" font-size="12" fill="#f5e6bd" stroke="#1a120a" stroke-width="3" paint-order="stroke">${known ? esc(T0.n) : 'Unknown isle'}</text></g>`; });
+  h += `<g transform="translate(${cx},${cy})"><circle r="7" fill="#ffd24a" stroke="#1a120a" stroke-width="2"/><text y="-12" text-anchor="middle" font-size="11" fill="#ffd24a" stroke="#1a120a" stroke-width="3" paint-order="stroke">⛵ ${esc(P.ship.name)}</text></g>`;
+  $('seaChart').innerHTML = h;
+  $('seaSide').innerHTML = `<div class="crNote"><b>THE DEEP</b>${windName()}. Hull ${Math.round(P.ship.hp)}/${SHIPS[P.ship.kind].hp}. Click an island to set sail. The farther it is, the longer the voyage and the greater the risk.</div>` +
+    (G.under && G.under.isle ? `<button class="btn gold" data-sea="home" style="width:100%;margin-top:8px">Sail home to the Four Kingdoms</button>` : `<button class="btn" data-sea="back" style="width:100%;margin-top:8px">Turn back to the coast</button>`) +
+    `<div class="seaList">${I.map((s, i) => { const T0 = ISLE_T[i], known = s.disc || s.visited, d = Math.hypot(s.x - cx, s.y - cy), days = Math.max(.5, Math.round(d / 90 * 2) / 2); return `<div class="seaRow" data-i="${i}"><b>${known ? esc(T0.n) : 'Unknown isle'}</b> <span class="dim">${days} day${days === 1 ? '' : 's'}${s.cleared ? ' · cleared' : ''}</span>${known ? `<div class="dim">${esc(T0.d)}</div>` : ''}</div>`; }).join('')}</div>`;
+  const go = i => { const s = I[i], d = Math.hypot(s.x - cx, s.y - cy); setSail(i, Math.max(.5, Math.round(d / 90 * 2) / 2)); };
+  $('seaChart').querySelectorAll('.isle').forEach(el => el.onclick = () => go(+el.dataset.i));
+  $('seaSide').querySelectorAll('.seaRow').forEach(el => el.onclick = () => go(+el.dataset.i));
+  $('seaSide').querySelectorAll('[data-sea]').forEach(el => el.onclick = () => { if (el.dataset.sea === 'home') { UI.close(); sailHome(); } else { UI.close(); turnBack(); } });
+}
+function turnBack() { const f = G.deepFrom || { x: P.x, y: P.y }; P.x = clamp(P.x, -8 * TS, (WW + 8) * TS); P.y = clamp(P.y, -8 * TS, (WH + 8) * TS); P.ship.a += Math.PI; }
+UI.ids.sea = 'seaScreen'; UI.renders.sea = renderSea;
+function setSail(i, days) {
+  UI.closeAll(); const T0 = ISLE_T[i];
+  withLoading(`Sailing for ${isleOf(i).disc || isleOf(i).visited ? T0.n : 'an unknown isle'}…`, () => {
+    G.time += days * DAYLEN; G.stats.voyages = (G.stats.voyages || 0) + 1;
+    const r = Math.random(), risk = .12 + days * .06;
+    if (r < risk * .45) { const lost = Math.round(SHIPS[P.ship.kind].hp * rand(.15, .3)); P.ship.hp = Math.max(10, P.ship.hp - lost); setTimeout(() => toast(`⛈ A storm in the Deep! The ${P.ship.name} takes a beating (−${lost} hull).`, 'bad'), 500); }
+    else if (r < risk) { enterIsle(i, true); setTimeout(() => { const fake = { id: 'sea' + Date.now(), name: isNight() ? 'The Ghost Ship' : 'A pirate galley', hp: 1, maxHp: 1, tier: clamp(Math.ceil(P.lvl / 4), 1, 4), ghost: isNight() && chance(.4) }; toast('☠ Pirates come alongside before you reach the isle! Grappling hooks fly!', 'war'); enterDeck(fake, null); }, 900); return; }
+    else if (r < risk + .08) setTimeout(() => toast('A pod of whales runs beside the ship for an hour. The crew calls it good luck.', 'good'), 500);
+    enterIsle(i, true);
+  });
+}
+function sailHomeQuiet() { const O = G.over; if (!O) return; W = O.W; setWorldSize(W.size); ents = O.ents; projs = O.projs; pickups = O.pickups; parts = []; texts = []; chunkCache.clear(); G.under = null; G.over = null; $('mmWrap').classList.toggle('hidden', !settings.minimap); }
+function towShipHome() { const s = P.ship; if (!s || !W.harbors || !W.harbors.length) return; const h = W.harbors.slice().sort((a, b) => dist(a.x, a.y, P.respawn.x, P.respawn.y) - dist(b.x, b.y, P.respawn.x, P.respawn.y))[0], w = harborWater(h); Object.assign(s, { x: w.x, y: w.y, map: 'w', v: 0 }); toast(`The ${s.name} limps back to ${W.places[h.place].name} without you.`); syncShipInteract(); }
+function sailHome() {
+  withLoading('Sailing home…', () => {
+    G.time += DAYLEN * .5; const f = G.deepFrom || { x: WW * TS / 2, y: -10 * TS };
+    if (G.under && G.under.isle) { const O = G.over; W = O.W; setWorldSize(W.size); ents = O.ents; projs = O.projs; pickups = O.pickups; parts = []; texts = []; chunkCache.clear(); G.under = null; G.over = null; $('mmWrap').classList.toggle('hidden', !settings.minimap); }
+    const a = Math.atan2(f.y - WH * TS / 2, f.x - WW * TS / 2); let x = f.x + Math.cos(a) * 10 * TS, y = f.y + Math.sin(a) * 10 * TS; for (let i = 0; i < 40 && !waterAt(x, y); i++) { x += Math.cos(a) * TS; y += Math.sin(a) * TS; }
+    P.x = x; P.y = y; P.ship.a = a + Math.PI; P.ship.v = 0; P.sailing = true; cam.x = P.x; cam.y = P.y; syncShipInteract();
+    toast('The coasts of the Four Kingdoms rise out of the sea.', 'good');
+  });
+}
+/* ---------------- Island maps ---------------- */
+const ISLE_TER = { grass: [T.GRASS, T.FOREST], swamp: [T.SWAMP, T.GRASS], sand: [T.SAND, T.GRASS], tundra: [T.TUNDRA, T.SNOW], desert: [T.DESERT, T.HILL], forest: [T.FOREST, T.DENSE] };
+function genIsle(i) {
+  const T0 = ISLE_T[i], n = T0.far ? 112 : 96, N = n * n, r = mulberry32(W.seed * 211 + i * 977 + 5), nz = makeNoise(W.seed * 7 + i * 131);
+  const ter = new Uint8Array(N).fill(T.SEA), solid = new Uint8Array(N), clear = new Uint8Array(N), c = n / 2, R0 = n * (T0.far ? .36 : .33), [t1, t2] = ISLE_TER[T0.ter];
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+    const d = Math.hypot(x - c, (y - c) * 1.1) + (fbm(nz, x / 12, y / 12, 3) - .5) * 18, i2 = y * n + x;
+    if (d < R0 - 2.5) ter[i2] = fbm(nz, x / 9 + 50, y / 9 + 50, 2) > .55 ? t2 : t1; else if (d < R0) ter[i2] = T.SAND;
+    if (T0.lagoon && Math.hypot(x - c, y - c) < R0 * .45) ter[i2] = T.WATER;
+    if (T0.id === 'ember' && Math.hypot(x - c, y - c - 6) < 6) ter[i2] = T.ROCK;
+    if (T0.id === 'frost' && ter[i2] === T.SNOW && fbm(nz, x / 7, y / 7, 2) > .68) ter[i2] = T.ICE;
+  }
+  const objs = [], ints = [], at = (x, y) => y * n + x, land = (x, y) => x > 2 && y > 2 && x < n - 3 && y < n - 3 && ter[at(x, y)] !== T.SEA && ter[at(x, y)] !== T.WATER && ter[at(x, y)] !== T.ROCK && !TINFO[ter[at(x, y)]].block && !solid[at(x, y)];
+  const addO = o => { o.x = o.x ?? o.tx * TS; o.y = o.y ?? o.ty * TS; o.w = o.w ?? (o.tw || 1) * TS; o.h = o.h ?? (o.th || 1) * TS; o.sy = o.sy ?? (o.y + o.h); objs.push(o); return o; };
+  const spot = (minD, maxD) => { for (let a = 0; a < 400; a++) { const ang = r() * TAU, d = minD + r() * (maxD - minD), x = Math.round(c + Math.cos(ang) * d), y = Math.round(c + Math.sin(ang) * d); if (land(x, y) && land(x + 1, y) && land(x, y + 1)) return { x, y }; } return { x: Math.round(c), y: Math.round(c + R0 * .5) }; };
+  // the landing: a jetty on the south shore
+  let ly = Math.round(c + R0); while (ly > c && (ter[at(Math.round(c), ly)] === T.SEA)) ly--; const dock = { x: Math.round(c) * TS + 16, y: (ly + 1) * TS + 20 };
+  addO({ k: 'jetty', x: Math.round(c) * TS, y: (ly + 1) * TS, w: TS, h: TS, dx: 0, dy: 1, sy: (ly + 1) * TS + 4 });
+  for (let y = ly - 3; y <= ly + 1; y++) for (let x = Math.round(c) - 2; x <= Math.round(c) + 2; x++) clear[at(x, y)] = 1;
+  const houses = [], feats = { foes: [], boss: null, npcs: [], chests: [] };
+  if (T0.hub) for (let h = 0; h < 5; h++) { const s = spot(4, R0 * .5); if (houses.some(o => Math.hypot(o.tx - s.x, o.ty - s.y) < 5)) continue; houses.push({ tx: s.x, ty: s.y }); addO({ k: 'house', tx: s.x - 1, ty: s.y - 1, tw: 3, th: 2, owner: T0.own, v: r() }); for (let y = s.y - 1; y < s.y + 1; y++) for (let x = s.x - 1; x < s.x + 2; x++) solid[at(x, y)] = 1; for (let y = s.y - 2; y <= s.y + 2; y++) for (let x = s.x - 2; x <= s.x + 3; x++) clear[at(x, y)] = 1; }
+  if (T0.ruin) for (let h = 0; h < 6; h++) { const s = spot(R0 * .2, R0 * .8); addO({ k: 'rubble', tx: s.x, ty: s.y, tw: 2, th: 1, v: r() }); clear[at(s.x, s.y)] = 1; }
+  T0.foes.forEach(([kind, cnt, tier]) => { const s = spot(R0 * .25, R0 * .8); for (let j = 0; j < cnt; j++) feats.foes.push({ kind, tier, x: (s.x + (r() - .5) * 5) * TS, y: (s.y + (r() - .5) * 5) * TS }); });
+  if (T0.boss) { const s = T0.lagoon ? { x: Math.round(c), y: Math.round(c) } : spot(R0 * .1, R0 * .35); feats.boss = { x: s.x * TS + 16, y: s.y * TS + 16 }; for (let y = s.y - 3; y <= s.y + 3; y++) for (let x = s.x - 3; x <= s.x + 3; x++) clear[at(x, y)] = 1; }
+  for (let j = 0; j < T0.chests; j++) { const s = spot(R0 * .3, R0 * .85); addO({ k: 'islechest', tx: s.x, ty: s.y, v: r(), idx: j }); solid[at(s.x, s.y)] = 1; ints.push({ type: 'islechest', x: s.x * TS + 16, y: (s.y + 1) * TS + 10, idx: j }); clear[at(s.x, s.y)] = 1; }
+  if (T0.hub) { const s = spot(3, 8); feats.npcs.push({ x: s.x * TS, y: s.y * TS, hub: T0.hub }); }
+  // trees
+  const cw = Math.ceil(n / CH), trees = []; for (let q = 0; q < cw * cw; q++) trees.push([]);
+  for (let y = 1; y < n - 1; y++) for (let x = 1; x < n - 1; x++) { const i2 = at(x, y); if (clear[i2] || solid[i2]) continue; const t = ter[i2]; const p = t === T.DENSE ? .8 : t === T.FOREST ? .5 : t === T.SWAMP ? .15 : t === T.GRASS ? .04 : t === T.TUNDRA ? .12 : t === T.DESERT ? .04 : 0; if (hash2(x * 13 + i, y * 17) >= p) continue; const kind = t === T.DESERT ? 4 : t === T.TUNDRA ? 6 : t === T.SWAMP ? 3 : t === T.DENSE ? 1 : t === T.GRASS ? (hash2(x, y * 3) < .5 ? 0 : 2) : 0; const tx = x * TS + 16, ty2 = y * TS + 20; trees[Math.floor(ty2 / (CH * TS)) * cw + Math.floor(tx / (CH * TS))].push({ x: tx, y: ty2, kind, s: .85 + hash2(x, y) * .4 }); }
+  const DW = { size: n, seed: W.seed, ter, own: new Uint8Array(N).fill(T0.own), solid, wall: new Uint8Array(N), clear, bord: new Uint8Array(N), hgt: new Float32Array(N), places: W.places, objs, chunkTrees: trees, chunkObjs: [], interacts: ints, caps: W.caps, rivers: [], landCount: [0, 0, 0, 0], towers: [], fish: [], hermits: [], start: { x: dock.x, y: dock.y - TS * 2 }, startK: W.startK, isle: i };
+  for (let q = 0; q < cw * cw; q++) DW.chunkObjs.push([]); objs.forEach(o => { const ci = Math.floor((o.y + o.h / 2) / (CH * TS)) * cw + Math.floor((o.x + o.w / 2) / (CH * TS)); if (DW.chunkObjs[ci]) DW.chunkObjs[ci].push(o); });
+  return { W: DW, n, dock, feats, approach: { x: dock.x, y: dock.y + 5 * TS } };
+}
+const _isleCache = {};
+function enterIsle(i, sailing) {
+  const I = isleOf(i), D = _isleCache[i] || (_isleCache[i] = genIsle(i)), T0 = ISLE_T[i], first = !I.visited;
+  if (!G.under) { G.over = { W, ents, projs, pickups, px: (G.deepFrom || P).x, py: (G.deepFrom || P).y }; }
+  W = D.W; setWorldSize(D.n); ents = []; projs = []; pickups = []; parts = []; texts = []; chunkCache.clear();
+  G.under = { isle: true, idx: i, name: T0.n, id: 'isle' + i }; $('mmWrap').classList.add('hidden');
+  P.x = D.approach.x; P.y = D.approach.y; P.sailing = !!sailing; if (P.ship) { P.ship.a = -Math.PI / 2; P.ship.v = 0; } cam.x = P.x; cam.y = P.y;
+  // who lives here
+  D.feats.foes.forEach((f, j) => { if (I.dead.includes(j)) return; const g = findFree(f.x, f.y); mkActor(f.kind, g.x, g.y, { tier: f.tier, isleFoe: j, roam: true, aggro: 320, home: { x: g.x, y: g.y }, leash: 700 }); });
+  if (D.feats.boss && !I.boss) spawnIsleBoss(i, D);
+  D.feats.npcs.forEach(nn => spawnIsleHub(nn, i));
+  I.visited = true; I.disc = true; showAreaTitle(T0.n.toUpperCase(), first ? T0.d : 'You have been here before.');
+  if (first) { logEvent(`You reached ${T0.n}.`, []); gainXP(80); G.stats.isles = G.isles.list.filter(x => x.visited).length; }
+  syncShipInteract();
+}
+function spawnIsleBoss(i, D) {
+  const T0 = ISLE_T[i], B0 = T0.boss, b = D.feats.boss, tier = clamp(Math.ceil(P.lvl / 4) + 1, 2, 4);
+  const e = mkActor(B0.kind, b.x, b.y, { tier, boss: true, isleBoss: i, name: B0.name, roam: true, aggro: 420, home: { x: b.x, y: b.y }, leash: 900, scale: B0.scale || (B0.kind === 'leader' ? 1.2 : undefined), _look: B0.frost ? { body: '#9ab8c8', head: 'hair', hair: '#e8f4ff', beard: 1, skin: '#cfe4f0', weapon: { wk: 'great', len: 48, col: '#e8f8ff', glow: '#9fdcff' } } : B0.kind === 'archmage' ? mageLook('arcane', '#e8e0ff') : undefined });
+  if (B0.hpM) e.hp = e.maxHp = Math.round(e.maxHp * B0.hpM); if (B0.dmgM) e.dmg *= B0.dmgM;
+  if (B0.titan) { e.titan = 1; e.hp = e.maxHp = Math.round(2000 * (1 + P.lvl * .03) * DIFF().enemyHp); e.dmg = 40; titanInit(e); }
+  if (B0.kind === 'serpent') { e.hp = e.maxHp = Math.round(1500 * (1 + P.lvl * .04) * DIFF().enemyHp); }
+}
+hook('kill', t => {
+  if (t.isleFoe != null && G.under && G.under.isle) { const I = isleOf(G.under.idx); if (!I.dead.includes(t.isleFoe)) I.dead.push(t.isleFoe); }
+  if (t.isleBoss != null) { const I = isleOf(t.isleBoss), T0 = ISLE_T[t.isleBoss]; I.boss = true; I.cleared = true; const prize = T0.boss.prize; if (prize) { dropItem(t.x, t.y, prize, prize === 'emberbrand' ? 1 : 2, 1); } dropGold(t.x, t.y, 300 + P.lvl * 20); gainXP(400); logEvent(`${pFull()} defeated ${T0.boss.name} on ${T0.n}.`, []); toast(`<b>${T0.boss.name}</b> is defeated! ${T0.n} is yours to explore.`, 'gold'); G.stats.isleBosses = (G.stats.isleBosses || 0) + 1; runHooks('isleBoss', t.isleBoss); }
+});
+IACTS.islechest = { label: it => (isleOf(G.under.idx).chests || []).includes(it.idx) ? 'An empty chest' : 'Open the chest', act: it => { const I = isleOf(G.under.idx); if (I.chests.includes(it.idx)) return; if (ents.some(e => !e.dead && playerHostileTo(e) && dist(e.x, e.y, P.x, P.y) < 300)) { toast('Not with enemies so close!', 'bad'); return; } I.chests.push(it.idx); const tier = clamp(Math.ceil(P.lvl / 4) + 1, 2, 4), g0 = randi(60, 180) * tier; P.gold += g0; addItem(pick(LOOT_TIERS[tier]), rollQual(tier), 1); if (chance(.5)) addItem(pick(['gem', 'sapphire', 'relic', 'soul_gem', 'treasure_map', 'mana_potion', 'greater_heal']), 1, 1); SND.play('chest'); toast(`Treasure! ${g0} gold, and more.`, 'gold'); } };
+function spawnIsleHub(nn, i) {
+  const f = findFree(nn.x, nn.y);
+  if (nn.hub === 'pirate') { mkActor('npc', f.x, f.y, { role: 'cityshop', skind: 'pirate', shopName: 'The Rum Barrel', name: 'Ol\' Tarr the Fence', _look: { body: '#4a2a2a', head: 'hood', hood: '#2a1a1a', skin: '#c89868', cape: '#1a1010' }, stand: true, k: 0 }); for (let j = 0; j < 4; j++) { const g = findFree(nn.x + rand(-160, 160), nn.y + rand(-120, 120)); mkActor('villager', g.x, g.y, { role: 'citizen', name: 'Pirate', _look: { body: pick(['#3a2a2a', '#5a3a2a', '#2a3a4a']), head: 'hood', hood: '#1a1a1a', skin: '#c89868' }, wanderR: 120, home: { x: g.x, y: g.y } }); } }
+  if (nn.hub === 'mage') mkActor('npc', f.x, f.y, { role: 'magus', name: 'Oris the Old', srole: 'Archmage of the Isle', mrank: 3, _look: mageLook('arcane', '#e8e0ff'), stand: true, mline: 'Visitors! How rare. I have tomes no tower keeps, and one bottle of the Elixir of Youth, if your purse is deep.', islemage: 1 });
+  if (nn.hub === 'hermit') mkActor('npc', f.x, f.y, { role: 'cityshop', skind: 'kelpwitch', shopName: 'The Kelp-Witch\'s Hut', name: 'Mother Ondine', _look: { body: '#3a6a4a', head: 'hood', hood: '#2a4a3a', skin: '#d8c0a0' }, stand: true, k: 3 });
+}
+CITY_SHOPS.pirate = { n: 'The Rum Barrel', who: 'Fence', col: '#4a2a2a', stock: a => { a('ale', 1, 12); a('treasure_map', 1, 2); a(pick(['corsair_blade', 'blood_ring', 'gambler_ring']), 2); a(pick(LOOT_TIERS[3].filter(id => ITEMS[id].type === 'weapon')), rollQual(3)); a('fire_arrow', 1, 30); a('silk', 1, 6); a('spices', 1, 6); a('shadowcloak', 1, 2); } };
+CITY_SHOPS.kelpwitch = { n: 'The Kelp-Witch\'s Hut', who: 'Witch', col: '#3a6a4a', stock: a => { HERBS.forEach(id => a(id, 1, randi(4, 9))); a('alchemy_kit'); ['clarity', 'blight_ward', 'plague_cure', 'love_philter', 'shadowcloak'].forEach(id => a(id, 1, randi(1, 3))); if (chance(.35)) a('elixir_youth'); } };
+{ const _ms = CITY_SHOPS.magus.stock; CITY_SHOPS.magus.stock = a => { _ms(a); if (G.under && G.under.isle && ISLE_T[G.under.idx].id === 'mage') { a('elixir_youth'); a('archmage_sigil'); SPELL_IDS.filter(id => SPELLS[id].t === 3).forEach(id => a('tome_' + id)); } }; }
+/* ---------------- The sea serpent ---------------- */
+function drawSerpent(g, e, t) {
+  const segs = 9, sub = e.sub > 0 ? .25 : 1; e.trail = e.trail || []; e.trail.unshift({ x: e.x, y: e.y }); if (e.trail.length > segs * 4) e.trail.length = segs * 4;
+  g.save(); g.globalAlpha = sub;
+  for (let i = segs - 1; i >= 0; i--) { const p = e.trail[Math.min(e.trail.length - 1, i * 4)] || e, r2 = 16 - i * 1.1 + Math.sin(t * 4 + i) * 1.5; g.fillStyle = i % 2 ? '#2a6a6a' : '#3a8a7a'; circ(g, p.x, p.y, r2); g.fillStyle = 'rgba(200,240,230,.35)'; circ(g, p.x - 3, p.y - 3, r2 * .4); }
+  g.save(); g.translate(e.x, e.y); g.rotate(e.face); if (e.flash > 0) g.filter = 'brightness(2)'; g.fillStyle = '#2a5a5a'; ell(g, 14, 0, 24, 16); g.fillStyle = '#d8f0e0'; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(24 + i * 3, -8); g.lineTo(27 + i * 3, -3); g.lineTo(30 + i * 3, -8); g.fill(); } g.fillStyle = '#ffe040'; circ(g, 22, -8, 3); circ(g, 22, 8, 3); g.fillStyle = '#111'; circ(g, 23, -8, 1.4); circ(g, 23, 8, 1.4); g.fillStyle = '#4a9a8a'; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(-4 - i * 7, -12); g.lineTo(-8 - i * 7, -22); g.lineTo(-12 - i * 7, -10); g.fill(); } g.restore();
+  g.restore(); if (e.sub > 0 && Math.random() < .5) addPart(e.x + rand(-20, 20), e.y + rand(-20, 20), rand(-10, 10), rand(-30, -10), 'rgba(255,255,255,.6)', .6, 3);
+}
+KIND_AI.serpent = (e, dt) => {
+  const tg = e.target || (dist(e.x, e.y, P.x, P.y) < 700 ? (e.target = P) : null); if (!tg) return;
+  e.sub = Math.max(0, (e.sub || 0) - dt); e.untouchable = e.sub > 0; e.fade = e.sub > 0 ? .75 : 0;
+  e.cycT = (e.cycT ?? 8) - dt;
+  if (e.cycT <= 0) { e.cycT = rand(7, 10); e.sub = 1.6; const a = rand(0, TAU); setTimeout(() => { if (e.dead) return; const f = findFree(tg.x + Math.cos(a) * 160, tg.y + Math.sin(a) * 160); e.x = f.x; e.y = f.y; addTell({ k: 'circle', x: e.x, y: e.y, r: 80, dur: .6, red: true, fn: () => { if (e.dead) return; addShake(8); SND.play('boom'); for (const t2 of [P, ...ents]) if (hostile(e, t2) && dist(e.x, e.y, t2.x, t2.y) < 80 + t2.r) damage(t2, e.dmg * 1.2, e, { kb: 3, unblock: true }); } }); }, 900); }
+  e.spitT = (e.spitT ?? 4) - dt; if (e.spitT <= 0 && !(e.sub > 0)) { e.spitT = rand(3.5, 5); const a0 = Math.atan2(tg.y - e.y, tg.x - e.x); for (let i = -2; i <= 2; i++) magProj({ x: e.x, y: e.y, a: a0 + i * .18, spd: 340, dmg: e.dmg * .5, s: 'rime', src: e, life: 1.6, r: 6 }); SND.play('frost'); }
+  if (e.hp < e.maxHp * .5 && !e.enraged) { e.enraged = true; e.cd *= .7; toast(`${e.name} thrashes in fury!`, 'war'); }
+};
+/* ---------------- Hooks ---------------- */
+hook('reset', () => { G.isles = null; G.wind = null; G.deepFrom = null; for (const k in _isleCache) delete _isleCache[k]; });
+hook('save', d => { d.P.ship = P.ship || null; d.P.sailing = !!P.sailing && !(G.under && G.under.deck); d.isles = G.isles; d.deepFrom = G.deepFrom; if (G.under && G.under.isle) d.isleAt = { i: G.under.idx, x: P.x, y: P.y, sailing: !!P.sailing }; else if (G.under && G.under.deck) d.isleAt = G.over && G.over.isleUnder ? { i: G.over.isleUnder.idx, x: G.over.px, y: G.over.py, sailing: true } : null; if (P.sailing && !G.under) { d.P.x = P.x; d.P.y = P.y; } if (G.under && G.under.deck && !G.over.isleUnder) { d.P.x = G.over.px; d.P.y = G.over.py; d.P.sailing = true; } });
+hook('load', d => { G.isles = d.isles || null; G.deepFrom = d.deepFrom || null; P.ship = d.P.ship || null; P._crew = []; P.sailing = false;
+  const crewUp = () => { const crew = partyNow().filter(e => !e.dead); P._crew = crew; crew.forEach(e => removeEnt(e)); if (horseEnt) { removeEnt(horseEnt); horseEnt = null; } };
+  if (d.isleAt) setTimeout(() => { enterIsle(d.isleAt.i, d.isleAt.sailing); P.x = d.isleAt.x; P.y = d.isleAt.y; cam.x = P.x; cam.y = P.y; if (d.isleAt.sailing) crewUp(); }, 50);
+  else if (d.P.sailing && P.ship) { P.sailing = true; crewUp(); }
+  syncShipInteract(); });
+hook('slow', () => { pirateTick(); const w = windNow(); w.a += rand(-.08, .08); w.s = clamp(w.s + rand(-.04, .04), .25, 1); });
+hook('hud', () => { const on = !!(P.sailing && P.ship); setIf('shipOn', on, v => $('shipBar').classList.toggle('hidden', !v)); if (!on) return; const S = SHIPS[P.ship.kind]; $('shipFill').style.transform = `scaleX(${clamp(P.ship.hp / S.hp, 0, 1)})`; setIf('shipT', `${P.ship.name}|${Math.ceil(P.ship.hp)}|${Math.round((P.ship.v || 0) / 10)}|${windName()}`, () => { $('shipText').textContent = `${P.ship.name} · ${Math.ceil(P.ship.hp)}/${S.hp} · ${windName()}`; }); });
+IACTS.sail = { label: it => it.what, act: it => it.fn() };
+function sailInteract() {
+  const foe = nearestEnemyShip(130); if (foe) return { it: { type: 'sail', what: `Board ${/^the /i.test(foe.name) ? foe.name : 'the ' + foe.name}!`, fn: () => enterDeck(foe, null) } };
+  const f = landSpot(); if (f) return { it: { type: 'sail', what: 'Go ashore', fn: disembark } };
+  return null;
+}
+
+function drawAnchoredShip(g) { const s = P && P.ship; if (!s || P.sailing || s.map !== seaMapKey()) return; drawTopShip(g, s.x, s.y, s.a, s.kind, { fill: .1, sail: '#efe6d0', flag: P.allegiance != null && KDATA[P.allegiance] ? KDATA[P.allegiance].color : '#c8b890', hull: s.hp <= 0 ? '#3a3028' : null }); }
+hook('draw', g => drawAnchoredShip(g));
+STRUCTS.islechest = (g, o, t) => { const x = o.x + 2, y = o.y + 6, open = G.under && G.under.isle && isleOf(G.under.idx).chests.includes(o.idx); g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, x + 14, y + 22, 15, 4); g.fillStyle = '#6a4424'; g.fillRect(x, y + 6, 28, 16); g.fillStyle = open ? '#3a2412' : '#8a5a30'; g.fillRect(x, y, 28, 8); g.fillStyle = '#c8a040'; g.fillRect(x + 12, y + 6, 4, 5); g.fillRect(x, y + 6, 28, 2); if (!open && Math.sin(t * 3 + x) > .7) { g.fillStyle = '#fff6c0'; circ(g, x + 14 + Math.sin(t * 2) * 8, y - 3, 1.8); } };
+STRUCTS.f_mast = (g, o) => { const x = o.x + o.w / 2, y = o.y + o.h / 2; g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, x + 3, y + 6, 12, 5); g.strokeStyle = 'rgba(220,210,180,.5)'; g.lineWidth = 1; for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; g.beginPath(); g.moveTo(x, y - 10); g.lineTo(x + Math.cos(a) * 40, y + Math.sin(a) * 26); g.stroke(); } g.fillStyle = '#4a2e18'; circ(g, x, y, 8); g.fillStyle = '#6a4424'; circ(g, x - 2, y - 2, 4); };
+SONGS.sea = { title: 'The Salt Road', root: 50, mode: 'dor', bpm: 104, prog: [0, 6, 3, 4, 0, 6, 4, 0], seed: 941, lead: { i: 'fiddle', r: R_FOLK, v: .12, alt: { i: 'flute', o: 0 } }, arp: { i: 'harp', p: '0.2.4.2.' }, bass: { p: '0...4...' }, drums: { b: 'x..x..x.', t: '...x...x' }, drone: { n: [0, 7], o: -12, v: .025, t: 'triangle' } };
+SONGS.isles = { title: 'Far Isles', vol: 3, root: 55, mode: 'lyd', bpm: 72, prog: [0, 1, 4, 5, 0, 1, 3, 4], seed: 947, lead: { i: 'flute', r: R_CALM, v: .11 }, arp: { i: 'harp', p: '0.2.1.4.' }, pad: { i: 'strings', v: .03 }, counter: { i: 'bell', o: 0, r: R_LONG, v: .03 } };
+MUSIC_PICK.unshift(() => P && P.sailing ? 'sea' : G.under && G.under.isle ? (ISLE_T[G.under.idx].id === 'haven' ? 'tavern' : ISLE_T[G.under.idx].id === 'aldmere' || ISLE_T[G.under.idx].id === 'monastery' ? 'black_tower' : 'isles') : null);
+BEASTS.push(['pship', 'Magic and Mystery', 'The coasts and the Deep', 'Pirate ships that shadow merchantmen. Trade volleys, then board her and take her hold.', 'Plunder'], ['serpent', 'Legends', "Serpent's Reef, in the Deep", 'It sinks beneath the waves and bursts up beneath you. Watch the water, and dodge the spray.', 'Its scales']);
+BEASTS.forEach((b, i) => BEAST_I[b[0]] = i); Object.assign(BEAST_Z, { pship: .6, serpent: .7 });
+ACH.push(
+  ['ship', '⛵', 'Master and Commander', 'Buy a ship of your own', () => !!P.ship || (G.stats.ships || 0) > 0],
+  ['board', '🏴', 'Grappling Hooks', 'Win a boarding action', () => (G.stats.boardings || 0) >= 1],
+  ['isles6', '🗺', 'Beyond the Edge of the Map', 'Set foot on six islands of the Deep', () => (G.stats.isles || 0) >= 6],
+  ['serpent', '🐉', 'Serpent-Slayer', 'Defeat the sea serpent of the reef', () => !!(G.isles && G.isles.list[2] && G.isles.list[2].boss)],
+  ['aldmere', '👑', 'The Crown of Aldmere', 'Defeat the Drowned King of Aldmere', () => !!(G.isles && G.isles.list[11] && G.isles.list[11].boss)],
+);
+
 /* ---------------- Loop ---------------- */
 let last = performance.now(), mmT = 0, ambT = 0, fpsA = 0;
 function update(dt) {
-  G.time += dt; if (!G.under) updateWeather(dt);
+  G.time += dt; if (!G.under || G.under.isle) updateWeather(dt);
   G.stats.play += dt; if (P.gold > G.stats.maxGold) G.stats.maxGold = P.gold; if ((G.achT = (G.achT || 0) - dt) <= 0) { G.achT = 2; checkAch(); }
   input.wx = cam.x + (input.mx - VW / 2) / ZOOM; input.wy = cam.y + (input.my - VH / 2) / ZOOM;
   const px0 = P.x, py0 = P.y; updatePlayer(dt); if (dt > 0) { P.avx = (P.x - px0) / dt; P.avy = (P.y - py0) / dt; }
   if (G.arena) arenaTick(dt, px0, py0);
   if (tells.length) updateTells(dt);
   if (!G.under) storyTick(dt);
-  if (G.under && !G.under.interior) updateTraps(dt);
+  if (G.under && !G.under.interior && !G.under.isle) updateTraps(dt);
   if (G.tut) tutTick(dt);
   if (G.siege && !G.under) updateSiege(dt);
   runHooks('tick', dt);

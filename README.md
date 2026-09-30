@@ -138,6 +138,25 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 - Companions and soldiers: hire spearmen, bowmen and knights from castle captains (daily pay), or recruit four named sellswords found in the villages, including a healer and a venom archer. Named companions are knocked down, never killed.
 - Property: buy a house in a friendly village (rest, a safe stash, and you wake there if you fall), or restore a ruined fort that pays a daily income and can be garrisoned.
 - Crafting: fletch every arrow type at market benches, and at the royal forges improve gear up to Masterwork or bind a dungeon relic into a blade to enchant it.
+- **The seas and the Deep:**
+  - **A ship of your own:** buy one at any harbour: a Cog, a Carrack or a War Galley. Walk down the jetty and board her. A/D steer, W makes sail and S slows.
+  - **Sailing:** the wind shifts as you sail. Sailing with it is fast; galleys row into it. Click to loose a volley from your crew. Press E to go ashore anywhere, and your crew and horse come with you.
+  - **Harbours** repair, fetch and upgrade your ship.
+  - **Pirates** hunt the coasts and the open sea. Trade volleys, then come alongside and press E to board her for a fight on her deck and the loot in her hold. At night, beware the ghost ship. Sink and your crew is washed ashore, and the wreck is towed to a harbour.
+  - **The Deep:** sail off the edge of the map to open the chart of the Deep. It holds twelve islands, each generated from your world's seed:
+    - Blackwater Haven, a pirate town with a fence and a pirate lord
+    - the Drowned Monastery
+    - Serpent's Reef, with a sea serpent that dives and bursts up beneath you
+    - the Isle of Oris, whose archmage sells the rarest tomes and the Elixir of Youth
+    - Frostholm and its frost giant
+    - the Ember Isle and its drake
+    - Smugglers' Cove
+    - the Shipwreck Shoals
+    - the Siren Rocks
+    - the Kelp Isles and their witch
+    - the Sunken Temple and its guardian
+    - far beyond them all, **Aldmere, Isle of the First King**, where the Drowned King guards the Crown of Aldmere.
+  - **Voyages** take days and can bring storms, whales and pirates. The islands' bosses guard unique prizes, and islands remember what you have cleared and looted.
 - **The Fifth Kingdom (sandbox):**
   - **Founding:** with a seat of your own (a fief or a restored fort), a company of at least four, level 10 and 3,000 gold for the coronation, you can crown yourself from the Realm tab (H).
   - **Your banner:** name the realm and choose its colours, one of eight emblems and a motto. It becomes a fifth crown on the map and in the diplomacy council. Your former liege calls it treason and goes to war, unless they love you dearly.
@@ -207,7 +226,7 @@ On the world map: right-click sets a waypoint, Shift+right-click pins a note (cl
 
 ## Achievements and statistics
 
-81 achievements are shared by every game in your browser (see the main menu or pause menu). The pause menu's *Your Journey* page tracks time played, distance, kills, arrows, dungeons, sieges, tourneys and more, and the story's closing screen shows it too.
+86 achievements are shared by every game in your browser (see the main menu or pause menu). The pause menu's *Your Journey* page tracks time played, distance, kills, arrows, dungeons, sieges, tourneys and more, and the story's closing screen shows it too.
 
 ## License
 
