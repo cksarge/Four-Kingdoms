@@ -1935,7 +1935,7 @@ const TINFO = [
   { n: 'Darkness', c: '#0c0906', spd: 0, block: 1, mm: '#0c0906' },
 ];
 let W = null;
-function terAt(tx, ty) { if (tx < 0 || ty < 0 || tx >= WW || ty >= WH) return G.under && !G.under.isle && !G.under.deck ? (G.under.interior ? T.VOID : T.ROCK) : T.SEA; return W.ter[ty * WW + tx]; }
+function terAt(tx, ty) { if (tx < 0 || ty < 0 || tx >= WW || ty >= WH) return G.under && G.under.oob != null ? G.under.oob : G.under && !G.under.isle && !G.under.deck ? (G.under.interior ? T.VOID : T.ROCK) : T.SEA; return W.ter[ty * WW + tx]; }
 function blockedTile(tx, ty) { if (tx < 0 || ty < 0 || tx >= WW || ty >= WH) return true; const i = ty * WW + tx; return TINFO[W.ter[i]].block === 1 || W.solid[i] === 1; }
 function blockedPx(x, y) { return blockedTile(Math.floor(x / TS), Math.floor(y / TS)); }
 function ownerAtPx(x, y) { const tx = clamp(Math.floor(x / TS), 0, WW - 1), ty = clamp(Math.floor(y / TS), 0, WH - 1); return W.own[ty * WW + tx]; }
@@ -8346,7 +8346,7 @@ function renderWorld(t) {
   g.fillStyle = G.under && !G.under.isle && !G.under.deck ? (G.under.interior ? '#0c0906' : '#1a1612') : '#24507e'; g.fillRect(0, 0, VW, VH);
   g.save(); g.translate(-vx, -vy);
   const CS = CH * TS;
-  const sea = !G.under || !!G.under.isle, c0 = sea ? Math.floor(vx / CS) : Math.max(0, Math.floor(vx / CS)), c1 = sea ? Math.floor((vx + VW) / CS) : Math.min(CW - 1, Math.floor((vx + VW) / CS)), r0 = sea ? Math.floor(vy / CS) : Math.max(0, Math.floor(vy / CS)), r1 = sea ? Math.floor((vy + VH) / CS) : Math.min(CHH - 1, Math.floor((vy + VH) / CS));
+  const sea = !G.under || !!G.under.isle || G.under.oob != null, c0 = sea ? Math.floor(vx / CS) : Math.max(0, Math.floor(vx / CS)), c1 = sea ? Math.floor((vx + VW) / CS) : Math.min(CW - 1, Math.floor((vx + VW) / CS)), r0 = sea ? Math.floor(vy / CS) : Math.max(0, Math.floor(vy / CS)), r1 = sea ? Math.floor((vy + VH) / CS) : Math.min(CHH - 1, Math.floor((vy + VH) / CS));
   for (let cy = r0; cy <= r1; cy++) for (let cx = c0; cx <= c1; cx++) { const c = getChunk(cx, cy); if (c) g.drawImage(c, cx * CS, cy * CS, CS + 1, CS + 1); else { g.fillStyle = tcol(cx * CH + (CH >> 1), cy * CH + (CH >> 1)); g.fillRect(cx * CS, cy * CS, CS, CS); } }
   // water shimmer
   if (settings.quality !== 'low') {
@@ -13405,7 +13405,7 @@ function roadEnter(resume) {
   W = D.W; setWorldSize(D.n); ents = party; projs = []; pickups = []; parts = []; texts = []; tells = []; chunkCache.clear(); G.arena = null; horseEnt = null;
   const en = D.entry; P.x = en.x; P.y = en.y; P.kbx = P.kby = 0; P.dodge = 0; P.drawing = false; cam.x = P.x; cam.y = P.y;
   party.forEach(e => { const f = findFree(P.x + rand(-50, 50), P.y + rand(-30, 20)); e.x = f.x; e.y = f.y; e.target = null; e.downed = 0; });
-  G.under = Object.assign(U || {}, { road: true, id: 'rd' + R.ri + '_' + (R.at ? R.at.r + '_' + R.at.i : 'g'), name: `${B.n} · ${(RNODE[t] || { n: 'The Way In' }).n}`, t, D, won: !!resume || !RCOMBAT.includes(t), dark: kind === 'delve' ? .82 : B.night || kind === 'boss' && B.final ? .5 : t === 'camp' ? .45 : 0, b });
+  G.under = Object.assign(U || {}, { road: true, id: 'rd' + R.ri + b + '_' + (R.at ? R.at.r + '_' + R.at.i : 'g'), name: `${B.n} · ${(RNODE[t] || { n: 'The Way In' }).n}`, t, D, won: !!resume || !RCOMBAT.includes(t), oob: kind === 'delve' ? DUN_TH[DELVE_OF[b]].wall : kind === 'deck' ? T.SEA : B.wall, dark: kind === 'delve' ? .82 : B.night || kind === 'boss' && B.final ? .5 : t === 'camp' ? .45 : 0, b });
   if (kind === 'delve') spawnDungeon(G.under, D); if (kind === 'delve') { W.interacts.forEach(it => { if (it.type === 'dexit') it.type = 'rdexit'; }); }
   $('mmWrap').classList.add('hidden');
   G.wx = { type: B.wx && kind !== 'delve' && kind !== 'deck' ? B.wx : 'clear', amt: B.wx ? .75 : 0, t: 1e9, reg: 'road', next: null }; G.snowAmt = b === 'frost' ? .6 : 0;
