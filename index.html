@@ -112,6 +112,21 @@ body.touch #helpTouch{display:block}
 .seaList{max-height:330px;overflow:auto;margin-top:8px;display:flex;flex-direction:column;gap:5px}.seaRow{padding:6px 8px;border:1px solid rgba(160,122,58,.3);border-radius:6px;background:rgba(0,0,0,.25);cursor:pointer;font-size:13.5px}.seaRow:hover{border-color:#e7c35a}.seaRow .dim{font-size:12.5px}
 #seaChart .isle:hover circle{stroke:#ffd24a;stroke-width:3}
 @media (max-width:760px){.seaBody{grid-template-columns:1fr}}
+#roadObj{position:absolute;left:50%;top:92px;transform:translateX(-50%);min-width:220px;text-align:center;padding:6px 14px 7px;background:rgba(15,10,5,.82);border:1px solid #6b5230;border-radius:6px;pointer-events:none}#roadObj b{display:block;font-family:var(--fh);color:var(--gold-l);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase}#roadObj span{display:block;font-size:13.5px;color:var(--ink2)}.rdoT{height:5px;margin-top:4px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden}.rdoF{height:100%;background:linear-gradient(90deg,#b0802a,#ffd24a);transform-origin:left}body.touch #roadObj{top:60px;zoom:.8}
+#roadMap{width:100%;border:1px solid #6b5230;border-radius:6px;background:#1e1710}#roadMap .rnAv{cursor:pointer}#roadMap .rnAv:hover circle{filter:brightness(1.3)}.rnPulse{animation:rnP 1.4s ease-in-out infinite}@keyframes rnP{0%,100%{opacity:.35}50%{opacity:1}}
+.rdRealms{display:flex;align-items:center;margin:10px 0 6px}.rdRealms span{width:26px;height:26px;border-radius:50%;border:2px solid #6b5230;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted)}.rdRealms span.on{border-color:var(--gold-l);color:var(--gold-l)}.rdRealms span.done{border-color:#8fe07a;color:#8fe07a}.rdRealms i{flex:1;height:2px;background:#6b5230}
+.rdLine{font-size:14px;margin:4px 0}.rdH{font-family:var(--fh);color:var(--gold);font-size:11.5px;letter-spacing:.16em;margin:12px 0 5px}.rdWarn{color:#ff9d8a;margin:8px 0;font-style:italic}.rdHint{color:var(--muted);margin:8px 0;font-style:italic;font-size:13.5px}
+.rdRelics{display:flex;flex-wrap:wrap;gap:5px}.rdRel{font-size:12.5px;padding:3px 7px;border:1px solid rgba(255,210,74,.4);border-radius:10px;color:#ffe08a;background:rgba(0,0,0,.25);cursor:default}.rdRel.bl{border-color:rgba(255,240,176,.4);color:#fff0b0}.rdRel.cu{border-color:rgba(255,138,122,.45);color:#ff9d8a}
+.rsTop{text-align:center;color:var(--ink2);margin-bottom:4px}.rsTop b{color:var(--gold-l);font-size:18px}
+.rsClasses{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.rsCls{padding:8px 10px;border:1px solid #6a5028;border-radius:6px;background:rgba(0,0,0,.25);cursor:pointer}.rsCls.on{border-color:var(--gold-l);background:linear-gradient(180deg,rgba(138,106,46,.55),rgba(60,42,20,.7))}.rsCls.locked{opacity:.62;cursor:default}.rsCls .btn{margin-top:6px}
+.rsN{font-family:var(--fh);font-weight:700;color:var(--gold-l);font-size:13.5px;letter-spacing:.06em}.rsW{color:#ffd24a;font-size:12px}.rsD{font-size:13px;color:var(--ink2);line-height:1.25;margin-top:2px}.rsK{font-size:12px;color:var(--muted);margin-top:3px}
+.rsDaily{margin-top:14px;padding:9px 12px;border:1px solid rgba(143,208,255,.35);border-radius:6px;background:rgba(20,40,60,.3)}.rsDT{font-family:var(--fh);color:#8fd0ff;font-size:12.5px;letter-spacing:.12em}.rsDD{font-size:13.5px;margin:4px 0 6px}
+.rsHist{font-size:13px;max-height:120px;overflow-y:auto}.rsRun{padding:2px 0;color:var(--muted)}.rsRun.won{color:#ffe08a}
+.modeCard.road .mcT::before{content:'⚔ ';color:#ff9a5a}.modeCard.slotCard.road{border-color:#b0703a}
+#roadEndScreen{background:radial-gradient(ellipse at center,rgba(40,26,8,.55),rgba(0,0,0,.93))}#roadEndScreen .panel{width:min(700px,calc(94vw/var(--ui-scale)));text-align:center}.rdEndLead{font-size:16px;margin:4px 0 12px}
+.rdStats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0}.rdStats div{padding:6px;border:1px solid rgba(160,122,58,.3);border-radius:6px;background:rgba(0,0,0,.2)}.rdStats b{display:block;font-size:19px;color:var(--gold-l);font-family:var(--fh)}.rdStats span{font-size:12px;color:var(--muted)}
+.rdRenown{font-family:var(--fh);font-size:22px;color:#ffd24a;margin:12px 0 4px}.rdRenown span{font-size:14px;color:var(--muted);font-family:var(--fb, Georgia)}.rdUnl{margin:4px 0}#rdEndBody .rdRelics{justify-content:center;margin:10px 0}
+@media (max-width:620px){.rsClasses{grid-template-columns:1fr}.rdStats{grid-template-columns:repeat(2,1fr)}}
 #battleBar{position:absolute;left:50%;top:92px;transform:translateX(-50%);display:flex;gap:10px;align-items:center;padding:6px 12px;background:rgba(15,10,5,.82);border:1px solid #6b5230;border-radius:6px;pointer-events:none}
 .btSide{width:200px}.btN{font-family:var(--fh);font-size:11.5px;color:#f5e6bd;text-align:center;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.btT{height:8px;background:#1a120a;border:1px solid #5d4526;border-radius:3px;overflow:hidden}.btF{height:100%;transition:width .3s}.btVs{font-size:18px;color:#ffd24a}
 body.touch #battleBar{top:60px;zoom:.8}
@@ -643,6 +658,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <button class="hbtn" data-open="pause" title="Menu (Esc)">Esc</button>
       </div>
     </div>
+    <div id="roadObj" class="hidden"></div>
     <div id="battleBar" class="hidden"><div class="btSide"><div class="btN" id="btAn"></div><div class="btT"><div class="btF" id="btAf"></div></div></div><div class="btVs">⚔</div><div class="btSide"><div class="btN" id="btBn"></div><div class="btT"><div class="btF" id="btBf"></div></div></div></div>
     <div id="siegeBar" class="hidden"><div class="sgN" id="sgN"></div><div class="sgT"><div class="sgF" id="sgF"></div></div></div>
     <div id="bossBar" class="hidden"><div class="bbN" id="bbN"></div><div class="bbT"><div class="bbF" id="bbF"></div></div></div>
@@ -680,6 +696,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div id="modePick" class="modeBox">
         <div class="modeCard story" data-mode="story"><div class="mcT">STORY MODE</div><div class="mcD">Follow a hedge knight's tale across the four kingdoms. Your choices shape the realm and decide one of many endings.</div></div>
         <div class="modeCard" data-mode="sandbox"><div class="mcT">SANDBOX</div><div class="mcD">The open realm with no story. Explore, fight, trade and meddle in diplomacy for as long as you like.</div></div>
+        <div class="modeCard road" data-mode="road"><div class="mcT">THE LONG ROAD</div><div class="mcD">A roguelite journey across three random realms to the Hollow Reach. Choose your path, win relics and blessings, and try to break the Hollow King. When you fall, the run ends, but your renown unlocks new heroes.</div><div class="mcS">8 heroes · 10 oaths · a new Daily Road each day</div></div>
         <div class="modeCard tut" data-mode="tutorial"><div class="mcT">TUTORIAL</div><div class="mcD">A quick lesson in the training yard: moving, fighting, archery, riding and the menus. Afterwards, keep playing the same world as an endless sandbox.</div><div class="mcS">About five minutes · Knight difficulty · Medium world</div></div>
       </div>
       <div id="setupBox" class="hidden">
@@ -706,6 +723,19 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <label class="setChk" id="exploredChk"><input type="checkbox" id="optExplored"> Start with the whole map explored <span>(hidden places stay secret)</span></label>
         <div class="lockNote hidden" id="exploredLock">Forsaken: you must discover the realm yourself</div>
         <div class="setBtns"><button class="btn sm" id="btnSetupBack">Back</button><button class="btn gold" id="btnSetupGo">Forge the Realm</button></div>
+      </div>
+      <div id="roadSetup" class="hidden">
+        <div class="rsTop" id="rsRenown"></div>
+        <div class="setH">YOUR HERO</div>
+        <div class="rsClasses" id="rsClasses"></div>
+        <div class="setupRow">
+          <div><div class="setH">OATH</div><div class="choice" id="rsOath"></div><div class="segNote" id="rsOathNote"></div></div>
+          <div><div class="setH">DIFFICULTY</div><div class="choice" id="rsDiff"></div><div class="segNote">Harder roads earn more renown.</div></div>
+        </div>
+        <div class="rsDaily" id="rsDaily"></div>
+        <div class="setH">PAST RUNS</div>
+        <div class="rsHist" id="rsHist"></div>
+        <div class="setBtns"><button class="btn sm" id="rsBack">Back</button><button class="btn gold" id="rsGo">Set Out</button></div>
       </div>
       <div id="slotBox" class="hidden"><div id="slotList" class="modeBox slotList"></div><div class="setBtns"><button class="btn sm" id="btnSlotBack">Back</button><span class="segNote" style="margin:0">Each slot can hold a story or a sandbox game.</span></div></div>
       <div id="newConfirm" class="confirmBox hidden">
@@ -872,6 +902,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <div><kbd data-k="KeyZ">Z</kbd> <kbd data-k="KeyX">X</kbd> <kbd data-k="KeyV">V</kbd> <kbd data-k="KeyB">B</kbd> Cast the spells in your four slots (set them in the spellbook, under Skills)</div><div><kbd>Esc</kbd> Pause / close</div>
       </div>
       <p style="margin-top:12px"><b style="font-family:var(--fh);color:var(--gold-l)">MAGIC.</b> Any knight can learn a spell or two. Court mages in the royal cities sell tomes; the wizard towers in each kingdom teach stronger magic to those who climb them and pass their trials. Spells cost mana, the blue bar, which returns on its own. A staff (two-handed) looses bolts that cost no mana and strengthens your spells. Rings, amulets and glyphs add mana, spell power and resistances. Herbs grow wild everywhere: brew them into potions at an apothecary, a court mage or a tower laboratory, or anywhere with an Alchemist's Kit.</p>
+      <p style="margin-top:12px"><b style="font-family:var(--fh);color:var(--gold-l)">THE LONG ROAD.</b> A roguelite mode, chosen from New Game. Cross three random realms, then the Hollow Reach. Press <kbd data-k="KeyM">M</kbd> (or walk to the glowing waymarker) to see your route and choose the next stop: battles, champions, duels, delves, boarding actions, events, merchants, forges, wizards, shrines, campfires and treasure. Wounds do not heal by themselves, and if you fall the run is over. The game saves after every stop. Renown from each run unlocks new heroes, and winning unlocks harder oaths.</p>
       <div id="helpTouch" style="margin-top:12px;padding:10px 12px;border:1px solid rgba(154,117,54,.4);border-radius:6px;background:rgba(0,0,0,.25)"><b style="font-family:var(--fh);color:var(--gold-l)">ON A PHONE OR TABLET</b><br>Drag anywhere on the left of the screen to move. <b>⚔</b> attacks (hold it to draw a bow, release to shoot), <b>🛡</b> blocks, <b>↻</b> dodges, <b>✦</b> is your special move and <b>✋</b> talks and interacts (or tap the prompt). Attacks and arrows aim at the nearest foe by themselves. The small buttons sprint, mount, swap weapons, switch arrows, eat, drink a potion, call your companions and go fullscreen. On the map, drag to pan, pinch to zoom, tap a place for details and press and hold to set a waypoint.</div>
       <p style="margin-top:12px">You begin as a poor hedge knight near a village of Albion. Explore the continent, hunt bandits, complete quests, trade goods between kingdoms, and build your reputation with four rival crowns. Your deeds shift the balance between the realms: help one kingdom and its rivals will take notice.</p>
       <p>Bandit camps hide in forests, hills and mountains; harder camps guard better loot. Kingdom soldiers turn hostile if your reputation falls too low, or if you swear allegiance to their enemy. Villages offer work, rest, rumors and trade. Rulers grant audiences in their castles.</p>
@@ -885,6 +916,25 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div class="ptitle">THE DEEP</div>
       <div class="orn">✦ A chart of the islands beyond the edge of the world ✦</div>
       <div class="seaBody"><svg id="seaChart" viewBox="0 0 600 420"></svg><div id="seaSide"></div></div>
+    </div>
+  </div>
+
+  <!-- THE LONG ROAD -->
+  <div id="roadScreen" class="screen">
+    <div class="panel rv" style="width:min(1000px,96vw)">
+      <div class="closeX" data-close>✕</div>
+      <div class="ptitle">THE LONG ROAD</div>
+      <div class="orn">✦ Choose your way ✦</div>
+      <div class="seaBody"><svg id="roadMap" viewBox="0 0 600 520"></svg><div id="roadSide"></div></div>
+    </div>
+  </div>
+  <div id="roadEndScreen" class="screen">
+    <div class="panel rv">
+      <div class="endKicker" id="rdEndKick"></div>
+      <div class="ptitle" id="rdEndTitle"></div>
+      <div class="orn">✦</div>
+      <div id="rdEndBody"></div>
+      <div class="endBtns"><button class="btn gold" id="rdEndAgain">Walk Another Road</button><button class="btn" id="rdEndMenu">Main Menu</button></div>
     </div>
   </div>
 
@@ -1015,7 +1065,7 @@ const sgn = n => (n > 0 ? '+' : '') + Math.round(n);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 /* Hooks: the bigger systems (magic, courts, armies, the realm, the seas, the Tide, the Long Road) each register here
    for reset, save, load and the game clocks, so the core save/load and loop code only needs one call per hook. */
-const HOOKS = { reset: [], save: [], load: [], newgame: [], daily: [], tick: [], slow: [], hud: [], draw: [], recalc: [], kill: [], pad: [], succession: [], bigmap: [], minimap: [], owner: [], captured: [], preload: [], courtRender: [], isleBoss: [], chunk: [], tideEnd: [] };
+const HOOKS = { reset: [], save: [], load: [], newgame: [], daily: [], tick: [], slow: [], hud: [], draw: [], recalc: [], kill: [], pad: [], succession: [], bigmap: [], minimap: [], owner: [], captured: [], preload: [], courtRender: [], isleBoss: [], chunk: [], tideEnd: [], perfect: [] };
 const hook = (n, fn) => { HOOKS[n].push(fn); };
 // New NPC roles, world interactions and keys register here: ROLES[role] = { label(e), talk(e) }, IACTS[type] = { label(it, pl), act(it, pl) },
 // KEYFN[code] = fn (the code is the default key; players can rebind it in Settings), PANELS[code] = UI screen to toggle.
@@ -2673,7 +2723,7 @@ function dismount() {
   SND.play('mount');
 }
 function toggleMount() {
-  if (G.under) { toast('Your horse waits for you outside.'); return; }
+  if (G.under && !G.under.road) { toast('Your horse waits for you outside.'); return; }
   if (!P.eq.horse) { toast('You have no horse. Loot or buy one from a stable master.'); return; }
   if (P.mounted) { dismount(); return; }
   if (G.arena) { toast('Your horse will not come near the grave-mist.'); return; }
@@ -2862,10 +2912,11 @@ function updatePlayer(dt) {
   updateFishing(dt);
   G.snowAmt = (G.snowAmt || 0) + ((inSnow() ? 1 : 0) - (G.snowAmt || 0)) * Math.min(1, dt * .7);
   // regen slowly out of combat
-  P.combatT = (P.combatT || 0) - dt; if (P.combatT <= 0 && P.hp < P.maxHp && !P.plague) P.hp = Math.min(P.maxHp, P.hp + dt * DIFF().regen);
+  P.combatT = (P.combatT || 0) - dt; if (P.combatT <= 0 && P.hp < P.maxHp && !P.plague && G.mode !== 'road') P.hp = Math.min(P.maxHp, P.hp + dt * DIFF().regen);
 }
 function playerDie() {
   if (G.state === 'dead') return;
+  if (G.mode === 'road' && roadDie()) return;
   P.hp = 0; G.state = 'dead'; SND.play('death'); addShake(12); G.stats.deaths++;
   for (let i = 0; i < 30; i++) addPart(P.x, P.y, rand(-150, 150), rand(-150, 150), '#8a1a12', rand(.5, 1.2), 3);
   if (bloodlineDeath(!!DIFF().ironman)) return;
@@ -2972,6 +3023,7 @@ function turnToward(a, b, s) { const d = angDiff(a, b); return a + clamp(d, -s, 
 
 function playerHostileTo(e) {
   if (e.dead || e.isPlayer) return false;
+  if (e.roadFoe) return true;
   if (e.dummy) return true;
   if (e.kind === 'horse' || e.important) return false;
   if (e.faction === 'civ') return !!e.aggroPlayer && !e.civ;
@@ -3019,7 +3071,7 @@ function damage(t, amt, src, o = {}) {
       const into = DODGE_T - P.dodge;
       if (into < DODGE_PERFECT) {
         P.st = Math.min(P.maxSt, P.st + 8); SND.play('perfect');
-        addText(P.x, P.y - 34, 'Perfect dodge!', '#ffe08a', 13);
+        addText(P.x, P.y - 34, 'Perfect dodge!', '#ffe08a', 13); runHooks('perfect');
         for (let i = 0; i < 8; i++) addPart(P.x, P.y, rand(-90, 90), rand(-90, 40), '#fff4c0', .35, 2.5);
         return 0;
       }
@@ -3609,7 +3661,7 @@ function addShake(v) { if (settings.shake) G.shake = Math.min(18, G.shake + v); 
 let DAYLEN = 480;
 const dayNum = () => Math.floor(G.time / DAYLEN + .3) + 1;
 const tod = () => (G.time / DAYLEN + .3) % 1;
-function darkness() { if (G.under && G.under.rift) return .5 * nightSight(); if (G.under && !G.under.isle && !G.under.deck) return (G.under.interior ? .3 : settings.quality === 'low' ? .55 : .86) * nightSight(); const t = tod(); if (t > .27 && t < .73) return 0; const d = t <= .27 ? .27 - t : t - .73; return Math.min(.58, d * 4.2) * nightSight(); }
+function darkness() { if (G.under && G.under.road) return (G.under.dark || 0) * nightSight(); if (G.under && G.under.rift) return .5 * nightSight(); if (G.under && !G.under.isle && !G.under.deck) return (G.under.interior ? .3 : settings.quality === 'low' ? .55 : .86) * nightSight(); const t = tod(); if (t > .27 && t < .73) return 0; const d = t <= .27 ? .27 - t : t - .73; return Math.min(.58, d * 4.2) * nightSight(); }
 const nightSight = () => !P || G.state === 'menu' ? 1 : (P.fx && P.fx.night > 0) || (P.S && P.S.night) ? .35 : P.fx && P.fx.light > 0 ? .6 : 1;
 /* ---------------- Seasons & weather ---------------- */
 const SEASON_DAYS = 6, SEASONS = ['Spring', 'Summer', 'Autumn', 'Winter'];
@@ -4581,7 +4633,7 @@ function evWolves() {
 
 /* ---------------- Shops ---------------- */
 function goodsFactor(id, k, selling) { if (k == null) return 1; if (KDATA[k].produces === id) return .6; if (KDATA[k].wants === id) return selling ? 1.65 : 1.5; return 1; }
-function buyPrice(it, shop) { return Math.max(1, Math.round(itemValue(it) * (1 - .05 * SK('trade')) * seasonPrice(it.id) * goodsFactor(it.id, shop.k) * (shop.k != null ? repMul(shop.k) : 1.15))); }
+function buyPrice(it, shop) { return Math.max(1, Math.round(itemValue(it) * (1 - .05 * SK('trade')) * seasonPrice(it.id) * goodsFactor(it.id, shop.k) * (shop.k != null ? repMul(shop.k) : 1.15) * (shop.road ? roadPriceMul() : 1))); }
 function sellPrice(it, shop) { if (shop.fence) return Math.max(1, Math.round(itemValue(it) * .6)); return Math.max(1, Math.round(itemValue(it) * .42 * (1 + .05 * SK('trade')) * goodsFactor(it.id, shop.k, true) * (shop.k != null ? clamp(1 + K.rep[shop.k] / 300, .75, 1.3) : 1))); }
 /* ---------------- City trades: shops in townhouses, stalls on the market plaza ---------------- */
 const CITY_SHOPS = {
@@ -7760,6 +7812,7 @@ const UI = {
   ids: { act: 'actScreen', ach: 'achScreen', stats: 'statScreen', skills: 'skillScreen', mode: 'modeScreen', cont: 'contScreen', pause: 'pauseScreen', inv: 'invScreen', map: 'mapScreen', dip: 'dipScreen', quests: 'questScreen', settings: 'settingsScreen', help: 'helpScreen', shop: 'shopScreen' },
   open(n) {
     if (n === 'journal') { qTab = 'beasts'; jSel = null; n = 'quests'; if (this.isOpen('quests')) { withOverworld(renderQuests); return; } }
+    if (G.mode === 'road' && G.state !== 'menu' && P) { if (n === 'map') n = 'road'; else if (n === 'dip' || n === 'court' || n === 'sea') { toast('There are no crowns to court on the Long Road. Only the road.'); return; } }
     if (n === 'map' && G.under && !G.under.interior) { toast('Your map is no use down here. Find your way back to the ladder.'); return; }
     if (dialogOpen) closeDialog();
     if (this.isOpen(n)) return;
@@ -8409,7 +8462,7 @@ function renderWorld(t) {
     }
   }
   // weather: rain, snow, fog, sandstorms
-  if (playing && !G.under) drawWeather(ctx, VW, VH, vx, vy, t);
+  if (playing && (!G.under || G.under.road)) drawWeather(ctx, VW, VH, vx, vy, t);
   // edge indicators
   if (playing && G.state === 'play' && !G.under) {
     const tq = Q.active.find(q => q.id === Q.tracked); const marks = [];
@@ -8459,7 +8512,7 @@ function updateHUD(force) {
   const SG = G.siege, sgOn = SG && !G.under && dist(P.x, P.y, W.places[SG.o].x, W.places[SG.o].y) < 2400;
   setIf('sg', sgOn ? SG.o + '|' + Math.round(SG.prog * 20) : '', () => { $('siegeBar').classList.toggle('hidden', !sgOn); if (sgOn) { const o = W.places[SG.o]; $('sgN').textContent = SG.att === 'bandit' ? `RAID ON ${o.name.toUpperCase()}` : `SIEGE OF ${o.name.toUpperCase()} · ${KDATA[SG.att].name.toUpperCase()} ATTACKS`; $('sgF').style.transform = `scaleX(${SG.prog})`; } });
   const own = ownerAtPx(P.x, P.y); const rs = statusOf(K.rep[own]);
-  if (G.under) { setIf('terr', 'u' + G.under.id, () => { const bu = bannerURL(G.under.owner); $('terrBanner').style.visibility = bu ? '' : 'hidden'; if (bu) $('terrBanner').src = bu; $('terrName').textContent = G.under.name; }); setIf('terrRep', 'u' + G.under.id, () => $('terrRep').innerHTML = G.under.isle ? 'The Deep' : G.under.deck ? 'At sea' : G.under.interior ? (W.places[G.under.place] ? W.places[G.under.place].name : KDATA[G.under.owner || 0].full) : 'Underground'); }
+  if (G.under) { setIf('terr', 'u' + G.under.id, () => { const bu = bannerURL(G.under.owner); $('terrBanner').style.visibility = bu ? '' : 'hidden'; if (bu) $('terrBanner').src = bu; $('terrName').textContent = G.under.name; }); setIf('terrRep', 'u' + G.under.id, () => $('terrRep').innerHTML = G.under.road ? `The Long Road · realm ${G.road ? G.road.ri + 1 : 1} of 4` : G.under.isle ? 'The Deep' : G.under.deck ? 'At sea' : G.under.interior ? (W.places[G.under.place] ? W.places[G.under.place].name : KDATA[G.under.owner || 0].full) : 'Underground'); }
   else setIf('terr', own, v => { $('terrBanner').style.visibility = ''; $('terrBanner').src = bannerURL(v); $('terrName').textContent = KDATA[v].full; });
   const bnt = G.bounty && G.bounty[own] >= 5 ? G.bounty[own] : 0;
   if (!G.under) setIf('terrRep', `${repTitle(own)}|${Math.round(K.rep[own])}|${rs.c}|${bnt}`, () => $('terrRep').innerHTML = `<span style="color:${K.rep[own] <= -40 ? '#ff5a3a' : rs.c}">${repTitle(own)}</span> · Rep ${sgn(K.rep[own])}${bnt ? ` · <span style="color:#ff8a6a">Wanted ${bnt}g</span>` : ''}`);
@@ -8550,7 +8603,7 @@ function renderPause() {
   $('quitConfirm').classList.add('hidden');
   const k = ownerAtPx(P.x, P.y), al = P.allegiance != null ? `${repTitle(P.allegiance)} of ${KDATA[P.allegiance].name}` : 'Wandering knight';
   const pl = !G.under && nearestPlace(P.x, P.y, p => p.disc && (p.type === 'village' || p.type === 'castle' || p.type === 'outpost'));
-  const where = G.under ? `${G.under.name}${G.under.interior ? '' : ', underground'}` : pl && dist(P.x, P.y, pl.x, pl.y) < 14 * TS ? `${pl.name}, ${KDATA[k].full}` : `The wilds of ${KDATA[k].name}`;
+  const where = G.under ? `${G.under.name}${G.under.interior || G.under.road ? '' : ', underground'}` : pl && dist(P.x, P.y, pl.x, pl.y) < 14 * TS ? `${pl.name}, ${KDATA[k].full}` : `The wilds of ${KDATA[k].name}`;
   $('pauseHero').innerHTML = `<canvas id="pausePort" width="128" height="128"></canvas><div style="flex:1;min-width:0"><div class="ph1">${esc(pFull())}, ${pAge()} · Level ${P.lvl} · ${al}${P.fief ? ` · Warden of ${W.places[P.fief.v].name}` : ''}</div><div class="ph2">${where}</div><div class="ph2">${SEASONS[curSeason]}, day ${dayNum()} · ${G.mode === 'story' ? (STORY && !STORY.done ? `Story · Act ${ROMAN[storyAct()]}` : 'Story') : G.fromStory ? 'Sandbox · story complete' : 'Sandbox'} · ${DIFF().name}</div><div class="phChips"><span>${fmt(P.gold)} gold</span><span>${Math.ceil(P.hp)} / ${P.maxHp} health</span><span>${fmt(G.kills)} foes slain</span><span>${Object.keys(ACHS).length} / ${ACH.length} achievements</span></div></div>`;
   drawPortrait($('pausePort'), P);
   document.querySelectorAll('#pauseScreen [data-icon]').forEach(img => { const id = img.dataset.icon; img.src = id === 'banner' ? bannerURL(P.allegiance ?? k) : itemIcon(id); });
@@ -8689,6 +8742,7 @@ addEventListener('keydown', ev => {
   if (G.state !== 'play' || e.repeat) return;
   const tog = { KeyI: 'inv', KeyM: 'map', KeyK: 'dip', KeyJ: 'quests', KeyP: 'skills', KeyL: 'journal', ...PANELS }[e.code]; if (tog === 'journal') { if (UI.isOpen('quests') && (qTab === 'beasts' || qTab === 'lore')) UI.close(); else UI.open('journal'); return; }
   if (tog === 'quests' && !UI.isOpen('quests') && (qTab === 'beasts' || qTab === 'lore')) qTab = 'active';
+  if (tog && G.mode === 'road' && roadKeyTog(tog)) return;
   if (tog) { if (tog === 'map' && G.under && G.under.isle) { toast('The maps of the Four Kingdoms do not reach this far. Sail off the island to see the chart of the Deep.'); return; } if (tog === 'map' && G.under && !G.under.interior) { toast('Your map is no use down here. Find your way back to the ladder.'); return; } UI.toggle(tog); return; }
   if (UI.stack.length) return;
   if (e.code === 'Space') tryDodge();
@@ -8734,11 +8788,11 @@ function hasSave() { return !!readSlot(G.slot || 1); }
 function migrateSaves() { // saves from before slots move into the first free slots
   ['fk_story', 'fk_save'].forEach(old => { let v = null; try { v = localStorage.getItem(old); } catch (e) { } if (!v) return; const n = firstFreeSlot(); if (!n) return; try { const d = JSON.parse(v); if (old === 'fk_story') d.mode = 'story'; else d.mode = d.mode || 'sandbox'; localStorage.setItem(slotKey(n), JSON.stringify(d)); localStorage.removeItem(old); } catch (e) { } });
 }
-const modeOf = d => d && d.mode === 'story' ? 'story' : 'sandbox';
+const modeOf = d => d && (d.mode === 'story' || d.mode === 'road') ? d.mode : 'sandbox';
 const wasStory = d => !!d && (!!d.fromStory || (d.mode === 'story' && !!d.story && !!d.story.done));
 function slotCard(n, d, acts) {
   const fs = wasStory(d), m = fs ? 'sandbox' : modeOf(d);
-  return `<div class="modeCard slotCard${d ? (fs ? ' fromstory' : m === 'story' ? ' story' : '') : ' empty'}" data-n="${n}"><div class="mcT">SLOT ${n}${d ? ` · ${fs ? 'SANDBOX <span class="wasStory">✦ FORMERLY STORY</span>' : m === 'story' ? 'STORY' : d.tutDone === false ? 'TUTORIAL' : 'SANDBOX'}` : ''}</div><div class="mcD">${d ? saveSummary(d) : '<i>Empty</i>'}</div>${acts && d ? `<div class="slotActs"><button class="btn sm" data-dl="${n}" title="Download this save">⬇ Download</button><button class="btn sm red" data-del="${n}">Delete</button></div>` : ''}</div>`;
+  return `<div class="modeCard slotCard${d ? (fs ? ' fromstory' : m === 'story' ? ' story' : m === 'road' ? ' road' : '') : ' empty'}" data-n="${n}"><div class="mcT">SLOT ${n}${d ? ` · ${fs ? 'SANDBOX <span class="wasStory">✦ FORMERLY STORY</span>' : m === 'story' ? 'STORY' : m === 'road' ? 'THE LONG ROAD' : d.tutDone === false ? 'TUTORIAL' : 'SANDBOX'}` : ''}</div><div class="mcD">${d ? saveSummary(d) : '<i>Empty</i>'}</div>${acts && d ? `<div class="slotActs"><button class="btn sm" data-dl="${n}" title="Download this save">⬇ Download</button><button class="btn sm red" data-del="${n}">Delete</button></div>` : ''}</div>`;
 }
 function downloadSave(d) {
   if (!d) return; const day = Math.floor((d.time || 0) / DAYLEN + .3) + 1;
@@ -8779,7 +8833,7 @@ function renderSlotPick() {
     $('slotBox').classList.add('hidden'); $('newConfirm').classList.remove('hidden');
   });
 }
-function showSlotPick() { ['modePick', 'setupBox', 'newConfirm'].forEach(id => $(id).classList.add('hidden')); $('slotBox').classList.remove('hidden'); $('modeScreen').querySelector('.panel').classList.remove('wide'); $('modeTitle').textContent = 'CHOOSE A SLOT'; renderSlotPick(); }
+function showSlotPick() { ['modePick', 'setupBox', 'newConfirm', 'roadSetup'].forEach(id => $(id).classList.add('hidden')); $('slotBox').classList.remove('hidden'); $('modeScreen').querySelector('.panel').classList.remove('wide'); $('modeTitle').textContent = 'CHOOSE A SLOT'; renderSlotPick(); }
 let pendingMode = 'sandbox';
 function refreshMenu() {
   $('btnContinue').classList.toggle('hidden', !slotsUsed().length);
@@ -8787,13 +8841,14 @@ function refreshMenu() {
 }
 function saveSummary(d) {
   const day = Math.floor((d.time || 0) / DAYLEN + .3) + 1, when = d.savedAt ? new Date(d.savedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+  if (d.mode === 'road' && d.road && RCLASS[d.road.cls]) { const r = d.road; return `${RCLASS[r.cls].n} · ${RB[r.realms[r.ri]].n} (realm ${r.ri + 1} of ${r.realms.length})${r.oath ? ` · Oath ${r.oath}` : ''}${r.daily ? ' · Daily Road' : ''} · Level ${d.P && d.P.lvl || 1} · ${r.relics.length} relics` + (when ? `<div class="mcS">Saved ${esc(when)}</div>` : ''); }
   const o = normOpts(d.opts); let top = `Day ${day} · Level ${d.P && d.P.lvl || 1} · ${DIFFS[o.diff].name} · ${SIZES[o.size].name}`;
   if (wasStory(d)) { const en = d.story && d.story.ending && ENDINGS[d.story.ending]; top = `Story finished${en ? `: <i>${esc(en.t)}</i>` : ''} · now free roam · ` + top; }
   else if (d.story) { const mq = (d.Q.active || []).find(q => q.type === 'story' && q.main); top = (mq ? esc(mq.title) : 'In progress') + ' · ' + top; }
   return top + (when ? `<div class="mcS">Saved ${esc(when)}</div>` : '');
 }
 let newOpts = normOpts((() => { try { return JSON.parse(localStorage.getItem('fk_newopts') || 'null'); } catch (e) { return null; } })());
-function showModePick() { $('modeScreen').querySelector('.panel').classList.remove('wide'); ['setupBox', 'newConfirm', 'slotBox'].forEach(id => $(id).classList.add('hidden')); $('modePick').classList.remove('hidden'); $('modeTitle').textContent = 'NEW GAME'; }
+function showModePick() { $('modeScreen').querySelector('.panel').classList.remove('wide'); ['setupBox', 'newConfirm', 'slotBox', 'roadSetup'].forEach(id => $(id).classList.add('hidden')); $('modePick').classList.remove('hidden'); $('modeTitle').textContent = 'NEW GAME'; }
 function renderSetup() {
   const o = newOpts, seg = (id, list, key, lab) => { $(id).innerHTML = list.map((x, i) => `<div class="sb ${o[key] === i ? 'on' : ''}" data-i="${i}">${lab ? lab(x, i) : x.name}</div>`).join(''); $(id).querySelectorAll('.sb').forEach(el => el.onclick = () => { o[key] = +el.dataset.i; SND.play('ui'); renderSetup(); }); };
   $('diffGrid').innerHTML = DIFFS.map((d, i) => `<div class="diffCard ${o.diff === i ? 'on' : ''}${d.ironman ? ' iron' : ''}" data-i="${i}"><div class="dcL">${d.ironman ? 'LEVEL ∞' : 'LEVEL ' + (i + 1)}</div><div class="dcN">${d.name.toUpperCase()}</div></div>`).join('');
@@ -8817,10 +8872,11 @@ function renderSetup() {
   ['wildSeg', 'exploredChk'].forEach(id => $(id).classList.toggle('setLocked', iron)); ['wildLock', 'exploredLock'].forEach(id => $(id).classList.toggle('hidden', !iron));
 }
 $('optExplored').onchange = e => { newOpts.explored = e.target.checked; };
-function beginNew() { G.slot = pendingSlot || firstFreeSlot() || 1; try { localStorage.removeItem(slotKey(G.slot)); } catch (e) { } if (pendingMode === 'tutorial') { UI.closeAll(); G.tutPending = true; startNew('sandbox', {}); return; } try { localStorage.setItem('fk_newopts', JSON.stringify(newOpts)); } catch (e) { } UI.closeAll(); startNew(pendingMode, Object.assign({}, newOpts)); }
+function beginNew() { G.slot = pendingSlot || firstFreeSlot() || 1; try { localStorage.removeItem(slotKey(G.slot)); } catch (e) { } if (pendingMode === 'road') { UI.closeAll(); roadStart(roadCfg); return; } if (pendingMode === 'tutorial') { UI.closeAll(); G.tutPending = true; startNew('sandbox', {}); return; } try { localStorage.setItem('fk_newopts', JSON.stringify(newOpts)); } catch (e) { } UI.closeAll(); startNew(pendingMode, Object.assign({}, newOpts)); }
 $('btnNew').onclick = () => { SND.init(); showModePick(); UI.open('mode'); };
 document.querySelectorAll('#modePick .modeCard').forEach(el => el.addEventListener('click', () => {
   pendingMode = el.dataset.mode; SND.play('ui');
+  if (pendingMode === 'road') { openRoadSetup(); return; }
   if (pendingMode === 'tutorial') { showSlotPick(); return; } // fixed settings, so straight to picking a slot
   $('modePick').classList.add('hidden'); $('setupBox').classList.remove('hidden'); $('modeScreen').querySelector('.panel').classList.add('wide');
   $('modeTitle').textContent = pendingMode === 'story' ? 'NEW STORY' : 'NEW SANDBOX'; renderSetup();
@@ -8831,7 +8887,7 @@ $('btnSetupGo').onclick = () => {
 };
 $('btnNewYes').onclick = () => beginNew();
 $('btnNewNo').onclick = () => { $('newConfirm').classList.add('hidden'); showSlotPick(); };
-$('btnSlotBack').onclick = () => { SND.play('ui'); if (pendingMode === 'tutorial') { showModePick(); return; } $('slotBox').classList.add('hidden'); $('setupBox').classList.remove('hidden'); $('modeScreen').querySelector('.panel').classList.add('wide'); $('modeTitle').textContent = pendingMode === 'story' ? 'NEW STORY' : 'NEW SANDBOX'; };
+$('btnSlotBack').onclick = () => { SND.play('ui'); if (pendingMode === 'tutorial') { showModePick(); return; } if (pendingMode === 'road') { $('slotBox').classList.add('hidden'); openRoadSetup(); return; } $('slotBox').classList.add('hidden'); $('setupBox').classList.remove('hidden'); $('modeScreen').querySelector('.panel').classList.add('wide'); $('modeTitle').textContent = pendingMode === 'story' ? 'NEW STORY' : 'NEW SANDBOX'; };
 $('btnContinue').onclick = () => { SND.init(); contMode = 'play'; renderCont(); UI.open('cont'); };
 $('btnImport').onclick = $('btnMenuImport').onclick = () => { SND.init(); $('importFile').value = ''; $('importFile').click(); };
 $('importFile').onchange = e => {
@@ -8902,6 +8958,7 @@ function packBits(arr) { const out = new Uint8Array(Math.ceil(arr.length / 8)); 
 function unpackBits(str, n) { const s = atob(str); const a = new Uint8Array(n); for (let i = 0; i < n; i++) a[i] = (s.charCodeAt(i >> 3) >> (i & 7)) & 1; return a; }
 function saveGame(silent, quiet) {
   if (!P || G.state === 'menu' || G.ironDead) return;
+  if (G.mode === 'road' && G.road && (!G.road.cleared || G.road.ended)) { if (!silent) toast('On the Long Road, your game saves itself after each stop. Win this fight first.'); return; }
   const qStrip = q => { const c = Object.assign({}, q); delete c.ent; delete c.foes; return c; };
   const data = {
     v: 2, seed: W.seed, time: G.time, kills: G.kills, uid: uidCounter, waypoint: G.mapWaypoint, savedAt: Date.now(),
@@ -8925,7 +8982,7 @@ function saveGame(silent, quiet) {
 function migrateSave(d) { if (!d.v || d.v < 2) { d.flags = d.flags || {}; d.sagaDone = d.sagaDone || []; d.v = 2; } return d; }
 function loadGame(d) {
   migrateSave(d); resetState(); runHooks('preload', d);
-  G.mode = d.mode === 'story' ? 'story' : 'sandbox'; STORY = d.story || null; // before anything draws the HUD, which reads story quests
+  G.mode = d.mode === 'story' || d.mode === 'road' ? d.mode : 'sandbox'; STORY = d.story || null; // before anything draws the HUD, which reads story quests
   newPlayer();
   Object.assign(P, d.P); P.inv = d.P.inv; P.eq = d.P.eq; P.mounted = false; uidCounter = d.uid || (Math.max(0, ...P.inv.map(i => i.uid)) + 1);
   recalc();
@@ -8948,7 +9005,7 @@ function loadGame(d) {
     if (q.type === 'assist') q.stage = 0;
     if (q.type === 'story') { q.sp = 0; q.amb = 0; q.x0 = 0; }
   });
-  G.mode = d.mode === 'story' ? 'story' : 'sandbox'; STORY = d.story || null; G.fromStory = d.fromStory || null; if (G.mode === 'story' && STORY && STORY.done) storyToSandbox(); // a finished story carries on as a sandbox
+  G.mode = d.mode === 'story' || d.mode === 'road' ? d.mode : 'sandbox'; STORY = d.story || null; G.fromStory = d.fromStory || null; if (G.mode === 'story' && STORY && STORY.done) storyToSandbox(); // a finished story carries on as a sandbox
   G.flags = d.flags || {}; G.sagaDone = d.sagaDone || [];
   runHooks('load', d);
   // settings belong to the device, not the save, so an imported game keeps this device's settings
@@ -13127,6 +13184,871 @@ hook('daily', day => { if (crownP() && P.spouse && !(P.kids || []).length && Q.a
   if (realmOn()) extra.push({ h: 'THE FIFTH REALM', html: `<p><b style="color:${G.realm.color}">${esc(G.realm.name)}</b> ("${esc(G.realm.motto)}") holds ${realmPlaces().length} places from its seat at ${esc(W.places[G.realm.seat].name)}.${G.realm.vassals.length ? ` ${G.realm.vassals.map(k => esc(KDATA[k].name)).join(' and ')} swore fealty.` : ''}</p>` });
   if (extra.length && epiPages.length) { epiPages.splice(epiPages.length - 1, 0, ...extra); renderEpi(); } }; }
 
+
+/* =====================================================================
+   THE LONG ROAD — a roguelite mode. A run crosses three realms drawn from
+   eight, then the Hollow Reach, choosing a path across a branching map of
+   battles, elites, events, merchants, forges, towers, shrines, campfires,
+   treasure, delves, duels, boarding actions and mysteries. Win relics and
+   blessings, learn spells, recruit followers; die, and the road starts
+   again, but the renown you earned unlocks new heroes and harder oaths.
+   Runs save between nodes, in a save slot like any other game.
+   ===================================================================== */
+const RB = { // biomes: floor tiles, wall tile, tint (0-3), foes by tier, boss
+  greenmarch: { n: 'The Greenmarch', floor: [T.GRASS, T.FOREST, T.PLAINS], wall: T.MOUNT, own: 0, trees: [0, 1], foes: [['bandit', 'archer', 'wolf', 'boar'], ['bandit', 'xbowman', 'shieldbearer', 'archer'], ['leader', 'shieldbearer', 'xbowman', 'knight']], boss: { kind: 'hill_giant', name: 'Gorm of the Greenmarch', hp: 1400 }, song: 'fields', d: 'Green hills and bandit roads.' },
+  sands: { n: 'The Sunscorch Sands', floor: [T.DESERT, T.SAND], wall: T.MOUNT, own: 1, trees: [4, 5], foes: [['scorpion', 'jackal', 'bandit'], ['scorpion', 'apprentice', 'xbowman'], ['fire_elemental', 'apprentice', 'scorpion']], boss: { kind: 'scorpion', name: 'The Sand Queen', hp: 1300, dmgM: 3.2, scale: 2.6, adds: 'scorpion' }, song: 'desert', d: 'Dunes, scorpions and a drake in the noon glare.', wx: 'sand' },
+  frost: { n: 'The Frostcrown Heights', floor: [T.TUNDRA, T.TUNDRA, T.ICE], wall: T.SNOW, own: 2, trees: [6, 7], foes: [['snow_wolf', 'goat', 'bandit'], ['snow_wolf', 'ice_bear', 'frost_elemental'], ['frost_elemental', 'ice_bear', 'hknight']], boss: { kind: 'rimeheart', name: 'Rimeheart the Unmelting', hp: 1500, adds: 'snow_wolf' }, song: 'frost', d: 'Snow and the things that live in it.', wx: 'snow' },
+  rotfen: { n: 'The Rotfen', floor: [T.SWAMP, T.GRASS], wall: T.MOUNT, own: 3, trees: [3, 2], foes: [['spider', 'wolf', 'bandit'], ['spider', 'wight', 'archer'], ['wight', 'hollow_archer', 'spider']], boss: { kind: 'spider', name: 'The Rot Mother', hp: 1200, dmgM: 2.6, scale: 2.4, adds: 'spider' }, song: 'barrow', d: 'Black water, webs, and the drowned.', wx: 'fog' },
+  isles: { n: 'The Shattered Isles', floor: [T.SAND, T.GRASS], wall: T.SEA, own: 0, trees: [5, 0], foes: [['bandit', 'xbowman'], ['bandit', 'shieldbearer', 'xbowman'], ['leader', 'xbowman', 'warlock']], boss: { kind: 'leader', name: 'Redmaw, Lord of the Isles', hp: 1100, dmgM: 1.5, scale: 1.35, adds: 'xbowman' }, song: 'isles', d: 'Pirates, reefs and a serpent in the shallows.' },
+  ember: { n: 'The Emberwaste', floor: [T.DESERT, T.DIRT], wall: T.ROCK, own: 1, trees: [4], foes: [['fire_elemental', 'scorpion'], ['fire_elemental', 'warlock', 'apprentice'], ['fire_elemental', 'warlock', 'stone_golem']], boss: { kind: 'wyvern', name: 'Cinderwing, the Ember Drake', hp: 1600 }, song: 'embers', d: 'Ash plains under a burning mountain.' },
+  feywood: { n: 'The Fey Wood', floor: [T.DENSE, T.FOREST], wall: T.MOUNT, own: 3, trees: [0, 2, 1], foes: [['wisp', 'wolf', 'boar'], ['wisp', 'apprentice', 'animated_armor'], ['warlock', 'animated_armor', 'wisp']], boss: { kind: 'archmage', name: 'The Archlich of the Fey Wood', hp: 1000, adds: 'wisp' }, song: 'arcane', d: 'A wood where the light itself is hungry.', night: 1 },
+  sunken: { n: 'The Sunken Kingdom', floor: [T.CRYPT, T.CRYPT, T.CAVE], wall: T.ROCK, own: 2, trees: [], foes: [['wight', 'hollow_archer'], ['animated_armor', 'wight', 'stone_golem'], ['stone_golem', 'hknight', 'animated_armor']], boss: { kind: 'animated_armor', name: 'The Drowned Guardian', hp: 1400, dmgM: 1.5, scale: 1.7, adds: 'wight' }, song: 'crypt', d: 'Halls of a kingdom the sea took.' },
+  hollow: { n: 'The Hollow Reach', floor: [T.CRYPT, T.DIRT], wall: T.ROCK, own: 2, trees: [], foes: [['wight', 'hollow_archer'], ['wight', 'hknight', 'hollow_archer'], ['hknight', 'wight', 'warlock']], boss: { kind: 'hollow_king', name: 'The Hollow King Unbound', hp: 2000, titan: 1 }, song: 'black_tower', d: 'The end of the road.', night: 1, final: 1 },
+};
+const RB_POOL = ['greenmarch', 'sands', 'frost', 'rotfen', 'isles', 'ember', 'feywood', 'sunken'];
+const RNODE = {
+  fight: { n: 'Battle', g: '⚔', c: '#d8c8a0' }, elite: { n: 'Elite', g: '☠', c: '#ff7a5a' }, event: { n: 'Event', g: '?', c: '#8fd0ff' }, shop: { n: 'Merchant', g: '⚖', c: '#ffd24a' },
+  forge: { n: 'Forge', g: '⚒', c: '#e0a060' }, tower: { n: "Wizard's Tower", g: '✦', c: '#c890ff' }, shrine: { n: 'Shrine', g: '✚', c: '#fff0b0' }, camp: { n: 'Campfire', g: '🔥', c: '#ff9a3a' },
+  treasure: { n: 'Treasure', g: '◆', c: '#ffd24a' }, delve: { n: 'Delve', g: '⛏', c: '#b8a080' }, duel: { n: 'Duel', g: '⚜', c: '#e8e0c0' }, board: { n: 'Boarding', g: '⚓', c: '#6ab0e0' }, mystery: { n: 'Mystery', g: '◈', c: '#a0a0ff' }, boss: { n: 'Boss', g: '♛', c: '#ff4a2a' },
+};
+const RELICS = {
+  iron_heart: { n: 'Iron Heart', d: '+40 maximum health.', st: { hp: 40 } }, whetstone: { n: 'Whetstone of the Old Road', d: 'Melee blows deal 15% more damage.', st: { dmg: .15 } },
+  focus_gem: { n: 'Focus Gem', d: 'Spells 20% stronger.', st: { sp: .2 } }, mana_well: { n: 'Mana Well', d: '+40 mana, and it returns 25% faster.', st: { mp: 40, mpr: .25 } },
+  stone_charm: { n: 'Stone Charm', d: '+6 armor.', st: { def: 6 } }, runner_band: { n: "Courier's Band", d: '+40 stamina.', st: { st: 40 } },
+  lucky_coin: { n: 'Lucky Coin', d: '+8% critical hits.', st: { luck: .08 } }, thorn_mail: { n: 'Thorn Mail', d: 'Reflect 20% of melee damage.', st: { thorns: .2 } },
+  vampire_fang: { n: 'Vampire Fang', d: 'Heal 5% of the damage you deal.', st: { life: .05 } }, regen_moss: { n: 'Regrowth Moss', d: 'Regenerate 1.2 health a second.', st: { regen: 1.2 } },
+  salamander: { n: 'Salamander Scale', d: 'Half damage from fire.', st: { resF: .5 } }, bearskin: { n: 'Bearskin Cloak', d: 'Half damage from frost.', st: { resC: .5 } },
+  saint_bone: { n: "A Saint's Finger", d: '+35% damage against the Hollow.', st: { undead: .35 } },
+  blood_price: { n: 'The Blood Price', d: 'Every kill heals you for 6.' }, war_drum: { n: 'War Drum', d: 'Each kill: +6% damage for 8 seconds, stacking.' },
+  phoenix: { n: 'Phoenix Feather', d: 'Once per run, rise from death with half your health.' }, gold_tooth: { n: "Pirate's Gold Tooth", d: 'Win 35% more gold.' },
+  merchant_seal: { n: "Merchant's Seal", d: 'Merchants charge 20% less.' }, executioner: { n: "Executioner's Hood", d: '+50% damage against foes below 30% health.' },
+  giantslayer: { n: 'Giantslayer', d: '+25% damage against elites and bosses.' }, glass_cannon: { n: 'Glass Cannon', d: '+40% damage and spell power, but 30% less maximum health.', st: { dmg: .4, sp: .4, hpP: -.3 } },
+  ember_heart: { n: 'Ember Heart', d: 'Melee blows set foes burning.' }, frost_heart: { n: 'Frost Heart', d: 'Melee blows chill.' }, storm_heart: { n: 'Storm Heart', d: 'Melee blows sometimes chain lightning.' },
+  hound_whistle: { n: 'Hound Whistle', d: 'A war hound fights beside you in every battle.' }, banner_hope: { n: 'Banner of Hope', d: 'Your followers have 40% more health.' },
+  spellblade: { n: 'Spellblade Sigil', d: 'Casting a spell makes your next melee blow 60% stronger.' }, second_wind: { n: 'Second Wind', d: 'A perfect dodge restores 20 stamina and 10 health.' },
+  owl_eye: { n: 'Owl Eye', d: 'See in the dark.', st: { night: 1 } }, cartographer: { n: "Cartographer's Quill", d: 'Mysteries show what they hold on the route map.' },
+  squires_oath: { n: "Squire's Oath", d: '+15% maximum health.', st: { hpP: .15 } }, hawk_eye: { n: 'Hawk Eye', d: 'Bows deal 20% more damage.', st: { bow: .2 } },
+  cavalry: { n: 'Cavalry Spurs', d: 'Your lance and mounted blows hit 30% harder.', st: { mount: .3 } }, corsair: { n: "Corsair's Compass", d: 'Merchants sell one extra relic, and boarding actions pay double.' },
+  old_crown: { n: 'Crown of a Forgotten King', d: '+20 health, +20 mana, +10% damage and spell power.', st: { hp: 20, mp: 20, dmg: .1, sp: .1 } }, oathstone: { n: 'Oathstone', d: 'Heal 25% of your health after every battle.' },
+  quick_hands: { n: 'Quick Hands', d: 'Spells recharge 20% faster.', st: { cdr: .2 } }, deep_pockets: { n: 'Deep Pockets', d: 'Start each realm with 120 gold.' },
+};
+const START_RELICS = ['squires_oath', 'hawk_eye', 'mana_well', 'saint_bone', 'war_drum', 'cavalry', 'blood_price', 'corsair'];
+const RCLASS = {
+  knight: { n: 'Hedge Knight', d: 'Sword and shield, and stubbornness. The road\'s oldest companion.', cost: 0, gear: ['steel_sword', 'iron_shield', 'chainmail'], relic: 'squires_oath', items: [['bread', 3], ['potion', 1]] },
+  ranger: { n: 'Ranger', d: 'A recurve bow, a quiver of broadheads and a short sword for when they get close.', cost: 60, gear: ['recurve_bow', 'leather'], side: 'iron_sword', relic: 'hawk_eye', items: [['arrow', 120], ['broadhead', 60], ['bandage', 3]] },
+  battlemage: { n: 'Battlemage', d: 'A staff and three spells: fire, frost and a ward. Burn them, then stand fast.', cost: 90, gear: ['oak_staff', 'leather'], spells: ['firebolt', 'ward', 'frost_shard'], relic: 'mana_well', items: [['mana_potion', 2], ['potion', 1]] },
+  crusader: { n: 'Crusader', d: 'A steel sword, a heater shield and the saints\' own magic. The Hollow fear you.', cost: 120, gear: ['steel_sword', 'knight_shield', 'chainmail'], spells: ['mend', 'cleanse'], relic: 'saint_bone', items: [['potion', 1]] },
+  berserker: { n: 'Berserker', d: 'A worn greatsword, no shield and no fear. Every kill makes you worse to face.', cost: 120, gear: ['greatsword', 'leather'], q0: 1, relic: 'war_drum', items: [['berserk', 2], ['meat', 3]] },
+  lancer: { n: 'Lancer', d: 'A war horse and a knight\'s lance. Ride them down.', cost: 160, gear: ['war_lance', 'round_shield', 'chainmail', 'fast_horse'], side: 'iron_sword', relic: 'cavalry', items: [['bread', 2]] },
+  witch: { n: 'Witch', d: 'A warlock\'s staff and the forbidden arts. Drain their lives; spend your own.', cost: 160, gear: ['warlock_staff', 'padded'], spells: ['drain_life', 'fear', 'raise_thrall'], relic: 'blood_price', items: [['mana_potion', 2]] },
+  corsair: { n: 'Corsair', d: 'A notched old cutlass, a crossbow-armed first mate and a nose for gold.', cost: 200, gear: ['corsair_blade', 'leather'], q0: 1, relic: 'corsair', ally: 'crossbow', items: [['ale', 3], ['treasure_map', 1]] },
+};
+const OATHS = ['', 'Enemies have 10% more health', 'Elites appear more often', 'Bosses have 20% more health', 'Merchants charge 25% more', 'You begin with 75% of your health', 'Enemies deal 15% more damage', 'Campfires are rarer', 'Events hold more curses', 'Bosses enrage sooner', 'The Hollow King rises a third time'];
+const BLESSINGS = [
+  { id: 'oak', n: 'Blessing of the Oak', d: '+25 maximum health.', st: { hp: 25 } }, { id: 'hawk', n: 'Blessing of the Hawk', d: '+10% critical hits.', st: { luck: .1 } },
+  { id: 'saint', n: 'Blessing of Saint Oswin', d: 'Regenerate 0.6 health a second.', st: { regen: .6 } }, { id: 'boar', n: 'Blessing of the Boar', d: '+12% damage.', st: { dmg: .12, sp: .12 } },
+  { id: 'owl', n: 'Blessing of the Owl', d: '+25 mana and +10% spell power.', st: { mp: 25, sp: .1 } }, { id: 'stag', n: 'Blessing of the Stag', d: '+30 stamina.', st: { st: 30 } },
+];
+const CURSES = [
+  { id: 'rust', n: 'Curse of Rust', d: '-4 armor.', st: { def: -4 } }, { id: 'frail', n: 'Curse of Frailty', d: '-15% maximum health.', st: { hpP: -.15 } },
+  { id: 'dull', n: 'Curse of the Dull Blade', d: '-10% damage.', st: { dmg: -.1 } }, { id: 'greed', n: 'Curse of Greed', d: 'Merchants charge 30% more.' },
+];
+
+/* ---------------- Renown and unlocks, kept in this browser across every run ---------------- */
+const RMETA0 = () => ({ renown: 0, earned: 0, unlocked: ['knight'], oath: 0, runs: [], wins: 0, realms: 0, bosses: 0, best: 0, daily: {}, classWins: {}, runsN: 0 });
+function rMeta() { let m = null; try { m = JSON.parse(localStorage.getItem('fk_road') || 'null'); } catch (e) { } return Object.assign(RMETA0(), m || {}); }
+function rMetaPut(m) { try { localStorage.setItem('fk_road', JSON.stringify(m)); } catch (e) { } }
+const todayKey = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const TWISTS = {
+  gilded: { n: 'The Gilded Road', d: 'Begin with 300 gold, but merchants charge 25% more.' },
+  arcane: { n: 'The Arcane Road', d: 'Begin knowing three extra spells, with a Mana Well.' },
+  bloody: { n: 'The Red Road', d: 'Foes strike 25% harder, but every kill heals you for 5.' },
+  hoard: { n: "The Dragon's Road", d: 'Begin with three more relics, but 20% less maximum health.' },
+  wild: { n: 'The Wild Road', d: 'More events and mysteries, fewer merchants.' },
+};
+function dailyOf(key = todayKey()) { const r = mulberry32(strHash('longroad' + key)), cls = Object.keys(RCLASS), tw = Object.keys(TWISTS); return { key, seed: Math.floor(r() * 1e9), cls: cls[Math.floor(r() * cls.length)], twist: tw[Math.floor(r() * tw.length)], oath: 2 }; }
+
+/* ---------------- The run ---------------- */
+const rOn = () => G.mode === 'road' && !!G.road;
+const rHas = id => rOn() && G.road.relics.includes(id);
+const rOath = n => rOn() && G.road.oath >= n;
+const rNode = () => G.road && G.road.at ? G.road.map.rows[G.road.at.r][G.road.at.i] : null;
+const rDepth = () => G.road.ri * 9 + (G.road.at ? G.road.at.r : 0);
+const rTier = () => clamp(1 + Math.floor(rDepth() / 9), 1, 4);
+const rType = nd => nd.t === 'mystery' ? nd.m : nd.t;
+function newRun(cfg) {
+  const r = mulberry32(cfg.seed), pool = RB_POOL.slice();
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  return { v: 1, seed: cfg.seed, cls: cfg.cls, oath: cfg.oath || 0, daily: cfg.daily || null, twist: cfg.twist || null, diff: cfg.diff ?? 2, ri: 0, realms: pool.slice(0, 3).concat(['hollow']), map: null, at: null, cleared: true, relics: [], bless: [], curse: [], pending: null, phoenix: false, allies: 0,
+    stats: { kills: 0, gold: 0, nodes: 0, elites: 0, bosses: 0, events: 0, t0: 0 }, realmsDone: 0, ended: false };
+}
+function roadStats() {
+  const st = {}, add = s => { if (s) for (const k in s) st[k] = (st[k] || 0) + s[k]; }, R = G.road;
+  R.relics.forEach(id => RELICS[id] && add(RELICS[id].st)); R.bless.forEach(id => add((BLESSINGS.find(b => b.id === id) || {}).st)); R.curse.forEach(id => add((CURSES.find(b => b.id === id) || {}).st));
+  if (R.twist === 'hoard') st.hpP = (st.hpP || 0) - .2;
+  return st;
+}
+function roadPriceMul() { const R = G.road; return .85 * (rHas('merchant_seal') ? .8 : 1) * (rOath(4) ? 1.25 : 1) * (R.curse.includes('greed') ? 1.3 : 1) * (R.twist === 'gilded' ? 1.25 : 1); }
+function roadRenown(won) { const R = G.road, s = R.stats; return Math.round((s.nodes * 2 + s.elites * 6 + s.bosses * 20 + R.realmsDone * 10 + (won ? 60 : 0)) * (1 + .12 * R.oath) * ([.6, .75, 1, 1.3, 1.6, 2][R.diff] || 1)); }
+
+/* ---------------- Each realm's route: rows of nodes, Slay-the-Spire style ---------------- */
+function genRealmMap(ri) {
+  const R = G.road, b = R.realms[ri], r = mulberry32(R.seed * 31 + ri * 7919 + 11), rows = [], final = !!RB[b].final;
+  const base = { fight: 30, event: 17, shop: 7, forge: 5, tower: 5, shrine: 5, treasure: 3, delve: 5, duel: 4, board: b === 'isles' ? 9 : 2, mystery: 7 };
+  if (R.twist === 'wild') { base.event += 10; base.mystery += 6; base.shop = 3; }
+  const pickT = (row, ban) => {
+    const w = Object.assign({}, base); if (row >= 2) w.elite = rOath(2) ? 14 : 9; if (row >= 3) w.camp = rOath(7) ? 2 : 6; if (row < 2) { w.shop = 0; w.forge = 0; w.duel = 0; }
+    ban.forEach(t => { w[t] = 0; }); let tot = 0; for (const k in w) tot += w[k]; let x = r() * tot; for (const k in w) if ((x -= w[k]) <= 0) return k; return 'fight';
+  };
+  const n = final ? 6 : 8;
+  for (let row = 0; row < n; row++) {
+    const cnt = row === 0 ? 3 : 2 + Math.floor(r() * 3), list = [];
+    for (let i = 0; i < cnt; i++) {
+      const t = row === 0 ? 'fight' : row === 4 && r() < .55 ? 'treasure' : pickT(row, list.map(o => o.t).filter(x => x !== 'fight'));
+      list.push({ t, s: Math.floor(r() * 1e9), jx: r() - .5, jy: r() - .5, m: t === 'mystery' ? ['event', 'event', 'event', 'fight', 'treasure', 'shop', 'elite', 'shrine'][Math.floor(r() * 8)] : null });
+    }
+    rows.push(list);
+  }
+  rows.push([{ t: 'camp', s: Math.floor(r() * 1e9), jx: 0, jy: 0 }]); rows.push([{ t: 'boss', s: Math.floor(r() * 1e9), jx: 0, jy: 0 }]);
+  // each node reaches a run of the next row, so every node can be reached and no two paths cross
+  rows.forEach((row, k) => { const nx = rows[k + 1], a = row.length; row.forEach((nd, j) => { nd.next = []; if (!nx) return; const bN = nx.length, lo = Math.floor(j * bN / a), hi = Math.floor(((j + 1) * bN - 1) / a); for (let q = lo; q <= hi; q++) nd.next.push(q); if (j + 1 < a && hi + 1 < bN && Math.floor((j + 1) * bN / a) === hi + 1 && r() < .35) nd.next.push(hi + 1); }); });
+  return { b, rows };
+}
+
+/* ---------------- Node maps: small arenas in the realm's own ground ---------------- */
+const DELVE_OF = { greenmarch: 'cave', sands: 'mine', frost: 'ice', rotfen: 'spider', isles: 'cave', ember: 'mine', feywood: 'spider', sunken: 'crypt', hollow: 'crypt' };
+function genRoadMap(b, kind, seed) {
+  const B = RB[b], r = mulberry32(seed), nz = makeNoise(seed % 100000);
+  if (kind === 'deck') return genRoadDeck(r);
+  const n = kind === 'clear' ? 38 : kind === 'duel' ? 36 : kind === 'boss' ? 54 : 50, N = n * n, c = n / 2, at = (x, y) => y * n + x;
+  const ter = new Uint8Array(N), solid = new Uint8Array(N), clear = new Uint8Array(N), R0 = n * (kind === 'clear' ? .38 : .43), fl = B.floor;
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+    const d = Math.hypot(x - c, (y - c) * 1.08) + (fbm(nz, x / 8, y / 8, 3) - .5) * 9;
+    ter[at(x, y)] = d < R0 && x > 1 && y > 1 && x < n - 2 && y < n - 2 ? fl[Math.min(fl.length - 1, Math.floor(fbm(nz, x / 7 + 40, y / 7 + 40, 2) * fl.length * 1.15))] : B.wall;
+  }
+  const floorAt = (x, y) => x > 0 && y > 0 && x < n - 1 && y < n - 1 && !TINFO[ter[at(x, y)]].block && !solid[at(x, y)];
+  // the way in (south) and the way on (north), and a lane between them
+  const entry = { x: Math.round(c), y: Math.round(c + R0 - 4) }, exit = { x: Math.round(c), y: Math.round(c - R0 + 3) };
+  for (let y = exit.y - 2; y <= entry.y + 2; y++) for (let x = Math.round(c) - 2; x <= Math.round(c) + 2; x++) { if (!floorAt(x, y)) ter[at(x, y)] = fl[0]; clear[at(x, y)] = 1; }
+  for (let y = c - 5; y <= c + 5; y++) for (let x = c - 6; x <= c + 6; x++) { if (Math.hypot(x - c, y - c) < 6) { if (!floorAt(x, y)) ter[at(x, y)] = fl[0]; clear[at(x, y)] = 1; } }
+  // cover: boulders, and ponds in the wetter realms
+  const rocks = [];
+  if (kind !== 'clear') {
+    const nb = kind === 'duel' ? 3 : 7 + Math.floor(r() * 5);
+    for (let k = 0; k < nb; k++) {
+      const a = r() * TAU, d = R0 * (.3 + r() * .55), bx = Math.round(c + Math.cos(a) * d), by = Math.round(c + Math.sin(a) * d), s = r() < .6 ? 0 : 1, wet = (b === 'rotfen' || b === 'greenmarch' || b === 'isles') && r() < .35;
+      if (!wet && [0, 1].some(dy => [0, 1].some(dx => clear[at(bx + dx, by + dy)] || !floorAt(bx + dx, by + dy)))) continue;
+      if (!wet) { const w = s ? 2 : 1; for (let y = by; y < by + w; y++) for (let x = bx; x < bx + w; x++) solid[at(x, y)] = 1; rocks.push({ x: bx, y: by, w }); continue; }
+      for (let y = by - 1; y <= by + 1; y++) for (let x = bx - 1; x <= bx + 1; x++) if (floorAt(x, y) && !clear[at(x, y)] && Math.hypot(x - bx, y - by) <= 1.3) ter[at(x, y)] = T.WATER;
+    }
+  }
+  // keep only ground joined to the entry
+  const seen = new Uint8Array(N), st = [at(entry.x, entry.y)]; seen[st[0]] = 1;
+  while (st.length) { const i = st.pop(), x = i % n, y = (i - x) / n; for (const [dx, dy] of D4) { const j = at(x + dx, y + dy); if (!seen[j] && floorAt(x + dx, y + dy)) { seen[j] = 1; st.push(j); } } }
+  for (let i = 0; i < N; i++) if (!seen[i] && !TINFO[ter[i]].block && !solid[i]) ter[i] = B.wall;
+  const objs = [], ints = [], addO = o => { o.sy = o.sy ?? (o.y + o.h); objs.push(o); return o; };
+  rocks.forEach(o => addO({ k: 'rd_rock', x: o.x * TS, y: o.y * TS, w: o.w * TS, h: o.w * TS, v: hash2(o.x, o.y), b }));
+  // scatter: bones, rubble, webs, crystals, torches
+  const deco = { rotfen: ['web', 'bones'], feywood: ['crystal', 'web'], sunken: ['bones', 'rubble', 'torch'], hollow: ['bones', 'bones', 'torch'], frost: ['bones'], ember: ['rubble', 'bones'], sands: ['bones', 'rubble'], greenmarch: ['rubble'], isles: ['rubble'] }[b] || ['rubble'];
+  for (let k = 0; k < 10; k++) { const x = 2 + Math.floor(r() * (n - 4)), y = 2 + Math.floor(r() * (n - 4)); if (!seen[at(x, y)] || clear[at(x, y)]) continue; const kk = deco[Math.floor(r() * deco.length)]; addO(kk === 'torch' ? { k: 'torch', x: x * TS + 8, y: y * TS, w: 16, h: 18, sy: y * TS + 12 } : kk === 'crystal' ? { k: 'crystal', x: x * TS + 2, y: y * TS - 10, w: 28, h: 30 } : { k: kk, x: x * TS, y: y * TS, w: 32, h: 32, sy: y * TS + 2, v: r() * 3 }); }
+  addO({ k: 'rd_exit', x: exit.x * TS, y: exit.y * TS - 8, w: 32, h: 40 }); ints.push({ type: 'rdexit', x: exit.x * TS + 16, y: exit.y * TS + 26 });
+  // trees
+  const cw = Math.ceil(n / CH), trees = []; for (let q = 0; q < cw * cw; q++) trees.push([]);
+  for (let y = 1; y < n - 1; y++) for (let x = 1; x < n - 1; x++) {
+    const i = at(x, y); if (clear[i] || solid[i] || !seen[i]) continue; const t = ter[i];
+    const p = t === T.DENSE ? .34 : t === T.FOREST ? .2 : t === T.SWAMP ? .08 : t === T.GRASS ? .025 : t === T.TUNDRA ? .05 : t === T.DESERT ? .015 : 0; if (hash2(x * 13 + seed % 997, y * 17) >= p) continue;
+    const kind2 = t === T.DESERT ? 4 : t === T.TUNDRA ? 6 : t === T.SWAMP ? 3 : t === T.DENSE ? 1 : t === T.GRASS ? (hash2(x, y * 3) < .5 ? 0 : 2) : 0, tx = x * TS + 16, ty = y * TS + 20;
+    trees[Math.floor(ty / (CH * TS)) * cw + Math.floor(tx / (CH * TS))].push({ x: tx, y: ty, kind: kind2, s: .8 + hash2(x, y) * .35 });
+  }
+  const spots = [], edge = [];
+  for (let a = 0; a < 600 && spots.length < 14; a++) { const x = 3 + Math.floor(r() * (n - 6)), y = 3 + Math.floor(r() * (c + 2)); if (!seen[at(x, y)] || Math.hypot(x - entry.x, y - entry.y) < n * .38 || spots.some(s => Math.hypot(s.tx - x, s.ty - y) < 5)) continue; spots.push({ tx: x, ty: y, x: x * TS + 16, y: y * TS + 16 }); }
+  for (let a = 0; a < 800 && edge.length < 10; a++) { const ang = r() * TAU, x = Math.round(c + Math.cos(ang) * (R0 - 3)), y = Math.round(c + Math.sin(ang) * (R0 - 3) * .92); if (y > c + R0 * .4 || !seen[at(x, y)]) continue; edge.push({ x: x * TS + 16, y: y * TS + 16 }); }
+  if (!spots.length) spots.push({ x: c * TS, y: (c - 6) * TS }); if (!edge.length) edge.push(spots[0]);
+  return roadW(n, ter, solid, clear, objs, ints, trees, B.own, { entry: { x: entry.x * TS + 16, y: entry.y * TS + 8 }, exit: { x: exit.x * TS + 16, y: exit.y * TS + 16 }, center: { x: c * TS, y: c * TS }, spots, edge });
+}
+function genRoadDeck(r) { // two ships lashed together on open water
+  const n = 44, N = n * n, at = (x, y) => y * n + x, ter = new Uint8Array(N).fill(T.SEA), solid = new Uint8Array(N), clear = new Uint8Array(N).fill(1), objs = [], ints = [];
+  const hull = (x0, y0, w, h) => { for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) { const tp = y - y0 < 3 ? (w - Math.abs(x - x0 - w / 2 + .5) * 2 > (3 - (y - y0)) * 3 ? 1 : 0) : 1; if (tp) ter[at(x, y)] = T.PLANK; } };
+  hull(6, 9, 11, 27); hull(25, 7, 12, 30);
+  for (let y = 18; y <= 23; y += 1) for (let x = 17; x < 25; x++) if (y === 18 || y === 19 || y === 22 || y === 23) ter[at(x, y)] = T.BRIDGE;
+  [[11, 16], [11, 28], [30, 13], [30, 26]].forEach(([x, y]) => { solid[at(x, y)] = 1; objs.push({ k: 'rd_mast', x: x * TS, y: y * TS, w: TS, h: TS, sy: y * TS + TS }); });
+  [[8, 12], [14, 33], [27, 10], [35, 33], [34, 20]].forEach(([x, y]) => { solid[at(x, y)] = 1; objs.push({ k: 'rd_crate', x: x * TS, y: y * TS, w: TS, h: TS, sy: y * TS + TS, v: r() }); });
+  objs.push({ k: 'rd_exit', x: 11 * TS, y: 32 * TS - 8, w: 32, h: 40, sy: 32 * TS + 32, sea: 1 }); ints.push({ type: 'rdexit', x: 11 * TS + 16, y: 33 * TS });
+  const cw = Math.ceil(n / CH), trees = []; for (let q = 0; q < cw * cw; q++) trees.push([]);
+  const spots = [[28, 12], [33, 16], [29, 22], [34, 27], [28, 31], [32, 34]].map(([x, y]) => ({ x: x * TS + 16, y: y * TS + 16 }));
+  return roadW(n, ter, solid, clear, objs, ints, trees, 0, { entry: { x: 11 * TS + 16, y: 30 * TS }, exit: { x: 11 * TS + 16, y: 33 * TS }, center: { x: 31 * TS, y: 21 * TS }, spots, edge: spots, deck: 1 });
+}
+function roadW(n, ter, solid, clear, objs, ints, trees, own, extra) {
+  const N = n * n, cw = Math.ceil(n / CH), W2 = { size: n, seed: G.road ? G.road.seed : 1, ter, own: new Uint8Array(N).fill(own), solid, wall: new Uint8Array(N), clear, bord: new Uint8Array(N), hgt: new Float32Array(N), places: [], objs, chunkTrees: trees, chunkObjs: [], interacts: ints, caps: W.caps, rivers: [], landCount: [0, 0, 0, 0], towers: [], fish: [], hermits: [], start: { x: extra.entry.x, y: extra.entry.y }, startK: W.startK, road: 1 };
+  for (let q = 0; q < cw * cw; q++) W2.chunkObjs.push([]);
+  objs.forEach(o => { o.sy = o.sy ?? (o.y + o.h); const ci = Math.floor((o.y + o.h / 2) / (CH * TS)) * cw + Math.floor((o.x + o.w / 2) / (CH * TS)); if (W2.chunkObjs[ci]) W2.chunkObjs[ci].push(o); });
+  return Object.assign({ W: W2, n }, extra);
+}
+function addRoadObj(o) { const cw = Math.ceil(WW / CH); o.sy = o.sy ?? (o.y + o.h); W.objs.push(o); const ci = Math.floor((o.y + o.h / 2) / (CH * TS)) * cw + Math.floor((o.x + o.w / 2) / (CH * TS)); if (W.chunkObjs[ci]) W.chunkObjs[ci].push(o); return o; }
+
+/* ---------------- Walking the road: entering a node ---------------- */
+const RCOMBAT = ['fight', 'elite', 'boss', 'duel', 'board', 'delve', 'event'];
+const NODE_TITLE = { fight: 'A Fight on the Road', elite: 'A Champion Bars the Way', boss: 'The Master of This Realm', duel: 'A Challenge', board: 'Boarding Action', delve: 'Into the Deep Places', event: 'On the Road', shop: 'A Travelling Merchant', forge: 'A Roadside Forge', tower: "A Wizard's Tower", shrine: 'A Wayside Shrine', camp: 'Campfire', treasure: 'Treasure', gate: 'The Road Begins' };
+function roadEnter(resume) {
+  const R = G.road, nd = rNode(), b = R.map.b, B = RB[b], t = nd ? rType(nd) : 'gate';
+  const kind = t === 'delve' ? 'delve' : t === 'board' ? 'deck' : t === 'boss' ? 'boss' : t === 'duel' ? 'duel' : t === 'fight' || t === 'elite' ? 'field' : 'clear';
+  const party = ents.filter(e => e.follow && e.ally && !e.dead && !e.roadTmp && !e.caravan);
+  if (!G.over) G.over = { W, ents: ents.filter(e => !party.includes(e) && e !== horseEnt), projs, pickups, px: P.x, py: P.y };
+  const seed = nd ? nd.s : (R.seed * 7 + R.ri * 131) >>> 0; let D, U;
+  if (kind === 'delve') {
+    const th = DELVE_OF[b]; U = { id: 7000 + (seed % 9000), name: `${pick2(seed / 1e9, ['The Sunken', 'The Old', 'The Black', 'The Forgotten'])} ${DUN_TH[th].n}`, theme: th, tier: rTier(), type: 'dungeon' };
+    D = genDungeon(U); D.W.places = []; D.W.road = 1; U._dun = D; if (resume) { U.dcleared = true; D.spawns = []; }
+  } else D = genRoadMap(b, kind, seed);
+  W = D.W; setWorldSize(D.n); ents = party; projs = []; pickups = []; parts = []; texts = []; tells = []; chunkCache.clear(); G.arena = null; horseEnt = null;
+  const en = D.entry; P.x = en.x; P.y = en.y; P.kbx = P.kby = 0; P.dodge = 0; P.drawing = false; cam.x = P.x; cam.y = P.y;
+  party.forEach(e => { const f = findFree(P.x + rand(-50, 50), P.y + rand(-30, 20)); e.x = f.x; e.y = f.y; e.target = null; e.downed = 0; });
+  G.under = Object.assign(U || {}, { road: true, id: 'rd' + R.ri + '_' + (R.at ? R.at.r + '_' + R.at.i : 'g'), name: `${B.n} · ${(RNODE[t] || { n: 'The Way In' }).n}`, t, D, won: !!resume || !RCOMBAT.includes(t), dark: kind === 'delve' ? .82 : B.night || kind === 'boss' && B.final ? .5 : t === 'camp' ? .45 : 0, b });
+  if (kind === 'delve') spawnDungeon(G.under, D); if (kind === 'delve') { W.interacts.forEach(it => { if (it.type === 'dexit') it.type = 'rdexit'; }); }
+  $('mmWrap').classList.add('hidden');
+  G.wx = { type: B.wx && kind !== 'delve' && kind !== 'deck' ? B.wx : 'clear', amt: B.wx ? .75 : 0, t: 1e9, reg: 'road', next: null }; G.snowAmt = b === 'frost' ? .6 : 0;
+  if (P.eq.horse && !P.mounted && kind !== 'delve' && kind !== 'deck') spawnHorse(P.x + 40, P.y); if (P.mounted && (kind === 'delve' || kind === 'deck')) P.mounted = false;
+  if (rHas('hound_whistle')) { const f = findFree(P.x - 30, P.y + 10); mkActor('wolf', f.x, f.y, { ally: true, follow: true, roadTmp: true, name: 'War Hound', aggro: 420, leash: 99999, followDist: 50, fox: rand(-30, 30), foy: rand(-30, 30), _rd: 1, passiveA: false, tame: true }); }
+  if (!resume && RCOMBAT.includes(t)) roadSetup(t, D, nd); else roadNonCombat(t, D, nd, resume);
+  showAreaTitle(NODE_TITLE[t] ? NODE_TITLE[t].toUpperCase() : B.n.toUpperCase(), nd ? `${B.n} · ${['First', 'Second', 'Third', 'Last'][R.ri]} realm${R.oath ? ` · Oath ${R.oath}` : ''}` : B.d);
+  updateHUD(true);
+}
+/* the gear the road gives each kind of hero */
+function roadKit() {
+  const R = G.road, C = RCLASS[R.cls]; P.inv = []; P.eq = { weapon: null, weapon2: null, shield: null, armor: null, horse: null, ring: null, amulet: null };
+  C.gear.forEach(id => { const it = addItem(id, C.q0 && ITEMS[id].type === 'weapon' ? 0 : 1, 1, true); const s = slotOf(ITEMS[id].type); if (s && !P.eq[s]) P.eq[s] = it.uid; });
+  if (C.side) P.eq.weapon2 = addItem(C.side, 1, 1, true).uid;
+  (C.items || []).forEach(([id, n]) => addItem(id, 1, n, true));
+  P.spells = []; P.slots = [null, null, null, null]; (C.spells || []).forEach(id => learnSpell(id, true));
+  P.gold = 40; P.sp = 1; R.relics.push(C.relic);
+  if (C.ally) spawnPartyMember({ kind: C.ally, name: 'Mad Meg, First Mate', k: 0 });
+  if (R.twist === 'gilded') P.gold += 300;
+  if (R.twist === 'arcane') { shuffleR(SPELL_IDS.filter(id => SPELLS[id].t <= 2 && !P.spells.includes(id))).slice(0, 3).forEach(id => learnSpell(id, true)); if (!R.relics.includes('mana_well')) R.relics.push('mana_well'); }
+  if (R.twist === 'hoard') relicPool(3).forEach(id => R.relics.push(id));
+  recalc(); P.hp = Math.round(P.maxHp * (rOath(5) ? .75 : 1)); P.st = P.maxSt; P.mp = P.maxMp;
+}
+const shuffleR = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+function relicPool(n) { const own = G.road.relics; return shuffleR(Object.keys(RELICS).filter(id => !own.includes(id))).slice(0, n); }
+function gainRelic(id, quiet) {
+  const R = G.road; if (!RELICS[id] || R.relics.includes(id)) return; const h0 = P.maxHp; R.relics.push(id); recalc(); if (P.maxHp > h0) P.hp += P.maxHp - h0;
+  if (!quiet) { toast(`◆ Relic: <b style="color:#ffd24a">${RELICS[id].n}</b>. ${RELICS[id].d}`, 'gold'); SND.play('quest'); }
+  if (id === 'hound_whistle') { const f = findFree(P.x - 30, P.y + 10); mkActor('wolf', f.x, f.y, { ally: true, follow: true, roadTmp: true, name: 'War Hound', aggro: 420, leash: 99999, followDist: 50, _rd: 1, tame: true }); }
+}
+function gainBless(curse) {
+  const R = G.road, list = curse ? CURSES : BLESSINGS, have = curse ? R.curse : R.bless, pool = list.filter(b => !have.includes(b.id)); if (!pool.length) return null;
+  const b = pick(pool), h0 = P.maxHp; have.push(b.id); recalc(); if (P.maxHp > h0) P.hp += P.maxHp - h0;
+  toast(`${curse ? '☠' : '✚'} <b style="color:${curse ? '#ff8a7a' : '#fff0b0'}">${b.n}</b>: ${b.d}`, curse ? 'bad' : 'gold'); SND.play(curse ? 'hollow' : 'bless');
+  return b;
+}
+function rGold(n) { n = Math.round(n * (rHas('gold_tooth') ? 1.35 : 1)); P.gold += n; G.road.stats.gold += n; SND.play('coin'); return n; }
+function rHeal(f) { const a = Math.round(P.maxHp * f); P.hp = Math.min(P.maxHp, P.hp + a); return a; }
+
+/* ---------------- Foes ---------------- */
+function rFoe(kind, x, y, o = {}) {
+  const R = G.road, d = rDepth(), f = findFree(x, y);
+  const e = mkActor(kind, f.x, f.y, Object.assign({ tier: rTier(), roam: true, aggro: 900, leash: 99999, home: { x: f.x, y: f.y } }, o));
+  rConvert(e); e.aggro = o.aggro || 900;
+  const hm = (1 + d * .025) * (rOath(1) ? 1.1 : 1), dm = (1 + d * .018) * (rOath(6) ? 1.15 : 1) * (R.twist === 'bloody' ? 1.25 : 1);
+  e.hp = e.maxHp = Math.round(e.maxHp * hm * (o.hpM || 1)); e.dmg *= dm * (o.dmgM || 1);
+  return e;
+}
+function rConvert(e) { // everything hostile on the road fights as one host, and only against you
+  e._rd = 1; if (e.ally || e.party || e.civ || e.kind === 'horse' || e.important || e.roadAlly) return;
+  const b = ATYPES[e.kind] || {}; if (b.faction === 'hollow' || e.faction === 'hollow') e.undead = true;
+  e.faction = 'road'; e.roadFoe = true; e.aggroPlayer = true; e.passiveA = false; e.roam = true; if (e.leash < 900) e.leash = 900;
+}
+const rFoes = () => ents.filter(e => e.roadFoe && !e.dead);
+function rPool() { const B = RB[G.road.map.b], r = G.road.at ? G.road.at.r : 0; return B.foes[Math.min(2, Math.floor(r / 3) + (G.road.ri >= 2 ? 1 : 0))]; }
+function rCount() { return 3 + Math.floor(rDepth() / 7) + randi(0, 2); }
+function rGroup(n, at, pool = rPool(), o = {}) { const out = []; for (let i = 0; i < n; i++) out.push(rFoe(pick(pool), at.x + rand(-60, 60), at.y + rand(-50, 50), o)); return out; }
+const ELITE_MODS = {
+  giant: { n: 'Giant', f: e => { e.scale = (e.scale || 1) * 1.45; e.hp = e.maxHp = Math.round(e.maxHp * 1.6); e.dmg *= 1.2; e.spd *= .85; } },
+  swift: { n: 'Swift', f: e => { e.spd *= 1.4; e.cd *= .7; e.windT *= .75; } },
+  summoner: { n: 'Summoner', f: e => { e.summon = 11; } },
+  frenzied: { n: 'Frenzied', f: e => { e.frenzy = 1; } },
+  armored: { n: 'Ironclad', f: e => { e.guard = true; e.hp = e.maxHp = Math.round(e.maxHp * 1.25); } },
+  regen: { n: 'Undying', f: e => { e.regenR = .012; } },
+  burning: { n: 'Burning', f: e => { e.burnAura = 1; } },
+};
+const EPITHETS = ['the Red', 'the Grim', 'Ironhand', 'the Butcher', 'Oathbreaker', 'the Pale', 'Blackthorn', 'the Wolf', 'Skullsplitter', 'the Silent', 'Stormborn', 'the Hungry'];
+const RNAMES = ['Garrick', 'Mord', 'Hesk', 'Ulfra', 'Vane', 'Othra', 'Brand', 'Sorrel', 'Kael', 'Isbet', 'Dunmore', 'Tamsin', 'Roderic', 'Wynn'];
+function rElite(kind, at, mods) {
+  const e = rFoe(kind, at.x, at.y, { hpM: 3.2, dmgM: 1.25, named: true, boss: true, elite: true, tier: Math.min(4, rTier() + 1) });
+  e.name = `${pick(RNAMES)} ${pick(EPITHETS)}`; e.chief = e.name; mods.forEach(m => ELITE_MODS[m].f(e)); e.mods = mods; e.say = { text: pick(['None shall pass.', 'Your road ends here.', 'Another fool.', 'I have been waiting for you.']), t: 3 };
+  return e;
+}
+
+/* ---------------- Setting up a fight ---------------- */
+const OBJ_TXT = { rout: 'Rout the foe', waves: 'Hold the pass', wagon: 'Guard the supply wagon', captain: 'Slay their captain', banner: 'Hold the banner', totems: 'Break the totems', elite: 'Defeat the champion', boss: 'Defeat the master of this realm', duel: 'Win the duel', board: 'Take the ship', delve: 'Slay the guardian of the deep' };
+function roadSetup(t, D, nd) {
+  const U = G.under, R = G.road, r = mulberry32(nd.s + 3), spots = (D.spots || []).slice(), sp = () => spots.length ? spots.splice(Math.floor(Math.random() * spots.length), 1)[0] : pick(D.spots || [D.entry]);
+  U.t0 = G.time; U.obj = t; U.prog = 0;
+  if (t === 'fight') {
+    const objs = ['rout', 'rout', 'waves', 'wagon', 'captain', 'banner', 'totems']; U.obj = objs[Math.floor(r() * objs.length)];
+    const n = rCount();
+    if (U.obj === 'rout') { const g = n > 5 ? 3 : 2; for (let k = 0; k < g; k++) rGroup(Math.ceil(n / g), sp()); }
+    if (U.obj === 'waves') { U.wave = 1; U.waves = 3; rGroup(Math.ceil(n * .6), sp()); }
+    if (U.obj === 'wagon') { const c = D.center; U.wagon = mkActor('rwagon', c.x, c.y, { ally: true, name: 'Supply Wagon', roadAlly: true, _rd: 1, k: 0 }); U.wagon.hp = U.wagon.maxHp = 260 + rDepth() * 22; U.left = 48; U.next = 3; }
+    if (U.obj === 'captain') { const at = sp(), cap = rFoe(pick(RB[R.map.b].foes[2].filter(k => !ATYPES[k].ranged && !ATYPES[k].animal)) || 'leader', at.x, at.y, { hpM: 2.2, named: true, boss: true }); cap.name = `Captain ${pick(RNAMES)}`; cap.capt = true; U.capt = cap; rGroup(n, at); rGroup(2, sp()); }
+    if (U.obj === 'banner') { const c = D.center; U.banner = { x: c.x, y: c.y }; addRoadObj({ k: 'rd_banner', x: c.x - 8, y: c.y - 40, w: 16, h: 44, sy: c.y + 4 }); U.hold = 0; U.need = 28; U.next = 2; rGroup(Math.ceil(n * .5), sp()); }
+    if (U.obj === 'totems') { U.totems = []; for (let k = 0; k < 3; k++) { const at = sp(), tt = rFoe('rtotem', at.x, at.y, { hpM: 1 }); tt.hp = tt.maxHp = Math.round(170 + rDepth() * 14); U.totems.push(tt); } rGroup(Math.ceil(n * .5), sp()); }
+  }
+  if (t === 'elite') {
+    const B = RB[R.map.b], pool = B.foes[2].filter(k => !ATYPES[k].ranged), kind = pool.length ? pick(pool) : 'knight', mods = shuffleR(Object.keys(ELITE_MODS)).slice(0, rDepth() > 16 || rOath(2) ? 2 : 1);
+    const at = D.spots[0] || D.center; U.champ = rElite(kind, at, mods); rGroup(1 + Math.floor(rDepth() / 12), sp());
+  }
+  if (t === 'boss') {
+    const B = RB[R.map.b], BB = B.boss, at = { x: D.center.x, y: D.center.y - 5 * TS }, f = findFree(at.x, at.y);
+    const e = mkActor(BB.kind, f.x, f.y, { tier: Math.min(4, rTier() + 1), boss: true, named: true, roam: true, aggro: 1400, leash: 99999, name: BB.name, chief: BB.name, scale: BB.scale, home: { x: f.x, y: f.y } }); rConvert(e); e.aggro = 1400;
+    e.hp = e.maxHp = Math.round(BB.hp * (1 + R.ri * .3) * (rOath(3) ? 1.2 : 1) * DIFF().enemyHp); e.dmg = (ATYPES[BB.kind].dmg * (BB.dmgM || 1)) * (1 + R.ri * .22) * (rOath(6) ? 1.15 : 1);
+    e.rboss = true; if (BB.adds) { e.summon = 15; e.summonKind = BB.adds; }
+    if (BB.titan) { e.titan = 1; e.dmg = 34 + R.ri * 4; titanInit(e); e.phase = 1; e.phases = rOath(10) ? 3 : 2; e.yieldAt = .03; e.yieldFn = rKingRise; }
+    U.boss = e; SND.play('roar');
+    setTimeout(() => { if (U === G.under && !e.dead) e.say = { text: pick(B.final ? ['So. The last knight of the Long Road. Kneel.', 'Every road ends at my feet.'] : ['You come far, little knight. No farther.', 'This realm is mine.', 'Another trophy for my hall.']), t: 3.5 }; }, 900);
+  }
+  if (t === 'duel') {
+    const at = D.spots[0] || D.center, e = rFoe(pick(['knight', 'champion', 'hknight', 'assassin']), at.x, at.y, { hpM: 2.6, named: true, boss: true });
+    e.name = `Ser ${pick(RNAMES)} ${pick(EPITHETS)}`; e.chief = e.name; e.yieldAt = .12; e.yieldFn = rDuelYield; U.duel = e; e.say = { text: 'To the yield, then. Guard yourself!', t: 3 };
+  }
+  if (t === 'board') { const n = rCount() + 1; rFoe('leader', D.spots[0].x, D.spots[0].y, { hpM: 1.6, named: true, boss: true }).name = `Captain ${pick(RNAMES)} ${pick(['Saltbeard', 'the Drowned', 'Redhand', 'Blackwater'])}`; for (let k = 0; k < n; k++) { const s2 = D.spots[1 + k % (D.spots.length - 1)]; rFoe(pick(['bandit', 'bandit', 'xbowman', 'shieldbearer']), s2.x, s2.y, { name: 'Pirate' }); } }
+  if (t === 'delve') { U.obj = 'delve'; ents.forEach(e => { if (!e._rd) rConvert(e); }); }
+  if (t === 'event') { R.cleared = false; setTimeout(() => { if (G.under === U && G.state === 'play') roadEvent(nd); }, 700); }
+}
+/* the non-fighting stops: set out their people and things */
+function roadNonCombat(t, D, nd, resume) {
+  const U = G.under, R = G.road, c = D.center;
+  const npc = (rk, name, look, o = {}) => { const f = findFree(c.x + (o.dx || 0), c.y + (o.dy || 0)); return mkActor('npc', f.x, f.y, Object.assign({ role: 'roadnpc', rk, name, _look: look, stand: true, standFace: Math.PI / 2, k: null, _rd: 1 }, o)); };
+  if (t === 'gate') { addRoadObj({ k: 'rd_stone', x: c.x - 16, y: c.y - 30, w: 32, h: 36 }); W.interacts.push({ type: 'rdstone', x: c.x, y: c.y + 12 }); }
+  if (t === 'shop') { addRoadObj({ k: 'stall', x: c.x - 40, y: c.y - 20, w: 80, h: 40, owner: 0, v: .3 }); npc('merchant', pick(['Odo the Pedlar', 'Mistress Hale', 'Grin the Trader', 'Old Bartholomew']), { body: '#6a4a2a', head: 'hood', hood: '#4a3018', skin: '#d8a878', cape: '#8a6a3a' }, { dy: 34 }); if (!nd.stock) nd.stock = roadStock(); }
+  if (t === 'forge') { addRoadObj({ k: 'rd_anvil', x: c.x - 16, y: c.y - 6, w: 32, h: 24 }); addRoadObj({ k: 'campfire', x: c.x + 40, y: c.y - 16, w: 32, h: 32 }); npc('smith', pick(['Hild the Smith', 'Brom Ironhand', 'Tova Anvilborn']), { body: '#4a3a2a', head: 'hair', hair: '#2a1a0a', skin: '#c08858', beard: 1, beardC: '#2a1a0a', pauld: 1 }, { dy: 38 }); }
+  if (t === 'tower') { addRoadObj({ k: 'rd_orb', x: c.x - 16, y: c.y - 30, w: 32, h: 40 }); npc('wizard', pick(['Mistress Orla', 'Aldous the Grey', 'Ysolde of the Stair', 'Magister Quill']), mageLook(pick(['ember', 'rime', 'storm', 'arcane', 'life']), '#e8e0ff'), { dy: 40 }); }
+  if (t === 'shrine') { addRoadObj({ k: 'rd_shrine', x: c.x - 20, y: c.y - 40, w: 40, h: 48 }); W.interacts.push({ type: 'rdshrine', x: c.x, y: c.y + 14 }); }
+  if (t === 'camp') { addRoadObj({ k: 'campfire', x: c.x - 16, y: c.y - 16, w: 32, h: 32 }); addRoadObj({ k: 'tent', x: c.x + 30, y: c.y - 50, w: 64, h: 44, v: .4 }); W.interacts.push({ type: 'rdcamp', x: c.x, y: c.y + 14 }); }
+  if (t === 'treasure') { addRoadObj({ k: 'rd_chest', x: c.x - 16, y: c.y - 12, w: 32, h: 26 }); W.interacts.push({ type: 'rdchest', x: c.x, y: c.y + 16 }); }
+  if (!resume && !R.cleared) { R.cleared = true; R.stats.nodes++; saveGame(true, true); }
+  if (t === 'camp' && !resume) setTimeout(() => toast('A campfire in the dark. Rest, train or cook: press <kbd>E</kbd> at the fire. You may only do one.'), 1200);
+}
+
+/* ---------------- The fight, second by second ---------------- */
+function roadTick(dt) {
+  if (!rOn() || !G.under || !G.under.road) return;
+  const U = G.under, R = G.road;
+  for (const e of ents) {
+    if (!e._rd) rConvert(e);
+    if (e.dead || !e.roadFoe) continue;
+    if (e.summon) { e.sumT = (e.sumT ?? e.summon * .6) - dt; if (e.sumT <= 0 && e.target && rFoes().length < 12) { e.sumT = e.summon; const k = e.summonKind || pick(rPool()); for (let i = 0; i < (e.rboss ? 2 : 1); i++) { const m = rFoe(k, e.x + rand(-70, 70), e.y + rand(-70, 70)); if (e.rboss) m.hp = m.maxHp = Math.round(m.maxHp * .8); for (let q = 0; q < 10 * QMUL(); q++) addPart(m.x + rand(-10, 10), m.y + rand(-4, 8), rand(-20, 20), rand(-80, -30), '#b07ae0', .6, 3); } if (e.rboss) e.say = { text: pick(['To me!', 'Rise!', 'Kill the knight!']), t: 2 }; } }
+    if (e.frenzy && !e.fren && e.hp < e.maxHp * .5) { e.fren = 1; e.dmg *= 1.4; e.spd *= 1.2; e.say = { text: 'RRAAAGH!', t: 2 }; SND.play('roar'); }
+    if (e.regenR && e.hp < e.maxHp) e.hp = Math.min(e.maxHp, e.hp + e.maxHp * e.regenR * dt);
+    if (e.burnAura && dist(e.x, e.y, P.x, P.y) < 60 && (e.bT = (e.bT || 0) - dt) <= 0) { e.bT = 1; damage(P, 4 + rDepth() * .4, e, { dot: 'fire' }); }
+    if (e.rboss && rOath(9) && !e.enr && e.hp < e.maxHp * .5) { e.enr = 1; e.dmg *= 1.2; e.spd *= 1.1; toast(`${e.name} is enraged!`, 'war'); SND.play('roar'); }
+  }
+  if (P.drum > 0 && (P.drumT -= dt) <= 0) P.drum = 0;
+  if (U.won || R.ended) return;
+  const alive = rFoes(), o = U.obj;
+  if (o === 'rout' || o === 'board') { if (!alive.length && G.time - U.t0 > 1) roadWin(); }
+  if (o === 'elite' && U.champ.dead) { if (alive.length) rScatter('With their champion dead, the rest lose heart and run.'); roadWin(); }
+  if (o === 'waves' && !alive.length) { if (U.wave >= U.waves) roadWin(); else if ((U.wT = (U.wT ?? 2) - dt) <= 0) { U.wT = 2; U.wave++; toast(`Wave ${U.wave} of ${U.waves}!`, 'war'); SND.play('battlecry'); rGroup(Math.ceil(rCount() * (.5 + U.wave * .15)), pick(D8(U))); } }
+  if (o === 'wagon') {
+    U.left -= dt; U.next -= dt; if (U.next <= 0 && U.left > 6) { U.next = 12; rGroup(Math.ceil(rCount() * .55), pick(U.D.edge)); SND.play('battlecry'); }
+    if (U.wagon.dead && !U.lost) { U.lost = 1; toast('The wagon burns! Its stores are lost.', 'bad'); }
+    if (U.left <= 0) { rScatter('Help arrives from up the road. The raiders scatter!'); roadWin(); }
+  }
+  if (o === 'captain' && U.capt.dead) { rScatter('Their captain falls, and the rest throw down their arms and flee.'); roadWin(); }
+  if (o === 'banner') {
+    const on = dist(P.x, P.y, U.banner.x, U.banner.y) < 110; if (on) U.hold += dt; U.next -= dt;
+    if (U.next <= 0) { U.next = 10; rGroup(Math.ceil(rCount() * .45), pick(U.D.edge)); }
+    if (U.hold >= U.need) { rScatter('The banner stands. The attackers give up the field.'); roadWin(); }
+  }
+  if (o === 'totems') {
+    U.totems.forEach(tt => { if (tt.dead) return; tt.spT = (tt.spT ?? 6) - dt; if (tt.spT <= 0 && rFoes().length < 10) { tt.spT = 10; const m = rFoe(pick(rPool()), tt.x + rand(-50, 50), tt.y + rand(-50, 50)); for (let q = 0; q < 12 * QMUL(); q++) addPart(m.x + rand(-10, 10), m.y + rand(-4, 8), rand(-20, 20), rand(-90, -30), '#6a6458', .7, 3); } });
+    if (U.totems.every(tt => tt.dead)) { rScatter('The last totem cracks. What it called up crumbles.'); roadWin(); }
+  }
+  if (o === 'boss' && U.boss.dead) { rScatter(''); roadWin(); }
+  if (o === 'duel' && U.duel.dead) roadWin();
+  if (o === 'delve' && U.dcleared) roadWin();
+}
+const D8 = U => U.D.spots.length ? U.D.spots : [U.D.center];
+function rScatter(msg) { const fl = rFoes().filter(e => !e.titan); fl.forEach(e => { e.roadFoe = false; e.faction = 'civ'; e.civ = true; e.flee = 99; e.fleeFrom = P; e.target = null; e.expireRd = G.time + 3; }); if (msg && fl.length) toast(msg, 'good'); }
+function rKingRise(e) {
+  const R = G.road; e.phase++; tells = tells.filter(tl => tl.src !== e);
+  if (e.phase > e.phases) { e.yieldFn = null; e.hp = 0; kill(e, P); return; }
+  e.hp = Math.round(e.maxHp * (e.phase === 2 ? .5 : .4)); e.titan = 2; titanInit(e); e.dmg *= 1.12; e.yieldFn = rKingRise; e.stun = 1.5;
+  e.say = { text: e.phase === 2 ? 'You think the grave can hold ME? I am UNBOUND!' : 'Again! AGAIN! I will not end!', t: 3.5 }; SND.play('roar'); addShake(14); toast(`<b>${e.name}</b> rises again${e.phase === 3 ? ', for the last time' : ''}!`, 'war');
+  for (let i = 0; i < 40 * QMUL(); i++) { const a = i / 40 * TAU; addPart(e.x + Math.cos(a) * 20, e.y + Math.sin(a) * 20, Math.cos(a) * 260, Math.sin(a) * 260, i % 2 ? '#9fdcff' : '#e8f4ff', .6, 3); }
+}
+function rDuelYield(e) { e.yielded = true; e.roadFoe = false; e.faction = 'civ'; e.civ = true; e.target = null; e.stand = true; e.say = { text: 'Enough! I yield. The road is yours, and my blade with it.', t: 3.5 }; SND.play('yield'); e.expireRd = G.time + 6; roadWin(); }
+
+/* ---------------- Victory in a node ---------------- */
+function roadWin() {
+  const U = G.under, R = G.road; if (U.won) return; U.won = true; R.cleared = true; R.stats.nodes++;
+  const t = U.t, d = rDepth(), base = 18 + d * 3;
+  let g = 0, msg = '';
+  if (t === 'fight') { g = rGold(base * (U.lost ? .5 : 1)); msg = `The road is clear. <b>+${g} gold</b>.`; }
+  if (t === 'elite') { R.stats.elites++; g = rGold(base * 2); msg = `The champion is beaten. <b>+${g} gold</b>.`; R.pending = { k: 'relic', why: 'A Champion\'s Hoard', opts: relicPool(3) }; }
+  if (t === 'duel') { g = rGold(base * 1.4); msg = `Victory in the duel. <b>+${g} gold</b>.`; R.pending = { k: 'gear', why: 'The Loser\'s Arms', opts: gearDraft(3, 1) }; }
+  if (t === 'board') { g = rGold(base * 2.2 * (rHas('corsair') ? 2 : 1)); msg = `The ship is taken and her strongbox broken open. <b>+${g} gold</b>.`; if (chance(.5)) R.pending = { k: 'gear', why: 'Plunder from the Hold', opts: gearDraft(3, 0) }; }
+  if (t === 'delve') { g = rGold(base * 1.6); msg = `The guardian of the deep is slain. <b>+${g} gold</b>. Search its hoard before you leave.`; R.pending = { k: 'relic', why: 'Found in the Deep', opts: relicPool(2) }; }
+  if (t === 'event') { msg = 'The road is clear.'; g = rGold(base * .8); }
+  if (t === 'boss') {
+    R.stats.bosses++; g = rGold(base * 4); rHeal(.3); R.realmsDone++;
+    if (RB[R.map.b].final) { SND.play('mainquest'); setTimeout(() => roadEnd(true), 2400); saveGame(true, true); return; }
+    msg = `<b>${U.boss.name}</b> is dead, and ${RB[R.map.b].n} is behind you. <b>+${g} gold</b>. The road runs on.`; R.pending = { k: 'relic', why: 'The Master\'s Hoard', opts: relicPool(3) };
+    logEvent(`${pFull()} slew ${U.boss.name} on the Long Road.`, []);
+  }
+  if (U.bonus) g += rGold(U.bonus);
+  if (rHas('oathstone')) rHeal(.25);
+  toast(msg + ` Take the road on at the waymarker, or press <kbd>${keyName('KeyM')}</kbd>.`, 'gold'); SND.play('quest');
+  gainXP(20 + d * 6 + (t === 'boss' ? 200 : t === 'elite' ? 80 : 0));
+  saveGame(true, true); if (R.pending) setTimeout(showDraft, 1400);
+}
+/* a choice of gear, one tier above the road's usual */
+function gearDraft(n, up) {
+  const tier = clamp(rTier() + up, 0, 4), pool = LOOT_TIERS[tier].filter(id => ['weapon', 'shield', 'armor', 'horse'].includes(ITEMS[id].type)).concat(tier >= 2 ? ['oak_staff', 'warlock_staff'] : ['apprentice_staff']).concat(tier >= 3 ? ['longbow', 'plate'] : []);
+  const out = [], seen = new Set(); for (let a = 0; a < 40 && out.length < n; a++) { const id = pick(pool); if (!ITEMS[id] || seen.has(id)) continue; seen.add(id); out.push({ id, q: Math.min(3, rollQual(tier) + (up ? 1 : 0)) }); }
+  return out;
+}
+function showDraft() {
+  const R = G.road, pd = R && R.pending; if (!pd || G.state !== 'play') return; if (dialogOpen || UI.stack.length) { setTimeout(showDraft, 500); return; }
+  const done = () => { R.pending = null; closeDialog(); saveGame(true, true); updateHUD(true); };
+  if (pd.k === 'relic') {
+    if (!pd.opts.length) { R.pending = null; rGold(60); return; }
+    openDialog({ name: pd.why || 'Spoils', role: 'Choose one relic to carry', portrait: 'scroll', text: pd.opts.map(id => `<p style="margin:0 0 6px"><b style="color:#ffd24a">◆ ${RELICS[id].n}</b>: ${RELICS[id].d}</p>`).join(''),
+      options: pd.opts.map(id => ({ t: `Take the <b>${RELICS[id].n}</b>`, fn: () => { gainRelic(id); done(); } })).concat([{ t: 'Leave them, and take 40 gold instead', fn: () => { rGold(40); done(); } }]) });
+  } else if (pd.k === 'gear') {
+    openDialog({ name: pd.why || 'Spoils', role: 'Choose one', portrait: 'scroll', text: pd.opts.map(o => { const it = { id: o.id, q: o.q, n: 1 }; return `<p style="margin:0 0 6px"><b style="color:${itemColor(it)}">${itemName(it)}</b> · <span style="color:var(--muted)">${statSummary(it)}</span></p>`; }).join('') + '<p style="margin:0;color:var(--muted)"><i>Equip it from your pack (I).</i></p>',
+      options: pd.opts.map(o => ({ t: `Take the ${itemName({ id: o.id, q: o.q })}`, fn: () => { addItem(o.id, o.q, 1); done(); } })).concat([{ t: 'Take none (+30 gold)', fn: () => { rGold(30); done(); } }]) });
+  } else if (pd.k === 'spell') {
+    openDialog({ name: pd.why || 'The Tower Library', role: 'Choose one spell to learn', portrait: 'scroll', text: pd.opts.map(id => `<p style="margin:0 0 6px"><b style="color:${SCHOOLS[SPELLS[id].s].c}">${SPELLS[id].g} ${SPELLS[id].n}</b> <span style="color:var(--muted)">(${SCHOOLS[SPELLS[id].s].n}, ${SPELLS[id].mp} mana)</span>: ${esc(SPELLS[id].d)}</p>`).join(''),
+      options: pd.opts.map(id => ({ t: `Learn <b>${SPELLS[id].n}</b>`, fn: () => { learnSpell(id); done(); } })).concat([{ t: 'Learn none of them', fn: done }]) });
+  } else R.pending = null;
+}
+function roadExit() {
+  const R = G.road; if (!R) return;
+  if (!R.cleared) { toast(G.under && G.under.t === 'event' ? 'Deal with what is in front of you first.' : 'The way on is barred while your foes still stand.', 'bad'); return; }
+  if (R.pending) { showDraft(); return; }
+  UI.open('road');
+}
+
+/* ---------------- The folk of the road: merchant, smith, wizard; and shrines, campfires, chests ---------------- */
+function roadStock() {
+  const out = [], add = (id, q = 1, n = 1) => { if (ITEMS[id]) out.push({ uid: uidCounter++, id, q, n }); };
+  add('potion', 1, randi(2, 4)); add('bandage', 1, 3); add('bread', 1, 3);
+  if (knowsMagic()) add('mana_potion', 1, randi(1, 3));
+  if (P.S.bow || P.eq.weapon2) { add('arrow', 1, 60); if (chance(.6)) add(pick(['broadhead', 'bodkin', 'fire_arrow']), 1, 30); }
+  gearDraft(3, chance(.3) ? 1 : 0).forEach(o => add(o.id, o.q, 1));
+  const tn = Object.keys(TONICS).filter(id => ITEMS[id] && id !== 'potion'); for (let i = 0; i < 2; i++) add(pick(tn), 1, 1);
+  const tomes = tomesFor(Math.min(3, rTier()), null); if (tomes.length) add('tome_' + pick(tomes));
+  const jw = Object.keys(ITEMS).filter(id => (ITEMS[id].type === 'ring' || ITEMS[id].type === 'amulet') && ITEMS[id].tier <= rTier() + 1 && ITEMS[id].val < 900); if (jw.length && chance(.7)) add(pick(jw));
+  return out;
+}
+const rPrice = base => Math.round(base * roadPriceMul() / .85);
+ROLES.roadnpc = { label: e => `Speak with ${e.name}`, talk: e => roadTalk(e) };
+function roadTalk(e) {
+  const nd = rNode(), R = G.road; if (!nd || !R) return;
+  const leave = { t: 'Leave', fn: closeDialog };
+  if (e.rk === 'merchant') {
+    nd.sale = nd.sale || relicPool(rHas('corsair') ? 3 : 2); const rp = rPrice(110 + rDepth() * 6);
+    const opts = [{ t: 'Show me your wares', fn: () => { closeDialog(); openShop({ name: e.name + "'s Wagon", k: null, items: nd.stock, road: true }, e); } }];
+    nd.sale.forEach(id => { if (!R.relics.includes(id)) opts.push({ t: `Buy the <b style="color:#ffd24a">${RELICS[id].n}</b> (${rp} gold) · <span style="color:var(--muted)">${RELICS[id].d}</span>`, dis: P.gold < rp, fn: () => { P.gold -= rp; SND.play('coin'); gainRelic(id); nd.sale = nd.sale.filter(x => x !== id); saveGame(true, true); roadTalk(e); } }); });
+    if (R.curse.length) { const cp = rPrice(90); opts.push({ t: `Pay to lift the ${CURSES.find(c => c.id === R.curse[0]).n} (${cp} gold)`, dis: P.gold < cp, fn: () => { P.gold -= cp; R.curse.shift(); recalc(); toast('The curse lifts. You feel lighter.', 'good'); SND.play('heal'); saveGame(true, true); roadTalk(e); } }); }
+    opts.push(leave);
+    openDialog({ name: e.name, role: 'Travelling merchant', portrait: e, text: pick(['Road-worn, but honest goods. Mostly honest.', 'Fine wares for a fine knight! Or for you.', 'Buying, selling, and asking no questions.']) + (nd.sale.length ? ' And, for the discerning traveller, a few curiosities.' : ''), options: opts });
+  }
+  if (e.rk === 'smith') {
+    nd.uses = nd.uses || 0; const left = 2 - nd.uses, opts = [], cost = q => rPrice(45 + q * 35 + rDepth() * 3);
+    const temper = (slot, word) => { const it = P.eq[slot] ? getItem(P.eq[slot]) : null; if (!it || it.q >= 3) return; const c = cost(it.q); opts.push({ t: `Temper your ${word}: ${itemName(it)} → <b>${QUAL[it.q + 1].n}</b> (${c} gold)`, dis: P.gold < c || left <= 0, fn: () => { P.gold -= c; it.q++; nd.uses++; recalc(); SND.play('hit'); toast(`Your ${word} is now <b>${itemName(it)}</b>.`, 'gold'); saveGame(true, true); roadTalk(e); } }); };
+    temper('weapon', 'weapon'); temper('armor', 'armour'); temper('shield', 'shield');
+    const w = P.eq.weapon ? getItem(P.eq.weapon) : null;
+    if (w && !w.ench && ITEMS[w.id].wk !== 'staff' && ITEMS[w.id].wk !== 'bow') { const c = rPrice(120 + rDepth() * 4); ['fire', 'frost', 'venom'].forEach(k => opts.push({ t: `Quench your blade in ${k === 'fire' ? 'dragon-oil' : k === 'frost' ? 'rime-water' : 'spider-venom'}: <b>${ENCH_N[k]}</b> (${c} gold)`, dis: P.gold < c || left <= 0, fn: () => { P.gold -= c; w.ench = k; nd.uses++; recalc(); SND.play('ignite'); toast(`Your weapon is now <b>${itemName(w)}</b>.`, 'gold'); saveGame(true, true); roadTalk(e); } })); }
+    opts.push(leave);
+    openDialog({ name: e.name, role: 'Roadside smith', portrait: e, text: left > 0 ? `I've coal for ${left === 2 ? 'two jobs' : 'one more job'} before I move on. What'll it be?` : 'That is all my coal. Good luck on the road.', options: opts });
+  }
+  if (e.rk === 'wizard') {
+    const opts = [];
+    if (!nd.studied) opts.push({ t: 'Study in the tower library (learn one of three spells)', fn: () => { closeDialog(); nd.studied = true; const pool = shuffleR(SPELL_IDS.filter(id => !(P.spells || []).includes(id) && SPELLS[id].t <= Math.min(3, 1 + Math.floor(rDepth() / 8)))).slice(0, 3); if (!pool.length) { toast('There is nothing here you do not already know.'); return; } R.pending = { k: 'spell', why: `${e.name}'s Library`, opts: pool }; saveGame(true, true); showDraft(); } });
+    const jw = nd.jw || (nd.jw = shuffleR(Object.keys(ITEMS).filter(id => (ITEMS[id].type === 'ring' || ITEMS[id].type === 'amulet') && ITEMS[id].tier <= rTier() + 1 && ITEMS[id].tier >= 1 && ITEMS[id].val < 900)).slice(0, 2));
+    jw.forEach(id => { const c = rPrice(ITEMS[id].val * .7); opts.push({ t: `Buy the <b>${ITEMS[id].name}</b> (${c} gold) · <span style="color:var(--muted)">${jewelSummary({ id, q: 1 })}</span>`, dis: P.gold < c, fn: () => { P.gold -= c; addItem(id, 1, 1); nd.jw = nd.jw.filter(x => x !== id); SND.play('coin'); saveGame(true, true); roadTalk(e); } }); });
+    if (!nd.well) { const c = rPrice(70); opts.push({ t: `Drink from the well of stars: +15 mana and +8% spell power for the rest of the road (${c} gold)`, dis: P.gold < c, fn: () => { P.gold -= c; nd.well = 1; R.star = (R.star || 0) + 1; recalc(); SND.play('arcane'); toast('Starlight runs in your veins.', 'gold'); saveGame(true, true); roadTalk(e); } }); }
+    opts.push(leave);
+    openDialog({ name: e.name, role: 'Wizard of the road', portrait: e, text: pick(['Few climb this far. Fewer climb back down. Well? Knowledge, or baubles?', 'Ah, a knight with a question in their eyes. Ask it.', 'The stars said you would come. They say a great deal, the stars.']), options: opts });
+  }
+}
+IACTS.rdexit = { label: () => G.road && G.road.cleared ? 'Take the road onward' : 'The way on is barred', act: () => roadExit() };
+IACTS.rdstone = { label: () => 'Read the waystone', act: () => { const R = G.road, B = RB[R.map.b]; openDialog({ name: B.n, role: `Realm ${R.ri + 1} of ${R.realms.length}`, portrait: 'sign', text: `<p>${B.d}</p><p style="color:var(--muted)">Walk to the glowing waymarker (or press <kbd>${keyName('KeyM')}</kbd>) to choose your path. Every realm ends with a campfire, then its master. Battles, champions and bosses win you gold and relics; merchants, forges, wizards and shrines spend it.</p>`, options: [{ t: 'Onward', fn: closeDialog }] }); } };
+IACTS.rdshrine = { label: () => rNode() && rNode().used ? 'The shrine is quiet' : 'Kneel at the shrine', act: () => {
+  const nd = rNode(); if (!nd || nd.used) { toast('The candles have burned down. The saint has nothing more for you.'); return; }
+  const c = rPrice(60), bad = rOath(8) ? .45 : .3, fin = () => { nd.used = 1; closeDialog(); saveGame(true, true); };
+  openDialog({ name: 'A Wayside Shrine', role: 'To a saint whose name has worn away', portrait: 'grave', text: 'Wax, wildflowers and old coins. Pilgrims pray here for luck on the road. The gods are not always kind to the ones who ask.', options: [
+    { t: 'Pray (heal a little, and a blessing, or a curse)', fn: () => { rHeal(.2); fin(); gainBless(chance(bad)); } },
+    { t: `Leave an offering of ${c} gold (a sure blessing)`, dis: P.gold < c, fn: () => { P.gold -= c; fin(); gainBless(false); } },
+    { t: 'Leave it be', fn: closeDialog }] });
+} };
+IACTS.rdcamp = { label: () => rNode() && rNode().used ? 'The fire burns low' : 'Sit at the fire', act: () => {
+  const nd = rNode(); if (!nd || nd.used) { toast('You have taken what rest there is here.'); return; }
+  const food = P.inv.filter(i => ITEMS[i.id].food || ['bread', 'meat', 'cheese', 'fish', 'apple'].includes(i.id)).reduce((s, i) => s + i.n, 0), fin = () => { nd.used = 1; closeDialog(); saveGame(true, true); updateHUD(true); };
+  openDialog({ name: 'Campfire', role: 'You may do one thing before you sleep', portrait: 'scroll', text: 'The fire crackles. Somewhere out in the dark, something howls, then thinks better of it.', options: [
+    { t: 'Rest (heal 45% of your health, and all your mana)', fn: () => { const a = rHeal(.45); P.mp = P.maxMp; P.st = P.maxSt; fin(); toast(`You sleep deeply. +${a} health.`, 'good'); SND.play('heal'); } },
+    { t: 'Train until dawn (+1 skill point)', fn: () => { P.sp = (P.sp || 0) + 1; fin(); toast(`You drill until your arms shake. <b>+1 skill point</b> (press ${keyName('KeyP')}).`, 'gold'); SND.play('level'); } },
+    { t: `Cook a proper meal (eat 2 food: +12 maximum health for good)${food < 2 ? ' · <i>you have too little food</i>' : ''}`, dis: food < 2, fn: () => { let n = 2; for (const it of P.inv.slice()) { if (n <= 0) break; if (!(ITEMS[it.id].food || ['bread', 'meat', 'cheese', 'fish', 'apple'].includes(it.id))) continue; const k = Math.min(n, it.n); removeItem(it.uid, k); n -= k; } P.bonusHp += 12; recalc(); P.hp += 12; fin(); toast('A stew worth remembering. <b>+12 maximum health</b>.', 'gold'); SND.play('eat'); } },
+    { t: 'Not yet', fn: closeDialog }] });
+} };
+IACTS.rdchest = { label: () => rNode() && rNode().used ? 'An empty chest' : 'Open the chest', act: () => { const nd = rNode(); if (!nd || nd.used) { toast('Empty.'); return; } nd.used = 1; SND.play('chest'); const g = rGold(25 + rDepth() * 2); toast(`+${g} gold.`, 'gold'); G.road.pending = { k: 'relic', why: 'An Old Strongbox', opts: relicPool(3) }; saveGame(true, true); showDraft(); } };
+
+/* ---------------- Events: forty-odd little stories on the road ---------------- */
+// each: { id, b: [biomes] or null, t: title, who: portrait look, txt, o: [[label, fn(rnd) -> text, req?]] }
+const rAmbush = (kinds, msg, hpM = 1) => { const U = G.under, D = U.D, n = Math.max(2, Math.ceil(rCount() * .8)); U.obj = 'rout'; U.t0 = G.time; for (let i = 0; i < n; i++) { const s = pick(D8(U)); rFoe(kinds ? pick(kinds) : pick(rPool()), s.x + rand(-40, 40), s.y + rand(-40, 40), { hpM }); } SND.play('battlecry'); return msg; };
+const rHurt = f => { const a = Math.round(P.maxHp * f); P.hp = Math.max(1, P.hp - a); return a; };
+const rItem = (id, n = 1) => { addItem(id, 1, n, true); return ITEMS[id] ? ITEMS[id].name : id; };
+const rRelic = () => { const id = relicPool(1)[0]; if (id) gainRelic(id, true); return id ? RELICS[id].n : null; };
+const rFood = () => P.inv.filter(i => ITEMS[i.id].food || ['bread', 'meat', 'cheese', 'fish', 'apple'].includes(i.id)).reduce((s, i) => s + i.n, 0);
+const rEat = n => { for (const it of P.inv.slice()) { if (n <= 0) break; if (!(ITEMS[it.id].food || ['bread', 'meat', 'cheese', 'fish', 'apple'].includes(it.id))) continue; const k = Math.min(n, it.n); removeItem(it.uid, k); n -= k; } };
+const RLK = { knight: { body: '#8a8e94', head: 'helm', skin: '#e0b48a', pauld: 1, mail: 1 }, hood: { body: '#4a3a2a', head: 'hood', hood: '#2a2018', skin: '#d8a878' }, crone: { body: '#3a3040', head: 'hood', hood: '#241a2a', skin: '#c8b8a0' }, monk: { body: '#6a5a4a', head: 'hood', hood: '#4a3a2a', skin: '#e8c49a' }, noble: { body: '#6a2a3a', head: 'hair', hair: '#8a5a2a', skin: '#f0d0b0', cape: '#3a1a2a' }, pirate: { body: '#4a2a2a', head: 'hood', hood: '#2a1a1a', skin: '#c89868', cape: '#1a1010' }, fey: { body: '#3a6a4a', head: 'hair', hair: '#e8f0a0', skin: '#e0f0d8', cape: '#5a9a6a' }, soldier: { body: '#5a5e66', head: 'helm', skin: '#d8a878', mail: 1 } };
+const REVENTS = [
+  { id: 'wounded', t: 'The Wounded Knight', who: 'knight', txt: 'A knight in dented plate sits against a milestone, pressing a hand to a wound. "Bandits," he says. "Took my horse. Left me my life, which was careless of them."', o: [
+    ['Bind his wound (use a potion)', () => { removeItemById('potion'); if (chance(.55)) { const n = rRelic(); return n ? `He presses something into your hand. "For your kindness." <b>${n}</b>.` : `He gives you his purse. <b>+${rGold(80)} gold</b>.`; } return `He thanks you, and gives you all he has. <b>+${rGold(45)} gold</b>.`; }, () => countItem('potion') > 0],
+    ['Take his purse. He is in no state to argue', () => { const g = rGold(90); if (chance(.5)) { gainBless(true); return `+${g} gold. His curse follows you down the road.`; } return `+${g} gold. He says nothing. His eyes say enough.`; }],
+    ['Wish him luck and walk on', () => 'You leave him to the road.']] },
+  { id: 'gamble', t: 'Dice by the Roadside', who: 'hood', txt: 'Three hooded men squat around a blanket with a pair of bone dice. "A game, sir knight? Double or nothing. We are honest men." One of them is plainly hiding a third die.', o: [
+    ['Bet 50 gold', () => { P.gold -= 50; if (chance(.48)) return `You roll well. <b>+${rGold(100)} gold</b> back.`; return 'The dice hate you. The 50 gold is gone.'; }, () => P.gold >= 50],
+    ['Call out the cheat', () => rAmbush(['bandit', 'bandit', 'archer'], 'Knives come out. So much for honest men!')],
+    ['Walk on', () => 'You keep your coin.']] },
+  { id: 'brew', t: "The Hermit's Brew", who: 'crone', txt: 'An old woman stirs a pot over a fire of green flames. "Drink, dearie. It will make you strong. Or it will not. I forget which pot this is."', o: [
+    ['Drink', () => { if (chance(.6)) { P.bonusHp += 15; recalc(); P.hp += 15; return 'It burns all the way down, then warms you through. <b>+15 maximum health</b>.'; } const a = rHurt(.15); return `You are sick behind a bush for some time. <b>-${a} health</b>.`; }],
+    ['Ask her to teach you a spell instead', () => { const id = pick(tomesFor(1, null)); if (!id) return 'She says you know more than she does already.'; learnSpell(id, true); return `She taps your forehead. You know <b>${SPELLS[id].n}</b>.`; }],
+    ['Politely decline', () => 'She shrugs and drinks it herself. Nothing happens. Or something does, later.']] },
+  { id: 'minstrel', t: 'A Wandering Minstrel', who: 'noble', txt: 'A minstrel with a lute and three missing teeth offers to sing of your deeds. "A small fee, for a great song!"', o: [
+    ['Pay 25 gold for a song', () => { P.gold -= 25; const b = gainBless(false); return b ? 'The song is terrible, but it lifts your heart.' : 'The song is terrible.'; }, () => P.gold >= 25],
+    ['Just listen', () => `He plays for free, badly. You feel rested anyway. <b>+${rHeal(.12)} health</b>.`]] },
+  { id: 'toll', t: 'A Bandit Toll', who: 'hood', txt: 'A rope across the road, and six men behind it. "Toll road, this. Forty gold, or we take it off your corpse."', o: [
+    ['Pay the forty gold', () => { P.gold -= 40; return 'They lower the rope, grinning.'; }, () => P.gold >= 40],
+    ['Cut the rope', () => rAmbush(['bandit', 'bandit', 'archer', 'xbowman'], 'They come at you, all six.')]] },
+  { id: 'cart', t: 'The Abandoned Cart', who: null, txt: 'A merchant\'s cart lies on its side, its mules long gone. The cargo is still under the canvas. Something under there is moving.', o: [
+    ['Search the cart', () => { if (chance(.55)) { const o = gearDraft(1, 0)[0]; addItem(o.id, o.q, 1, true); return `Only rats. And a <b>${itemName({ id: o.id, q: o.q })}</b>, and <b>${rGold(40)} gold</b>.`; } return rAmbush(['spider', 'spider', 'wolf'], 'It is not rats.'); }],
+    ['Leave it', () => 'Some things are best left under canvas.']] },
+  { id: 'battlefield', t: 'An Old Battlefield', who: null, txt: 'Rusted blades and white bones in the grass. Nobody came back for these dead.', o: [
+    ['Loot the fallen', () => { const o = gearDraft(1, 1)[0]; addItem(o.id, o.q, 1, true); if (chance(.35)) { gainBless(true); return `You find a <b>${itemName({ id: o.id, q: o.q })}</b>. The dead do not forgive you.`; } return `You find a <b>${itemName({ id: o.id, q: o.q })}</b>.`; }],
+    ['Bury them', () => { rHeal(.15); if (chance(.5)) gainBless(false); return 'It takes the afternoon. You feel at peace.'; }]] },
+  { id: 'stranger', t: 'The Pale Stranger', who: 'crone', txt: 'A figure in grey holds out a closed hand. "A relic of great power, for a little of your life. Only a little. You will hardly miss it."', o: [
+    ['Pay with your life (-15 maximum health)', () => { P.bonusHp -= 15; recalc(); const n = rRelic(); return n ? `Something cold leaves you. In your palm: <b>${n}</b>.` : 'The hand is empty. So is the road.'; }],
+    ['Refuse', () => 'The stranger is gone when you look back.']] },
+  { id: 'witch', t: "The Witch's Bargain", who: 'crone', txt: '"Give me one of your trinkets, and I will give you two of mine. Fair, is it not?"', o: [
+    ['Trade a random relic for two others', () => { const R = G.road, give = pick(R.relics.filter(id => id !== RCLASS[R.cls].relic)) || null; if (!give) return 'You have nothing she wants.'; R.relics = R.relics.filter(x => x !== give); recalc(); const a = rRelic(), b = rRelic(); return `She takes the <b>${RELICS[give].n}</b> and gives you <b>${a}</b> and <b>${b}</b>.`; }, () => G.road.relics.length > 1],
+    ['No bargains with witches', () => 'She cackles, which feels like an answer.']] },
+  { id: 'refugees', t: 'Refugees', who: 'monk', txt: 'A column of families trudges past with everything they own on their backs. A child stares at your sword.', o: [
+    ['Give them 30 gold', () => { P.gold -= 30; gainBless(false); return 'The mother blesses you in the old way.'; }, () => P.gold >= 30],
+    ['Share your food', () => { rEat(2); rHeal(.1); return 'You eat together by the road. It does you good too.'; }, () => rFood() >= 2],
+    ['Keep walking', () => 'They do not ask. That is worse.']] },
+  { id: 'duelist', t: 'A Challenge', who: 'knight', txt: 'A knight on the bridge lowers his visor. "None cross my bridge without breaking a lance with me. Or a sword. I am flexible."', o: [
+    ['Accept', () => { const U = G.under, e = rFoe(pick(['knight', 'hknight']), U.D.center.x, U.D.center.y - 80, { hpM: 2.4, named: true, boss: true }); e.name = `Ser ${pick(RNAMES)} of the Bridge`; e.yieldAt = .12; e.yieldFn = rDuelYield; U.obj = 'duel'; U.duel = e; U.t = 'duel'; return 'He salutes you with his blade.'; }],
+    ['Decline and wade the river', () => { const a = rHurt(.08); return `The river is cold and fast. <b>-${a} health</b>.`; }]] },
+  { id: 'thorns', t: 'The Shrine of Thorns', who: null, txt: 'A shrine grown over with black briars. A bronze plaque reads: BLEED, AND BE ARMOURED.', o: [
+    ['Grasp the thorns (-20% health)', () => { rHurt(.2); if (!G.road.relics.includes('thorn_mail')) { gainRelic('thorn_mail', true); return 'The briars bite deep. You come away wearing them: <b>Thorn Mail</b>.'; } const n = rRelic(); return n ? `The briars give you <b>${n}</b>.` : 'The briars take, and give nothing.'; }],
+    ['Leave it alone', () => 'Wise.']] },
+  { id: 'sunkenchest', b: ['isles', 'sunken', 'rotfen'], t: 'Something Glints Below', who: null, txt: 'Under the dark water, a chest. The water is cold, and deep, and you are wearing armour.', o: [
+    ['Dive for it', () => { const a = rHurt(.15); return `You come up gasping, <b>-${a} health</b>, with <b>${rGold(randi(90, 160))} gold</b>.`; }],
+    ['Leave it for the fish', () => 'The fish thank you.']] },
+  { id: 'frozen', b: ['frost'], t: 'The Frozen Traveller', who: 'soldier', txt: 'A man half-buried in snow, still breathing, wrapped in a fine bearskin.', o: [
+    ['Warm him by a fire (use 1 food)', () => { rEat(1); gainRelic('bearskin', true); return 'He lives. He gives you his cloak: <b>Bearskin Cloak</b>.'; }, () => rFood() >= 1 && !G.road.relics.includes('bearskin')],
+    ['Take the cloak', () => { if (!G.road.relics.includes('bearskin')) gainRelic('bearskin', true); gainBless(true); return 'You take it. It is warm. You are not.'; }],
+    ['Leave him', () => 'The snow covers him soon enough.']] },
+  { id: 'oracle', b: ['sands', 'ember'], t: 'The Sand Oracle', who: 'crone', txt: 'A blind woman sits beneath a tattered awning, sand pouring through her fingers. "Ask, and pay."', o: [
+    ['Ask of the road ahead (30 gold)', () => { P.gold -= 30; G.road.map.rows.forEach(r => r.forEach(n => { if (n.t === 'mystery') n.seen = 1; })); return 'She tells you what waits in every mystery on this realm\'s map.'; }, () => P.gold >= 30],
+    ['Ask of your death (30 gold)', () => { P.gold -= 30; if (!G.road.relics.includes('phoenix') && chance(.4)) { gainRelic('phoenix', true); return '"Not yet," she says, and gives you a burning feather: <b>Phoenix Feather</b>.'; } rHeal(.2); return '"Not today," she says. That is something.'; }, () => P.gold >= 30],
+    ['Leave her to her sand', () => 'The sand keeps pouring.']] },
+  { id: 'feyring', b: ['feywood', 'greenmarch'], t: 'A Ring of Mushrooms', who: 'fey', txt: 'Music, faint and sweet, from a ring of white mushrooms. Tiny lights dance inside it.', o: [
+    ['Step in and dance', () => { if (chance(.55)) { gainXP(xpNeed(P.lvl) - P.xp + 1); return 'You dance until dawn, and come out stronger. <b>A level!</b>'; } const g = Math.floor(P.gold * .4); P.gold -= g; return `You dance until dawn. Your purse is <b>${g} gold</b> lighter. Fey dancing is not free.`; }],
+    ['Step around it', () => 'The music stops as you pass. It sounds offended.']] },
+  { id: 'emberspirit', b: ['ember', 'sands'], t: 'The Forge-Spirit', who: null, txt: 'A living flame hovers over a cracked anvil. "Feed me your blade," it crackles, "and I will give it back hotter."', o: [
+    ['Offer your weapon', () => { const w = P.eq.weapon && getItem(P.eq.weapon); if (!w) return 'You have no weapon.'; if (w.q < 3) w.q++; if (!w.ench && ITEMS[w.id].wk !== 'staff' && ITEMS[w.id].wk !== 'bow') w.ench = 'fire'; recalc(); return `It comes back glowing: <b>${itemName(w)}</b>.`; }],
+    ['Back away', () => 'The flame sulks.']] },
+  { id: 'rotwell', b: ['rotfen', 'sunken', 'hollow'], t: 'A Black Well', who: null, txt: 'The water in this well is black, and warm, and smells faintly of honey.', o: [
+    ['Drink', () => { if (chance(.5)) { P.bonusHp += 20; recalc(); P.hp += 20; return 'Sweet, then bitter. <b>+20 maximum health</b>.'; } gainBless(true); return 'Bitter, then worse.'; }],
+    ['Fill a flask (a venom oil)', () => rItem('venom_vial', 2) + ' ×2 go in your pack.'],
+    ['Leave it', () => 'Some wells are wishing wells. This is not one.']] },
+  { id: 'deserters', t: 'Deserters', who: 'soldier', txt: 'Two soldiers without badges on their tabards eye you warily. "We are done with lords and their wars. But we would follow a knight who pays."', o: [
+    ['Hire a spearman (50 gold)', () => { P.gold -= 50; spawnPartyMember({ kind: 'soldier', name: pick(RNAMES) + ' the Deserter', k: 0 }); G.road.allies++; return 'He falls in behind you.'; }, () => P.gold >= 50],
+    ['Hire a bowman (60 gold)', () => { P.gold -= 60; spawnPartyMember({ kind: 'bowman', name: pick(RNAMES) + ' the Deserter', k: 0 }); G.road.allies++; return 'She strings her bow and follows.'; }, () => P.gold >= 60],
+    ['Send them on their way', () => 'They go, looking for a better offer.']] },
+  { id: 'squire', t: 'The Lost Squire', who: 'soldier', txt: 'A boy in oversized mail is lost. His knight died three days ago. "I can fight," he says. His voice cracks.', o: [
+    ['Take him on', () => { spawnPartyMember({ kind: 'soldier', name: 'Young ' + pick(RNAMES), k: 0 }); G.road.allies++; return 'He follows you like a puppy with a spear.'; }],
+    ['Send him home with coin (20 gold)', () => { P.gold -= 20; gainBless(false); return 'He runs home. You feel better for it.'; }, () => P.gold >= 20]] },
+  { id: 'map', t: 'A Treasure Map', who: null, txt: 'A scrap of map pinned to a tree with a dagger. X marks a spot a mile off the road, in a gully full of thorns.', o: [
+    ['Follow it', () => { const a = rHurt(.1); if (chance(.55)) return `Scratched and bleeding (<b>-${a} health</b>), you dig up <b>${rGold(randi(110, 180))} gold</b>.`; return `Scratched and bleeding (<b>-${a} health</b>), you dig up a very old boot.`; }],
+    ['It is obviously a trap', () => chance(.5) ? 'It probably was.' : 'You will never know.']] },
+  { id: 'library', t: 'A Library in Ruins', who: null, txt: 'Half a tower, and in its shell, shelves of rotting books. Some are still dry.', o: [
+    ['Study (learn a spell)', () => { const id = pick(tomesFor(2, null)); if (!id) { P.bonusSt += 10; recalc(); return 'Nothing new. You leave with sore eyes and <b>+10 stamina</b> from all the climbing.'; } learnSpell(id, true); return `You learn <b>${SPELLS[id].n}</b>.`; }],
+    ['Search for valuables', () => `Behind a loose stone: <b>${rGold(50)} gold</b>.`]] },
+  { id: 'beggar', t: 'The Beggar King', who: 'monk', txt: 'A beggar in a paper crown. "Alms for a king, good knight! A king without a kingdom, alas."', o: [
+    ['Give him 10 gold', () => { P.gold -= 10; if (chance(.12) && !G.road.relics.includes('old_crown')) { gainRelic('old_crown', true); return 'He takes off his crown and gives it to you. It is not paper. <b>Crown of a Forgotten King</b>.'; } gainBless(false); return '"A king remembers his friends," he says.'; }, () => P.gold >= 10],
+    ['Mock him', () => { gainBless(true); return 'He curses you, and it takes.'; }],
+    ['Ignore him', () => 'He waves after you anyway.']] },
+  { id: 'well', t: 'A Wishing Well', who: null, txt: 'Moss-green stones and a bucket on a chain. The bottom shines with coins.', o: [
+    ['Toss in 25 gold and wish', () => { P.gold -= 25; if (chance(.6)) { P.hp = P.maxHp; return 'Your wounds close. Every one.'; } return 'Nothing. It was a very expensive splash.'; }, () => P.gold >= 25],
+    ['Fish out some coins', () => { const g = rGold(randi(20, 45)); if (chance(.4)) { gainBless(true); return `+${g} gold. Something at the bottom of the well is angry.`; } return `+${g} gold.`; }]] },
+  { id: 'barrow', t: 'An Open Barrow', who: null, txt: 'The stone door of a barrow stands open. Cold air breathes out of it. There is gold in there. There is also something else.', o: [
+    ['Go in', () => { const U = G.under, s = pick(D8(U)); const e = rElite(pick(['hknight', 'wight']), s, [pick(['giant', 'regen', 'armored'])]); U.obj = 'elite'; U.champ = e; U.t = 'elite'; rAmbush(['wight', 'hollow_archer'], ''); U.obj = 'elite'; return 'Something in rusted armour steps out to meet you.'; }],
+    ['Close the door', () => 'You roll a stone against it for good measure.']] },
+  { id: 'caravan', t: 'A Trade Caravan', who: 'noble', txt: 'A merchant caravan has stopped to water its camels. The master eyes your relics with interest.', o: [
+    ['Sell a random relic (150 gold)', () => { const R = G.road, give = pick(R.relics.filter(id => id !== RCLASS[R.cls].relic)); if (!give) return 'He wants nothing you have.'; R.relics = R.relics.filter(x => x !== give); recalc(); return `He buys your <b>${RELICS[give].n}</b> for <b>${rGold(150)} gold</b>.`; }, () => G.road.relics.length > 1],
+    ['Buy three healing draughts (60 gold)', () => { P.gold -= 60; rItem('potion', 3); return 'Three healing draughts go into your pack.'; }, () => P.gold >= 60],
+    ['Wave and ride on', () => 'The camels spit at you. Camels are like that.']] },
+  { id: 'wolf', b: ['greenmarch', 'frost', 'feywood'], t: 'A Wounded Wolf', who: null, txt: 'A great grey wolf lies in a hunter\'s snare, too weak to snarl.', o: [
+    ['Free it and tend its leg', () => { if (!G.road.relics.includes('hound_whistle')) { gainRelic('hound_whistle', true); return 'It limps after you and will not leave. You have a war hound now.'; } rHeal(.1); return 'It licks your hand and bounds away.'; }],
+    ['Put it out of its misery', () => rItem('meat', 2) + ' ×2 and a fur.']] },
+  { id: 'priest', t: 'A Priest of the Road', who: 'monk', txt: 'A priest with a staff and a begging bowl. "The road is long, child. Let me lighten your load."', o: [
+    ['Ask him to lift a curse', () => { G.road.curse.shift(); recalc(); return 'He mutters, and something lifts from your shoulders.'; }, () => G.road.curse.length > 0],
+    ['Ask for a blessing (40 gold)', () => { P.gold -= 40; gainBless(false); return 'He blesses you, and pockets the coin.'; }, () => P.gold >= 40],
+    ['Ask him to pray for you', () => `He prays. You feel better. <b>+${rHeal(.15)} health</b>.`]] },
+  { id: 'mirror', t: 'The Mirror Pool', who: null, txt: 'A pool so still it is a mirror. Your reflection is carrying more relics than you are.', o: [
+    ['Reach into the water', () => { if (chance(.35)) { const n = rRelic(); return n ? `You pull out <b>${n}</b>.` : 'Only water.'; } gainBless(true); return 'Your reflection pulls back.'; }],
+    ['Do not touch it', () => 'Your reflection looks disappointed.']] },
+  { id: 'ambush', t: 'Too Quiet', who: null, txt: 'The birds have stopped singing. There are fresh tracks on the road, and a broken arrow.', o: [
+    ['Draw your weapon and push on', () => rAmbush(null, 'They were waiting in the trees!')],
+    ['Circle around through the brush', () => { const a = rHurt(.06); if (chance(.6)) return `Briars and mud, <b>-${a} health</b>, but you slip past them.`; return rAmbush(null, 'They spot you anyway!'); }]] },
+  { id: 'pilgrims', t: 'Pilgrims\' Rest', who: 'monk', txt: 'A hut for pilgrims, with a pot of soup on and nobody home. A sign says: TAKE WHAT YOU NEED. LEAVE WHAT YOU CAN.', o: [
+    ['Eat, and leave 15 gold', () => { P.gold -= 15; gainBless(false); rHeal(.2); return 'The soup is good. You feel watched over.'; }, () => P.gold >= 15],
+    ['Eat, and leave nothing', () => `The soup is good. <b>+${rHeal(.2)} health</b>.`],
+    ['Take the soup pot', () => { gainBless(true); return 'You take the pot. It is a bad pot. You are a bad knight.'; }]] },
+  { id: 'arena', t: 'A Pit Fight', who: 'noble', txt: 'A crowd in a ring of wagons, shouting over a pit. "A knight! A real knight! Fight our champion, sir, and win the pot!"', o: [
+    ['Fight (win 120 gold)', () => { const U = G.under, e = rElite(pick(['bandit', 'knight', 'bear']), U.D.center, [pick(Object.keys(ELITE_MODS))]); U.obj = 'elite'; U.champ = e; U.t = 'elite'; U.bonus = 120; return 'The crowd roars as the champion drops into the pit.'; }],
+    ['Bet on the champion instead (40 gold)', () => { P.gold -= 40; if (chance(.5)) return `The champion wins. <b>+${rGold(80)} gold</b>.`; return 'The champion trips over his own feet.'; }, () => P.gold >= 40]] },
+  { id: 'gypsy', t: 'The Fortune Teller', who: 'crone', txt: 'A painted wagon with a crystal ball in the window. "Your future, knight? The cards never lie. Much."', o: [
+    ['Have your fortune told (20 gold)', () => { P.gold -= 20; const r2 = Math.random(); if (r2 < .4) { gainBless(false); return '"Good fortune," she says, and it is.'; } if (r2 < .7) { P.luckT = 999; return '"Luck," she says. You feel lucky.'; } return '"Death," she says, then laughs. "Only joking."'; }, () => P.gold >= 20],
+    ['Rob the wagon', () => rAmbush(['bandit', 'assassin', 'bandit'], 'Her sons were in the wagon.')]] },
+  { id: 'smithy', t: 'A Travelling Tinker', who: 'noble', txt: 'A tinker with a grindstone on his back. "Sharpen that blade for you? Twenty gold, and it\'ll cut the wind."', o: [
+    ['Sharpen your weapon (20 gold)', () => { P.gold -= 20; const w = P.eq.weapon && getItem(P.eq.weapon); if (w && w.q < 3) { w.q++; recalc(); return `<b>${itemName(w)}</b>. It does cut the wind.`; } return 'He sharpens it. It was sharp already.'; }, () => P.gold >= 20],
+    ['No thank you', () => 'He trundles off, grinding.']] },
+  { id: 'hollowcall', b: ['hollow', 'sunken', 'rotfen'], t: 'Voices in the Mist', who: null, txt: 'The mist thickens, and in it, voices. They know your name. They promise power, if you will only stay a while.', o: [
+    ['Listen', () => { if (chance(.5)) { const n = rRelic(); gainBless(true); return n ? `You come away with <b>${n}</b>, and something else that clings.` : 'You come away with nothing but a chill.'; } return rAmbush(['wight', 'wight', 'hollow_archer'], 'The voices were hungry.'); }],
+    ['Stop your ears and run', () => { const a = rHurt(.05); return `You run until the mist thins. <b>-${a} health</b>.`; }]] },
+  { id: 'nest', b: ['sands', 'ember', 'frost'], t: 'A Nest of Eggs', who: null, txt: 'A nest of great speckled eggs, each the size of your head, and warm. The mother is nowhere to be seen. For now.', o: [
+    ['Take an egg to sell (+90 gold)', () => { const g = rGold(90); if (chance(.45)) return rAmbush([RB[G.road.map.b].foes[1][0]], `The mother is somewhere to be seen. (+${g} gold)`); return `+${g} gold.`; }],
+    ['Leave them be', () => 'You tiptoe away.']] },
+  { id: 'kraken', b: ['isles'], t: 'Wreckers\' Beach', who: 'pirate', txt: 'Lanterns on the rocks to lure ships to their doom, and a wrecker with a crowbar. "Nothing to see, stranger. Just fishing."', o: [
+    ['Put out their lanterns', () => rAmbush(['bandit', 'xbowman', 'bandit'], 'The wreckers come for you with crowbars.')],
+    ['Buy a share of the salvage (40 gold)', () => { P.gold -= 40; const o = gearDraft(1, 1)[0]; addItem(o.id, o.q, 1, true); return `A <b>${itemName({ id: o.id, q: o.q })}</b>, salty but sound.`; }, () => P.gold >= 40]] },
+];
+function roadEvent(nd) {
+  const R = G.road, b = R.map.b, r = mulberry32(nd.s + 77), pool = REVENTS.filter(ev => !ev.b || ev.b.includes(b)), ev = pool[Math.floor(r() * pool.length)], U = G.under;
+  const who = ev.who ? { kind: 'npc', name: '', _look: RLK[ev.who] } : 'scroll';
+  const finish = txt => {
+    nd.done = 1; closeDialog(); R.stats.events++; updateHUD(true);
+    const fight = U.obj && U.obj !== 'event';
+    openDialog({ name: ev.t, role: '', portrait: who, text: `<p>${txt}</p>`, options: [{ t: fight ? 'To arms!' : 'Continue', fn: () => { closeDialog(); if (!fight) { U.won = true; R.cleared = true; R.stats.nodes++; saveGame(true, true); if (R.pending) showDraft(); } } }] });
+  };
+  openDialog({ name: ev.t, role: RB[b].n, portrait: who, text: `<p>${ev.txt}</p>`, options: ev.o.map(([t, fn, req]) => ({ t, dis: req ? !req() : false, fn: () => { let txt = ''; try { txt = fn(r) || ''; } catch (err) { console.error(err); txt = 'The moment passes.'; } recalc(); finish(txt); } })) });
+}
+
+/* ---------------- Starting, resuming and ending a run ---------------- */
+let roadCfg = { cls: 'knight', oath: 0, diff: 2, daily: false };
+function roadStart(cfg) {
+  withLoading('THE ROAD UNWINDS…', () => {
+    const d = cfg.daily ? dailyOf() : null, seed = d ? d.seed : Math.floor(Math.random() * 1e9);
+    const opts = normOpts({ size: 0, diff: cfg.diff ?? 2, gen: 2, kingdom: 0, pname: newOpts.pname, fem: newOpts.fem });
+    G.mode = 'road'; G.opts = opts; DAYLEN = DAYS[opts.day].len; STORY = null;
+    prepareWorld(seed, opts); resetState();
+    G.road = newRun({ seed, cls: d ? d.cls : cfg.cls, oath: d ? d.oath : cfg.oath, diff: opts.diff, daily: d ? d.key : null, twist: d ? d.twist : null });
+    newPlayer(); runHooks('newgame', 'road', opts); roadKit();
+    G.road.map = genRealmMap(0); G.road.stats.t0 = G.time; if (rHas('deep_pockets')) P.gold += 120;
+    const m = rMeta(); m.runsN = (m.runsN || 0) + 1; rMetaPut(m);
+    roadEnter(false); beginPlay(); saveGame(true, true);
+    const C = RCLASS[G.road.cls];
+    setTimeout(() => { if (G.state !== 'play' || !rOn()) return; openDialog({ name: 'The Long Road', role: `${C.n}${G.road.oath ? ` · Oath ${G.road.oath}` : ''}${G.road.daily ? ' · Daily Road' : ''}`, portrait: 'sign', text: `<p>Three realms, then the Hollow Reach, where the Hollow King waits, unbound. The road will not wait for you, and it will not forgive you: <b>if you fall, the run ends</b>, but the renown you earn stays with you, and unlocks new heroes.</p>${G.road.twist ? `<p><b style="color:#ffd24a">${TWISTS[G.road.twist].n}:</b> ${TWISTS[G.road.twist].d}</p>` : ''}<p style="color:var(--muted)">Your first realm is <b>${RB[G.road.realms[0]].n}</b>. Walk to the glowing waymarker, or press <kbd>${keyName('KeyM')}</kbd>, to choose your path. Wounds do not heal on their own out here: find potions, campfires and shrines.</p>`, options: [{ t: 'Set out', fn: closeDialog }] }); }, 700);
+  });
+}
+function roadResume() { // a loaded run: back to where the road was left, with the fight there already won
+  const R = G.road; if (!R.map) R.map = genRealmMap(R.ri);
+  roadEnter(true);
+  setTimeout(() => { if (G.state === 'play' && rOn()) { if (R.pending) showDraft(); else toast(`The Long Road: ${RB[R.map.b].n}. Press <kbd>${keyName('KeyM')}</kbd> for your route.`, 'gold'); } }, 900);
+}
+function roadGo(r, i) {
+  const R = G.road; if (!R.cleared || R.ended) return;
+  R.at = { r, i }; R.cleared = false; R.map.rows[r][i].v = 1; UI.closeAll();
+  roadEnter(false);
+}
+function roadNextRealm() {
+  const R = G.road; if (R.ri >= R.realms.length - 1) return;
+  R.ri++; R.map = genRealmMap(R.ri); R.at = null; R.cleared = true; rHeal(.35); P.mp = P.maxMp; if (rHas('deep_pockets')) P.gold += 120;
+  UI.closeAll(); roadEnter(false); saveGame(true, true); SND.play('horn');
+  toast(`Onward, to <b>${RB[R.map.b].n}</b>. The road heals a little of what it took (35% health).`, 'gold');
+}
+function roadDie() {
+  const R = G.road; if (!R || R.ended) return false;
+  if (rHas('phoenix') && !R.phoenix) {
+    R.phoenix = true; P.hp = Math.round(P.maxHp * .5); P.iframes = 2.5; SND.play('ignite'); addShake(8);
+    for (let i = 0; i < 40 * QMUL(); i++) addPart(P.x, P.y, rand(-160, 160), rand(-220, 20), pick(['#ff5a1a', '#ff9a2a', '#ffd04a']), rand(.5, 1.1), 3.5, -40);
+    toast('The <b>Phoenix Feather</b> burns away, and you rise from the ashes!', 'gold'); return true;
+  }
+  P.hp = 0; G.state = 'dead'; SND.play('death'); addShake(12); G.stats.deaths++;
+  for (let i = 0; i < 30; i++) addPart(P.x, P.y, rand(-150, 150), rand(-150, 150), '#8a1a12', rand(.5, 1.2), 3);
+  const src = P.lastBlow && P.lastBlow.src; R.fell = src && src.name ? (src.boss ? src.name : (/^[aeiou]/i.test(src.name) ? 'an ' : 'a ') + src.name.toLowerCase()) : null;
+  setTimeout(() => roadEnd(false), 1300); return true;
+}
+function roadEnd(won) {
+  const R = G.road; if (!R || R.ended) return; R.ended = true;
+  const m = rMeta(), ren = roadRenown(won), B = RB[R.realms[R.ri]]; let newOath = false;
+  m.renown += ren; m.earned += ren; m.realms += R.realmsDone; m.bosses += R.stats.bosses; m.best = Math.max(m.best, ren);
+  if (won) { m.wins++; m.classWins[R.cls] = (m.classWins[R.cls] || 0) + 1; if (!R.daily && R.oath >= m.oath && m.oath < 10) { m.oath = R.oath + 1; newOath = true; } }
+  m.runs.unshift({ at: Date.now(), cls: R.cls, oath: R.oath, won, ri: R.ri, b: R.realms[R.ri], lvl: P.lvl, ren, daily: R.daily, kills: R.stats.kills, fell: R.fell || null }); m.runs.length = Math.min(m.runs.length, 20);
+  if (R.daily) m.daily[R.daily] = { ren, won, ri: R.ri };
+  rMetaPut(m); G.ironDead = true; try { localStorage.removeItem(saveKey()); } catch (e) { }
+  G.state = 'dead'; checkAch(); if (won) SND.play('mainquest');
+  const C = RCLASS[R.cls], mins = Math.round((G.time - (R.stats.t0 || 0)) / 60), next = Object.entries(RCLASS).find(([id, c]) => !m.unlocked.includes(id) && c.cost > 0);
+  $('rdEndKick').textContent = won ? 'VICTORY' : 'THE ROAD ENDS';
+  $('rdEndTitle').textContent = won ? 'The Hollow King Falls' : `Fallen in ${B.n}`;
+  $('rdEndBody').innerHTML = `<p class="rdEndLead">${won ? `${esc(pFull())} walked the whole of the Long Road and broke the Hollow King, ${R.oath ? `under Oath ${R.oath}` : 'unbound by any oath'}. The songs will be long ones.` : `${esc(pFull())} fell ${R.fell ? `to <b>${esc(R.fell)}</b> ` : ''}in ${B.n}, ${['in the first realm', 'in the second realm', 'in the third realm', 'at the very end of the road'][R.ri]}.`}</p>
+    <div class="rdStats"><div><b>${C.n}</b><span>hero</span></div><div><b>${P.lvl}</b><span>level</span></div><div><b>${R.realmsDone}</b><span>realms</span></div><div><b>${R.stats.nodes}</b><span>stops</span></div><div><b>${R.stats.kills}</b><span>foes slain</span></div><div><b>${R.stats.elites + R.stats.bosses}</b><span>champions &amp; bosses</span></div><div><b>${R.relics.length}</b><span>relics</span></div><div><b>${mins}</b><span>minutes</span></div></div>
+    <div class="rdRenown">+${ren} renown <span>· ${m.renown} to spend</span></div>
+    ${newOath ? `<p class="rdUnl">✦ <b>Oath ${m.oath}</b> unlocked: ${OATHS[m.oath]}.</p>` : ''}
+    ${next ? `<p class="rdUnl" style="color:var(--muted)">Next hero to unlock: <b>${next[1].n}</b> (${next[1].cost} renown).</p>` : ''}
+    <div class="rdRelics">${R.relics.map(id => `<span class="rdRel" data-tip="<h4>${RELICS[id].n}</h4>${esc(RELICS[id].d)}">◆ ${RELICS[id].n}</span>`).join('')}</div>`;
+  setTimeout(() => UI.show('roadEndScreen'), won ? 600 : 200);
+}
+$('rdEndAgain').onclick = () => { UI.hide('roadEndScreen'); toMainMenu(); SND.init(); showModePick(); UI.open('mode'); openRoadSetup(); };
+$('rdEndMenu').onclick = () => { UI.hide('roadEndScreen'); toMainMenu(); };
+
+/* ---------------- The route map (M on the road) ---------------- */
+function renderRoad() {
+  const R = G.road; if (!R || !R.map) return; const M = R.map, L = M.rows.length, B = RB[M.b];
+  const pos = (r, i) => { const row = M.rows[r], nd = row[i], jit = row.length > 1; return [20 + (i + 1) / (row.length + 1) * 560 + (jit ? nd.jx * 40 : 0), 470 - r * (436 / (L - 1)) + (jit ? nd.jy * 12 : 0)]; };
+  const av = !R.cleared || R.ended ? [] : !R.at ? M.rows[0].map((_, i) => [0, i]) : (M.rows[R.at.r][R.at.i].next || []).map(k => [R.at.r + 1, k]);
+  const isAv = (r, i) => av.some(([a, b]) => a === r && b === i), cur = R.at;
+  let h = `<rect width="600" height="520" fill="#1e1710"/><rect x="6" y="6" width="588" height="508" fill="none" stroke="#6b5230" stroke-width="1.5" rx="6"/>`;
+  for (let i = 0; i < 26; i++) h += `<circle cx="${(i * 137) % 600}" cy="${(i * 211) % 520}" r="${1 + (i % 3)}" fill="rgba(216,200,144,.07)"/>`;
+  M.rows.forEach((row, r) => row.forEach((nd, i) => (nd.next || []).forEach(k => { const [x1, y1] = pos(r, i), [x2, y2] = pos(r + 1, k), walked = nd.v && M.rows[r + 1][k].v; h += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${walked ? '#ffd24a' : 'rgba(216,200,144,.28)'}" stroke-width="${walked ? 3 : 2}" ${walked ? '' : 'stroke-dasharray="4 6"'}/>`; })));
+  M.rows.forEach((row, r) => row.forEach((nd, i) => {
+    const [x, y] = pos(r, i), show = nd.t === 'mystery' && (nd.seen || rHas('cartographer')) ? nd.m : nd.t, N = RNODE[show], a = isAv(r, i), here = cur && cur.r === r && cur.i === i, big = nd.t === 'boss' ? 22 : nd.t === 'camp' ? 17 : 15;
+    h += `<g class="rn${a ? ' rnAv' : ''}" data-r="${r}" data-i="${i}" transform="translate(${x.toFixed(1)},${y.toFixed(1)})" data-tip="<h4>${N.n}${nd.t === 'mystery' && show !== 'mystery' ? ' (a mystery)' : ''}</h4>${esc(NODE_TIP[show] || '')}">`
+      + (a ? `<circle r="${big + 7}" fill="none" stroke="#ffd24a" stroke-width="2" class="rnPulse"/>` : '')
+      + `<circle r="${big}" fill="${nd.v ? '#3a2e1e' : '#2a2016'}" stroke="${here ? '#fff4c0' : nd.v ? '#ffd24a' : N.c}" stroke-width="${here ? 3.5 : 2}"/>`
+      + `<text y="${nd.t === 'boss' ? 7 : 5}" text-anchor="middle" font-size="${nd.t === 'boss' ? 20 : 15}" fill="${nd.v && !here ? '#8a7a5a' : N.c}">${N.g}</text>` + (nd.v && !here ? `<text x="${big - 4}" y="${-big + 8}" font-size="11" fill="#8fe07a">✓</text>` : '') + '</g>';
+  }));
+  if (!R.at) { const [x, y] = [300, 510]; h += `<text x="${x}" y="${y}" text-anchor="middle" font-family="Cinzel,Georgia" font-size="11" fill="#d8c890">▲ YOU ARE HERE</text>`; }
+  $('roadMap').innerHTML = h;
+  const bossDone = cur && M.rows[cur.r][cur.i].t === 'boss' && R.cleared, C = RCLASS[R.cls], relTip = id => `<h4>${RELICS[id].n}</h4>${esc(RELICS[id].d)}`;
+  $('roadSide').innerHTML = `<div class="crNote"><b>${B.n.toUpperCase()}</b>${B.d} · Realm ${R.ri + 1} of ${R.realms.length}</div>
+    <div class="rdRealms">${R.realms.map((b, i) => `<span class="${i < R.ri ? 'done' : i === R.ri ? 'on' : ''}" data-tip="${i <= R.ri ? RB[b].n : 'Unknown realm'}">${i < R.ri ? '✓' : i === R.realms.length - 1 ? '♛' : i + 1}</span>`).join('<i></i>')}</div>
+    <div class="rdLine"><b>${C.n}</b> · Level ${P.lvl}${R.oath ? ` · <span style="color:#ff9a7a">Oath ${R.oath}</span>` : ''}${R.daily ? ' · Daily Road' : ''}</div>
+    <div class="rdLine">❤ ${Math.ceil(P.hp)} / ${P.maxHp} · <span style="color:#ffd24a">⛁ ${fmt(P.gold)}</span>${P.maxMp ? ` · <span style="color:#8fb8ff">✦ ${Math.floor(P.mp)} / ${P.maxMp}</span>` : ''}</div>
+    ${bossDone ? (R.ri < R.realms.length - 1 ? `<button class="btn gold" id="rdNext" style="width:100%;margin:8px 0">Onward to ${R.ri + 1 === R.realms.length - 1 ? 'the Hollow Reach' : 'the next realm'} ▸</button>` : '') : !R.cleared ? '<div class="rdWarn">Finish what you started here before you move on.</div>' : `<div class="rdHint">Choose your next stop: the glowing nodes${R.at ? ' joined to where you stand' : ' on the bottom row'}.</div>`}
+    <div class="rdH">RELICS</div><div class="rdRelics">${R.relics.map(id => `<span class="rdRel" data-tip="${relTip(id)}">◆ ${RELICS[id].n}</span>`).join('') || '<i style="color:var(--muted)">None yet</i>'}</div>
+    ${R.bless.length || R.curse.length ? `<div class="rdH">BLESSINGS &amp; CURSES</div><div class="rdRelics">${R.bless.map(id => { const b = BLESSINGS.find(x => x.id === id); return `<span class="rdRel bl" data-tip="<h4>${b.n}</h4>${esc(b.d)}">✚ ${b.n}</span>`; }).join('')}${R.curse.map(id => { const b = CURSES.find(x => x.id === id); return `<span class="rdRel cu" data-tip="<h4>${b.n}</h4>${esc(b.d)}">☠ ${b.n}</span>`; }).join('')}</div>` : ''}
+    ${R.twist ? `<div class="rdH">TODAY'S ROAD</div><div class="rdLine">${TWISTS[R.twist].n}: <span style="color:var(--muted)">${TWISTS[R.twist].d}</span></div>` : ''}
+    ${R.oath ? `<div class="rdH">YOUR OATHS</div><div class="rdLine" style="color:var(--muted);font-size:13px">${OATHS.slice(1, R.oath + 1).join(' · ')}</div>` : ''}`;
+  $('roadMap').querySelectorAll('.rnAv').forEach(el => el.onclick = () => { SND.play('ui'); roadGo(+el.dataset.r, +el.dataset.i); });
+  const nx = $('rdNext'); if (nx) nx.onclick = () => roadNextRealm();
+}
+const NODE_TIP = { fight: 'A fight: rout the foe, hold a pass, guard a wagon, slay a captain, hold a banner or break the totems.', elite: 'A named champion with dangerous gifts. Beat them for a relic.', event: 'Something happens. Choices, and consequences.', shop: 'A merchant: potions, gear, tomes and, sometimes, relics.', forge: 'A smith who can temper or enchant your gear, twice.', tower: 'A wizard: learn a spell, buy enchanted jewellery, drink from the well of stars.', shrine: 'Pray for a blessing. The gods are fickle.', camp: 'Rest, train or cook. Only one.', treasure: 'A strongbox: choose a relic.', delve: 'A dungeon off the road, with traps and a guardian. Rich pickings.', duel: 'A knight challenges you, one on one. Win their arms.', board: 'Board a pirate ship and take her. Double pay for corsairs.', mystery: 'Anything at all.', boss: 'The master of this realm.' };
+UI.ids.road = 'roadScreen'; UI.renders.road = renderRoad;
+
+/* ---------------- Setting out: hero, oath and the Daily Road ---------------- */
+function openRoadSetup() {
+  pendingMode = 'road'; ['modePick', 'setupBox', 'newConfirm', 'slotBox'].forEach(id => $(id).classList.add('hidden')); $('roadSetup').classList.remove('hidden');
+  $('modeScreen').querySelector('.panel').classList.add('wide'); $('modeTitle').textContent = 'THE LONG ROAD'; renderRoadSetup();
+}
+function renderRoadSetup() {
+  const m = rMeta(), c = roadCfg, dl = dailyOf(), dd = m.daily[dl.key];
+  if (!m.unlocked.includes(c.cls)) c.cls = 'knight'; c.oath = Math.min(c.oath, m.oath);
+  $('rsRenown').innerHTML = `<b>${m.renown}</b> renown to spend · ${m.wins} victor${m.wins === 1 ? 'y' : 'ies'} · ${m.runsN || 0} run${(m.runsN || 0) === 1 ? '' : 's'}`;
+  $('rsClasses').innerHTML = Object.entries(RCLASS).map(([id, C]) => { const has = m.unlocked.includes(id), can = !has && m.renown >= C.cost; return `<div class="rsCls${has ? '' : ' locked'}${c.cls === id && !c.daily ? ' on' : ''}" data-c="${id}"><div class="rsN">${C.n}${m.classWins[id] ? ` <span class="rsW" title="Victories">♛${m.classWins[id]}</span>` : ''}</div><div class="rsD">${C.d}</div><div class="rsK">◆ ${RELICS[C.relic].n}${C.spells ? ` · ✦ ${C.spells.map(s => SPELLS[s].n).join(', ')}` : ''}</div>${has ? '' : `<button class="btn sm ${can ? 'gold' : ''}" data-unl="${id}" ${can ? '' : 'disabled'}>Unlock · ${C.cost} renown</button>`}</div>`; }).join('');
+  $('rsOath').innerHTML = OATHS.map((o, i) => i > m.oath ? '' : `<div class="sb ${c.oath === i ? 'on' : ''}" data-o="${i}">${i ? 'Oath ' + i : 'No oath'}</div>`).join('');
+  $('rsOathNote').textContent = c.oath ? OATHS.slice(1, c.oath + 1).join(' · ') + '.' : m.oath ? 'Swear oaths for more renown. Winning under your highest oath unlocks the next.' : 'Win a run to unlock the first oath: harder roads, more renown.';
+  $('rsDiff').innerHTML = [[1, 'Squire'], [2, 'Knight'], [3, 'Champion']].map(([i, n]) => `<div class="sb ${c.diff === i ? 'on' : ''}" data-d="${i}">${n}</div>`).join('');
+  $('rsDaily').innerHTML = `<div class="rsDT">⚑ THE DAILY ROAD · ${dl.key}</div><div class="rsDD">Everyone who plays today walks the same road: <b>${RCLASS[dl.cls].n}</b>, Oath ${dl.oath}, and <b>${TWISTS[dl.twist].n}</b> (${TWISTS[dl.twist].d}) One attempt a day.</div>${dd ? `<div class="rsDD" style="color:#8fe07a">Today's attempt: ${dd.won ? 'victory!' : `fell in realm ${dd.ri + 1}`} · ${dd.ren} renown</div>` : `<button class="btn sm ${c.daily ? 'gold' : ''}" id="rsDailyBtn">${c.daily ? '✓ Walking the Daily Road' : 'Walk the Daily Road'}</button>`}`;
+  $('rsHist').innerHTML = m.runs.length ? m.runs.slice(0, 6).map(r => `<div class="rsRun ${r.won ? 'won' : ''}">${r.won ? '♛' : '✝'} <b>${RCLASS[r.cls] ? RCLASS[r.cls].n : r.cls}</b>${r.oath ? ` · Oath ${r.oath}` : ''}${r.daily ? ' · daily' : ''} · ${r.won ? 'Victory' : `fell in ${RB[r.b] ? RB[r.b].n : 'the road'}${r.fell ? ` to ${esc(r.fell)}` : ''}`} · lvl ${r.lvl} · +${r.ren}</div>`).join('') : '<i style="color:var(--muted)">No runs yet. Every hero starts somewhere.</i>';
+  $('rsClasses').querySelectorAll('.rsCls').forEach(el => el.onclick = e => { const id = el.dataset.c; if (e.target.closest('[data-unl]')) { const mm = rMeta(), C = RCLASS[id]; if (mm.renown < C.cost) return; askConfirm(`UNLOCK THE ${C.n.toUpperCase()}?`, `Spend <b>${C.cost}</b> of your ${mm.renown} renown to unlock the ${C.n} for every future run.`, 'Unlock', () => { const m2 = rMeta(); if (m2.renown < C.cost) return; m2.renown -= C.cost; m2.unlocked.push(id); rMetaPut(m2); roadCfg.cls = id; roadCfg.daily = false; SND.play('level'); renderRoadSetup(); }); return; } if (!rMeta().unlocked.includes(id)) return; roadCfg.cls = id; roadCfg.daily = false; SND.play('ui'); renderRoadSetup(); });
+  $('rsOath').querySelectorAll('.sb').forEach(el => el.onclick = () => { roadCfg.oath = +el.dataset.o; roadCfg.daily = false; SND.play('ui'); renderRoadSetup(); });
+  $('rsDiff').querySelectorAll('.sb').forEach(el => el.onclick = () => { roadCfg.diff = +el.dataset.d; SND.play('ui'); renderRoadSetup(); });
+  const db = $('rsDailyBtn'); if (db) db.onclick = () => { roadCfg.daily = !roadCfg.daily; SND.play('ui'); renderRoadSetup(); };
+  $('rsGo').textContent = c.daily ? 'Walk the Daily Road ▸' : `Set out as the ${RCLASS[c.cls].n} ▸`;
+}
+$('rsBack').onclick = () => { SND.play('ui'); $('roadSetup').classList.add('hidden'); showModePick(); };
+$('rsGo').onclick = () => { SND.play('ui'); const m = rMeta(); if (roadCfg.daily && m.daily[todayKey()]) { roadCfg.daily = false; renderRoadSetup(); return; } $('roadSetup').classList.add('hidden'); showSlotPick(); };
+
+/* ---------------- Hooks into the rest of the game ---------------- */
+Object.assign(ATYPES, {
+  rwagon: { name: 'Supply Wagon', hp: 300, dmg: 0, spd: 0, range: 0, cd: 99, wind: 1, faction: 'k', xp: 0, gold: [0, 0], r: 18 },
+  rtotem: { name: 'Hollow Totem', hp: 200, dmg: 0, spd: 0, range: 0, cd: 99, wind: 1, faction: 'hollow', xp: 30, gold: [0, 0], r: 14 },
+});
+KIND_AI.rwagon = e => { e.x = e.home.x; e.y = e.home.y; e.kbx = e.kby = 0; e.atkCd = 99; };
+KIND_AI.rtotem = e => { e.x = e.home.x; e.y = e.home.y; e.kbx = e.kby = 0; e.atkCd = 99; };
+Object.assign(DRAW_KIND, {
+  rwagon: (g, e) => { const x = e.x, y = e.y; g.fillStyle = 'rgba(0,0,0,.28)'; ell(g, x, y + 14, 30, 8); g.fillStyle = '#5a3a1e'; g.fillRect(x - 26, y - 8, 52, 20); g.fillStyle = '#e8dcc0'; g.beginPath(); g.moveTo(x - 24, y - 8); g.quadraticCurveTo(x, y - 40, x + 24, y - 8); g.fill(); g.strokeStyle = '#b8a888'; g.lineWidth = 1.5; for (let i = -1; i <= 1; i++) { g.beginPath(); g.moveTo(x + i * 12, y - 8); g.lineTo(x + i * 10, y - 28 + Math.abs(i) * 6); g.stroke(); } g.fillStyle = '#3a2410'; circ(g, x - 18, y + 12, 7); circ(g, x + 18, y + 12, 7); g.fillStyle = '#8a6a3a'; circ(g, x - 18, y + 12, 2.5); circ(g, x + 18, y + 12, 2.5); if (e.flash > 0) { g.fillStyle = 'rgba(255,255,255,.4)'; g.fillRect(x - 26, y - 30, 52, 42); } },
+  rtotem: (g, e, t) => { const x = e.x, y = e.y; g.fillStyle = 'rgba(0,0,0,.28)'; ell(g, x, y + 10, 16, 5); g.fillStyle = e.flash > 0 ? '#e8e0d0' : '#4a4038'; g.fillRect(x - 8, y - 44, 16, 54); g.fillStyle = '#d8d0c0'; circ(g, x, y - 48, 9); g.fillStyle = '#1a1410'; circ(g, x - 3, y - 49, 2); circ(g, x + 3, y - 49, 2); g.save(); g.globalAlpha = .5 + Math.sin(t * 4 + e.id) * .3; g.fillStyle = '#9fdcff'; g.shadowColor = '#9fdcff'; g.shadowBlur = 12; circ(g, x, y - 20, 4); g.restore(); },
+});
+Object.assign(STRUCTS, {
+  rd_exit: (g, o, t) => { const x = o.x + 16, y = o.y + o.h, on = G.road && G.road.cleared; g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, x, y, 14, 4); g.fillStyle = '#6a6660'; g.fillRect(x - 6, y - 34, 12, 34); g.fillStyle = '#8e8a82'; g.fillRect(x - 5, y - 33, 5, 32); g.fillStyle = '#4a3018'; g.fillRect(x - 14, y - 30, 28, 9); g.fillStyle = '#e8d8a8'; g.font = 'bold 8px Georgia'; g.textAlign = 'center'; g.fillText('▲', x, y - 23); if (on) { g.save(); g.globalAlpha = .45 + Math.sin(t * 3) * .25; g.fillStyle = '#ffd24a'; g.shadowColor = '#ffd24a'; g.shadowBlur = 18; circ(g, x, y - 40, 5); g.restore(); } },
+  rd_rock: (g, o) => { const k = o.w / 32; g.save(); g.translate(o.x, o.y); g.scale(k, k); o = { x: 0, y: 0, v: o.v, b: o.b }; const x = 16, y = 18, v = o.v || 0, c = o.b === 'frost' ? ['#c8d4dc', '#e8eef2'] : o.b === 'ember' ? ['#3a2a24', '#5a3a2a'] : o.b === 'sands' ? ['#b89a6a', '#d8ba8a'] : ['#6a665e', '#8e8a82']; g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, x + 3, y + 10, 17, 6); g.fillStyle = c[0]; ell(g, x, y + 2, 16 + v * 3, 13); g.fillStyle = c[1]; ell(g, x - 4, y - 2, 9, 7); g.restore(); },
+  rd_mast: (g, o) => { const x = o.x + 16, y = o.y + 16; g.fillStyle = '#4a3018'; circ(g, x, y, 9); g.fillStyle = '#6a4424'; circ(g, x, y, 6); g.fillStyle = 'rgba(232,220,192,.85)'; g.fillRect(x - 40, y - 70, 80, 6); },
+  rd_crate: (g, o) => { const x = o.x + 3, y = o.y + 4; g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(x + 3, y + 5, 26, 24); g.fillStyle = o.v > .5 ? '#7a5a34' : '#6a4a2a'; g.fillRect(x, y, 26, 24); g.strokeStyle = '#4a3018'; g.lineWidth = 2; g.strokeRect(x + 1, y + 1, 24, 22); g.beginPath(); g.moveTo(x + 1, y + 1); g.lineTo(x + 25, y + 23); g.stroke(); },
+  rd_banner: (g, o, t) => { const x = o.x + 8, y = o.y + o.h, U = G.under; g.fillStyle = '#3a2a1a'; g.fillRect(x - 1.5, y - 60, 3, 60); g.fillStyle = '#b03a2a'; g.beginPath(); g.moveTo(x + 1, y - 58); g.lineTo(x + 26 + Math.sin(t * 3) * 3, y - 52); g.lineTo(x + 1, y - 40); g.fill(); if (U && U.banner) { const f = clamp(U.hold / U.need, 0, 1); g.strokeStyle = 'rgba(255,210,74,.25)'; g.lineWidth = 3; g.beginPath(); g.arc(x, y, 110, 0, TAU); g.stroke(); g.strokeStyle = '#ffd24a'; g.lineWidth = 4; g.beginPath(); g.arc(x, y - 70, 12, -Math.PI / 2, -Math.PI / 2 + f * TAU); g.stroke(); } },
+  rd_anvil: (g, o) => { const x = o.x + 16, y = o.y + 18; g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, x, y + 6, 16, 4); g.fillStyle = '#4a3018'; g.fillRect(x - 8, y - 4, 16, 10); g.fillStyle = '#3a3e44'; g.fillRect(x - 14, y - 12, 28, 8); g.fillStyle = '#5a5e66'; g.beginPath(); g.moveTo(x + 14, y - 12); g.lineTo(x + 22, y - 9); g.lineTo(x + 14, y - 6); g.fill(); },
+  rd_orb: (g, o, t) => { const x = o.x + 16, y = o.y + o.h; g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, x, y, 14, 4); g.fillStyle = '#6a6470'; g.fillRect(x - 6, y - 24, 12, 24); g.fillStyle = '#8a8490'; g.fillRect(x - 10, y - 26, 20, 4); g.save(); g.shadowColor = '#c890ff'; g.shadowBlur = 16; g.fillStyle = `rgba(200,144,255,${.7 + Math.sin(t * 2) * .2})`; circ(g, x, y - 34, 8); g.restore(); },
+  rd_shrine: (g, o, t) => { const x = o.x + 20, y = o.y + o.h, used = rNode() && rNode().used; g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, x, y, 20, 5); g.fillStyle = '#8e8a82'; g.fillRect(x - 16, y - 12, 32, 12); g.fillStyle = '#a8a49a'; g.fillRect(x - 8, y - 40, 16, 28); g.fillStyle = '#6a665e'; g.beginPath(); g.moveTo(x - 12, y - 40); g.lineTo(x, y - 52); g.lineTo(x + 12, y - 40); g.fill(); g.fillStyle = '#e8e0c0'; g.fillRect(x - 1.5, y - 36, 3, 14); g.fillRect(x - 5, y - 32, 10, 3); if (!used) for (let i = -1; i <= 1; i += 2) { g.fillStyle = '#f0ece0'; g.fillRect(x + i * 12 - 1.5, y - 20, 3, 8); g.fillStyle = `rgba(255,200,90,${.8 + Math.sin(t * 7 + i) * .2})`; circ(g, x + i * 12, y - 22, 2.2); } },
+  rd_chest: (g, o) => { const x = o.x + 4, y = o.y + 4, open = rNode() && rNode().used; g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, x + 12, y + 22, 15, 4); g.fillStyle = '#6a4424'; g.fillRect(x, y + 6, 24, 16); g.fillStyle = open ? '#2a1a0a' : '#7a5230'; g.fillRect(x, y + (open ? -2 : 0), 24, open ? 6 : 8); g.fillStyle = '#e8c050'; g.fillRect(x + 10, y + 8, 4, 5); g.strokeStyle = '#3a2410'; g.lineWidth = 1.5; g.strokeRect(x, y + 6, 24, 16); },
+  rd_stone: (g, o) => { const x = o.x + 16, y = o.y + o.h; g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, x, y, 16, 4); g.fillStyle = '#7a766e'; g.beginPath(); g.moveTo(x - 12, y); g.lineTo(x - 10, y - 30); g.quadraticCurveTo(x, y - 38, x + 10, y - 30); g.lineTo(x + 12, y); g.fill(); g.fillStyle = '#5a564e'; for (let i = 0; i < 4; i++) g.fillRect(x - 6, y - 26 + i * 6, 12, 2); },
+});
+hook('reset', () => { G.road = null; });
+hook('preload', d => { if (d.mode === 'road' && d.road) { G.mode = 'road'; G.road = d.road; } });
+hook('save', d => { if (G.mode === 'road' && G.road) d.road = G.road; });
+hook('load', d => { if (d.mode === 'road' && G.road) roadResume(); });
+hook('tick', dt => { if (!rOn() || !G.under || !G.under.road) return; roadTick(dt); for (const e of ents) if (e.expireRd && G.time > e.expireRd && !e.dead) { e.expireRd = 0; for (let i = 0; i < 8 * QMUL(); i++) addPart(e.x, e.y - 10, rand(-40, 40), rand(-60, 0), '#8a7a5a', .5, 3); removeEnt(e); } });
+hook('kill', (t, src) => {
+  if (!rOn() || !t.roadFoe) return; const R = G.road; R.stats.kills++;
+  if (src === P || (src && src.ally)) {
+    if (rHas('blood_price')) healP(6, true); if (R.twist === 'bloody') healP(5, true);
+    if (rHas('war_drum')) { P.drum = Math.min(8, (P.drum || 0) + 1); P.drumT = 8; }
+  }
+});
+hook('recalc', () => {
+  if (!rOn()) return; const st = roadStats(), S = P.S, R = G.road;
+  if (R.star) { st.mp = (st.mp || 0) + 15 * R.star; st.sp = (st.sp || 0) + .08 * R.star; }
+  P.maxHp += Math.round(st.hp || 0); P.maxSt += Math.round(st.st || 0); S.def += Math.round(st.def || 0);
+  S.dmgB = (S.dmgB || 0) + (st.dmg || 0); S.sp = (S.sp || 1) * (1 + (st.sp || 0)); S.luck = (S.luck || 0) + (st.luck || 0); S.thorns = (S.thorns || 0) + (st.thorns || 0); S.life = (S.life || 0) + (st.life || 0); S.regen = (S.regen || 0) + (st.regen || 0); S.undead = (S.undead || 0) + (st.undead || 0); if (st.night) S.night = true;
+  S.resF = Math.min(.8, (S.resF || 0) + (st.resF || 0)); S.resC = Math.min(.8, (S.resC || 0) + (st.resC || 0));
+  if (P.maxMp > 0) P.maxMp += Math.round(st.mp || 0); S.mpRegen = (S.mpRegen || 0) * (1 + (st.mpr || 0)); S.cdMul = (S.cdMul || 1) * (1 - (st.cdr || 0));
+  if (st.hpP) P.maxHp = Math.max(20, Math.round(P.maxHp * (1 + st.hpP)));
+  if (S.bow && st.bow) S.dmg *= 1 + st.bow; S.mountB = st.mount || 0;
+  if (P.mp > P.maxMp) P.mp = P.maxMp;
+});
+hook('perfect', () => { if (rHas('second_wind')) { P.st = Math.min(P.maxSt, P.st + 20); healP(10, true); } });
+{ const _pdm = playerDmgMul; playerDmgMul = function (t, o) { let m = _pdm(t, o); if (!rOn()) return m;
+  if (rHas('executioner') && t.hp < t.maxHp * .3) m *= 1.5; if (rHas('giantslayer') && (t.boss || t.elite || t.rboss)) m *= 1.25; if (P.drum > 0) m *= 1 + .06 * P.drum;
+  if (!o.mag && !o.proj) { if (P.bladeCharged) { m *= 1.6; P.bladeCharged = false; addText(t.x, t.y - 44, 'Spellblade!', '#c890ff', 13); } if (P.mounted && P.S.mountB) m *= 1 + P.S.mountB;
+    if (rHas('ember_heart')) { t.burn = 3; t.burnDps = 5 + P.lvl * .8; t.dotSrc = P; } if (rHas('frost_heart')) t.chill = Math.max(t.chill || 0, 2); if (rHas('storm_heart') && chance(.2)) setTimeout(() => { if (!t.dead) magChain(t, 2, 10 * SPW('storm'), 'storm', P); }, 60); }
+  return m; }; }
+{ const _cs = castSpell; castSpell = function (id, slot) { const b = P.scd && P.scd[id]; _cs(id, slot); if (rHas('spellblade') && P.scd && P.scd[id] !== b) P.bladeCharged = true; }; }
+{ const _at = addTrophy; addTrophy = function (...a) { if (rOn()) return; return _at(...a); }; }
+MUSIC_PICK.unshift(() => { if (!rOn() || !G.under || !G.under.road) return null; const t = G.under.t; return t === 'camp' ? 'starlit' : t === 'shop' ? 'pilgrim' : t === 'shrine' ? 'sacred' : t === 'tower' ? 'arcane' : G.under._dun ? (G.under.theme === 'crypt' ? 'crypt' : 'cave') : RB[G.under.b].song; });
+hook('hud', () => {
+  const U = G.under, on = rOn() && U && U.road && !U.won && U.obj && U.obj !== 'event';
+  setIf('rdObjOn', on, v => $('roadObj').classList.toggle('hidden', !v)); if (!on) return;
+  const o = U.obj, left = rFoes().length; let sub = '', f = null;
+  if (o === 'waves') sub = `Wave ${U.wave} of ${U.waves} · ${left} left`;
+  else if (o === 'wagon') { sub = `Help arrives in ${Math.max(0, Math.ceil(U.left))}s${U.lost ? ' · the wagon is lost' : ` · wagon ${Math.ceil(Math.max(0, U.wagon.hp))}/${U.wagon.maxHp}`}`; f = 1 - U.left / 48; }
+  else if (o === 'banner') { sub = dist(P.x, P.y, U.banner.x, U.banner.y) < 110 ? 'Holding the banner…' : 'Get back to the banner!'; f = U.hold / U.need; }
+  else if (o === 'totems') sub = `${U.totems.filter(tt => !tt.dead).length} totems standing`;
+  else if (o === 'boss' || o === 'elite' || o === 'duel' || o === 'captain') { const e = o === 'boss' ? U.boss : o === 'elite' ? U.champ : o === 'duel' ? U.duel : U.capt; if (e) { sub = `${e.name}${e.mods ? ` · ${e.mods.map(m => ELITE_MODS[m].n).join(', ')}` : ''}${e.phases ? ` · phase ${e.phase} of ${e.phases}` : ''}`; f = 1 - Math.max(0, e.hp) / e.maxHp; } }
+  else if (o === 'delve') sub = 'Find and slay the guardian';
+  else sub = `${left} foe${left === 1 ? '' : 's'} left`;
+  setIf('rdObj', OBJ_TXT[o] + '|' + sub + '|' + (f == null ? '' : Math.round(f * 50)), () => { $('roadObj').innerHTML = `<b>${OBJ_TXT[o] || ''}</b><span>${esc(sub)}</span>${f == null ? '' : `<div class="rdoT"><div class="rdoF" style="transform:scaleX(${clamp(f, 0, 1).toFixed(2)})"></div></div>`}`; });
+});
+ACH.push(
+  ['road_realm', '🛤', 'First Steps on the Long Road', 'Beat the master of a realm on the Long Road', () => rMeta().bosses >= 1 || (rOn() && G.road.stats.bosses >= 1)],
+  ['road_win', '♛', 'The Road Goes Ever On', 'Win a run of the Long Road', () => rMeta().wins >= 1],
+  ['road_oath5', '⚔', 'Oathsworn', 'Win a run of the Long Road under Oath 5 or higher', () => rMeta().runs.some(r => r.won && r.oath >= 5)],
+  ['road_oath10', '☠', 'Oath of Ten', 'Win a run of the Long Road under Oath 10', () => rMeta().runs.some(r => r.won && r.oath >= 10)],
+  ['road_heroes', '✦', 'A Company of Heroes', 'Unlock every hero of the Long Road', () => rMeta().unlocked.length >= Object.keys(RCLASS).length],
+  ['road_relics', '◆', 'Magpie', 'Carry 12 relics at once on the Long Road', () => rOn() && G.road.relics.length >= 12],
+  ['road_daily', '⚑', 'Daily Bread', 'Finish a Daily Road', () => Object.values(rMeta().daily).some(d => d.won)],
+  ['road_hedge', '🛡', 'Hedge Knight\'s Glory', 'Win a run of the Long Road as the Hedge Knight', () => (rMeta().classWins.knight || 0) >= 1],
+);
+
+function roadKeyTog(tog) {
+  if (tog === 'map') { UI.toggle('road'); return true; }
+  if (tog === 'dip' || tog === 'court' || tog === 'sea') { toast('There are no crowns to court on the Long Road. Only the road.'); return true; }
+  return false;
+}
+
 /* ---------------- Loop ---------------- */
 let last = performance.now(), mmT = 0, ambT = 0, fpsA = 0;
 function update(dt) {
@@ -13137,7 +14059,7 @@ function update(dt) {
   if (G.arena) arenaTick(dt, px0, py0);
   if (tells.length) updateTells(dt);
   if (!G.under) storyTick(dt);
-  if (G.under && !G.under.interior && !G.under.isle && !G.under.rift) updateTraps(dt);
+  if (G.under && !G.under.interior && !G.under.isle && !G.under.rift && G.under._dun) updateTraps(dt);
   if (G.tut) tutTick(dt);
   if (G.siege && !G.under) updateSiege(dt);
   runHooks('tick', dt);
@@ -13148,12 +14070,13 @@ function update(dt) {
     G.questT = .5; if (!G.under) questUpdate();
     ents.forEach(e => { if (e.expire && G.time > e.expire) { e.expire = 0; if (e.ally) { e.ally = false; e.follow = false; e.transient = true; e.roam = true; e.home = { x: e.x + rand(-2000, 2000), y: e.y + rand(-2000, 2000) }; e.say = { text: 'We must return to our posts.', t: 3 }; } else if (e.role === 'trader') { e.dead = true; e.deadT = 99; toast('Ysolde the Far-Wanderer has packed up and moved on.'); } } });
   }
-  if ((G.dipT += dt) >= 40) { G.dipT = 0; dipTick(); }
-  const dnow = dayNum(); if (G.lastPay == null) G.lastPay = dnow; else if (dnow !== G.lastPay) { G.lastPay = dnow; dailyTick(); }
-  if ((G.lawT = (G.lawT || 0) - dt) <= 0) { G.lawT = .25; thiefTick(); if ((G.law2 = (G.law2 || 0) - 1) <= 0) { G.law2 = 4; lawTick(); cityTick(); guildTick(); festivalTick(); encounterTick(); wbossTick(1); seeTick(); dockTick(); runHooks('slow'); if (G.bounty) G.bounty = G.bounty.map(v => v > 1 ? v * Math.pow(.9, 1 / (DAYLEN / 1)) : 0); } }
+  const road = G.mode === 'road';
+  if (!road && (G.dipT += dt) >= 40) { G.dipT = 0; dipTick(); }
+  const dnow = dayNum(); if (G.lastPay == null) G.lastPay = dnow; else if (dnow !== G.lastPay) { G.lastPay = dnow; if (!road) dailyTick(); }
+  if (!road && (G.lawT = (G.lawT || 0) - dt) <= 0) { G.lawT = .25; thiefTick(); if ((G.law2 = (G.law2 || 0) - 1) <= 0) { G.law2 = 4; lawTick(); cityTick(); guildTick(); festivalTick(); encounterTick(); wbossTick(1); seeTick(); dockTick(); runHooks('slow'); if (G.bounty) G.bounty = G.bounty.map(v => v > 1 ? v * Math.pow(.9, 1 / (DAYLEN / 1)) : 0); } }
   contestTick(dt); raceTick(dt);
   if ((G.eventT -= dt) <= 0) { G.eventT = rand(60, 115); if (!G.under && !G.tut) worldEvent(); } // no raids or ambushes mid-lesson
-  if ((G.autosaveT += dt) >= 180) { G.autosaveT = 0; saveGame(true); }
+  if (!road && (G.autosaveT += dt) >= 180) { G.autosaveT = 0; saveGame(true); }
   if ((ambT -= dt) <= 0) {
     ambT = rand(1.5, 4);
     const amb = terAtPx(P.x, P.y);
@@ -13178,7 +14101,7 @@ function frame(now) {
 }
 function frameBody(dt, t) {
   if (W) {
-    if (seasonOf() !== curSeason) { applySeason(G.state === 'play' && G.seasonInit); } if (G.state === 'play') G.seasonInit = true;
+    if (G.mode !== 'road' && seasonOf() !== curSeason) { applySeason(G.state === 'play' && G.seasonInit); } if (G.state === 'play') G.seasonInit = true;
     if (G.state === 'play' && !paused()) { if (G.hitstop > 0) G.hitstop -= dt; else update(dt); }
     else { input.clicked = false; G.shake *= Math.pow(.004, dt); if (G.state === 'dead') { updateFX(dt); for (const e of ents) updateActor(e, dt * .3); } }
     if (G.state === 'menu') { const M = G.menuCam || (newMenuCam(), G.menuCam); M.a += dt * M.sp; cam.x = WW * TS * (M.cx + Math.cos(M.a * M.fx + M.px) * M.ax); cam.y = WH * TS * (M.cy + Math.sin(M.a * M.fy + M.py) * M.ay); }
